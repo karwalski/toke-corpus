@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CorpusEntry",
+  "description": "Schema for a single validated toke corpus entry. Version 1.",
+  "version": 1,
+  "type": "object",
+  "required": ["id", "version", "phase", "task_id", "tk_source", "tk_tokens",
+               "validation", "differential", "judge"],
+  "properties": {
+    "id":          { "type": "string", "description": "Unique corpus entry ID" },
+    "version":     { "type": "integer", "description": "Schema version" },
+    "phase":       { "type": "string", "enum": ["A", "B", "C"] },
+    "task_id":     { "type": "string", "description": "Benchmark task ID" },
+    "tk_source":   { "type": "string", "description": "Validated toke source code" },
+    "tk_tokens":   { "type": "integer", "description": "Token count in cl100k_base" },
+    "attempts":    { "type": "integer", "description": "Generation attempts before acceptance" },
+    "model":       { "type": "string", "description": "Model that generated this entry" },
+    "validation": {
+      "type": "object",
+      "required": ["compiler_exit_code", "error_codes"],
+      "properties": {
+        "compiler_exit_code": { "type": "integer" },
+        "error_codes":        { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "differential": {
+      "type": "object",
+      "required": ["languages_agreed", "majority_output"],
+      "properties": {
+        "languages_agreed": { "type": "array", "items": { "type": "string" } },
+        "majority_output":  { "type": "string" }
+      }
+    },
+    "judge": {
+      "type": "object",
+      "required": ["accepted", "score"],
+      "properties": {
+        "accepted": { "type": "boolean" },
+        "score":    { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

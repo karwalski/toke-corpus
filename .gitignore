@@ -1,0 +1,26 @@
+# Corpus data — never commit
+corpus/*.jsonl
+corpus/*.json.gz
+corpus/data/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+dist/
+*.egg-info/
+
+# Credentials
+.env
+*.key
+
+# Models — never commit weights
+models/
+*.bin
+*.safetensors
+*.gguf
+
+.DS_Store
+.vscode/
+.idea/
