@@ -1,0 +1,91 @@
+{
+  "trial_task_count": 100,
+  "scores": [
+    {
+      "provider_name": "deepseek",
+      "first_pass_compile_rate": 0.8764044943820225,
+      "correction_success_rate": 0.45454545454545453,
+      "diff_agreement_rate": 0.5,
+      "cost_per_accepted": 0.0006492157831325301,
+      "composite_score": 0.6581,
+      "passed": true,
+      "per_category": {
+        "A-ARR": 1.0,
+        "A-CND": 1.0,
+        "A-ERR": 0.9286,
+        "A-MTH": 0.9333,
+        "A-SRT": 0.8182,
+        "A-STR": 0.5333
+      }
+    },
+    {
+      "provider_name": "anthropic",
+      "first_pass_compile_rate": 0.8617021276595744,
+      "correction_success_rate": 0.6923076923076923,
+      "diff_agreement_rate": 0.5,
+      "cost_per_accepted": 0.004214266666666667,
+      "composite_score": 0.6434,
+      "passed": true,
+      "per_category": {
+        "A-ARR": 0.8235,
+        "A-CND": 1.0,
+        "A-ERR": 0.625,
+        "A-MTH": 0.875,
+        "A-SRT": 0.9231,
+        "A-STR": 0.9333
+      }
+    },
+    {
+      "provider_name": "xai",
+      "first_pass_compile_rate": 0.7142857142857143,
+      "correction_success_rate": 0.625,
+      "diff_agreement_rate": 0.5,
+      "cost_per_accepted": 0.0013364986666666665,
+      "composite_score": 0.5931,
+      "passed": true,
+      "per_category": {
+        "A-ARR": 0.8235,
+        "A-CND": 1.0,
+        "A-ERR": 0.6429,
+        "A-MTH": 0.7857,
+        "A-SRT": 0.6364,
+        "A-STR": 0.3571
+      }
+    },
+    {
+      "provider_name": "openai",
+      "first_pass_compile_rate": 0.6875,
+      "correction_success_rate": 0.4,
+      "diff_agreement_rate": 0.5,
+      "cost_per_accepted": 0.00211496,
+      "composite_score": 0.5254,
+      "passed": true,
+      "per_category": {
+        "A-ARR": 0.8235,
+        "A-CND": 1.0,
+        "A-ERR": 0.4615,
+        "A-MTH": 0.6667,
+        "A-SRT": 0.6667,
+        "A-STR": 0.3
+      }
+    },
+    {
+      "provider_name": "gemini",
+      "first_pass_compile_rate": 0.36082474226804123,
+      "correction_success_rate": 0.22580645161290322,
+      "diff_agreement_rate": 0.5,
+      "cost_per_accepted": 0.00043237959183673466,
+      "composite_score": 0.4395,
+      "passed": true,
+      "per_category": {
+        "A-ARR": 0.5882,
+        "A-CND": 0.6,
+        "A-ERR": 0.25,
+        "A-MTH": 0.5,
+        "A-SRT": 0.125,
+        "A-STR": 0.1176
+      }
+    }
+  ],
+  "dropped": []
+}

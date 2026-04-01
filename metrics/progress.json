@@ -1,0 +1,112 @@
+{
+  "started_at": "2026-03-31T22:19:13.090648+00:00",
+  "updated_at": "2026-04-01T02:15:24.655238+00:00",
+  "total_tasks": 26000,
+  "dispatched": 3950,
+  "pending": 22050,
+  "accepted": 2711,
+  "failed": 1239,
+  "escalated": 0,
+  "per_model": {
+    "claude-haiku-4-5-20251001": {
+      "dispatched": 0,
+      "accepted": 1406,
+      "failed": 343,
+      "acceptance_rate": 0.0,
+      "cost": 9.867011
+    },
+    "deepseek-chat": {
+      "dispatched": 0,
+      "accepted": 418,
+      "failed": 119,
+      "acceptance_rate": 0.0,
+      "cost": 1.520096
+    },
+    "gemini-2.5-flash": {
+      "dispatched": 0,
+      "accepted": 78,
+      "failed": 60,
+      "acceptance_rate": 0.0,
+      "cost": 0.372176
+    },
+    "gpt-4.1-mini-2025-04-14": {
+      "dispatched": 0,
+      "accepted": 374,
+      "failed": 187,
+      "acceptance_rate": 0.0,
+      "cost": 2.031974
+    },
+    "grok-3-mini": {
+      "dispatched": 0,
+      "accepted": 435,
+      "failed": 112,
+      "acceptance_rate": 0.0,
+      "cost": 1.678038
+    },
+    "pool": {
+      "dispatched": 3950,
+      "accepted": 0,
+      "failed": 0,
+      "acceptance_rate": 0.0,
+      "cost": 0.0
+    },
+    "unknown": {
+      "dispatched": 0,
+      "accepted": 0,
+      "failed": 418,
+      "acceptance_rate": 0.0,
+      "cost": 0.0
+    }
+  },
+  "per_category": {
+    "A-ARR": {
+      "dispatched": 385,
+      "accepted": 291,
+      "failed": 94,
+      "acceptance_rate": 0.7558
+    },
+    "A-CND": {
+      "dispatched": 652,
+      "accepted": 484,
+      "failed": 168,
+      "acceptance_rate": 0.7423
+    },
+    "A-ERR": {
+      "dispatched": 1036,
+      "accepted": 647,
+      "failed": 389,
+      "acceptance_rate": 0.6245
+    },
+    "A-MTH": {
+      "dispatched": 563,
+      "accepted": 399,
+      "failed": 164,
+      "acceptance_rate": 0.7087
+    },
+    "A-SRT": {
+      "dispatched": 602,
+      "accepted": 402,
+      "failed": 200,
+      "acceptance_rate": 0.6678
+    },
+    "A-STR": {
+      "dispatched": 712,
+      "accepted": 488,
+      "failed": 224,
+      "acceptance_rate": 0.6854
+    }
+  },
+  "cost": {
+    "api_total": 15.469296,
+    "by_provider": {
+      "claude-haiku-4-5-20251001": 9.867011,
+      "deepseek-chat": 1.520096,
+      "gemini-2.5-flash": 0.372176,
+      "gpt-4.1-mini-2025-04-14": 2.031974,
+      "grok-3-mini": 1.678038,
+      "unknown": 0.0
+    },
+    "compute_estimate": 0.0
+  },
+  "estimated_remaining_hours": 21.97
+}

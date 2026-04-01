@@ -38,6 +38,17 @@
         "accepted": { "type": "boolean" },
         "score":    { "type": "number", "minimum": 0, "maximum": 1 }
       }
+    },
+    "references": {
+      "type": "object",
+      "properties": {
+        "python_source": { "type": "string", "description": "Equivalent Python source" },
+        "python_tokens": { "type": "integer", "description": "Python token count (cl100k_base)" },
+        "c_source":      { "type": "string", "description": "Equivalent C source" },
+        "c_tokens":      { "type": "integer", "description": "C token count (cl100k_base)" },
+        "java_source":   { "type": "string", "description": "Equivalent Java source" },
+        "java_tokens":   { "type": "integer", "description": "Java token count (cl100k_base)" }
+      }
     }
   }
 }

@@ -1,0 +1,54 @@
+phase: A
+total_tasks: 50000
+seed: 42
+
+tkc_path: /opt/toke-corpus/bin/tkc  # or from TKC_PATH env
+corpus_dir: /opt/toke-corpus/corpus
+metrics_dir: /opt/toke-corpus/metrics
+log_dir: /opt/toke-corpus/logs
+
+prompts_dir: prompts/
+
+trial:
+  tasks: 500
+  min_compile_rate: 0.50
+
+providers:
+  anthropic:
+    model: claude-haiku-4-5-20251001
+    tier: 2
+    cost_input: 0.80
+    cost_output: 4.00
+    batch: true
+  openai:
+    model: gpt-4.1-mini
+    tier: 1
+    cost_input: 0.40
+    cost_output: 1.60
+    batch: true
+  gemini:
+    model: gemini-2.5-flash
+    tier: 1
+    cost_input: 0.15
+    cost_output: 0.60
+  deepseek:
+    model: deepseek-chat
+    tier: 1
+    cost_input: 0.27
+    cost_output: 1.10
+
+pool:
+  tier2_minimum_pct: 0.40
+  category_overrides:
+    A-ERR: 0.60
+    A-SRT: 0.50
+    A-STR: 0.40
+
+validation:
+  timeout_seconds: 10
+  max_correction_attempts: 3
+
+dedup:
+  threshold: 0.95
+
+cost_limit: 500.00  # emergency stop
