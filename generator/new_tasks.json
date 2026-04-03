@@ -1,0 +1,614 @@
+{
+  "A-MTH": [
+    [
+      "abs",
+      "F=abs(n:i64):i64",
+      "Return the absolute value of n"
+    ],
+    [
+      "max2",
+      "F=max2(a:i64;b:i64):i64",
+      "Return the larger of two integers"
+    ],
+    [
+      "min2",
+      "F=min2(a:i64;b:i64):i64",
+      "Return the smaller of two integers"
+    ],
+    [
+      "max3",
+      "F=max3(a:i64;b:i64;c:i64):i64",
+      "Return the largest of three integers"
+    ],
+    [
+      "clampI",
+      "F=clampI(x:i64;lo:i64;hi:i64):i64",
+      "Clamp x to range [lo,hi]"
+    ],
+    [
+      "clampF",
+      "F=clampF(x:f64;lo:f64;hi:f64):f64",
+      "Clamp float x to range [lo,hi]"
+    ],
+    [
+      "avgTwo",
+      "F=avgTwo(a:i64;b:i64):i64",
+      "Return integer average of two numbers (floor)"
+    ],
+    [
+      "avgThree",
+      "F=avgThree(a:i64;b:i64;c:i64):i64",
+      "Return integer average of three numbers"
+    ],
+    [
+      "pow",
+      "F=pow(base:i64;exp:i64):i64",
+      "Compute base raised to exp using a loop"
+    ],
+    [
+      "mod",
+      "F=mod(a:i64;b:i64):i64",
+      "Return a modulo b (a - a/b*b)"
+    ],
+    [
+      "sign",
+      "F=sign(n:i64):i64",
+      "Return -1, 0, or 1 for negative, zero, positive"
+    ],
+    [
+      "isEven",
+      "F=isEven(n:i64):bool",
+      "Return true if n is even"
+    ],
+    [
+      "isOdd",
+      "F=isOdd(n:i64):bool",
+      "Return true if n is odd"
+    ],
+    [
+      "floorDiv",
+      "F=floorDiv(a:i64;b:i64):i64",
+      "Integer division rounding toward negative infinity"
+    ],
+    [
+      "diffAbs",
+      "F=diffAbs(a:i64;b:i64):i64",
+      "Return absolute difference |a-b|"
+    ],
+    [
+      "midpoint",
+      "F=midpoint(a:i64;b:i64):i64",
+      "Return midpoint between a and b"
+    ],
+    [
+      "lcm",
+      "F=lcm(a:i64;b:i64):i64",
+      "Return least common multiple using gcd"
+    ],
+    [
+      "gcd",
+      "F=gcd(a:i64;b:i64):i64",
+      "Return greatest common divisor using Euclidean algorithm"
+    ],
+    [
+      "negate",
+      "F=negate(n:i64):i64",
+      "Return negated value of n"
+    ],
+    [
+      "double",
+      "F=double(n:i64):i64",
+      "Return n multiplied by 2"
+    ],
+    [
+      "halve",
+      "F=halve(n:i64):i64",
+      "Return n divided by 2 (integer)"
+    ],
+    [
+      "square",
+      "F=square(n:i64):i64",
+      "Return n squared"
+    ],
+    [
+      "cube",
+      "F=cube(n:i64):i64",
+      "Return n cubed"
+    ],
+    [
+      "sumTo",
+      "F=sumTo(n:i64):i64",
+      "Sum integers from 1 to n"
+    ],
+    [
+      "productTo",
+      "F=productTo(n:i64):i64",
+      "Product of integers from 1 to n (factorial)"
+    ]
+  ],
+  "A-ARR": [
+    [
+      "len",
+      "F=len(arr:[i64]):i64",
+      "Return the length of the array"
+    ],
+    [
+      "sum",
+      "F=sum(arr:[i64]):i64",
+      "Sum all elements"
+    ],
+    [
+      "product",
+      "F=product(arr:[i64]):i64",
+      "Multiply all elements"
+    ],
+    [
+      "contains",
+      "F=contains(arr:[i64];val:i64):bool",
+      "Check if val is in array"
+    ],
+    [
+      "indexOf",
+      "F=indexOf(arr:[i64];val:i64):i64",
+      "Return first index of val or -1"
+    ],
+    [
+      "lastIndexOf",
+      "F=lastIndexOf(arr:[i64];val:i64):i64",
+      "Return last index of val or -1"
+    ],
+    [
+      "count",
+      "F=count(arr:[i64];val:i64):i64",
+      "Count occurrences of val"
+    ],
+    [
+      "max",
+      "F=max(arr:[i64]):i64",
+      "Return max element"
+    ],
+    [
+      "min",
+      "F=min(arr:[i64]):i64",
+      "Return min element"
+    ],
+    [
+      "reverse",
+      "F=reverse(arr:[i64]):[i64]",
+      "Return reversed array"
+    ],
+    [
+      "take",
+      "F=take(arr:[i64];n:i64):[i64]",
+      "Return first n elements"
+    ],
+    [
+      "drop",
+      "F=drop(arr:[i64];n:i64):[i64]",
+      "Return array without first n elements"
+    ],
+    [
+      "slice",
+      "F=slice(arr:[i64];start:i64;end:i64):[i64]",
+      "Return sub-array from start to end"
+    ],
+    [
+      "concat",
+      "F=concat(a:[i64];b:[i64]):[i64]",
+      "Concatenate two arrays"
+    ],
+    [
+      "flatten",
+      "F=flatten(arr:[[i64]]):[i64]",
+      "Flatten 2D array to 1D"
+    ],
+    [
+      "unique",
+      "F=unique(arr:[i64]):[i64]",
+      "Remove duplicates preserving order"
+    ],
+    [
+      "filter",
+      "F=filterPos(arr:[i64]):[i64]",
+      "Keep only positive elements"
+    ],
+    [
+      "filterNeg",
+      "F=filterNeg(arr:[i64]):[i64]",
+      "Keep only negative elements"
+    ],
+    [
+      "filterEven",
+      "F=filterEven(arr:[i64]):[i64]",
+      "Keep only even elements"
+    ],
+    [
+      "filterOdd",
+      "F=filterOdd(arr:[i64]):[i64]",
+      "Keep only odd elements"
+    ],
+    [
+      "mapDouble",
+      "F=mapDouble(arr:[i64]):[i64]",
+      "Double each element"
+    ],
+    [
+      "mapSquare",
+      "F=mapSquare(arr:[i64]):[i64]",
+      "Square each element"
+    ],
+    [
+      "mapNegate",
+      "F=mapNegate(arr:[i64]):[i64]",
+      "Negate each element"
+    ],
+    [
+      "mapAbs",
+      "F=mapAbs(arr:[i64]):[i64]",
+      "Absolute value of each element"
+    ],
+    [
+      "fill",
+      "F=fill(n:i64;val:i64):[i64]",
+      "Create array of n copies of val"
+    ],
+    [
+      "range",
+      "F=range(start:i64;end:i64):[i64]",
+      "Create array [start, start+1, ..., end-1]"
+    ],
+    [
+      "allPositive",
+      "F=allPositive(arr:[i64]):bool",
+      "Check if all elements positive"
+    ],
+    [
+      "anyNegative",
+      "F=anyNegative(arr:[i64]):bool",
+      "Check if any element negative"
+    ],
+    [
+      "isSorted",
+      "F=isSorted(arr:[i64]):bool",
+      "Check if sorted ascending"
+    ],
+    [
+      "replaceAll",
+      "F=replaceAll(arr:[i64];old:i64;new:i64):[i64]",
+      "Replace all occurrences of old with new"
+    ]
+  ],
+  "A-CND": [
+    [
+      "ternary",
+      "F=ternary(cond:bool;a:i64;b:i64):i64",
+      "Return a if cond else b"
+    ],
+    [
+      "boolToInt",
+      "F=boolToInt(b:bool):i64",
+      "Return 1 if true, 0 if false"
+    ],
+    [
+      "intToBool",
+      "F=intToBool(n:i64):bool",
+      "Return false if 0, true otherwise"
+    ],
+    [
+      "boolAnd",
+      "F=boolAnd(a:bool;b:bool):bool",
+      "Logical AND without && operator"
+    ],
+    [
+      "boolOr",
+      "F=boolOr(a:bool;b:bool):bool",
+      "Logical OR without || operator"
+    ],
+    [
+      "boolXor",
+      "F=boolXor(a:bool;b:bool):bool",
+      "Logical XOR"
+    ],
+    [
+      "boolNot",
+      "F=boolNot(a:bool):bool",
+      "Logical NOT"
+    ],
+    [
+      "inRange",
+      "F=inRange(x:i64;lo:i64;hi:i64):bool",
+      "Check if lo <= x <= hi"
+    ],
+    [
+      "between",
+      "F=between(x:f64;lo:f64;hi:f64):bool",
+      "Check if lo < x < hi (exclusive)"
+    ],
+    [
+      "median3",
+      "F=median3(a:i64;b:i64;c:i64):i64",
+      "Return middle value of three"
+    ],
+    [
+      "dayType",
+      "F=dayType(day:i64):Str",
+      "Return weekday or weekend (1=Mon, 7=Sun)"
+    ],
+    [
+      "vowelOrCons",
+      "F=vowelOrCons(c:Str):Str",
+      "Return vowel or consonant for a letter"
+    ],
+    [
+      "compass",
+      "F=compass(deg:i64):Str",
+      "Return N/E/S/W for degrees 0-359"
+    ],
+    [
+      "romanDigit",
+      "F=romanDigit(n:i64):Str",
+      "Convert single digit 1-9 to Roman numeral"
+    ],
+    [
+      "pluralize",
+      "F=pluralize(n:i64;word:Str):Str",
+      "Return word or word+s based on count"
+    ]
+  ],
+  "A-STR": [
+    [
+      "strLen",
+      "F=strLen(s:Str):i64",
+      "Return length of string"
+    ],
+    [
+      "isEmpty",
+      "F=isEmpty(s:Str):bool",
+      "Return true if string is empty"
+    ],
+    [
+      "charAt",
+      "F=charAt(s:Str;i:i64):Str",
+      "Return character at index i"
+    ],
+    [
+      "startsWith",
+      "F=startsWith(s:Str;prefix:Str):bool",
+      "Check if s starts with prefix"
+    ],
+    [
+      "endsWith",
+      "F=endsWith(s:Str;suffix:Str):bool",
+      "Check if s ends with suffix"
+    ],
+    [
+      "repeat",
+      "F=repeat(s:Str;n:i64):Str",
+      "Repeat string n times"
+    ],
+    [
+      "padLeft",
+      "F=padLeft(s:Str;width:i64;ch:Str):Str",
+      "Pad string on left to width with ch"
+    ],
+    [
+      "padRight",
+      "F=padRight(s:Str;width:i64;ch:Str):Str",
+      "Pad string on right to width with ch"
+    ],
+    [
+      "trimLeft",
+      "F=trimLeft(s:Str):Str",
+      "Remove leading spaces"
+    ],
+    [
+      "trimRight",
+      "F=trimRight(s:Str):Str",
+      "Remove trailing spaces"
+    ],
+    [
+      "contains",
+      "F=contains(s:Str;sub:Str):bool",
+      "Check if s contains sub"
+    ],
+    [
+      "replace",
+      "F=replace(s:Str;old:Str;new:Str):Str",
+      "Replace first occurrence of old with new"
+    ],
+    [
+      "toInt",
+      "F=toInt(s:Str):i64",
+      "Parse integer from string"
+    ],
+    [
+      "fromInt",
+      "F=fromInt(n:i64):Str",
+      "Convert integer to string"
+    ],
+    [
+      "strEq",
+      "F=strEq(a:Str;b:Str):bool",
+      "Check string equality"
+    ],
+    [
+      "strConcat",
+      "F=strConcat(a:Str;b:Str):Str",
+      "Concatenate two strings"
+    ],
+    [
+      "strReverse",
+      "F=strReverse(s:Str):Str",
+      "Reverse a string"
+    ],
+    [
+      "countChar",
+      "F=countChar(s:Str;c:Str):i64",
+      "Count occurrences of char c"
+    ],
+    [
+      "removeChar",
+      "F=removeChar(s:Str;c:Str):Str",
+      "Remove all occurrences of char c"
+    ],
+    [
+      "initials",
+      "F=initials(s:Str):Str",
+      "Extract first letter of each word"
+    ]
+  ],
+  "A-SRT": [
+    [
+      "insertionSort",
+      "F=insertionSort(arr:[i64]):[i64]",
+      "Sort using insertion sort"
+    ],
+    [
+      "selectionSort",
+      "F=selectionSort(arr:[i64]):[i64]",
+      "Sort using selection sort"
+    ],
+    [
+      "bubbleSort",
+      "F=bubbleSort(arr:[i64]):[i64]",
+      "Sort using bubble sort"
+    ],
+    [
+      "isSorted",
+      "F=isSorted(arr:[i64]):bool",
+      "Check if array is sorted ascending"
+    ],
+    [
+      "linearSearch",
+      "F=linearSearch(arr:[i64];val:i64):i64",
+      "Linear search returning index or -1"
+    ],
+    [
+      "binarySearch",
+      "F=binarySearch(arr:[i64];val:i64):i64",
+      "Binary search on sorted array"
+    ],
+    [
+      "minIndex",
+      "F=minIndex(arr:[i64]):i64",
+      "Return index of minimum element"
+    ],
+    [
+      "maxIndex",
+      "F=maxIndex(arr:[i64]):i64",
+      "Return index of maximum element"
+    ],
+    [
+      "kthSmallest",
+      "F=kthSmallest(arr:[i64];k:i64):i64",
+      "Find kth smallest element"
+    ],
+    [
+      "kthLargest",
+      "F=kthLargest(arr:[i64];k:i64):i64",
+      "Find kth largest element"
+    ],
+    [
+      "countLess",
+      "F=countLess(arr:[i64];val:i64):i64",
+      "Count elements less than val"
+    ],
+    [
+      "countGreater",
+      "F=countGreater(arr:[i64];val:i64):i64",
+      "Count elements greater than val"
+    ],
+    [
+      "rankElement",
+      "F=rankElement(arr:[i64];val:i64):i64",
+      "How many elements are less than val"
+    ],
+    [
+      "sortDesc",
+      "F=sortDesc(arr:[i64]):[i64]",
+      "Sort in descending order"
+    ],
+    [
+      "mergeSorted",
+      "F=mergeSorted(a:[i64];b:[i64]):[i64]",
+      "Merge two sorted arrays"
+    ]
+  ],
+  "A-ERR": [
+    [
+      "safeDivI",
+      "F=safeDivI(a:i64;b:i64):i64!MathErr",
+      "Divide returning error if b=0"
+    ],
+    [
+      "safeDivF",
+      "F=safeDivF(a:f64;b:f64):f64!MathErr",
+      "Float divide with zero check"
+    ],
+    [
+      "safeGet",
+      "F=safeGet(arr:[i64];i:i64):i64!LookupErr",
+      "Array get with bounds check"
+    ],
+    [
+      "safeLast",
+      "F=safeLast(arr:[i64]):i64!LookupErr",
+      "Get last element of non-empty array"
+    ],
+    [
+      "safeFirst",
+      "F=safeFirst(arr:[i64]):i64!LookupErr",
+      "Get first element of non-empty array"
+    ],
+    [
+      "safeParseI",
+      "F=safeParseI(s:Str):i64!ParseErr",
+      "Parse integer from string with error"
+    ],
+    [
+      "safeSqrtF",
+      "F=safeSqrtF(x:f64):f64!MathErr",
+      "Square root with negative check"
+    ],
+    [
+      "safePow",
+      "F=safePow(base:i64;exp:i64):i64!MathErr",
+      "Power with negative exponent check"
+    ],
+    [
+      "safeLog",
+      "F=safeLog(n:i64):i64!MathErr",
+      "Integer log base 2 with zero/neg check"
+    ],
+    [
+      "requirePositive",
+      "F=requirePositive(n:i64):i64!ValidationErr",
+      "Return n if positive, error otherwise"
+    ],
+    [
+      "requireNonEmpty",
+      "F=requireNonEmpty(s:Str):Str!ValidationErr",
+      "Return s if non-empty"
+    ],
+    [
+      "requireInRange",
+      "F=requireInRange(n:i64;lo:i64;hi:i64):i64!ValidationErr",
+      "Validate n in [lo,hi]"
+    ],
+    [
+      "tryBothDiv",
+      "F=tryBothDiv(a:i64;b:i64;c:i64):i64!MathErr",
+      "Try a/b, if error try a/c"
+    ],
+    [
+      "orDefault",
+      "F=orDefault(arr:[i64];i:i64;def:i64):i64",
+      "Get arr[i] or return def if out of bounds"
+    ],
+    [
+      "chainLookup",
+      "F=chainLookup(a:[i64];b:[i64];i:i64):i64!LookupErr",
+      "Get a[i] then use as index into b"
+    ]
+  ]
+}

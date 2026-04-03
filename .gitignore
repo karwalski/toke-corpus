@@ -1,7 +1,6 @@
-# Corpus data — never commit
-corpus/*.jsonl
-corpus/*.json.gz
-corpus/data/
+# Corpus data — never commit (large, local only)
+corpus/
+logs/
 
 # Python
 __pycache__/
