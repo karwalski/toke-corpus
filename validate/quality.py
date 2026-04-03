@@ -57,13 +57,25 @@ class QualityScore:
 
 
 class QualityScorer:
-    """Score and gate corpus entries before acceptance."""
+    """Score and gate corpus entries before acceptance.
+
+    The *holdout_task_ids* parameter is **required** and must be a
+    non-empty set.  This is a hard invariant: the pipeline must never
+    run without an explicit holdout set, otherwise evaluation tasks
+    could leak into training data.
+    """
 
     def __init__(
         self,
-        holdout_task_ids: set[str] | None = None,
+        holdout_task_ids: set[str],
     ) -> None:
-        self.holdout_task_ids: set[str] = holdout_task_ids or set()
+        if not isinstance(holdout_task_ids, set) or len(holdout_task_ids) == 0:
+            raise ValueError(
+                "holdout_task_ids is required and must be a non-empty set. "
+                "The corpus pipeline refuses to run without an explicit "
+                "holdout set — evaluation tasks would leak into training data."
+            )
+        self.holdout_task_ids: set[str] = holdout_task_ids
 
     def score(
         self,

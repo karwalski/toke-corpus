@@ -118,7 +118,7 @@ class TestCorpusWriter:
     def test_write_and_load_roundtrip(self) -> None:
         """Write an entry, then load it back and verify fields match."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             entry = _make_entry()
 
             path = writer.write(entry)
@@ -143,7 +143,7 @@ class TestCorpusWriter:
     def test_directory_structure(self) -> None:
         """Entry files are written to phase_a/{category}/ subdirectories."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             entry = _make_entry()
             path = writer.write(entry)
 
@@ -156,7 +156,7 @@ class TestCorpusWriter:
     def test_schema_validation_rejects_bad_entry(self) -> None:
         """An entry with an invalid phase value is rejected by schema validation."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             entry = _make_entry()
             # Phase must be one of A, B, C per the schema enum.
             entry.phase = "Z"
@@ -167,7 +167,7 @@ class TestCorpusWriter:
     def test_duplicate_rejection(self) -> None:
         """Writing the same entry ID twice raises FileExistsError."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             entry = _make_entry()
             writer.write(entry)
 
@@ -177,7 +177,7 @@ class TestCorpusWriter:
     def test_count_increments(self) -> None:
         """count() reflects the number of successful writes."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             assert writer.count() == 0
 
             writer.write(_make_entry(entry_id="A-A-MTH-0001-aaaa1111"))
@@ -189,13 +189,13 @@ class TestCorpusWriter:
     def test_load_nonexistent_returns_none(self) -> None:
         """Loading a non-existent entry ID returns None."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             assert writer.load("no-such-entry") is None
 
     def test_written_json_is_valid_against_schema(self) -> None:
         """The JSON file on disk passes independent schema validation."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             entry = _make_entry()
             path = writer.write(entry)
 
@@ -206,6 +206,24 @@ class TestCorpusWriter:
 
             # Should not raise.
             jsonschema.validate(data, schema)
+
+    def test_missing_holdout_raises(self) -> None:
+        """CorpusWriter refuses to initialise without holdout_task_ids."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with pytest.raises(ValueError, match="holdout_task_ids"):
+                CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+
+    def test_holdout_violation_rejects_write(self) -> None:
+        """Writing an entry whose task_id is in the holdout set raises ValueError."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            writer = CorpusWriter(
+                corpus_dir=tmpdir,
+                schema_path=SCHEMA_PATH,
+                holdout_task_ids={"A-MTH-0001"},
+            )
+            entry = _make_entry(task_id="A-MTH-0001")
+            with pytest.raises(ValueError, match="HOLDOUT VIOLATION"):
+                writer.write(entry)
 
 
 # ===================================================================
@@ -219,7 +237,7 @@ class TestBuildEntry:
     def test_build_entry_from_components(self) -> None:
         """build_entry assembles a valid CorpusEntry from pipeline results."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             task = _make_task_spec()
             toke_src = "M=test;\nF=add(a:i64;b:i64):i64{<a+b};"
             tk_tokens = count_tokens(toke_src)
@@ -252,7 +270,7 @@ class TestBuildEntry:
     def test_build_entry_extracts_error_codes(self) -> None:
         """build_entry extracts E-codes from compiler stderr."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             task = _make_task_spec()
             compile_result = _make_compile_result(success=False)
 
@@ -272,7 +290,7 @@ class TestBuildEntry:
     def test_build_entry_is_writable(self) -> None:
         """An entry from build_entry can be written to disk without error."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH)
+            writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             task = _make_task_spec()
             toke_src = "M=test;\nF=add(a:i64;b:i64):i64{<a+b};"
 

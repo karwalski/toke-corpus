@@ -280,7 +280,7 @@ class TestFullPipeline:
             corpus_dir = os.path.join(tmpdir, "corpus_out")
             metrics_dir = os.path.join(tmpdir, "metrics")
 
-            writer = CorpusWriter(corpus_dir=corpus_dir, schema_path=schema_path)
+            writer = CorpusWriter(corpus_dir=corpus_dir, schema_path=schema_path, holdout_task_ids={"HOLDOUT-TEST-001"})
             metrics_collector = MetricsCollector(
                 total_tasks=10, metrics_dir=metrics_dir
             )
@@ -452,7 +452,7 @@ class TestFullPipeline:
             corpus_dir = os.path.join(tmpdir, "corpus_out")
             metrics_dir = os.path.join(tmpdir, "metrics")
 
-            writer = CorpusWriter(corpus_dir=corpus_dir, schema_path=schema_path)
+            writer = CorpusWriter(corpus_dir=corpus_dir, schema_path=schema_path, holdout_task_ids={"HOLDOUT-TEST-001"})
             metrics_collector = MetricsCollector(total_tasks=100, metrics_dir=metrics_dir)
             dedup = Deduplicator(threshold=0.95)
             correction = CorrectionLoop(max_attempts=1)

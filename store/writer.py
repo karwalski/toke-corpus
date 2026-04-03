@@ -141,13 +141,25 @@ class CorpusWriter:
 
     Each entry is validated against the normative schema before writing.
     Writes are atomic (write to temp file, then rename).
+
+    A *holdout_task_ids* set **must** be provided.  The writer refuses
+    to persist any entry whose ``task_id`` is in the holdout set,
+    providing a last-line defence against evaluation data leaking into
+    the training corpus.
     """
 
     def __init__(
         self,
         corpus_dir: str,
         schema_path: str | None = None,
+        holdout_task_ids: set[str] | None = None,
     ) -> None:
+        if not holdout_task_ids:
+            raise ValueError(
+                "CorpusWriter requires a non-empty holdout_task_ids set. "
+                "Refusing to write corpus entries without holdout isolation."
+            )
+        self._holdout_task_ids: set[str] = holdout_task_ids
         self._corpus_dir = Path(corpus_dir)
         self._count = 0
 
@@ -236,11 +248,19 @@ class CorpusWriter:
         """Validate and write *entry* to disk. Return the file path.
 
         Raises:
+            ValueError: If the entry's task_id is in the holdout set.
             jsonschema.ValidationError: If the entry does not conform to
                 the normative schema.
             FileExistsError: If an entry with the same ID already exists
                 (append-only guarantee).
         """
+        # Hard reject: holdout tasks must never be written to the corpus.
+        if entry.task_id in self._holdout_task_ids:
+            raise ValueError(
+                f"HOLDOUT VIOLATION: task_id '{entry.task_id}' is in the "
+                f"holdout set and must not be written to the training corpus."
+            )
+
         entry_dict = entry.to_dict()
 
         # Schema validation — fail loudly on violation.

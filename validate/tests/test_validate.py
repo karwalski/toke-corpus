@@ -300,8 +300,15 @@ class TestDifferentialTester:
 class TestQualityScorer:
     """Tests for quality scoring, holdout checks, and token efficiency."""
 
+    # Sentinel holdout set used by tests that don't exercise holdout logic.
+    _DEFAULT_HOLDOUT: set[str] = {"HOLDOUT-TEST-001"}
+
+    def test_missing_holdout_raises(self) -> None:
+        with pytest.raises(ValueError, match="holdout_task_ids is required"):
+            QualityScorer(holdout_task_ids=set())
+
     def test_perfect_score(self) -> None:
-        scorer = QualityScorer()
+        scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)
         qs = scorer.score(
             task_id="A-MTH-001",
             toke_src="x=1;",
@@ -314,7 +321,7 @@ class TestQualityScorer:
         assert len(qs.reasons) == 0
 
     def test_compiler_failure_rejects(self) -> None:
-        scorer = QualityScorer()
+        scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)
         qs = scorer.score(
             task_id="A-MTH-002",
             toke_src="bad",
@@ -326,7 +333,7 @@ class TestQualityScorer:
         assert any("compiler failed" in r for r in qs.reasons)
 
     def test_diff_failure_rejects(self) -> None:
-        scorer = QualityScorer()
+        scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)
         qs = scorer.score(
             task_id="A-MTH-003",
             toke_src="x=1;",
@@ -350,7 +357,7 @@ class TestQualityScorer:
         assert any("holdout" in r for r in qs.reasons)
 
     def test_token_inefficiency_flagged(self) -> None:
-        scorer = QualityScorer()
+        scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)
         # Make toke source much longer than python.
         toke_src = "x = 1;\n" * 200
         python_src = "x = 1"
@@ -366,7 +373,7 @@ class TestQualityScorer:
         assert any("token inefficient" in r for r in qs.reasons)
 
     def test_score_below_threshold_rejects(self) -> None:
-        scorer = QualityScorer()
+        scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)
         qs = scorer.score(
             task_id="A-MTH-005",
             toke_src="x=1;",

@@ -765,6 +765,34 @@ async def run_pipeline(args: argparse.Namespace) -> None:
     trial_tasks = trial_cfg.get("tasks", 500)
     min_compile_rate = trial_cfg.get("min_compile_rate", 0.50)
 
+    # ---- Holdout isolation (hard invariant) --------------------------------
+    holdout_cfg = config.get("holdout", {})
+    holdout_file: str | None = holdout_cfg.get("file")
+    holdout_ids_raw: list[str] = holdout_cfg.get("task_ids", [])
+
+    holdout_task_ids: set[str] = set(holdout_ids_raw)
+    if holdout_file:
+        holdout_path = Path(holdout_file)
+        if not holdout_path.is_file():
+            logger.error(
+                "holdout.file '%s' does not exist -- aborting", holdout_file
+            )
+            sys.exit(1)
+        with open(holdout_path, encoding="utf-8") as hf:
+            for line in hf:
+                tid = line.strip()
+                if tid and not tid.startswith("#"):
+                    holdout_task_ids.add(tid)
+
+    if not holdout_task_ids:
+        logger.error(
+            "No holdout task IDs configured.  Set holdout.task_ids or "
+            "holdout.file in your config YAML.  The pipeline refuses to "
+            "run without an explicit holdout set."
+        )
+        sys.exit(1)
+    logger.info("Holdout isolation: %d task IDs will be blocked", len(holdout_task_ids))
+
     setup_logging(log_dir)
     logger.info("Pipeline starting: phase=%s, total_tasks=%d, seed=%d", phase, total_tasks, seed)
 
@@ -895,7 +923,7 @@ async def run_pipeline(args: argparse.Namespace) -> None:
     # ---- Initialise pipeline components -----------------------------------
     compiler = CompilerValidator(tkc_path=tkc_path, timeout_s=timeout_s)
     diff_tester = DifferentialTester(compiler)
-    quality_scorer = QualityScorer()
+    quality_scorer = QualityScorer(holdout_task_ids=holdout_task_ids)
     dedup = Deduplicator(threshold=dedup_threshold)
     correction_template = prompts.get("correct", "")
     correction_loop = CorrectionLoop(
@@ -906,7 +934,7 @@ async def run_pipeline(args: argparse.Namespace) -> None:
         correction_loop=correction_loop,
         pool_manager=pool,
     )
-    writer = CorpusWriter(corpus_dir=corpus_dir)
+    writer = CorpusWriter(corpus_dir=corpus_dir, holdout_task_ids=holdout_task_ids)
     metrics = MetricsCollector(
         total_tasks=total_tasks,
         metrics_dir=metrics_dir,

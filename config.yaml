@@ -56,4 +56,9 @@ validation:
 dedup:
   threshold: 0.95
 
+holdout:
+  task_ids:
+    - "A-MTH-EVAL-001"
+    - "A-MTH-EVAL-002"
+
 cost_limit: 200.00

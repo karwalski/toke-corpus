@@ -51,4 +51,15 @@ validation:
 dedup:
   threshold: 0.95
 
+# Holdout isolation — REQUIRED.  The pipeline will refuse to start
+# without at least one holdout task ID.  These tasks are reserved for
+# evaluation and must never appear in the training corpus.
+holdout:
+  # Inline list (small sets):
+  task_ids:
+    - "A-MTH-EVAL-001"
+    - "A-MTH-EVAL-002"
+  # Or load from a file (one task ID per line, # comments allowed):
+  # file: holdout_task_ids.txt
+
 cost_limit: 500.00  # emergency stop
