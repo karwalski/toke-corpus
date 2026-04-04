@@ -1,6 +1,7 @@
 # Corpus data — never commit (large, local only)
 corpus/
 logs/
+data/*.jsonl
 
 # Python
 __pycache__/
