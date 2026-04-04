@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-03803-5320d2d2",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03803",
+  "tk_source": "M=wordCountC;F=reverse(s:Str):Str{let n=s.len;let m=mut.(n as i64)-1;let r=mut.\"\";lp(let i=0;i<n;i=i+1){r=r+s[m];m=m-1;};<r};F=intToStr(n:i64):Str{if(n<0){<\"-\"+intToStr(-n)}el{if(n=0){<\"0\"}el{let result=mut.\"\";lp(let temp=n;temp>0;temp=temp/10){let digit=(temp-(temp/10)*10)as u8;let zeroChar=\"0\"[0];let charDigit=((digit as u8)+zeroChar)as Str;result=result+charDigit;};<reverse(result)}}};F=repeat(val:Str;other:i64):Str{if(other<0){<\"\"}el{if(val=intToStr(other)){<val}el{let result=mut.\"\";lp(let i=0;i<other;i=i+1){result=result+val};<result}}};F=wordCount(s:Str):i64{let len=s.len;let count=mut.0;let inWord=mut.0;lp(let i=0;i<len;i=i+1){let ch=s[i];if(ch=32){if(inWord=1){count=count+1;inWord=0};}el{inWord=1};};if(inWord=1){count=count+1};<count};F=wordCountReverse(s:Str):i64{<wordCount(reverse(s))};F=countSentences(lhs:Str):i64{let count=mut.0;let n=lhs.len;lp(let i=0;i<n;i=i+1){if(lhs[i as u64]=46 as u8){count=count+1;};};<count;};F=isHarshad(n:i64):bool{if(n<1){<false};let lhs=n;let rhs=mut.0;let temp=n;lp(let i=0;i<20;i=i+1){let digit=temp-temp/10*10;rhs=rhs+digit;temp=temp/10;if(temp=0){br}};let quotient=lhs/rhs;let remainder=lhs-quotient*rhs;if(remainder=0){<true};<false};F=isHarshadCountsentences(lhs:Str):bool{<isHarshad(countSentences(lhs))};F=combined(s:Str):i64{let a=wordCount(s);let b=countSentences(s);<a+b};",
+  "tk_tokens": 555,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-0177-33bea06e",
+      "B-B-CMP-7788-986d12d2"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

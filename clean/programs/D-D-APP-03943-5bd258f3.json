@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-03943-5bd258f3",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03943",
+  "tk_source": "M=rot13FirstcharMF;F=factorial(val:i64;other:i64):i64{if(val=other){<1};if(val=0){<1};let result=mut.1;lp(let i=1;i<val;i=i+1){result=result*i;};<result};F=titleCase(s:Str):Str{let len=s.len;let result=mut.\"\";let capitalizeNext=mut.true;lp(let i=0;i<len;i=i+1){let ch=s[i];if(ch=32){result=result+\" \";capitalizeNext=true}el{if(capitalizeNext){result=result+capitalize(ch);capitalizeNext=false}el{result=result+ch}}};<result};F=capitalize(ch:Str):Str{let code=charCode(ch);if(code>96){if(code<123){<fromCharCode(code-32)}el{<ch}}el{<ch}};F=charCode(ch:Str):i64{<0};F=fromCharCode(code:i64):Str{<\"\"};F=fromCharCodeFactorial(val:i64;other:i64):Str{<fromCharCode(factorial(val;other))};F=trim(first:Str;second:Str):Str{if(second=0){<first}el{let start=mut.0;lp(let i=0;i<first.len;i=i+1){if(first[i]=32){br}el{if(first[i]=9){br}el{if(first[i]=10){br}el{start=i;br}}}};let end=mut.first.len-1;lp(let i=end;i<first.len;i=i-1){if(first[i]=32){br}el{if(first[i]=9){br}el{if(first[i]=10){br}el{end=i;br}}}};<first}};F=manualToUpper(s:Str):Str{let n=s.len;let m=mut.0 as u64;let result=mut.\"\";lp(let i=0 as u64;i<n;i=i+1){let c=s[i];if(c>96){if(c<123){let upper=c-32;result=result+(upper as Str)}el{result=result+(c as Str)}}el{result=result+(c as Str)}};<result};F=manualToUpperTrim(first:Str;second:Str):Str{<manualToUpper(trim(first;second))};F=firstChar(s:Str):Str{if(s.len=0 as u64){<\"\"}el{<(s[0 as u64]as Str)};};F=rot13(lhs:Str):Str{let n=lhs.len;let result=mut.\"\";lp(let i=0;i<n;i=i+1){let c=lhs[i as u64];let newc=mut.c;if(c>96){if(c<123){let shifted=c-97;let torotate=shifted+13;let rotated=torotate-(torotate/26*26);newc=rotated+97;}}if(c>64){if(c<91){let shifted=c-65;let torotate=shifted+13;let rotated=torotate-(torotate/26*26);newc=rotated+65;}}result=result+(newc as Str);};<result};F=rot13Firstchar(s:Str):Str{<rot13(firstChar(s))};F=pipeline(code:i64):Str{<rot13Firstchar(manualToUpper(fromCharCode(code)))};",
+  "tk_tokens": 743,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-1813-2ee8e68c",
+      "B-B-CMP-0848-ca07e11d",
+      "B-B-CMP-4263-b2610e8c"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

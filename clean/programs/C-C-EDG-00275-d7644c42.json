@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-00275-d7644c42",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-00275",
+  "tk_source": "M=replaceAllGuard;F=replaceAll(s:Str;old:Str;new:Str):Str{let slen=s.len;let olen=old.len;let result=mut.\"\";let i=mut.0;lp(let i=0;i<slen;i=i+1){let matched=mut.true;if(i+olen>slen){matched=false;}el{lp(let j=0;j<olen;j=j+1){if(!(s[i+j as u64]=old[j])){matched=false;};};};if(matched){result=result+new;i=i+olen;}el{result=result+s[i as u64]as Str;};};<result};F=safeReplaceAll(s:Str;old:Str;new:Str):Str{if(s.len=0){<\"\"};<replaceAll(s;old;new)};",
+  "tk_tokens": 178,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0017v31-580870ae",
+    "transform": "guard_empty",
+    "original_function": "replaceAll"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

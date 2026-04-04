@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-00148-e4d53ff1",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-00148",
+  "tk_source": "M=isNumericNot;F=isNumeric(num1:Str):bool{let n=num1.len;if(n=0 as u64){<false};lp(let i=0;i<n;i=i+1){let c=num1[i as u64];let isNotDigit=mut.false;if(c<48){isNotDigit=true;};if(c>57){isNotDigit=true;};if(isNotDigit){<false};};<true;};F=notIsNumeric(num1:Str):bool{<!(isNumeric(num1))};",
+  "tk_tokens": 114,
+  "attempts": 0,
+  "model": "mechanical-invert",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0054v6-c1450dbf",
+    "transform": "invert",
+    "original_function": "isNumeric"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

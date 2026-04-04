@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-2873-1a76d58b",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-2873",
+  "tk_source": "M=manualToLowerReverse;F=reverseWords(s:Str):Str{let n=s.len;let words=mut.[];let start=mut.0 as u64;lp(let i=0 as u64;i<n;i=i+1){if(s[i]=32){let end=i;let len=end-start;let word=mut.\"\";lp(let j=0 as u64;j<len;j=j+1){word=word+s[start+j]};words=words+[word];start=i+1}el{if(i=n-1){let end=n;let len=end-start;let word=mut.\"\";lp(let j=0 as u64;j<len;j=j+1){word=word+s[start+j]};words=words+[word]}}};let result=mut.\"\";let m=words.len;lp(let i=m-1;i<m;i=i-1){if(i<words.len){result=result+words[i]};if(i>0 as u64){result=result+\" \"}};<result};F=manualToLower(s:Str):Str{let n=s.len;let m=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(c>64){if(c<91){let lower=c+32;m=m+(lower as Str)}el{m=m+(c as Str)}}el{m=m+(c as Str)}};<m};F=manualToLowerReversewords(s:Str):Str{<manualToLower(reverseWords(s))};",
+  "tk_tokens": 320,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0041v1-3bccfed4",
+      "A-A-STR-0074v1-ab35b9fd"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: manualToLower(reverseWords(...))\ndef manualToLower_reverseWords(s):\n    return manualToLower(reverseWords(s))",
+    "python_tokens": 0,
+    "c_source": "// Composed: manualToLower(reverseWords(...))\nconst char* manualToLower_reverseWords(const char* s) {\n    return manualToLower(reverseWords(s));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: manualToLower(reverseWords(...))\nstatic String manualToLowerReversewords(String s) {\n    return manualToLower(reverseWords(s));\n}\n",
+    "java_tokens": 0
+  }
+}

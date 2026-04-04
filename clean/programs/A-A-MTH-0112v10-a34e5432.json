@@ -1,0 +1,33 @@
+{
+  "id": "A-A-MTH-0112v10-a34e5432",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-MTH-0112v10",
+  "tk_source": "M=prevpow2;F=prevPow2(val:i64;other:i64):i64{if(val=other){<val};let pow=mut.1;lp(let i=0;i<63;i=i+1){let next=pow*2;if(next>val){<pow};pow=next};<pow};",
+  "tk_tokens": 71,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "java",
+      "python"
+    ],
+    "majority_output": "prevPow2(1) = 1 (expected 1)\nprevPow2(2) = 2 (expected 2)\nprevPow2(3) = 2 (expected 2)\nprevPow2(16) = 16 (expected 16)\nprevPow2(17) = 16 (expected 16)\nprevPow2(100) = 64 (expected 64)\nprevPow2(255) = 128 (expected 128)\nprevPow2(256) = 256 (expected 256)\nprevPow2(1000) = 512 (expected 512)\nprevPow2(1048576) = 1048576 (expected 1048576)\nprevPow2(1048577) = 1048576 (expected 1048576)\nprevPow2(0) = 0 (expected 0)\nprevPow2(-5) = 0 (expected 0)"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9677
+  },
+  "references": {
+    "python_source": "def prevPow2(n: int) -> int:\n    if n <= 0:\n        return 0\n    result = 1\n    while True:\n        next_val = result * 2\n        if next_val > n:\n            return result\n        result = next_val\n\ndef main() -> None:\n    test_cases = [\n        (1, 1),\n        (2, 2),\n        (3, 2),\n        (16, 16),\n        (17, 16),\n        (100, 64),\n        (255, 128),\n        (256, 256),\n        (1000, 512),\n        (1 << 20, 1 << 20),\n        ((1 << 20) + 1, 1 << 20),\n        (0, 0),\n        (-5, 0),\n    ]\n    \n    for n, expected in test_cases:\n        result = prevPow2(n)\n        print(f\"prevPow2({n}) = {result} (expected {expected})\")\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 229,
+    "c_source": "#include <stdio.h>\n#include <stdint.h>\n#include <math.h>\n\nint64_t prevPow2(int64_t n) {\n    int64_t val = n;\n    int64_t other = 1;\n    while (other <= val) {\n        if (other == val) {\n            return other;\n        }\n        other = other * 2;\n    }\n    return other / 2;\n}\n\nint main() {\n    int64_t tests[] = {1, 2, 3, 7, 8, 9, 15, 16, 17, 100, 1023, 1024, 1025, 65535, 65536, 65537, 2147483647, 2147483648, 9223372036854775807};\n    int num_tests = sizeof(tests) / sizeof(tests[0]);\n    for (int i = 0; i < num_tests; i++) {\n        printf(\"%ld\\n\", prevPow2(tests[i]));\n    }\n    return 0;\n}",
+    "c_tokens": 224,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static long prevPow2(long n) {\n        long val = n;\n        long other = 1;\n        while (other <= val) {\n            if (other == val) {\n                return other;\n            }\n            other = other * 2;\n        }\n        return other / 2;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(prevPow2(1));\n        System.out.println(prevPow2(2));\n        System.out.println(prevPow2(5));\n        System.out.println(prevPow2(16));\n        System.out.println(prevPow2(100));\n    }\n}",
+    "java_tokens": 136
+  }
+}

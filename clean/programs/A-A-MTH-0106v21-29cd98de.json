@@ -1,0 +1,34 @@
+{
+  "id": "A-A-MTH-0106v21-29cd98de",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-MTH-0106v21",
+  "tk_source": "M=divcount;F=countDivisors(p:i64):i64{let q=mut.0;lp(let i=1;!(i>p);i=i+1){let rem=p-p/i*i;if(rem=0){q=q+1}};<q};",
+  "tk_tokens": 58,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "1\n2\n6\n9\n9\n2\n15"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9763
+  },
+  "references": {
+    "python_source": "def countDivisors(n: int) -> int:\n    p = n\n    q = 0  # mutable binding for result\n    i = 1\n    while i <= p:\n        if p % i == 0:\n            q += 1\n        i += 1\n    return q\n\ndef main() -> None:\n    # Test case 1: n = 1 (edge case, smallest positive integer)\n    print(countDivisors(1))\n    \n    # Test case 2: n = 2 (prime number)\n    print(countDivisors(2))\n    \n    # Test case 3: n = 12 (multiple divisors)\n    print(countDivisors(12))\n    \n    # Test case 4: n = 36 (perfect square)\n    print(countDivisors(36))\n    \n    # Test case 5: n = 100 (boundary-like value)\n    print(countDivisors(100))\n    \n    # Test case 6: n = 97 (prime number)\n    print(countDivisors(97))\n    \n    # Test case 7: n = 144 (larger perfect square)\n    print(countDivisors(144))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 257,
+    "c_source": "#include <stdio.h>\n#include <stdbool.h>\n\nlong long countDivisors(long long n) {\n    long long count = 0;\n    long long p = 1;\n    while (p <= n) {\n        long long q = n / p;\n        if (q * p == n) {\n            count = count + 1;\n        }\n        p = p + 1;\n    }\n    return count;\n}\n\nint main() {\n    // Test case 1: n = 1 (smallest positive)\n    printf(\"%lld\\n\", countDivisors(1));\n    \n    // Test case 2: n = 12 (typical case)\n    printf(\"%lld\\n\", countDivisors(12));\n    \n    // Test case 3: n = 17 (prime number)\n    printf(\"%lld\\n\", countDivisors(17));\n    \n    // Test case 4: n = 36 (perfect square)\n    printf(\"%lld\\n\", countDivisors(36));\n    \n    // Test case 5: n = 100 (larger composite)\n    printf(\"%lld\\n\", countDivisors(100));\n    \n    return 0;\n}",
+    "c_tokens": 241,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static long countDivisors(long n) {\n        long q = 0L;\n        long p = 1L;\n        while (p <= n) {\n            if (n % p == 0) {\n                q = q + 1L;\n            }\n            p = p + 1L;\n        }\n        return q;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(countDivisors(1L));\n        System.out.println(countDivisors(2L));\n        System.out.println(countDivisors(12L));\n        System.out.println(countDivisors(30L));\n        System.out.println(countDivisors(100L));\n    }\n}",
+    "java_tokens": 150
+  }
+}

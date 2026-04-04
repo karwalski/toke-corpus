@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-04889-379d4887",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-04889",
+  "tk_source": "M=charToDigitC;T=ParseErr{InvalidFormat:Str;EmptyInput:bool;OutOfRange:Str};F=firstValid(values:[Str]):i64!ParseErr{let len=values.len;if(len=0 as u64){<ParseErr{InvalidFormat:\"\";EmptyInput:true;OutOfRange:\"\"}};let i=mut.0;lp(let idx=0 as u64;idx<len;idx=idx+1){let val=values[idx];let other=val;if(val=other){let parsed=parseString(val);parsed|{Ok:v i=v;Err:e e};let checkVal=i;let checkZero=0;if(!(checkVal=checkZero)){<checkVal}}};<ParseErr{InvalidFormat:\"\";EmptyInput:true;OutOfRange:\"\"}};F=parseString(s:Str):i64!ParseErr{let result=stringToInt(s);result|{Ok:v v;Err:e ParseErr{InvalidFormat:s;EmptyInput:false;OutOfRange:\"\"}}};F=stringToInt(s:Str):i64!ParseErr{let len=s.len;if(len=0 as u64){<ParseErr{InvalidFormat:s;EmptyInput:false;OutOfRange:\"\"}};let result=mut.0;let idx=mut.0 as u64;lp(let i=0 as u64;i<len;i=i+1){let ch=stringCharAt(s;i);let digit=charToDigit(ch);if(digit<0 as i64){<ParseErr{InvalidFormat:s;EmptyInput:false;OutOfRange:\"\"}};result=result*10 as i64+digit};<result};F=stringCharAt(s:Str;pos:u64):Str{<s};F=charToDigit(c:Str):i64{<0};F=rle(s:Str):Str{let n=s.len;let result=mut.\"\";if(n=0 as u64){<\"\"};let currentChar=s[0 as u64];let count=mut.1 as u64;lp(let i=1 as u64;i<n;i=i+1){if(s[i as u64]=currentChar){count=count+1;}el{result=result+(currentChar as Str);if(count>1 as u64){result=result+(count as Str);};currentChar=s[i as u64];count=1 as u64;};};result=result+(currentChar as Str);if(count>1 as u64){result=result+(count as Str);};<result;};F=rleStringcharat(s:Str;pos:u64):Str{<rle(stringCharAt(s;pos))};F=httpCategory(code:i64):Str{let n=code;let m=n-100;if(m>-1){if(m<100){<\"informational\"};let m=n-200;if(m>-1){if(m<100){<\"success\"};let m=n-300;if(m>-1){if(m<100){<\"redirect\"};let m=n-400;if(m>-1){if(m<100){<\"client_error\"};let m=n-500;if(m>-1){if(m<100){<\"server_error\"};<\"unknown\"};<\"unknown\"};<\"unknown\"};<\"unknown\"};<\"unknown\"};<\"unknown\"};F=countUpper(s:Str):i64{let n=s.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i];if(c>64){if(c<91){count=count+1}}};<count};F=countUpperHttpcategory(code:i64):i64{<countUpper(httpCategory(code))};F=combined(c:Str):i64{let a=charToDigit(c);let b=countUpper(c);<a+b};",
+  "tk_tokens": 796,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-4975-fb19ee12",
+      "B-B-CMP-5331-0d83627f"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

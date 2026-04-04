@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-8115-71890081",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-8115",
+  "tk_source": "M=parityBitCountlower;F=countLower(first:Str):i64{let result=mut.0;let n=first.len;if(n<0){<0};lp(let i=0;i<n;i=i+1){let c=first[i];if(c>96){if(c<123){result=result+1}}};<result};F=parityBit(n:i64):bool{let count=mut.0;let x=mut.n;lp(let i=0;i<64;i=i+1){let bit=x-x/2*2;if(bit=1){count=count+1};x=x/2};let parity=count-count/2*2;if(parity=0){<true};<false};F=parityBitCountlower(first:Str):bool{<parityBit(countLower(first))};",
+  "tk_tokens": 173,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0096v4-3154ec96",
+      "A-A-CND-0078-4cb8cffb"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: parityBit(countLower(...))\ndef parityBit_countLower(first):\n    return parityBit(countLower(first))",
+    "python_tokens": 0,
+    "c_source": "// Composed: parityBit(countLower(...))\nint parityBit_countLower(const char* first) {\n    return parityBit(countLower(first));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: parityBit(countLower(...))\nstatic boolean parityBitCountlower(String first) {\n    return parityBit(countLower(first));\n}\n",
+    "java_tokens": 0
+  }
+}

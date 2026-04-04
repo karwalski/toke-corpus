@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-02013-f0406171",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-02013",
+  "tk_source": "M=reverseGuard;F=reverse(val:Str;other:Str):Str{if(val=other){<val;};let len=val.len;let reversed=mut.[0;len];lp(let i=0;i<len;i=i+1){reversed[i]=val[len-1-i];};<reversed as Str;};F=safeReverse(val:Str;other:Str):Str{if(val.len=0){<\"\"};<reverse(val;other)};",
+  "tk_tokens": 101,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0001v10-ce3b2a7b",
+    "transform": "guard_empty",
+    "original_function": "reverse"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

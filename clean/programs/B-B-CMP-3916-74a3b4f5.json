@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-3916-74a3b4f5",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-3916",
+  "tk_source": "M=charFreqLongestword;F=longestWord(s:Str):Str{let n=s.len;if(n=0){<\"\"};let m=mut.0;let word=mut.\"\";let longest=mut.\"\";let current=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(c=32){if(longest.len>m){}el{longest=current;m=longest.len;};current=\"\"}el{current=current+(c as Str);};};if(longest.len>m){}el{longest=current;m=longest.len;};<longest};F=charFreq(p:Str):Str{let q=mut.\"\";let n=p.len;lp(let i=0;i<n;i=i+1){let c=p[i];let found=mut.false;let m=q.len;lp(let j=0;j<m;j=j+2){let ch=q[j];if(ch as u8=c){found=true;};};if(!(found)){q=q+c as Str;q=q+\"1\";}el{let m=q.len;lp(let j=0;j<m;j=j+2){let ch=q[j];if(ch as u8=c){let countStr=q[j+1];let count=mut.0;let clen=countStr.len;lp(let k=0;k<clen;k=k+1){let digit=countStr[k];count=count*10+(digit-48);};count=count+1;let newCount=mut.\"\";if(count=0){newCount=\"\";}el{lp(let d=count;d>0;d=d/10){let digit=d-d/10*10+48;newCount=digit as Str+newCount;};};q=q+newCount;};};};};<q};F=charFreqLongestword(s:Str):Str{<charFreq(longestWord(s))};",
+  "tk_tokens": 404,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0061v1-30d638f1",
+      "A-A-STR-0034v21-9d7ec097"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: charFreq(longestWord(...))\ndef charFreq_longestWord(s):\n    return charFreq(longestWord(s))",
+    "python_tokens": 0,
+    "c_source": "// Composed: charFreq(longestWord(...))\nconst char* charFreq_longestWord(const char* s) {\n    return charFreq(longestWord(s));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: charFreq(longestWord(...))\nstatic String charFreqLongestword(String s) {\n    return charFreq(longestWord(s));\n}\n",
+    "java_tokens": 0
+  }
+}

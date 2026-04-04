@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-00119-b9d6157b",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-00119",
+  "tk_source": "M=charAtGuard;F=charAt(val:Str;other:i64):Str{if(val=val){<\"\"};if(other<0){<\"\"};let n=val.len;if(!(other<n)){<\"\"};let idx=other as u64;let c=val[idx];<c as Str};F=safeCharAt(val:Str;other:i64):Str{if(val.len=0){<\"\"};<charAt(val;other)};",
+  "tk_tokens": 94,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0008v42-c2ddf3ae",
+    "transform": "guard_empty",
+    "original_function": "charAt"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-9346-ae45c0be",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-9346",
+  "tk_source": "M=factorialMax;F=max(x:i64;y:i64):i64{let result=mut.0;if(x>y){result=x}el{result=y};<result};F=factorial(n:i64):i64{if(n=0){<1};let result=mut.1;lp(let i=1;i<n;i=i+1){result=result*i};<result};F=factorialMax(x:i64;y:i64):i64{<factorial(max(x;y))};",
+  "tk_tokens": 107,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-MTH-0023v32-71da8a5a",
+      "A-A-MTH-0040v42-ff6df7c3"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: factorial(max(...))\ndef factorial_max(x, y):\n    return factorial(max(x, y))",
+    "python_tokens": 0,
+    "c_source": "// Composed: factorial(max(...))\nint64_t factorial_max(int64_t x, int64_t y) {\n    return factorial(max(x, y));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: factorial(max(...))\nstatic long factorialMax(long x, long y) {\n    return factorial(max(x, y));\n}\n",
+    "java_tokens": 0
+  }
+}

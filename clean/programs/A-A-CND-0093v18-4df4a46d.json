@@ -1,0 +1,34 @@
+{
+  "id": "A-A-CND-0093v18-4df4a46d",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-CND-0093v18",
+  "tk_source": "M=discriminant;F=discriminant(val:f64;other:f64;c:f64):Str{if(val=other){<\"two_real\"};let disc=val*val-4.0*other*c;if(disc>0.0){<\"two_real\"};if(disc=0.0){<\"one_real\"};<\"complex\"};",
+  "tk_tokens": 76,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "two_real\none_real\ncomplex\ntwo_real\nequal_inputs\nequal_inputs\nequal_inputs\ncomplex\nequal_inputs"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.973
+  },
+  "references": {
+    "python_source": "def discriminant(val: float, other: float, c: float) -> str:\n    if val == other:\n        return \"equal_inputs\"\n    disc = other * other - 4.0 * val * c\n    if disc > 0.0:\n        return \"two_real\"\n    if disc == 0.0:\n        return \"one_real\"\n    return \"complex\"\n\ndef main():\n    test_cases = [\n        (1.0, 5.0, 6.0),\n        (1.0, 4.0, 4.0),\n        (1.0, 2.0, 5.0),\n        (0.0, 3.0, 2.0),\n        (2.0, 2.0, 2.0),\n        (-1.0, -1.0, -1.0),\n        (0.0, 0.0, 0.0),\n        (1.0, 0.0, 1.0),\n        (1.0, 1.0, 0.0),\n    ]\n    for a, b, c_val in test_cases:\n        result = discriminant(a, b, c_val)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 274,
+    "c_source": "#include <stdio.h>\n#include <math.h>\n\nconst char* discriminant(double val, double other, double c) {\n    if (val == other) {\n        return \"equal_inputs\";\n    }\n    double d = other * other - 4.0 * val * c;\n    if (d > 0.0) {\n        return \"two_real\";\n    } else if (d == 0.0) {\n        return \"one_real\";\n    } else {\n        return \"complex\";\n    }\n}\n\nint main() {\n    printf(\"%s\\n\", discriminant(1.0, 2.0, 1.0));\n    printf(\"%s\\n\", discriminant(1.0, 3.0, 2.0));\n    printf(\"%s\\n\", discriminant(1.0, 1.0, 1.0));\n    printf(\"%s\\n\", discriminant(0.0, 2.0, 3.0));\n    printf(\"%s\\n\", discriminant(1.0, 0.0, 1.0));\n    return 0;\n}",
+    "c_tokens": 231,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static String discriminant(double val, double other, double c) {\n        if (val == other) {\n            return \"equal_inputs\";\n        }\n        double d = other * other - 4.0 * val * c;\n        if (d > 0.0) {\n            return \"two_real\";\n        }\n        if (d == 0.0) {\n            return \"one_real\";\n        }\n        return \"complex\";\n    }\n\n    public static void main(String[] args) {\n        System.out.println(discriminant(1.0, 2.0, 3.0));\n        System.out.println(discriminant(1.0, 4.0, 4.0));\n        System.out.println(discriminant(1.0, 1.0, 1.0));\n        System.out.println(discriminant(0.0, 5.0, 2.0));\n        System.out.println(discriminant(2.0, 2.0, 2.0));\n    }\n}",
+    "java_tokens": 225
+  }
+}

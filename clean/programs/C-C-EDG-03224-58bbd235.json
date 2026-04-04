@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-03224-58bbd235",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-03224",
+  "tk_source": "M=numToStrClamp;F=numToStr(x:i64):Str{if(x=0){<\"0\"}el{let left=mut.x;let right=mut.\"\";if(left<0){left=0-left;lp(let i=0;i<1;i=i+1){if(left=0){right=\"-\"+right}el{let digit=left-left/10*10;right=(digit as u8)+48 as Str+right;left=left/10}};lp(let i=0;i<1;i=i+1){if(!(left=0)){let digit=left-left/10*10;right=(digit as u8)+48 as Str+right;left=left/10}el{right=\"-\"+right}}}el{lp(let i=0;i<20;i=i+1){if(left=0){br}el{let digit=left-left/10*10;right=(digit as u8)+48 as Str+right;left=left/10}}};<right}};F=numToStrClamped(x:i64):Str{let clamped=mut.x;if(x<0){clamped=0};if(x>1000){clamped=1000};<numToStr(clamped)};",
+  "tk_tokens": 258,
+  "attempts": 0,
+  "model": "mechanical-clamp",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0030v47-42af63ef",
+    "transform": "clamp",
+    "original_function": "numToStr"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

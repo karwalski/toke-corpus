@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-01022-86acc2fe",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-01022",
+  "tk_source": "M=charToIndexC;T=CharCount{count:[i64]};F=charToIndex(c:Str):i64{let code=c as i64;if(code>96){<code-97};<code-65};F=toLowerCase(s:Str):Str{<s};F=sortString(s:Str):Str{let counts=mut.[0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];let i=mut.0;lp(let j=0;j<s.len;j=j+1){let c=s[j];let idx=charToIndex(c);counts[idx]=counts[idx]+1;};let result=mut.[];lp(let k=0;k<26;k=k+1){let ct=counts[k];lp(let m=0;m<ct;m=m+1){result=result+[(k+97)as Str];};};<result};F=isAnagram(num1:Str;num2:Str):bool{let sorted1=sortString(num1);let sorted2=sortString(num2);sorted1=sorted2|{Ok:v true;Err:e false}};F=removePunct(s:Str):Str{let n=s.len;let r=mut.\"\";lp(let lhs=0;lhs<n;lhs=lhs+1){let rhs=s[lhs];if(rhs>47){if(rhs<58){r=r+(rhs as Str)}el{if(rhs>64){if(rhs<91){r=r+(rhs as Str)}el{if(rhs>96){if(rhs<123){r=r+(rhs as Str)}el{if(rhs=32){r=r+(rhs as Str)}}}}}}}};<r};F=removePunctTolowercase(s:Str):Str{<removePunct(toLowerCase(s))};F=insertStr(s:Str;sub:Str;pos:i64):Str{let slen=s.len;let sublen=sub.len;let actualpos=pos;if(pos>slen){actualpos=slen};let result=mut.\"\";lp(let i=0;i<slen;i=i+1){if(i=actualpos){result=result+sub};result=result+s[i]};if(actualpos=slen){result=result+sub};<result};F=countDigitsInStr(s:Str):i64{let n=s.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(c>47){if(c<58){count=count+1}}};<count};F=countDigitsInStrInsertstr(s:Str;sub:Str;pos:i64):i64{<countDigitsInStr(insertStr(s;sub;pos))};F=combined(c:Str):i64{let a=charToIndex(c);let b=countDigitsInStr(c);<a+b};",
+  "tk_tokens": 642,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-4097-b744dd86",
+      "B-B-CMP-1863-8e1b46ed"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

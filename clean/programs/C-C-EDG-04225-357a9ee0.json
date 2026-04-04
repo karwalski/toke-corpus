@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-04225-357a9ee0",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-04225",
+  "tk_source": "M=wordcountGuard;F=wordCount(s:Str):i64{let n=s.len;let wordcount=mut.0;let inword=mut.false;lp(let m=0;m<n;m=m+1){if(s[m as u64]>32){if(!(inword=true)){inword=true;wordcount=wordcount+1}el{}}el{inword=false}};<wordcount};F=safeWordCount(s:Str):i64{if(s.len=0){<0};<wordCount(s)};",
+  "tk_tokens": 116,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0033v89-a6d5e847",
+    "transform": "guard_empty",
+    "original_function": "wordCount"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

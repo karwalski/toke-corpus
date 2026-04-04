@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-6657-b6fe0de7",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-6657",
+  "tk_source": "M=bmiCatAdd;F=add(first:f64;second:f64):f64{if(first<0 as f64){<0.0;}el{if(second<0 as f64){<0.0;}el{<first+second;}}};F=bmiCategory(lhs:f64;rhs:f64):Str{let cats=[\"underweight\";\"normal\";\"overweight\";\"obese\"];let bounds=[18.5;25.0;30.0];lp(let i=0;i<bounds.len;i=i+1){if(lhs<bounds[i as u64]){<cats[i as u64];};};<cats[bounds.len]};F=bmiCat(bmi:f64):Str{<bmiCategory(bmi;0.0)};F=bmiCatAdd(first:f64;second:f64):Str{<bmiCat(add(first;second))};",
+  "tk_tokens": 189,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-MTH-0003v20-b780f2f0",
+      "A-A-CND-0046v51-a710f5ed"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: bmiCat(add(...))\ndef bmiCat_add(first, second):\n    return bmiCat(add(first, second))",
+    "python_tokens": 0,
+    "c_source": "// Composed: bmiCat(add(...))\nconst char* bmiCat_add(double first, double second) {\n    return bmiCat(add(first, second));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: bmiCat(add(...))\nstatic String bmiCatAdd(double first, double second) {\n    return bmiCat(add(first, second));\n}\n",
+    "java_tokens": 0
+  }
+}

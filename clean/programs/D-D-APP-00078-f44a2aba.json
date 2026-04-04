@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-00078-f44a2aba",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-00078",
+  "tk_source": "M=countSentencesC;F=longestWord(s:Str):Str{let n=s.len;if(n=0){<\"\"};let m=mut.0;let word=mut.\"\";let longest=mut.\"\";let current=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(c=32){if(longest.len>m){}el{longest=current;m=longest.len;};current=\"\"}el{current=current+(c as Str);};};if(longest.len>m){}el{longest=current;m=longest.len;};<longest};F=countSentences(s:Str):i64{if(s.len=0 as u64){<0};let count=mut.0;let n=s.len;lp(let i=0 as u64;i<n;i=i+1 as u64){if(s[i]=46 as u8){count=count+1}};<count};F=countSentencesLongestword(s:Str):i64{<countSentences(longestWord(s))};F=countLower(first:Str):i64{let result=mut.0;let n=first.len;if(n<0){<0};lp(let i=0;i<n;i=i+1){let c=first[i];if(c>96){if(c<123){result=result+1}}};<result};F=abs(x:i64):i64{let n=x;if(n<0){let m=0-n;<m;}el{<n;}};F=absCountlower(first:Str):i64{<abs(countLower(first))};F=combined(s:Str):i64{let a=countSentences(s);let b=countLower(s);<a+b};",
+  "tk_tokens": 375,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-3890-5f3f9570",
+      "B-B-CMP-8082-841f1ded"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

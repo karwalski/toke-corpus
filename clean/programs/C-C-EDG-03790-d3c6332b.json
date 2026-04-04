@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-03790-d3c6332b",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-03790",
+  "tk_source": "M=zeropadNeg;F=zeroPad(s:Str;width:i64):Str{let len=s.len as i64;if(!(len>width)){<s};let n=width-len;let r=mut.\"\";lp(let i=0;i<n;i=i+1){r=r+\"0\"};r=s+r;<r};F=zeroPadSafe(s:Str;width:i64):Str{if(width<0){<\"\"};<zeroPad(s;width)};",
+  "tk_tokens": 101,
+  "attempts": 0,
+  "model": "mechanical-guard_neg",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0044-f697e0d1",
+    "transform": "guard_neg",
+    "original_function": "zeroPad"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

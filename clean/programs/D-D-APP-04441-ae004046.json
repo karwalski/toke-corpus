@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-04441-ae004046",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-04441",
+  "tk_source": "M=parseToIntS;T=ValidationErr{TooShort:Str;TooLong:Str;InvalidChar:Str};F=validateAge(input:Str):i64!ValidationErr{let p=mut.0;let q=mut.0;q=parseToInt(input);if(q<0){<ValidationErr{InvalidChar:\"not a number\"}};p=q;if(p<0){<ValidationErr{TooShort:\"too young\"}};if(p>150){<ValidationErr{TooLong:\"too old\"}};<p};F=parseToInt(s:Str):i64{let result=mut.0;let i=mut.0;lp(i=0;i<s.len;i=i+1){let c=s[i];if(c<48){<-1};if(c>57){<-1};result=result*10+(c-48);};<result};F=titleCase(s:Str):Str{let len=s.len;let result=mut.\"\";let capitalizeNext=mut.true;lp(let i=0;i<len;i=i+1){let ch=s[i];if(ch=32){result=result+\" \";capitalizeNext=true}el{if(capitalizeNext){result=result+capitalize(ch);capitalizeNext=false}el{result=result+ch}}};<result};F=capitalize(ch:Str):Str{let code=charCode(ch);if(code>96){if(code<123){<fromCharCode(code-32)}el{<ch}}el{<ch}};F=charCode(ch:Str):i64{<0};F=fromCharCode(code:i64):Str{<\"\"};F=fromCharCodeParsetoint(s:Str):Str{<fromCharCode(parseToInt(s))};F=padRight(s:Str;width:i64;fill:Str):Str{if(width<0){<s};let slen=s.len;let wlen=width as u64;if(slen>wlen){<s};let needed=width-slen;let result=mut.s;let filllen=fill.len;if(filllen=0 as u64){<result};lp(let i=0;i<needed;i=i+1){let idx=i as u64-i as u64/filllen*filllen;result=result+fill[idx]as Str};<result};F=strLen(val:Str):i64{<val.len};F=strLenPadright(s:Str;width:i64;fill:Str):i64{<strLen(padRight(s;width;fill))};F=combined(s:Str):i64{let a=parseToInt(s);let b=strLen(s);<a+b};",
+  "tk_tokens": 552,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-2919-69a8d4b2",
+      "B-B-CMP-0626-2352d613"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

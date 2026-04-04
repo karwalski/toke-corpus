@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-04464-e7cea780",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-04464",
+  "tk_source": "M=accFactorialRec;F=factorialRec(n:i64):i64{if(n<1){<1;}el{if(n=1){<1;}el{<n*factorialRec(n-1);}}};F=digitSum(n:i64):i64{let num=n;let isNeg=num<0;let absNum=num;if(isNeg){absNum=0-absNum};let sum=mut.0;let current=absNum;lp(let i=0;!(current=0);i=i+1){let digit=current-current/10*10;sum=sum+digit;current=current/10};<sum};F=digitSumFactorialrec(n:i64):i64{<digitSum(factorialRec(n))};F=accumulate(arr:[i64]):i64{let r=mut.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+factorialRec(arr[i as u64]);};<r};",
+  "tk_tokens": 213,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-1759-b737105d"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-6056-0c568662",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-6056",
+  "tk_source": "M=isValidEmailLettergr;F=letterGrade(pct:f64):Str{if(!(pct<97.0)){<\"A+\";}el{if(!(pct<93.0)){<\"A\";}el{if(!(pct<90.0)){<\"A-\";}el{if(!(pct<87.0)){<\"B+\";}el{if(!(pct<83.0)){<\"B\";}el{if(!(pct<80.0)){<\"B-\";}el{if(!(pct<77.0)){<\"C+\";}el{if(!(pct<73.0)){<\"C\";}el{if(!(pct<70.0)){<\"C-\";}el{if(!(pct<60.0)){<\"D\";}el{<\"F\";}}}}}}}}}}};F=isValidEmail(s:Str):bool{let atCount=mut.0;let dotAfterAt=mut.false;let atPos=mut.0 as i64;let n=s.len as i64;lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(c=64){atCount=atCount+1;atPos=i}el{if(c=46){if(!(atCount=0)){if(i>atPos){dotAfterAt=true}}}}};if(atCount=1){if(dotAfterAt){<true}el{<false}}el{<false}};F=isValidEmailLettergrade(pct:f64):bool{<isValidEmail(letterGrade(pct))};",
+  "tk_tokens": 329,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0077v2-32355a0d",
+      "A-A-STR-0089v3-1e058b45"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: isValidEmail(letterGrade(...))\ndef isValidEmail_letterGrade(pct):\n    return isValidEmail(letterGrade(pct))",
+    "python_tokens": 0,
+    "c_source": "// Composed: isValidEmail(letterGrade(...))\nint isValidEmail_letterGrade(double pct) {\n    return isValidEmail(letterGrade(pct));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: isValidEmail(letterGrade(...))\nstatic boolean isValidEmailLettergrade(double pct) {\n    return isValidEmail(letterGrade(pct));\n}\n",
+    "java_tokens": 0
+  }
+}

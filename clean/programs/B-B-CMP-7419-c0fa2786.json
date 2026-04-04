@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-7419-c0fa2786",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-7419",
+  "tk_source": "M=ageGroupWordcount;F=wordCount(s:Str):i64{let len=s.len;let count=mut.0;let inWord=mut.0;lp(let i=0;i<len;i=i+1){let ch=s[i];if(ch=32){if(inWord=1){count=count+1;inWord=0};}el{inWord=1};};if(inWord=1){count=count+1};<count};F=ageGroup(age:i64):Str{if(age<0){<\"invalid\"};if(!(age>1)){<\"infant\"};if(!(age>12)){<\"child\"};if(!(age>17)){<\"teen\"};if(!(age>64)){<\"adult\"};<\"senior\"};F=ageGroupWordcount(s:Str):Str{<ageGroup(wordCount(s))};",
+  "tk_tokens": 184,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0033v5-e4a65319",
+      "A-A-CND-0070v2-6c4d7f11"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: ageGroup(wordCount(...))\ndef ageGroup_wordCount(s):\n    return ageGroup(wordCount(s))",
+    "python_tokens": 0,
+    "c_source": "// Composed: ageGroup(wordCount(...))\nconst char* ageGroup_wordCount(const char* s) {\n    return ageGroup(wordCount(s));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: ageGroup(wordCount(...))\nstatic String ageGroupWordcount(String s) {\n    return ageGroup(wordCount(s));\n}\n",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-00573-47675450",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-00573",
+  "tk_source": "M=startswithNot;F=startsWith(s:Str;prefix:Str):bool{let slen=s.len;let plen=prefix.len;let diff=slen-plen;if(diff<0){<false};let i=mut.0;lp(let i=0;i<plen;i=i+1){if(s[i]=prefix[i]){}el{<false};};<true};F=notStartsWith(s:Str;prefix:Str):bool{<!(startsWith(s;prefix))};",
+  "tk_tokens": 105,
+  "attempts": 0,
+  "model": "mechanical-invert",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0009v1-5ac7057c",
+    "transform": "invert",
+    "original_function": "startsWith"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

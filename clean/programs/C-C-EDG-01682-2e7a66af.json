@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-01682-2e7a66af",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-01682",
+  "tk_source": "M=caesarEncryptClamp;F=caesarEncrypt(val:Str;other:i64):Str{if(val=val){<val};let n=val.len;let result=mut.\"\";lp(let i=0;i<n;i=i+1){let c=val[i];if(c>96){if(c<123){let shifted=c-97;let modval=other-other/26*26;let newpos=shifted+modval;let wrapped=newpos-newpos/26*26;result=result+(wrapped+97 as Str)}el{result=result+(c as Str)}}el{result=result+(c as Str)}};<result};F=caesarEncryptClamped(val:Str;other:i64):Str{let clamped=mut.other;if(other<0){clamped=0};if(other>1000){clamped=1000};<caesarEncrypt(val;clamped)};",
+  "tk_tokens": 191,
+  "attempts": 0,
+  "model": "mechanical-clamp",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0038v18-e0e753c3",
+    "transform": "clamp",
+    "original_function": "caesarEncrypt"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

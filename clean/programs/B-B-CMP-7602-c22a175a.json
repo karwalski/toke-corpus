@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-7602-c22a175a",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-7602",
+  "tk_source": "M=digitalRootCountspac;F=countSpaces(lhs:Str;rhs:Str):i64{let count=mut.0;let n=lhs.len;lp(let i=0;i<n;i=i+1){if(lhs[i]=32){count=count+1}};<count};F=digitalRoot(n:i64):i64{let absval=n;if(n<0){absval=0-n};if(absval=0){<0};let current=absval;lp(let done=0;done<1;done=1){if(current<10){<current};let sum=0;lp(let temp=current;temp>0;temp=temp/10){let digit=temp-temp/10*10;sum=sum+digit};current=sum};<0};F=digitalRootCountspaces(lhs:Str;rhs:Str):i64{<digitalRoot(countSpaces(lhs;rhs))};",
+  "tk_tokens": 190,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0098v3-be8bfa53",
+      "A-A-MTH-0074v10-8bfe0a84"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: digitalRoot(countSpaces(...))\ndef digitalRoot_countSpaces(lhs, rhs):\n    return digitalRoot(countSpaces(lhs, rhs))",
+    "python_tokens": 0,
+    "c_source": "// Composed: digitalRoot(countSpaces(...))\nint64_t digitalRoot_countSpaces(const char* lhs, const char* rhs) {\n    return digitalRoot(countSpaces(lhs, rhs));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: digitalRoot(countSpaces(...))\nstatic long digitalRootCountspaces(String lhs, String rhs) {\n    return digitalRoot(countSpaces(lhs, rhs));\n}\n",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "A-A-STR-0063v4-59e13b17",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-STR-0063v4",
+  "tk_source": "M=firstWord;F=firstWord(s:Str):Str{let first=mut.0 as u64;let second=mut.0 as u64;let n=s.len;if(n=0 as u64){<\"\"};lp(let i=0 as u64;i<n;i=i+1){if(!(s[i]=32)){first=i;br;}};if(s[first]=32){<\"\"};second=first+1;lp(let j=second;j<n;j=j+1){if(s[j]=32){second=j;br;}};if(!(second>first)){second=n};let result=mut.\"\";lp(let k=first;k<second;k=k+1){result=result+s[k]as Str;};<result};",
+  "tk_tokens": 157,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "hello\nleading\ntrailing\n\n\nsingle\nmultiple\n\tnot\na\na"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9335
+  },
+  "references": {
+    "python_source": "def firstWord(s: str) -> str:\n    if not s:\n        return \"\"\n    i = 0\n    n = len(s)\n    # skip leading spaces\n    while i < n and s[i] == ' ':\n        i += 1\n    if i == n:\n        return \"\"\n    start = i\n    # find end of first word\n    while i < n and s[i] != ' ':\n        i += 1\n    return s[start:i]\n\ndef main() -> None:\n    test_cases = [\n        (\"hello world\", \"hello\"),\n        (\"   leading spaces\", \"leading\"),\n        (\"trailing spaces   \", \"trailing\"),\n        (\"\", \"\"),\n        (\"    \", \"\"),\n        (\"single\", \"single\"),\n        (\"multiple   spaces   between\", \"multiple\"),\n        (\"\\tnot a space char\", \"\\tnot\"),  # tabs are not spaces\n        (\"a\", \"a\"),\n        (\"  a  b  c  \", \"a\"),\n    ]\n    for input_str, expected in test_cases:\n        result = firstWord(input_str)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 242,
+    "c_source": "#include <stdio.h>\n#include <string.h>\n#include <stdbool.h>\n\nchar* firstWord(const char* s) {\n    static char result[1024];\n    int i = 0;\n    int j = 0;\n    \n    if (s == NULL) {\n        result[0] = '\\0';\n        return result;\n    }\n    \n    int len = strlen(s);\n    \n    while (i < len && s[i] == ' ') {\n        i++;\n    }\n    \n    while (i < len && s[i] != ' ') {\n        result[j] = s[i];\n        j++;\n        i++;\n    }\n    \n    result[j] = '\\0';\n    return result;\n}\n\nint main() {\n    printf(\"%s\\n\", firstWord(\"hello world\"));\n    printf(\"%s\\n\", firstWord(\"   leading spaces\"));\n    printf(\"%s\\n\", firstWord(\"single\"));\n    printf(\"%s\\n\", firstWord(\"\"));\n    printf(\"%s\\n\", firstWord(\"    \"));\n    printf(\"%s\\n\", firstWord(\"multiple   spaces   between\"));\n    printf(\"%s\\n\", firstWord(\"trailing   \"));\n    \n    return 0;\n}",
+    "c_tokens": 239,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static String firstWord(String s) {\n        if (s == null) {\n            return \"\";\n        }\n        int first = 0;\n        int second = 0;\n        int n = s.length();\n        while (first < n && s.charAt(first) == ' ') {\n            first++;\n        }\n        if (first >= n) {\n            return \"\";\n        }\n        second = first;\n        while (second < n && s.charAt(second) != ' ') {\n            second++;\n        }\n        return s.substring(first, second);\n    }\n\n    public static void main(String[] args) {\n        System.out.println(firstWord(\"hello world\"));\n        System.out.println(firstWord(\"   leading spaces\"));\n        System.out.println(firstWord(\"single\"));\n        System.out.println(firstWord(\"\"));\n        System.out.println(firstWord(\"   \"));\n        System.out.println(firstWord(\"multiple   spaces   between\"));\n        System.out.println(firstWord(\"trailing   \"));\n    }\n}",
+    "java_tokens": 203
+  }
+}

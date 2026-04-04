@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-01669-61d878a2",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-01669",
+  "tk_source": "M=anagramNot;F=isAnagram(p:Str;q:Str):bool{let plen=p.len;let qlen=q.len;if(plen=qlen){let result=mut.true;lp(let i=0;i<plen;i=i+1){let pc=p[i];let qc=q[i];if(pc>96){let pc2=pc-32;let pc=pc2;};if(qc>96){let qc2=qc-32;let qc=qc2;};if(result=true){let found=mut.false;lp(let j=0;j<qlen;j=j+1){if(found=false){let qcj=q[j];if(qcj>96){let qcj2=qcj-32;let qcj=qcj2;};if(pc=qcj){found=true;};};};if(found=false){result=false;};};};<result};<false};F=notIsAnagram(p:Str;q:Str):bool{<!(isAnagram(p;q))};",
+  "tk_tokens": 218,
+  "attempts": 0,
+  "model": "mechanical-invert",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0037v13-6e74d8a2",
+    "transform": "invert",
+    "original_function": "isAnagram"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

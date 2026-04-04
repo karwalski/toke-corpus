@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-04577-48b83090",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-04577",
+  "tk_source": "M=substringBetweenNeg;F=substringBetween(s:Str;p:i64;q:i64):Str{let len=s.len;let start=p;let end=q;if(start<0){start=0};if(end<0){end=0};if(start>len as i64){start=len as i64};if(end>len as i64){end=len as i64};if(start>end){start=end};let result=mut.\"\";lp(let i=start;i<end;i=i+1){result=result+(s[i as u64]as Str)};<result};F=substringBetweenSafe(s:Str;p:i64;q:i64):Str{if(p<0){<\"\"};<substringBetween(s;p;q)};",
+  "tk_tokens": 154,
+  "attempts": 0,
+  "model": "mechanical-guard_neg",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0082v5-d7896d0c",
+    "transform": "guard_neg",
+    "original_function": "substringBetween"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

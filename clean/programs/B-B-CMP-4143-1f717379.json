@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-4143-1f717379",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-4143",
+  "tk_source": "M=extractDigitsLastwor;F=lastWord(s:Str):Str{let n=s.len;if(n=0 as u64){<\"\"};let laststart=mut.0 as u64;let found=mut.false;lp(let i=0 as u64;i<n;i=i+1){let c=s[i];if(c=32){found=true;laststart=i+1 as u64}};if(!(found)){<s};if(laststart=n){<\"\"};let result=mut.\"\";lp(let j=laststart;j<n;j=j+1){result=result+(s[j]as Str)};<result};F=extractDigits(s:Str):Str{let n=s.len;let lhs=mut.\"\";lp(let rhs=0;rhs<n;rhs=rhs+1){let c=s[rhs];if(c>47){if(c<58){lhs=lhs+c}}};<lhs};F=extractDigitsLastword(s:Str):Str{<extractDigits(lastWord(s))};",
+  "tk_tokens": 214,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0064v3-f365cfb8",
+      "A-A-STR-0047v3-4ac6ed2a"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: extractDigits(lastWord(...))\ndef extractDigits_lastWord(s):\n    return extractDigits(lastWord(s))",
+    "python_tokens": 0,
+    "c_source": "// Composed: extractDigits(lastWord(...))\nconst char* extractDigits_lastWord(const char* s) {\n    return extractDigits(lastWord(s));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: extractDigits(lastWord(...))\nstatic String extractDigitsLastword(String s) {\n    return extractDigits(lastWord(s));\n}\n",
+    "java_tokens": 0
+  }
+}

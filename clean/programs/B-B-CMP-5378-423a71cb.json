@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-5378-423a71cb",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-5378",
+  "tk_source": "M=countSentencesFizzbu;F=fizzBuzz(n:i64):Str{let mod3=n-n/3*3;let mod5=n-n/5*5;if(mod3=0){if(mod5=0){<\"FizzBuzz\"};<\"Fizz\"};if(mod5=0){<\"Buzz\"};<n as Str};F=countSentences(s:Str):i64{if(s.len=0 as u64){<0};let count=mut.0;let n=s.len;lp(let i=0 as u64;i<n;i=i+1 as u64){if(s[i]=46 as u8){count=count+1}};<count};F=countSentencesFizzbuzz(n:i64):i64{<countSentences(fizzBuzz(n))};",
+  "tk_tokens": 164,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0042v2-113780de",
+      "A-A-STR-0060v2-c128f51c"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: countSentences(fizzBuzz(...))\ndef countSentences_fizzBuzz(n):\n    return countSentences(fizzBuzz(n))",
+    "python_tokens": 0,
+    "c_source": "// Composed: countSentences(fizzBuzz(...))\nint64_t countSentences_fizzBuzz(int64_t n) {\n    return countSentences(fizzBuzz(n));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: countSentences(fizzBuzz(...))\nstatic long countSentencesFizzbuzz(long n) {\n    return countSentences(fizzBuzz(n));\n}\n",
+    "java_tokens": 0
+  }
+}

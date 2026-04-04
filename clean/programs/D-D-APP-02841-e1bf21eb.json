@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-02841-e1bf21eb",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-02841",
+  "tk_source": "M=charToIndexC;T=CharCount{count:[i64]};F=charToIndex(c:Str):i64{let code=c as i64;if(code>96){<code-97};<code-65};F=toLowerCase(s:Str):Str{<s};F=sortString(s:Str):Str{let counts=mut.[0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];let i=mut.0;lp(let j=0;j<s.len;j=j+1){let c=s[j];let idx=charToIndex(c);counts[idx]=counts[idx]+1;};let result=mut.[];lp(let k=0;k<26;k=k+1){let ct=counts[k];lp(let m=0;m<ct;m=m+1){result=result+[(k+97)as Str];};};<result};F=isAnagram(num1:Str;num2:Str):bool{let sorted1=sortString(num1);let sorted2=sortString(num2);sorted1=sorted2|{Ok:v true;Err:e false}};F=toCamelCase(lhs:Str):Str{let rhs=mut.\"\";let n=lhs.len;let i=mut.0;let capNext=mut.false;lp(let i=0;i<n;i=i+1){let c=lhs[i];if(c=95){capNext=true}el{if(capNext){if(c>96){let c=c-32;rhs=rhs+(c as Str);capNext=false}el{rhs=rhs+(c as Str);capNext=false}}el{rhs=rhs+(c as Str)}}};<rhs};F=toCamelCaseTolowercase(s:Str):Str{<toCamelCase(toLowerCase(s))};F=numToStr(x:f64):Str{if(x<0.0){let neg=x*-1.0;let posStr=numToStr(neg);<\"-\"+posStr}el{if(!(x=x)){<\"0\"}el{let intPart=x as i64;let fracPart=x-intPart as f64;let intStr=intToStr(intPart);if(fracPart>0.0){let fracStr=fracToStr(fracPart);<intStr+\".\"+fracStr}el{<intStr}}}};F=intToStr(n:i64):Str{if(n=0){<\"0\"}el{let num=n;if(num<0){num=num*-1};let result=mut.\"\";lp(let i=0;!(i=0);i=i-1){let digit=num-num/10*10;result=digitToChar(digit as u64)+result;num=num/10};<result}};F=fracToStr(f:f64):Str{let result=mut.\"\";let frac=f;lp(let i=0;i<6;i=i+1){frac=frac*10.0;let digit=frac as i64;result=result+digitToChar(digit as u64);frac=frac-digit as f64};<result};F=digitToChar(d:u64):Str{if(d=0 as u64){<\"0\"}el{if(d=1 as u64){<\"1\"}el{if(d=2 as u64){<\"2\"}el{if(d=3 as u64){<\"3\"}el{if(d=4 as u64){<\"4\"}el{if(d=5 as u64){<\"5\"}el{if(d=6 as u64){<\"6\"}el{if(d=7 as u64){<\"7\"}el{if(d=8 as u64){<\"8\"}el{<\"9\"}}}}}}}}}};F=countVowels(first:Str):i64{let n=first.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=first[i];let isVowel=mut.false;if(c=97){isVowel=true};if(c=101){isVowel=true};if(c=105){isVowel=true};if(c=111){isVowel=true};if(c=117){isVowel=true};if(c=65){isVowel=true};if(c=69){isVowel=true};if(c=73){isVowel=true};if(c=79){isVowel=true};if(c=85){isVowel=true};if(isVowel){count=count+1};};let result=mut.count;if(result<0){result=0};<result};F=countVowelsDigittochar(d:u64):i64{<countVowels(digitToChar(d))};F=combined(c:Str):i64{let a=charToIndex(c);let b=countVowels(c);<a+b};",
+  "tk_tokens": 1066,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-4063-fdb1765a",
+      "B-B-CMP-2853-1481623d"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

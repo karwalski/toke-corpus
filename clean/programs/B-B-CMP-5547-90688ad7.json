@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-5547-90688ad7",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-5547",
+  "tk_source": "M=removeSpacesBmicateg;F=bmiCategory(num1:f64;num2:f64):Str{let bmi=num1;if(bmi<18.5){<\"underweight\"};if(bmi<25.0){<\"normal\"};if(bmi<30.0){<\"overweight\"};<\"obese\"};F=removeSpaces(s:Str):Str{let n=s.len;let result=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i];if(!(c=32)){result=result+c as Str}};<result};F=removeSpacesBmicategory(num1:f64;num2:f64):Str{<removeSpaces(bmiCategory(num1;num2))};",
+  "tk_tokens": 156,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0046v30-405f9a99",
+      "A-A-STR-0042v4-be37075f"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: removeSpaces(bmiCategory(...))\ndef removeSpaces_bmiCategory(num1, num2):\n    return removeSpaces(bmiCategory(num1, num2))",
+    "python_tokens": 0,
+    "c_source": "// Composed: removeSpaces(bmiCategory(...))\nconst char* removeSpaces_bmiCategory(double num1, double num2) {\n    return removeSpaces(bmiCategory(num1, num2));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: removeSpaces(bmiCategory(...))\nstatic String removeSpacesBmicategory(double num1, double num2) {\n    return removeSpaces(bmiCategory(num1, num2));\n}\n",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-6043-df2ebe06",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-6043",
+  "tk_source": "M=rleLettergrade;F=letterGrade(pct:f64):Str{if(!(pct<97.0)){<\"A+\";}el{if(!(pct<93.0)){<\"A\";}el{if(!(pct<90.0)){<\"A-\";}el{if(!(pct<87.0)){<\"B+\";}el{if(!(pct<83.0)){<\"B\";}el{if(!(pct<80.0)){<\"B-\";}el{if(!(pct<77.0)){<\"C+\";}el{if(!(pct<73.0)){<\"C\";}el{if(!(pct<70.0)){<\"C-\";}el{if(!(pct<60.0)){<\"D\";}el{<\"F\";}}}}}}}}}}};F=rle(s:Str):Str{let n=s.len;let result=mut.\"\";if(n=0 as u64){<\"\"};let currentChar=s[0 as u64];let count=mut.1 as u64;lp(let i=1 as u64;i<n;i=i+1){if(s[i as u64]=currentChar){count=count+1;}el{result=result+(currentChar as Str);if(count>1 as u64){result=result+(count as Str);};currentChar=s[i as u64];count=1 as u64;};};result=result+(currentChar as Str);if(count>1 as u64){result=result+(count as Str);};<result;};F=rleLettergrade(pct:f64):Str{<rle(letterGrade(pct))};",
+  "tk_tokens": 345,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0077v2-32355a0d",
+      "A-A-STR-0036v75-c819aa69"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: rle(letterGrade(...))\ndef rle_letterGrade(pct):\n    return rle(letterGrade(pct))",
+    "python_tokens": 0,
+    "c_source": "// Composed: rle(letterGrade(...))\nconst char* rle_letterGrade(double pct) {\n    return rle(letterGrade(pct));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: rle(letterGrade(...))\nstatic String rleLettergrade(double pct) {\n    return rle(letterGrade(pct));\n}\n",
+    "java_tokens": 0
+  }
+}

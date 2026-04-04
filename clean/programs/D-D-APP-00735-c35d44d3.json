@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-00735-c35d44d3",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-00735",
+  "tk_source": "M=morseCharCI;F=modulo(left:i64;right:i64):i64{let div=mut.left/right;let mul=mut.div*right;let rem=mut.left-mul;if(rem<0){if(right<0){rem=rem-right}el{rem=rem+right}};<rem};F=numToStr(x:f64):Str{if(x<0.0){<\"-\"+numToStr(0.0-x)};let intPart=x as i64;let fracPart=x-intPart as f64;let intStr=intToStr(intPart);if(fracPart=0.0){<intStr};let fracStr=mut.\"\";let frac=mut.fracPart;lp(let i=0;i<6;i=i+1){frac=frac*10.0;let digit=frac as i64;fracStr=fracStr+intToStr(digit);frac=frac-digit as f64};<intStr+\".\"+fracStr};F=intToStr(n:i64):Str{if(n=0){<\"0\"};if(n<0){<\"-\"+intToStr(0-n)};let result=mut.\"\";let num=mut.n;lp(let i=0;i<20;i=i+1){if(num=0){br};let digit=num-num/10*10;result=digitToChar(digit)+result;num=num/10};<result};F=digitToChar(d:i64):Str{if(d=0){<\"0\"};if(d=1){<\"1\"};if(d=2){<\"2\"};if(d=3){<\"3\"};if(d=4){<\"4\"};if(d=5){<\"5\"};if(d=6){<\"6\"};if(d=7){<\"7\"};if(d=8){<\"8\"};if(d=9){<\"9\"};<\"\"};F=digitToCharModulo(left:i64;right:i64):Str{<digitToChar(modulo(left;right))};F=manualToLower(lhs:Str):Str{let rhs=mut.\"\";let n=lhs.len;lp(let i=0;i<n;i=i+1){let c=lhs[i];if(c>64){if(c<91){rhs=rhs+(c+32 as Str)}el{rhs=rhs+(c as Str)}}el{rhs=rhs+(c as Str)}};<rhs};F=capitalize(s:Str):Str{let len=s.len;if(len=0 as u64){<\"\"};let first=s[0 as u64];let helper=mut.\"\";if(first>96){if(first<123){helper=(first-32)as Str;}el{helper=first as Str;};}el{helper=first as Str;};let i=mut.1 as u64;lp(let idx=0 as u64;idx<len-1 as u64;idx=idx+1){helper=helper+s[i];i=i+1;};<helper};F=capitalizeManualtolower(lhs:Str):Str{<capitalize(manualToLower(lhs))};F=tempCategory(celsius:f64):Str{let categories=[\"freezing\";\"cold\";\"mild\";\"warm\";\"hot\"];let lhs=[-9999999999.0;0.0;10.0;20.0;30.0];let rhs=[0.0;10.0;20.0;30.0;9999999999.0];let res=mut.\"hot\";lp(let i=0;i<categories.len;i=i+1){if(lhs[i as u64]>celsius){}el{if(!(celsius>rhs[i as u64])){res=categories[i as u64];br;}}};<res};F=morseChar(c:Str):Str{if(c=\"A\"){<\".-\"};if(c=\"B\"){<\"-...\"};if(c=\"C\"){<\"-.-.\"};if(c=\"D\"){<\"-..\"};if(c=\"E\"){<\".\"};if(c=\"F\"){<\"..-.\"};if(c=\"G\"){<\"--.\"};if(c=\"H\"){<\"....\"};if(c=\"I\"){<\"..\"};if(c=\"J\"){<\".---\"};if(c=\"K\"){<\"-.-\"};if(c=\"L\"){<\".-..\"};if(c=\"M\"){<\"--\"};if(c=\"N\"){<\"-.\"};if(c=\"O\"){<\"---\"};if(c=\"P\"){<\".--.\"};if(c=\"Q\"){<\"--.-\"};if(c=\"R\"){<\".-.\"};if(c=\"S\"){<\"...\"};if(c=\"T\"){<\"-\"};if(c=\"U\"){<\"..-\"};if(c=\"V\"){<\"...-\"};if(c=\"W\"){<\".--\"};if(c=\"X\"){<\"-..-\"};if(c=\"Y\"){<\"-.--\"};if(c=\"Z\"){<\"--..\"};<\"?\"};F=morseCharTempcategory(celsius:f64):Str{<morseChar(tempCategory(celsius))};F=pipeline(n:i64):Str{<morseChar(capitalize(intToStr(n)))};",
+  "tk_tokens": 1108,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-8955-f3b3ba42",
+      "B-B-CMP-4729-6fcdd86c",
+      "B-B-CMP-5192-56cc57cc"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

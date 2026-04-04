@@ -1,0 +1,34 @@
+{
+  "id": "A-A-ERR-0050v35-1063a741",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-ERR-0050v35",
+  "tk_source": "M=validatePos;T=ValidationErr{TooShort:Str;TooLong:Str;InvalidChar:Str};F=validatePos(lhs:i64):i64!ValidationErr{if(lhs>0){let rhs=mut.0;lp(let i=0;i<lhs;i=i+1){rhs=rhs+1};<rhs}el{<ValidationErr{TooShort:\"TooShort\"}}};",
+  "tk_tokens": 86,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "Ok(5)\nOk(1)\nErr(TooShort:Number must be positive)\nErr(TooShort:Number must be positive)\nOk(10)"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9527
+  },
+  "references": {
+    "python_source": "class ValidationErr:\n    def __init__(self, variant, value):\n        self.variant = variant\n        self.value = value\n\ndef validatePos(lhs: int) -> int | ValidationErr:\n    if lhs <= 0:\n        return ValidationErr(\"TooShort\", \"Number must be positive\")\n    result = 0\n    i = 0\n    while i < lhs:\n        result = result + 1\n        i = i + 1\n    return result\n\ndef main():\n    test_cases = [\n        (5,),\n        (1,),\n        (0,),\n        (-3,),\n        (10,),\n    ]\n    for n in test_cases:\n        res = validatePos(*n)\n        if isinstance(res, ValidationErr):\n            print(f\"Err({res.variant}:{res.value})\")\n        else:\n            print(f\"Ok({res})\")\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 188,
+    "c_source": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n#include <stdbool.h>\n\ntypedef struct {\n    char* TooShort;\n    char* TooLong;\n    char* InvalidChar;\n} ValidationErr;\n\ntypedef struct {\n    bool is_ok;\n    union {\n        long long ok;\n        ValidationErr err;\n    } value;\n} Result_i64_ValidationErr;\n\nResult_i64_ValidationErr validatePos(long long n) {\n    if (n > 0) {\n        Result_i64_ValidationErr result;\n        result.is_ok = true;\n        result.value.ok = n;\n        return result;\n    } else {\n        Result_i64_ValidationErr result;\n        result.is_ok = false;\n        result.value.err.TooShort = \"Value must be positive\";\n        result.value.err.TooLong = NULL;\n        result.value.err.InvalidChar = NULL;\n        return result;\n    }\n}\n\nint main() {\n    long long test_cases[] = {5, 0, -1, 100, -42};\n    int num_tests = sizeof(test_cases) / sizeof(test_cases[0]);\n    \n    for (int i = 0; i < num_tests; i++) {\n        long long lhs = test_cases[i];\n        Result_i64_ValidationErr result = validatePos(lhs);\n        \n        if (result.is_ok) {\n            printf(\"Test %d: OK - %lld\\n\", i + 1, result.value.ok);\n        } else {\n            printf(\"Test %d: Err - TooShort: %s\\n\", i + 1, \n                   result.value.err.TooShort ? result.value.err.TooShort : \"NULL\");\n        }\n    }\n    \n    return 0;\n}",
+    "c_tokens": 355,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static void main(String[] args) {\n        // Test 1: positive number\n        Result result1 = validatePos(42);\n        System.out.println(result1);\n\n        // Test 2: zero\n        Result result2 = validatePos(0);\n        System.out.println(result2);\n\n        // Test 3: negative number\n        Result result3 = validatePos(-5);\n        System.out.println(result3);\n\n        // Test 4: boundary positive\n        Result result4 = validatePos(1);\n        System.out.println(result4);\n\n        // Test 5: large negative\n        Result result5 = validatePos(-1000);\n        System.out.println(result5);\n    }\n\n    public static Result validatePos(int n) {\n        // Using a loop to compute result iteratively\n        // We'll simulate the \"lhs\" and \"rhs\" parameter names as requested\n        int lhs = n;\n        int rhs = 0;\n        \n        // Loop to compute if n > 0\n        boolean isPositive = false;\n        for (int i = 0; i < 1; i++) {\n            if (lhs > rhs) {\n                isPositive = true;\n            }\n        }\n        \n        if (isPositive) {\n            return new Result.Ok(lhs);\n        } else {\n            return new Result.Err(new ValidationErr(\"TooShort\", \"Number must be positive\"));\n        }\n    }\n}\n\nclass ValidationErr {\n    public final String variant;\n    public final String message;\n    \n    public ValidationErr(String variant, String message) {\n        this.variant = variant;\n        this.message = message;\n    }\n    \n    @Override\n    public String toString() {\n        return \"ValidationErr{\" + variant + \": \" + message + \"}\";\n    }\n}\n\nsealed interface Result permits Result.Ok, Result.Err {\n    record Ok(int value) implements Result {\n        @Override\n        public String toString() {\n            return \"Ok(\" + value + \")\";\n        }\n    }\n    \n    record Err(ValidationErr error) implements Result {\n        @Override\n        public String toString() {\n            return \"Err(\" + error + \")\";\n        }\n    }\n}",
+    "java_tokens": 447
+  }
+}

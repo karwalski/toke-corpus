@@ -1,0 +1,34 @@
+{
+  "id": "A-A-ARR-0107v21-cb5e7bb2",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-ARR-0107v21",
+  "tk_source": "M=issuffix;F=isSuffix(p:[i64];q:[i64]):bool{let result=mut.true;if(p.len>q.len){result=false}el{let diff=q.len-p.len;lp(let i=0;i<p.len;i=i+1){if(p[i]=q[diff+i]){}el{result=false}}};<result};",
+  "tk_tokens": 76,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "True\nTrue\nTrue\nFalse\nTrue\nFalse\nFalse\nTrue\nFalse"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9792
+  },
+  "references": {
+    "python_source": "def isSuffix(suffix, arr):\n    p = suffix\n    q = arr\n    if len(p) > len(q):\n        return False\n    result = True\n    i = 0\n    while i < len(p):\n        if p[i] != q[len(q) - len(p) + i]:\n            result = False\n            break\n        i += 1\n    return result\n\ndef main():\n    # Test case 1: suffix matches exactly\n    print(isSuffix([2, 3], [1, 2, 3]))\n    # Test case 2: suffix matches at end of longer array\n    print(isSuffix([4, 5], [1, 2, 3, 4, 5]))\n    # Test case 3: suffix is empty (always true)\n    print(isSuffix([], [1, 2, 3]))\n    # Test case 4: array is empty, suffix non-empty (false)\n    print(isSuffix([1], []))\n    # Test case 5: both empty (true)\n    print(isSuffix([], []))\n    # Test case 6: suffix longer than array (false)\n    print(isSuffix([1, 2, 3], [1, 2]))\n    # Test case 7: suffix matches but not at end (false)\n    print(isSuffix([2, 3], [2, 3, 4, 5]))\n    # Test case 8: single element suffix true\n    print(isSuffix([5], [1, 2, 3, 4, 5]))\n    # Test case 9: single element suffix false\n    print(isSuffix([6], [1, 2, 3, 4, 5]))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 379,
+    "c_source": "#include <stdio.h>\n#include <stdbool.h>\n#include <string.h>\n\nbool isSuffix(const long long *suffix, size_t suffix_len, const long long *arr, size_t arr_len) {\n    if (suffix_len > arr_len) {\n        return false;\n    }\n    for (size_t i = 0; i < suffix_len; i++) {\n        if (suffix[i] != arr[arr_len - suffix_len + i]) {\n            return false;\n        }\n    }\n    return true;\n}\n\nint main() {\n    long long test1_suffix[] = {2, 3};\n    long long test1_arr[] = {1, 2, 3};\n    printf(\"%s\\n\", isSuffix(test1_suffix, 2, test1_arr, 3) ? \"true\" : \"false\");\n\n    long long test2_suffix[] = {4, 5};\n    long long test2_arr[] = {1, 2, 3};\n    printf(\"%s\\n\", isSuffix(test2_suffix, 2, test2_arr, 3) ? \"true\" : \"false\");\n\n    long long test3_suffix[] = {};\n    long long test3_arr[] = {1, 2, 3};\n    printf(\"%s\\n\", isSuffix(test3_suffix, 0, test3_arr, 3) ? \"true\" : \"false\");\n\n    long long test4_suffix[] = {3};\n    long long test4_arr[] = {};\n    printf(\"%s\\n\", isSuffix(test4_suffix, 1, test4_arr, 0) ? \"true\" : \"false\");\n\n    long long test5_suffix[] = {};\n    long long test5_arr[] = {};\n    printf(\"%s\\n\", isSuffix(test5_suffix, 0, test5_arr, 0) ? \"true\" : \"false\");\n\n    long long test6_suffix[] = {5, 5};\n    long long test6_arr[] = {5, 5, 5, 5};\n    printf(\"%s\\n\", isSuffix(test6_suffix, 2, test6_arr, 4) ? \"true\" : \"false\");\n\n    long long test7_suffix[] = {7, 8, 9};\n    long long test7_arr[] = {7, 8, 9};\n    printf(\"%s\\n\", isSuffix(test7_suffix, 3, test7_arr, 3) ? \"true\" : \"false\");\n\n    return 0;\n}",
+    "c_tokens": 519,
+    "java_source": "import java.util.Arrays;\n\npublic class Solution {\n    public static boolean isSuffix(int[] suffix, int[] arr) {\n        boolean result = true;\n        int suffixLen = suffix.length;\n        int arrLen = arr.length;\n        \n        if (suffixLen > arrLen) {\n            result = false;\n        } else {\n            for (int i = 0; i < suffixLen; i++) {\n                if (suffix[suffixLen - 1 - i] != arr[arrLen - 1 - i]) {\n                    result = false;\n                    break;\n                }\n            }\n        }\n        \n        return result;\n    }\n    \n    public static void main(String[] args) {\n        int[] suffix1 = {2, 3};\n        int[] arr1 = {1, 2, 3};\n        System.out.println(isSuffix(suffix1, arr1));\n        \n        int[] suffix2 = {4, 5};\n        int[] arr2 = {1, 2, 3};\n        System.out.println(isSuffix(suffix2, arr2));\n        \n        int[] suffix3 = {};\n        int[] arr3 = {1, 2, 3};\n        System.out.println(isSuffix(suffix3, arr3));\n        \n        int[] suffix4 = {0, 0, 0};\n        int[] arr4 = {0, 0, 0, 0};\n        System.out.println(isSuffix(suffix4, arr4));\n        \n        int[] suffix5 = {5};\n        int[] arr5 = {5};\n        System.out.println(isSuffix(suffix5, arr5));\n        \n        int[] suffix6 = {3, 4, 5};\n        int[] arr6 = {1, 2, 3, 4, 5};\n        System.out.println(isSuffix(suffix6, arr6));\n    }\n}",
+    "java_tokens": 382
+  }
+}

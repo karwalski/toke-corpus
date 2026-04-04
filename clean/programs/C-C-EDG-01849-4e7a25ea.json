@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-01849-4e7a25ea",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-01849",
+  "tk_source": "M=caesarNeg;F=caesarEncrypt(p:Str;q:i64):Str{let result=mut.\"\";let n=p.len;lp(let i=0;i<n;i=i+1){let c=p[i];if(c>96){if(c<123){let base=97;let offset=(c-base)+q;let ntof=26;let wrapped=offset-offset/ntof*ntof;let newc=base+wrapped;result=result+(newc as Str)}el{result=result+(c as Str)}}el{result=result+(c as Str)}};<result};F=caesarEncryptSafe(p:Str;q:i64):Str{if(q<0){<\"\"};<caesarEncrypt(p;q)};",
+  "tk_tokens": 157,
+  "attempts": 0,
+  "model": "mechanical-guard_neg",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0038v77-3e47d13b",
+    "transform": "guard_neg",
+    "original_function": "caesarEncrypt"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

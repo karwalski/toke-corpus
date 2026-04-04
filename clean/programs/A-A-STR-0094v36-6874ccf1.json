@@ -1,0 +1,34 @@
+{
+  "id": "A-A-STR-0094v36-6874ccf1",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-STR-0094v36",
+  "tk_source": "M=zipStrs;F=zipStrs(first:Str;second:Str):Str{let aLen=first.len;let bLen=second.len;if(aLen<0){<\"\"};if(bLen<0){<\"\"};let result=mut.\"\";let i=mut.0 as u64;let j=mut.0 as u64;lp(let zz=0;zz<aLen+bLen;zz=zz+1){if(i<aLen){if(j<bLen){if(zz-zz/2*2=0){result=result+first[i];i=i+1}el{result=result+second[j];j=j+1}}el{result=result+first[i];i=i+1}}el{if(j<bLen){result=result+second[j];j=j+1}}};<result};",
+  "tk_tokens": 177,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "abc\nabc\na123\na1b23\na1bc\na1b2c3\nHWeolrllod!\nabcdef\n1x2y3z4567890"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9047
+  },
+  "references": {
+    "python_source": "def zipStrs(first: str, second: str) -> str:\n    result = []\n    i = 0\n    while i < len(first) or i < len(second):\n        if i < len(first):\n            result.append(first[i])\n        if i < len(second):\n            result.append(second[i])\n        i += 1\n    return ''.join(result)\n\ndef main() -> None:\n    test_cases = [\n        (\"\", \"\"),\n        (\"\", \"abc\"),\n        (\"abc\", \"\"),\n        (\"a\", \"123\"),\n        (\"ab\", \"123\"),\n        (\"abc\", \"1\"),\n        (\"abc\", \"123\"),\n        (\"Hello\", \"World!\"),\n        (\"ace\", \"bdf\"),\n        (\"1234567890\", \"xyz\"),\n    ]\n    for first, second in test_cases:\n        result = zipStrs(first, second)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 192,
+    "c_source": "#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n\nchar* zipStrs(const char* first, const char* second) {\n    if (first == NULL || second == NULL) {\n        char* empty = malloc(1);\n        if (empty) empty[0] = '\\0';\n        return empty;\n    }\n    \n    size_t len1 = strlen(first);\n    size_t len2 = strlen(second);\n    size_t max_len = len1 > len2 ? len1 : len2;\n    \n    char* result = malloc(len1 + len2 + 1);\n    if (result == NULL) return NULL;\n    \n    size_t idx = 0;\n    for (size_t i = 0; i < max_len; i++) {\n        if (i < len1) {\n            result[idx++] = first[i];\n        }\n        if (i < len2) {\n            result[idx++] = second[i];\n        }\n    }\n    result[idx] = '\\0';\n    \n    return result;\n}\n\nvoid test_zipStrs(const char* first, const char* second, const char* expected) {\n    char* result = zipStrs(first, second);\n    printf(\"zipStrs(\\\"%s\\\", \\\"%s\\\") = \\\"%s\\\"\", first, second, result);\n    if (strcmp(result, expected) == 0) {\n        printf(\" ✓\\n\");\n    } else {\n        printf(\" ✗ (expected \\\"%s\\\")\\n\", expected);\n    }\n    free(result);\n}\n\nint main() {\n    printf(\"Testing zipStrs function:\\n\");\n    printf(\"=========================\\n\");\n    \n    test_zipStrs(\"abc\", \"123\", \"a1b2c3\");\n    test_zipStrs(\"Hello\", \"World\", \"HWeolrllod\");\n    test_zipStrs(\"short\", \"verylongstring\", \"svhoerrtlongstring\");\n    test_zipStrs(\"\", \"nonempty\", \"nonempty\");\n    test_zipStrs(\"nonempty\", \"\", \"nonempty\");\n    test_zipStrs(\"\", \"\", \"\");\n    test_zipStrs(\"A\", \"1\", \"A1\");\n    test_zipStrs(\"AB\", \"1\", \"A1B\");\n    \n    return 0;\n}",
+    "c_tokens": 473,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static String zipStrs(String first, String second) {\n        if (first == null || second == null) {\n            return \"\";\n        }\n        int n = first.length();\n        int m = second.length();\n        int i = 0;\n        int j = 0;\n        StringBuilder result = new StringBuilder();\n        while (i < n && j < m) {\n            result.append(first.charAt(i));\n            result.append(second.charAt(j));\n            i++;\n            j++;\n        }\n        while (i < n) {\n            result.append(first.charAt(i));\n            i++;\n        }\n        while (j < m) {\n            result.append(second.charAt(j));\n            j++;\n        }\n        return result.toString();\n    }\n\n    public static void main(String[] args) {\n        System.out.println(zipStrs(\"abc\", \"123\"));\n        System.out.println(zipStrs(\"abcd\", \"12\"));\n        System.out.println(zipStrs(\"ab\", \"1234\"));\n        System.out.println(zipStrs(\"\", \"xyz\"));\n        System.out.println(zipStrs(\"hello\", \"\"));\n        System.out.println(zipStrs(\"\", \"\"));\n        System.out.println(zipStrs(\"A\", \"1\"));\n        System.out.println(zipStrs(\"AB\", \"12\"));\n        System.out.println(zipStrs(\"ABC\", \"1\"));\n        System.out.println(zipStrs(\"X\", \"YZ\"));\n    }\n}",
+    "java_tokens": 291
+  }
+}

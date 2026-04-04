@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-00551-f3f9132a",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-00551",
+  "tk_source": "M=accSqrt;F=foldSum(arr:[f64];init:f64):f64{let acc=mut.init;lp(let i=0;i<arr.len;i=i+1){acc=acc+arr[i];};<acc};F=sqrt(x:f64):f64{let guess=mut.1.0;let prev=mut.0.0;lp(let i=0;i<100;i=i+1){let next=(guess+x/guess)/2.0;let diff=next-prev;if(diff<0.0){let diff=0.0-diff;};if(diff<0.0001){br;};guess=next;prev=guess;};<guess};F=distance(x1:f64;y1:f64;x2:f64;y2:f64):f64{let dx=x2-x1;let dy=y2-y1;let dxsq=dx*dx;let dysq=dy*dy;let sumsq=dxsq+dysq;let result=sqrt(sumsq);<result};F=sqrtFoldsum(arr:[f64];init:f64):f64{<sqrt(foldSum(arr;init))};F=accumulate(arr:[f64]):f64{let r=mut.0.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+sqrt(arr[i as u64]);};<r};",
+  "tk_tokens": 302,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-6793-8aa264ab"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

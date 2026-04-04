@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-8123-fa8317f5",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-8123",
+  "tk_source": "M=windDirCountlower;F=countLower(first:Str):i64{let result=mut.0;let n=first.len;if(n<0){<0};lp(let i=0;i<n;i=i+1){let c=first[i];if(c>96){if(c<123){result=result+1}}};<result};F=windDir(deg:i64):Str{let other=deg;let val=deg;if(val=other){<\"equal\"};if(val<45){<\"N\"};if(val<90){<\"NE\"};if(val<135){<\"E\"};if(val<180){<\"SE\"};if(val<225){<\"S\"};if(val<270){<\"SW\"};if(val<315){<\"W\"};<\"NW\"};F=windDirCountlower(first:Str):Str{<windDir(countLower(first))};",
+  "tk_tokens": 189,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0096v4-3154ec96",
+      "A-A-CND-0066v2-158194fd"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: windDir(countLower(...))\ndef windDir_countLower(first):\n    return windDir(countLower(first))",
+    "python_tokens": 0,
+    "c_source": "// Composed: windDir(countLower(...))\nconst char* windDir_countLower(const char* first) {\n    return windDir(countLower(first));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: windDir(countLower(...))\nstatic String windDirCountlower(String first) {\n    return windDir(countLower(first));\n}\n",
+    "java_tokens": 0
+  }
+}

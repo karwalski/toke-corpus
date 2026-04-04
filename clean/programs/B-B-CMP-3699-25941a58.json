@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-3699-25941a58",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-3699",
+  "tk_source": "M=toLowerExtractletter;F=extractLetters(s:Str):Str{let n=s.len;let m=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i];let letter=mut.false;if(c>64){if(c<91){letter=true}};if(letter){m=m+c}el{if(c>96){if(c<123){letter=true}};if(letter){m=m+c}}};<m};F=toLower(x:Str):Str{let n=x.len;let y=mut.\"\";lp(let i=0;i<n;i=i+1){let char=x[i];if(!(char<65)){if(!(char>90)){let lowerChar=char+32;y=y+(lowerChar as Str)}el{y=y+(char as Str)}}el{y=y+(char as Str)}};<y};F=toLowerExtractletters(s:Str):Str{<toLower(extractLetters(s))};",
+  "tk_tokens": 205,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0048v1-5f201a59",
+      "A-A-STR-0003v48-4d3442b4"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: toLower(extractLetters(...))\ndef toLower_extractLetters(s):\n    return toLower(extractLetters(s))",
+    "python_tokens": 0,
+    "c_source": "// Composed: toLower(extractLetters(...))\nconst char* toLower_extractLetters(const char* s) {\n    return toLower(extractLetters(s));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: toLower(extractLetters(...))\nstatic String toLowerExtractletters(String s) {\n    return toLower(extractLetters(s));\n}\n",
+    "java_tokens": 0
+  }
+}

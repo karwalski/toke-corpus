@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-8508-b03640e7",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-8508",
+  "tk_source": "M=intToStrCharcount;F=charCount(lhs:Str;rhs:Str):i64{let n=lhs.len;let count=mut.0;lp(let i=0;i<n;i=i+1){if(lhs[i as u64]=rhs[0 as u64]){count=count+1}};<count};F=reverse(s:Str):Str{let n=s.len;let m=mut.(n as i64)-1;let r=mut.\"\";lp(let i=0;i<n;i=i+1){r=r+s[m];m=m-1;};<r};F=intToStr(n:i64):Str{if(n<0){<\"-\"+intToStr(-n)}el{if(n=0){<\"0\"}el{let result=mut.\"\";lp(let temp=n;temp>0;temp=temp/10){let digit=(temp-(temp/10)*10)as u8;let zeroChar=\"0\"[0];let charDigit=((digit as u8)+zeroChar)as Str;result=result+charDigit;};<reverse(result)}}};F=repeat(val:Str;other:i64):Str{if(other<0){<\"\"}el{if(val=intToStr(other)){<val}el{let result=mut.\"\";lp(let i=0;i<other;i=i+1){result=result+val};<result}}};F=intToStrCharcount(lhs:Str;rhs:Str):Str{<intToStr(charCount(lhs;rhs))};",
+  "tk_tokens": 317,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0083v3-029e34b4",
+      "A-A-STR-0007v26-4e83a80f"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: intToStr(charCount(...))\ndef intToStr_charCount(lhs, rhs):\n    return intToStr(charCount(lhs, rhs))",
+    "python_tokens": 0,
+    "c_source": "// Composed: intToStr(charCount(...))\nconst char* intToStr_charCount(const char* lhs, const char* rhs) {\n    return intToStr(charCount(lhs, rhs));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: intToStr(charCount(...))\nstatic String intToStrCharcount(String lhs, String rhs) {\n    return intToStr(charCount(lhs, rhs));\n}\n",
+    "java_tokens": 0
+  }
+}

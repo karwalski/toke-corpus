@@ -1,0 +1,34 @@
+{
+  "id": "A-A-STR-0061v24-1b4c67f8",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-STR-0061v24",
+  "tk_source": "M=longestWord;F=longestWord(s:Str):Str{let x=s.len;if(x=0){<\"\"};let y=mut.0;let start=mut.0;let maxLen=mut.0;let maxStart=mut.0;lp(let i=0;i<x;i=i+1){let c=s[i];if(c=32){let len=i-start;if(len>maxLen){maxLen=len;maxStart=start};start=i+1};if(i=x-1){let len=i-start+1;if(len>maxLen){maxLen=len;maxStart=start}}};let result=mut.\"\";lp(let i=0;i<maxLen;i=i+1){result=result+s[maxStart+i]};<result};",
+  "tk_tokens": 162,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "hello\nquick\ndddd\n\nsingle\nleading\nsecond\nspace\na\nmultiple"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9251
+  },
+  "references": {
+    "python_source": "def longestWord(s: str) -> str:\n    if not s:\n        return \"\"\n    longest = \"\"\n    current = \"\"\n    for ch in s:\n        if ch == \" \":\n            if current and len(current) > len(longest):\n                longest = current\n            current = \"\"\n        else:\n            current += ch\n    if current and len(current) > len(longest):\n        longest = current\n    return longest\n\ndef main():\n    tests = [\n        (\"hello world\", \"hello\"),\n        (\"the quick brown fox jumps over the lazy dog\", \"quick\"),\n        (\"a bb ccc dddd eeee fff gg h\", \"dddd\"),\n        (\"\", \"\"),\n        (\"single\", \"single\"),\n        (\"  leading  spaces  \", \"leading\"),\n        (\"tie first second\", \"first\"),\n        (\"end with space \", \"with\"),\n        (\"a\", \"a\"),\n        (\"multiple    spaces   between\", \"multiple\")\n    ]\n    for x, expected in tests:\n        y = longestWord(x)\n        print(y)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 227,
+    "c_source": "#include <stdio.h>\n#include <string.h>\n#include <stdbool.h>\n\nchar* longestWord(const char* s) {\n    if (s == NULL || s[0] == '\\0') {\n        return \"\";\n    }\n    \n    const char* start = NULL;\n    const char* end = NULL;\n    const char* best_start = NULL;\n    size_t best_len = 0;\n    bool in_word = false;\n    \n    for (const char* p = s; *p != '\\0'; p++) {\n        if (*p == ' ') {\n            if (in_word) {\n                size_t current_len = p - start;\n                if (current_len > best_len) {\n                    best_len = current_len;\n                    best_start = start;\n                }\n                in_word = false;\n            }\n        } else {\n            if (!in_word) {\n                start = p;\n                in_word = true;\n            }\n        }\n    }\n    \n    if (in_word) {\n        size_t current_len = strlen(s) - (start - s);\n        if (current_len > best_len) {\n            best_len = current_len;\n            best_start = start;\n        }\n    }\n    \n    static char result[256];\n    if (best_start != NULL) {\n        strncpy(result, best_start, best_len);\n        result[best_len] = '\\0';\n    } else {\n        result[0] = '\\0';\n    }\n    \n    return result;\n}\n\nint main() {\n    printf(\"Test 1: '%s'\\n\", longestWord(\"hello world\"));\n    printf(\"Test 2: '%s'\\n\", longestWord(\"the quick brown fox jumps over the lazy dog\"));\n    printf(\"Test 3: '%s'\\n\", longestWord(\"\"));\n    printf(\"Test 4: '%s'\\n\", longestWord(\"a bb ccc dd eeee\"));\n    printf(\"Test 5: '%s'\\n\", longestWord(\"  leading and trailing spaces  \"));\n    printf(\"Test 6: '%s'\\n\", longestWord(\"single\"));\n    printf(\"Test 7: '%s'\\n\", longestWord(\"tie first second third\"));\n    printf(\"Test 8: '%s'\\n\", longestWord(\"multiple    spaces   between   words\"));\n    \n    return 0;\n}",
+    "c_tokens": 476,
+    "java_source": "public class Solution {\n    public static String longestWord(String s) {\n        if (s.isEmpty()) {\n            return \"\";\n        }\n        String longest = \"\";\n        int start = 0;\n        int n = s.length();\n        while (start < n) {\n            while (start < n && s.charAt(start) == ' ') {\n                start++;\n            }\n            if (start >= n) {\n                break;\n            }\n            int end = start;\n            while (end < n && s.charAt(end) != ' ') {\n                end++;\n            }\n            String word = s.substring(start, end);\n            if (word.length() > longest.length()) {\n                longest = word;\n            }\n            start = end;\n        }\n        return longest;\n    }\n\n    public static void main(String[] args) {\n        // Test 1: Normal case\n        System.out.println(longestWord(\"hello world programming\"));\n        // Test 2: Tie, return first\n        System.out.println(longestWord(\"cat dog fish\"));\n        // Test 3: Empty string\n        System.out.println(longestWord(\"\"));\n        // Test 4: Single word\n        System.out.println(longestWord(\"solitary\"));\n        // Test 5: Multiple spaces and leading/trailing spaces\n        System.out.println(longestWord(\"   multiple   spaces   between   words   \"));\n    }\n}",
+    "java_tokens": 279
+  }
+}

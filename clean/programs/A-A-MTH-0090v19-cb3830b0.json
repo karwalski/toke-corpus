@@ -1,0 +1,34 @@
+{
+  "id": "A-A-MTH-0090v19-cb3830b0",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-MTH-0090v19",
+  "tk_source": "M=trailingZeros;F=trailingZeros(lhs:i64):i64{if(lhs=0){<0};let rhs=mut.lhs;let count=mut.0;lp(let i=0;!(i=64);i=i+1){let rem=rhs-rhs/2*2;if(rem=0){count=count+1;rhs=rhs/2;}el{br;}};<count};",
+  "tk_tokens": 93,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "0\n0\n1\n3\n2\n10\n0\n0\n3\n0"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9404
+  },
+  "references": {
+    "python_source": "def trailingZeros(n: int) -> int:\n    if n == 0:\n        return 0\n    count = 0\n    lhs = n\n    while True:\n        rhs = lhs // 2\n        if rhs * 2 != lhs:\n            break\n        count += 1\n        lhs = rhs\n    return count\n\ndef main():\n    test_cases = [\n        0,\n        1,\n        2,\n        8,\n        12,\n        1024,\n        1025,\n        -1,\n        -8,\n        9223372036854775807\n    ]\n    for n in test_cases:\n        result = trailingZeros(n)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 161,
+    "c_source": "#include <stdio.h>\n#include <stdint.h>\n#include <inttypes.h>\n\nint64_t trailingZeros(int64_t n) {\n    int64_t lhs = n;\n    int64_t rhs = 0;\n    \n    if (lhs == 0) {\n        return 0;\n    }\n    \n    while ((lhs & 1) == 0) {\n        lhs = lhs >> 1;\n        rhs = rhs + 1;\n    }\n    \n    return rhs;\n}\n\nint main() {\n    int64_t test_cases[] = {0, 1, 8, 12, 1024};\n    int num_tests = sizeof(test_cases) / sizeof(test_cases[0]);\n    \n    for (int i = 0; i < num_tests; i++) {\n        int64_t result = trailingZeros(test_cases[i]);\n        printf(\"%\" PRId64 \"\\n\", result);\n    }\n    \n    return 0;\n}",
+    "c_tokens": 196,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static long trailingZeros(long n) {\n        if (n == 0) {\n            return 0;\n        }\n        long count = 0;\n        long lhs = n;\n        long rhs = 2;\n        while (true) {\n            long remainder = lhs - (lhs / rhs) * rhs;\n            if (remainder != 0) {\n                break;\n            }\n            count = count + 1;\n            lhs = lhs / rhs;\n        }\n        return count;\n    }\n\n    public static void main(String[] args) {\n        // Test case 1: n = 0\n        System.out.println(trailingZeros(0));\n\n        // Test case 2: n = 1 (binary 1)\n        System.out.println(trailingZeros(1));\n\n        // Test case 3: n = 8 (binary 1000)\n        System.out.println(trailingZeros(8));\n\n        // Test case 4: n = 20 (binary 10100)\n        System.out.println(trailingZeros(20));\n\n        // Test case 5: n = Long.MAX_VALUE (odd number)\n        System.out.println(trailingZeros(Long.MAX_VALUE));\n\n        // Test case 6: n = 1024 (binary 10000000000)\n        System.out.println(trailingZeros(1024));\n\n        // Test case 7: n = -8 (negative, binary representation uses two's complement)\n        System.out.println(trailingZeros(-8));\n    }\n}",
+    "java_tokens": 323
+  }
+}

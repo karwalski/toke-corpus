@@ -1,0 +1,34 @@
+{
+  "id": "A-A-MTH-0107v14-4c3b7e90",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-MTH-0107v14",
+  "tk_source": "M=sumDivisors;F=sumDivisors(num1:i64):i64{let sum=mut.0;lp(let i=1;!(i>num1);i=i+1){let rem=num1-i/num1*num1;if(rem=0){sum=sum+i}};<sum}",
+  "tk_tokens": 64,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "1\n3\n12\n28\n56"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.938
+  },
+  "references": {
+    "python_source": "def sumDivisors(n: int) -> int:\n    total = 0\n    i = 1\n    while i <= n:\n        if n % i == 0:\n            total += i\n        i += 1\n    return total\n\ndef main() -> None:\n    test_cases = [1, 2, 6, 12, 28]\n    for n in test_cases:\n        result = sumDivisors(n)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 108,
+    "c_source": "#include <stdio.h>\n#include <stdbool.h>\n#include <math.h>\n\nlong long sumDivisors(long long n) {\n    long long sum = 0;\n    for (long long i = 1; i <= n; i++) {\n        if (n % i == 0) {\n            sum += i;\n        }\n    }\n    return sum;\n}\n\nint main() {\n    long long test_cases[] = {1, 2, 12, 28, 100};\n    int num_tests = sizeof(test_cases) / sizeof(test_cases[0]);\n    \n    for (int i = 0; i < num_tests; i++) {\n        long long result = sumDivisors(test_cases[i]);\n        printf(\"%lld\\n\", result);\n    }\n    \n    return 0;\n}",
+    "c_tokens": 164,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static long sumDivisors(long n) {\n        long sum = 0;\n        for (long i = 1; i <= n; i++) {\n            if (n % i == 0) {\n                sum += i;\n            }\n        }\n        return sum;\n    }\n\n    public static void main(String[] args) {\n        // Test case 1: n = 1 (smallest positive)\n        System.out.println(sumDivisors(1));\n\n        // Test case 2: n = 6 (perfect number, sum = 1+2+3+6 = 12)\n        System.out.println(sumDivisors(6));\n\n        // Test case 3: n = 12 (sum = 1+2+3+4+6+12 = 28)\n        System.out.println(sumDivisors(12));\n\n        // Test case 4: n = 17 (prime number, sum = 1+17 = 18)\n        System.out.println(sumDivisors(17));\n\n        // Test case 5: n = 100 (larger composite)\n        System.out.println(sumDivisors(100));\n    }\n}",
+    "java_tokens": 247
+  }
+}

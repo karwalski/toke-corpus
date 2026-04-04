@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-04212-bb511693",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-04212",
+  "tk_source": "M=accTaxRate;F=shippingCost(weight:f64):f64{if(weight<0.0){<0.0};if(weight=0.0){<5.0};if(!(weight>1.0)){<5.0};if(!(weight>5.0)){<10.0};if(!(weight>10.0)){<20.0};<50.0};F=taxRate(income:f64):f64{if(income<0.0){<0.0};if(income=0.0){<0.0};if(income=10000.0){<0.1};if(income<10000.0){<0.0};if(income=50000.0){<0.2};if(income<50000.0){<0.1};if(income=100000.0){<0.3};if(income<100000.0){<0.2};<0.3};F=taxRateShippingcost(weight:f64):f64{<taxRate(shippingCost(weight))};F=accumulate(arr:[f64]):f64{let r=mut.0.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+taxRate(arr[i as u64]);};<r};",
+  "tk_tokens": 286,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-7185-1531a736"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

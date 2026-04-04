@@ -1,0 +1,34 @@
+{
+  "id": "A-A-STR-0077v32-8c2c86a4",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-STR-0077v32",
+  "tk_source": "M=commonPrefix;F=commonPrefix(x:Str;y:Str):Str{let n=x.len;let m=y.len;let minLen=mut.0;if(n<m){minLen=n}el{minLen=m};let result=mut.\"\";lp(let i=0;i<minLen;i=i+1){if(x[i]=y[i]){result=result+(x[i]as Str)}el{br}};<result};",
+  "tk_tokens": 92,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "hell\nabc\n\n\n\npre\na\na\nsame"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9429
+  },
+  "references": {
+    "python_source": "def commonPrefix(x: str, y: str) -> str:\n    n = min(len(x), len(y))\n    result = \"\"\n    i = 0\n    while i < n:\n        if x[i] != y[i]:\n            break\n        result += x[i]\n        i += 1\n    return result\n\ndef main():\n    tests = [\n        (\"hello\", \"hell\"),\n        (\"abc\", \"abc\"),\n        (\"abc\", \"def\"),\n        (\"\", \"abc\"),\n        (\"abc\", \"\"),\n        (\"prefix\", \"pre\"),\n        (\"a\", \"ab\"),\n        (\"ab\", \"a\"),\n        (\"same\", \"same\"),\n        (\"\", \"\")\n    ]\n    for a, b in tests:\n        print(commonPrefix(a, b))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 168,
+    "c_source": "#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n\nchar* commonPrefix(const char* x, const char* y) {\n    size_t i = 0;\n    while (x[i] != '\\0' && y[i] != '\\0' && x[i] == y[i]) {\n        i++;\n    }\n    char* result = malloc(i + 1);\n    if (result == NULL) {\n        return NULL;\n    }\n    strncpy(result, x, i);\n    result[i] = '\\0';\n    return result;\n}\n\nint main() {\n    const char* tests[][2] = {\n        {\"hello\", \"hell\"},\n        {\"abc\", \"abc\"},\n        {\"abc\", \"def\"},\n        {\"\", \"hello\"},\n        {\"prefix\", \"pre\"},\n        {\"a\", \"ab\"},\n        {\"ab\", \"a\"},\n        {\"same\", \"same\"},\n        {\"\", \"\"},\n        {\"longprefix\", \"longpref\"}\n    };\n    int num_tests = sizeof(tests) / sizeof(tests[0]);\n    \n    for (int i = 0; i < num_tests; i++) {\n        char* result = commonPrefix(tests[i][0], tests[i][1]);\n        printf(\"Test %d: commonPrefix(\\\"%s\\\", \\\"%s\\\") = \\\"%s\\\"\\n\", \n               i + 1, tests[i][0], tests[i][1], result);\n        free(result);\n    }\n    \n    return 0;\n}",
+    "c_tokens": 306,
+    "java_source": "public class Solution {\n    public static String commonPrefix(String x, String y) {\n        int n = x.length();\n        int m = y.length();\n        int i = 0;\n        while (i < n && i < m && x.charAt(i) == y.charAt(i)) {\n            i++;\n        }\n        return x.substring(0, i);\n    }\n\n    public static void main(String[] args) {\n        System.out.println(commonPrefix(\"hello\", \"hell\"));\n        System.out.println(commonPrefix(\"abc\", \"abc\"));\n        System.out.println(commonPrefix(\"abc\", \"def\"));\n        System.out.println(commonPrefix(\"\", \"test\"));\n        System.out.println(commonPrefix(\"prefix\", \"pre\"));\n    }\n}",
+    "java_tokens": 146
+  }
+}

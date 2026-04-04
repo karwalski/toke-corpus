@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-02384-182bf342",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-02384",
+  "tk_source": "M=padLeftClamp;F=padLeft(s:Str;width:i64;fill:Str):Str{let slen=s.len;let wlen=width as u64;if(slen<wlen){let padlen=width-slen;let result=mut.\"\";lp(let i=0;i<padlen;i=i+1){result=result+fill};<result+s}el{<s}};F=padLeftClamped(s:Str;width:i64;fill:Str):Str{let clamped=mut.width;if(width<0){clamped=0};if(width>1000){clamped=1000};<padLeft(s;clamped;fill)};",
+  "tk_tokens": 145,
+  "attempts": 0,
+  "model": "mechanical-clamp",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0020v14-08f0ac67",
+    "transform": "clamp",
+    "original_function": "padLeft"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

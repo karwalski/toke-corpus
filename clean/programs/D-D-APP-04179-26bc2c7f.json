@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-04179-26bc2c7f",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-04179",
+  "tk_source": "M=countSpacesReversewo;F=reverseWords(s:Str):Str{let n=s.len;let words=mut.[];let start=mut.0 as u64;lp(let i=0 as u64;i<n;i=i+1){if(s[i]=32){let end=i;let len=end-start;let word=mut.\"\";lp(let j=0 as u64;j<len;j=j+1){word=word+s[start+j]};words=words+[word];start=i+1}el{if(i=n-1){let end=n;let len=end-start;let word=mut.\"\";lp(let j=0 as u64;j<len;j=j+1){word=word+s[start+j]};words=words+[word]}}};let result=mut.\"\";let m=words.len;lp(let i=m-1;i<m;i=i-1){if(i<words.len){result=result+words[i]};if(i>0 as u64){result=result+\" \"}};<result};F=countSpaces(s:Str):i64{let n=s.len;let m=mut.0;lp(let i=0;i<n;i=i+1){if(s[i]=32){m=m+1}};<m};F=countSpacesReversewords(s:Str):i64{<countSpaces(reverseWords(s))};F=triangleSides(a:f64;b:f64;c:f64):Str{if(!(a>0.0)){<\"invalid\"};if(!(b>0.0)){<\"invalid\"};if(!(c>0.0)){<\"invalid\"};let sumab=a+b;if(!(c<sumab)){<\"invalid\"};let sumbc=b+c;if(!(a<sumbc)){<\"invalid\"};let sumac=a+c;if(!(b<sumac)){<\"invalid\"};let eqab=mut.false;let eqbc=mut.false;let eqac=mut.false;if(a=b){eqab=true};if(b=c){eqbc=true};if(a=c){eqac=true};if(eqab){if(eqbc){<\"equilateral\"}el{if(eqac){<\"equilateral\"}el{<\"isosceles\"}}};if(eqbc){if(!(eqab)){if(!(eqac)){<\"isosceles\"}}};if(eqac){if(!(eqab)){if(!(eqbc)){<\"isosceles\"}}};<\"scalene\"};F=countVowels(first:Str):i64{let n=first.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=first[i];let isVowel=mut.false;if(c=97){isVowel=true};if(c=101){isVowel=true};if(c=105){isVowel=true};if(c=111){isVowel=true};if(c=117){isVowel=true};if(c=65){isVowel=true};if(c=69){isVowel=true};if(c=73){isVowel=true};if(c=79){isVowel=true};if(c=85){isVowel=true};if(isVowel){count=count+1};};let result=mut.count;if(result<0){result=0};<result};F=countVowelsTrianglesides(a:f64;b:f64;c:f64):i64{<countVowels(triangleSides(a;b;c))};F=combined(s:Str):i64{let a=countSpacesReversewords(s);let b=countVowels(s);<a+b};",
+  "tk_tokens": 746,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-2916-66db5486",
+      "B-B-CMP-5649-bc22af1c"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

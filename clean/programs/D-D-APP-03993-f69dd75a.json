@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-03993-f69dd75a",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03993",
+  "tk_source": "M=swapCaseNB;F=min2(n:f64;m:f64):f64{if(n<m){<n};<m};F=bmiCategory(bmi:f64):Str{if(bmi<18.5){<\"underweight\"};if(!(bmi<25.0)){if(bmi<30.0){<\"overweight\"};<\"obese\"};<\"normal\"};F=bmiCategoryMin2(n:f64;m:f64):Str{<bmiCategory(min2(n;m))};F=itos(n:i64):Str{if(n=0){<\"0\";};let s=mut.\"\";lp(let i=0;n>0;i=i+1){let digit=n-(n/10)*10;s=((digit as u8+48 as u8)as Str)+s;n=n/10;};<s;};F=rle(lhs:Str):Str{let len=lhs.len;if(len=0){<\"\";};let result=mut.\"\";let i=mut.0;lp(let k=0;i<len;k=k+1){let current=lhs[i];let runLength=mut.1;lp(let m=i+1;m<len;m=m+1){if(lhs[m]=current){runLength=runLength+1;}el{br;}};result=result+(current as Str);if(runLength>1){result=result+itos(runLength);};i=i+runLength;};<result;};F=natoPhonetic(c:Str):Str{let s=mut.\"\";if(c.len=1){let ch=c[0];if(ch>64){if(ch<91){let idx=mut.(ch-65 as u64);let nato=[\"Alpha\";\"Bravo\";\"Charlie\";\"Delta\";\"Echo\";\"Foxtrot\";\"Golf\";\"Hotel\";\"India\";\"Juliet\";\"Kilo\";\"Lima\";\"Mike\";\"November\";\"Oscar\";\"Papa\";\"Quebec\";\"Romeo\";\"Sierra\";\"Tango\";\"Uniform\";\"Victor\";\"Whiskey\";\"Xray\";\"Yankee\";\"Zulu\"];s=nato[idx];}el{s=\"Unknown\"}}el{s=\"Unknown\"}}el{s=\"Unknown\"};<s};F=natoPhoneticItos(n:i64):Str{<natoPhonetic(itos(n))};F=swapCase(s:Str):Str{let n=s.len;let m=mut.0;let result=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i];let isUpper=mut.false;let isLower=mut.false;if(c>64){if(c<91){isUpper=true}};if(c>96){if(c<123){isLower=true}};if(isUpper){m=c+32;result=result+(m as Str)}el{if(isLower){m=c-32;result=result+(m as Str)}el{result=result+(c as Str)}}};<result};F=normalize(s:Str):Str{let n=s.len;let result=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i];if(c>64){if(c<91){result=result+((c+32)as Str)}el{result=result+(c as Str)}}el{if(c>96){if(c<123){result=result+(c as Str)}}}};<result};F=countChars(s:Str):[i64]{let counts=mut.[0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];let n=s.len;lp(let i=0;i<n;i=i+1){let c=s[i];let idx=c-97;counts[idx]=counts[idx]+1};<counts};F=isAnagram(lhs:Str;rhs:Str):bool{let nlhs=normalize(lhs);let nrhs=normalize(rhs);if(!(nlhs.len=nrhs.len)){<false};let countsLhs=countChars(nlhs);let countsRhs=countChars(nrhs);let match=mut.true;lp(let i=0;i<26;i=i+1){if(!(countsLhs[i]=countsRhs[i])){match=false}};<match};F=normalizeSwapcase(s:Str):Str{<normalize(swapCase(s))};F=pipeline(bmi:f64):Str{<swapCase(natoPhonetic(bmiCategory(bmi)))};",
+  "tk_tokens": 983,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-0967-fdef7581",
+      "B-B-CMP-4619-803f89cd",
+      "B-B-CMP-4599-147b0bcd"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

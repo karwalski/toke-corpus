@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-03231-de9cdc2b",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03231",
+  "tk_source": "M=pentagonalStrlenI;T=CharCount{char:u8;count:i64};F=strlen(s:Str):i64{let len=mut.0;lp(let i=0;i<256;i=i+1){if(s[i]=0){<len};len=len+1;};<len;};F=toLower(c:u8):u8{if(c>64){if(c<91){<c+32;};};<c;};F=countChars(s:Str):[i64]{let counts=mut.[0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];let i=mut.0;lp(let idx=0;idx<26;idx=idx+1){counts[idx]=0;};lp(let idx=0;idx<256;idx=idx+1){if(s[idx]=0){br;};let c=toLower(s[idx]as u8);if(c>96){if(c<123){let pos=c-97;counts[pos]=counts[pos]+1;};};};<counts;};F=isAnagram(first:Str;second:Str):bool{let len1=strlen(first);let len2=strlen(second);if(len1=0){<false;};if(len2=0){<false;};if(len1>0){if(len2>0){if(len1=len2){let counts1=countChars(first);let counts2=countChars(second);let match=mut.true;lp(let i=0;i<26;i=i+1){if(counts1[i]=counts2[i]){}el{match=false;};};<match;};};};<false;};F=pentagonal(val:i64):i64{if(val=1){<1;};let result=val*((3*val)-1)/2;<result;};F=pentagonalStrlen(s:Str):i64{<pentagonal(strlen(s))};F=countVowels(s:Str):i64{let n=s.len;let m=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i as u64];let zc=mut.false;if(c>64){if(c<91){let cl=c+32;if(cl=97){zc=true}el{if(cl=101){zc=true}el{if(cl=105){zc=true}el{if(cl=111){zc=true}el{if(cl=117){zc=true}}}}};}el{if(c=97){zc=true}el{if(c=101){zc=true}el{if(c=105){zc=true}el{if(c=111){zc=true}el{if(c=117){zc=true}}}}};};}el{if(c=97){zc=true}el{if(c=101){zc=true}el{if(c=105){zc=true}el{if(c=111){zc=true}el{if(c=117){zc=true}}}}};};if(zc){m=m+1};};<m;};F=isqrt(n:i64):i64{let num1=mut.0;let num2=mut.n;let res=mut.0;lp(let zw=0;!(num1>num2);zw=0){let mid=(num1+num2)/2;let sq=mid*mid;let tmp=mut.0;if(sq>n){tmp=mid-1;num2=tmp}el{res=mid;num1=mid+1};};<res};F=isqrtCountvowels(s:Str):i64{<isqrt(countVowels(s))};F=combined(s:Str):i64{let a=pentagonalStrlen(s);let b=isqrtCountvowels(s);<a+b};",
+  "tk_tokens": 849,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-8224-a0c0a644",
+      "B-B-CMP-8290-8d9b05cf"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

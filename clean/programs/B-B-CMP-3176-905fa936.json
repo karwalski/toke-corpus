@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-3176-905fa936",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-3176",
+  "tk_source": "M=countDigitsDaysinmon;F=isLeapYear(year:i64):bool{let div4=year-year/4*4;let div100=year-year/100*100;let div400=year-year/400*400;if(!(div4=0)){<false};if(!(div100=0)){<true};if(div400=0){<true};<false};F=daysInMonth(month:i64;year:i64):i64{if(month=1){<31};if(month=2){if(isLeapYear(year)){<29};<28};if(month=3){<31};if(month=4){<30};if(month=5){<31};if(month=6){<30};if(month=7){<31};if(month=8){<31};if(month=9){<30};if(month=10){<31};if(month=11){<30};if(month=12){<31};<0};F=isValidDate(y:i64;m:i64;d:i64):bool{if(y=y){if(m=m){if(d=d){<true}}};if(!(m>0)){<false};if(!(m<13)){<false};if(!(d>0)){<false};let maxDays=daysInMonth(m;y);if(d>maxDays){<false};<true};F=countDigits(n:i64):i64{let x=n;if(x<0){x=0-x};let count=1;let divisor=10;lp(let i=0;i<100;i=i+1){if(x<divisor){<count};count=count+1;divisor=divisor+divisor+divisor+divisor+divisor+divisor+divisor+divisor+divisor+divisor};<count};F=countDigitsDaysinmonth(month:i64;year:i64):i64{<countDigits(daysInMonth(month;year))};",
+  "tk_tokens": 409,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0050v26-14be32a3",
+      "A-A-MTH-0055v9-ee00d194"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: countDigits(daysInMonth(...))\ndef countDigits_daysInMonth(month, year):\n    return countDigits(daysInMonth(month, year))",
+    "python_tokens": 0,
+    "c_source": "// Composed: countDigits(daysInMonth(...))\nint64_t countDigits_daysInMonth(int64_t month, int64_t year) {\n    return countDigits(daysInMonth(month, year));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: countDigits(daysInMonth(...))\nstatic long countDigitsDaysinmonth(long month, long year) {\n    return countDigits(daysInMonth(month, year));\n}\n",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-00973-c52bb58c",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-00973",
+  "tk_source": "M=charAtNeg;F=charAt(lhs:Str;rhs:i64):Str{let n=lhs.len;if(rhs<0){<\"\"};if(rhs>(n-1 as i64)){<\"\"};let result=mut.\"\";lp(let i=0 as i64;i<n as i64;i=i+1){if(i=rhs){result=result+(lhs[i as u64]as Str)}};<result};F=charAtSafe(lhs:Str;rhs:i64):Str{if(rhs<0){<\"\"};<charAt(lhs;rhs)};",
+  "tk_tokens": 117,
+  "attempts": 0,
+  "model": "mechanical-guard_neg",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0008v75-99c29aa8",
+    "transform": "guard_neg",
+    "original_function": "charAt"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

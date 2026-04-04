@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-03233-f3f77a3f",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03233",
+  "tk_source": "M=collatzStepsCT;F=reverse(s:Str):Str{let n=s.len;let m=mut.n-1;let r=mut.\"\";lp(let i=0;i<n;i=i+1){r=r+s[m];m=m-1;};<r};F=toHex(val:i64;other:i64):Str{if(val=other){<\"0\"};if(val=0){<\"0\"};let result=mut.\"\";let num=mut.val;lp(let i=0;num>0;i=i+1){let remainder=num-(num/16)*16;let digit=mut.0;if(!(remainder<0)){if(!(remainder>9)){digit=(48+remainder)as i64}el{digit=(97+(remainder-10))as i64}};result=result+(digit as u8);num=num/16;};<reverse(result)};F=longestCommonPrefix(strs:[Str]):Str{if(strs.len=0 as u64){<\"\"};let prefix=mut.\"\";let minLen=mut.strs[0].len;lp(let i=1;i<strs.len;i=i+1){if(strs[i].len<minLen){minLen=strs[i].len};};lp(let j=0;j<minLen;j=j+1){let char=strs[0][j];let match=mut.true;lp(let i=1;i<strs.len;i=i+1){if(strs[i][j]=char){}el{match=false};};if(match){prefix=prefix+char}el{<prefix};};<prefix};F=countSpaces(s:Str):i64{let n=s.len;let m=mut.0;lp(let i=0;i<n;i=i+1){if(s[i]=32){m=m+1}};<m};F=countSpacesLongestcommonprefix(strs:[Str]):i64{<countSpaces(longestCommonPrefix(strs))};F=divide(p:i64;q:i64):i64{let result=mut.0;lp(let acc=p;acc>q;acc=acc-q){result=result+1;};<result};F=collatzSteps(n:i64):i64{let steps=mut.0;let current=mut.n;lp(let x=0;current>1;x=x+1){if(current=1){br};let remainder=current-current/2*2;if(remainder=0){current=current/2}el{current=3*current+1};steps=steps+1;};<steps};F=collatzStepsDivide(p:i64;q:i64):i64{<collatzSteps(divide(p;q))};F=pipeline(val:i64;other:i64):i64{<collatzSteps(countSpaces(toHex(val;other)))};",
+  "tk_tokens": 603,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "A-A-STR-0072v2-3c6f7da4",
+      "B-B-CMP-1421-a3428902",
+      "B-B-CMP-1996-4b7fc019"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

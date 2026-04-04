@@ -1,0 +1,34 @@
+{
+  "id": "A-A-STR-0091v30-405a451d",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-STR-0091v30",
+  "tk_source": "M=morseChar;F=morseChar(num1:Str):Str{let code=mut.\"?\";if(num1.len=1 as u64){let ch=num1[0];let idx=ch-65;if(!(idx<0)){if(idx<26){let morseTable=[\".-\";\"-...\";\"-.-.\";\"-..\";\".\";\"..-.\";\"--.\";\"....\";\"..\";\".---\";\"-.-\";\".-..\";\"--\";\"-.\";\"---\";\".--.\";\"--.-\";\".-.\";\"...\";\"-\";\"..-\";\"...-\";\".--\";\"-..-\";\"-.--\";\"--..\"];code=morseTable[idx as u64];}}};<code};",
+  "tk_tokens": 153,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": ".-\n--..\n?\n?\n?\n....\n--.-\n?"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9335
+  },
+  "references": {
+    "python_source": "def morseChar(c: str) -> str:\n    morse_map = {\n        'A': \".-\", 'B': \"-...\", 'C': \"-.-.\", 'D': \"-..\", 'E': \".\",\n        'F': \"..-.\", 'G': \"--.\", 'H': \"....\", 'I': \"..\", 'J': \".---\",\n        'K': \"-.-\", 'L': \".-..\", 'M': \"--\", 'N': \"-.\", 'O': \"---\",\n        'P': \".--.\", 'Q': \"--.-\", 'R': \".-.\", 'S': \"...\", 'T': \"-\",\n        'U': \"..-\", 'V': \"...-\", 'W': \".--\", 'X': \"-..-\", 'Y': \"-.--\",\n        'Z': \"--..\"\n    }\n    return morse_map.get(c, \"?\")\n\ndef main():\n    test_cases = [\"A\", \"Z\", \"?\", \"\", \"1\", \"H\", \"Q\", \" \"]\n    for tc in test_cases:\n        print(morseChar(tc))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 233,
+    "c_source": "#include <stdio.h>\n#include <string.h>\n\nconst char* morseChar(const char* c) {\n    if (c[0] == '\\0') return \"?\";\n    char ch = c[0];\n    switch (ch) {\n        case 'A': return \".-\";\n        case 'B': return \"-...\";\n        case 'C': return \"-.-.\";\n        case 'D': return \"-..\";\n        case 'E': return \".\";\n        case 'F': return \"..-.\";\n        case 'G': return \"--.\";\n        case 'H': return \"....\";\n        case 'I': return \"..\";\n        case 'J': return \".---\";\n        case 'K': return \"-.-\";\n        case 'L': return \".-..\";\n        case 'M': return \"--\";\n        case 'N': return \"-.\";\n        case 'O': return \"---\";\n        case 'P': return \".--.\";\n        case 'Q': return \"--.-\";\n        case 'R': return \".-.\";\n        case 'S': return \"...\";\n        case 'T': return \"-\";\n        case 'U': return \"..-\";\n        case 'V': return \"...-\";\n        case 'W': return \".--\";\n        case 'X': return \"-..-\";\n        case 'Y': return \"-.--\";\n        case 'Z': return \"--..\";\n        default: return \"?\";\n    }\n}\n\nint main() {\n    const char* tests[] = {\"A\", \"E\", \"S\", \"Z\", \"?\", \"1\", \"\"};\n    int num_tests = sizeof(tests) / sizeof(tests[0]);\n    for (int i = 0; i < num_tests; i++) {\n        printf(\"%s\\n\", morseChar(tests[i]));\n    }\n    return 0;\n}",
+    "c_tokens": 368,
+    "java_source": "import java.util.Map;\n\npublic class Solution {\n    private static final Map<Character, String> MORSE_MAP = Map.ofEntries(\n        Map.entry('A', \".-\"),\n        Map.entry('B', \"-...\"),\n        Map.entry('C', \"-.-.\"),\n        Map.entry('D', \"-..\"),\n        Map.entry('E', \".\"),\n        Map.entry('F', \"..-.\"),\n        Map.entry('G', \"--.\"),\n        Map.entry('H', \"....\"),\n        Map.entry('I', \"..\"),\n        Map.entry('J', \".---\"),\n        Map.entry('K', \"-.-\"),\n        Map.entry('L', \".-..\"),\n        Map.entry('M', \"--\"),\n        Map.entry('N', \"-.\"),\n        Map.entry('O', \"---\"),\n        Map.entry('P', \".--.\"),\n        Map.entry('Q', \"--.-\"),\n        Map.entry('R', \".-.\"),\n        Map.entry('S', \"...\"),\n        Map.entry('T', \"-\"),\n        Map.entry('U', \"..-\"),\n        Map.entry('V', \"...-\"),\n        Map.entry('W', \".--\"),\n        Map.entry('X', \"-..-\"),\n        Map.entry('Y', \"-.--\"),\n        Map.entry('Z', \"--..\")\n    );\n\n    public static String morseChar(String c) {\n        if (c == null || c.isEmpty()) {\n            return \"?\";\n        }\n        char ch = c.charAt(0);\n        return switch (ch) {\n            case 'A' -> \".-\";\n            case 'B' -> \"-...\";\n            case 'C' -> \"-.-.\";\n            case 'D' -> \"-..\";\n            case 'E' -> \".\";\n            case 'F' -> \"..-.\";\n            case 'G' -> \"--.\";\n            case 'H' -> \"....\";\n            case 'I' -> \"..\";\n            case 'J' -> \".---\";\n            case 'K' -> \"-.-\";\n            case 'L' -> \".-..\";\n            case 'M' -> \"--\";\n            case 'N' -> \"-.\";\n            case 'O' -> \"---\";\n            case 'P' -> \".--.\";\n            case 'Q' -> \"--.-\";\n            case 'R' -> \".-.\";\n            case 'S' -> \"...\";\n            case 'T' -> \"-\";\n            case 'U' -> \"..-\";\n            case 'V' -> \"...-\";\n            case 'W' -> \".--\";\n            case 'X' -> \"-..-\";\n            case 'Y' -> \"-.--\";\n            case 'Z' -> \"--..\";\n            default -> \"?\";\n        };\n    }\n\n    public static void main(String[] args) {\n        System.out.println(morseChar(\"A\"));\n        System.out.println(morseChar(\"S\"));\n        System.out.println(morseChar(\"Z\"));\n        System.out.println(morseChar(\"?\"));\n        System.out.println(morseChar(\"\"));\n        System.out.println(morseChar(\"a\"));\n        System.out.println(morseChar(\"1\"));\n        System.out.println(morseChar(\"HELLO\".substring(0, 1)));\n    }\n}",
+    "java_tokens": 632
+  }
+}

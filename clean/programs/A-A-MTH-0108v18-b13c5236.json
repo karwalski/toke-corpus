@@ -1,0 +1,34 @@
+{
+  "id": "A-A-MTH-0108v18-b13c5236",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-MTH-0108v18",
+  "tk_source": "M=totient;F=totient(n:i64):i64{let result=mut.1;let val=mut.2;lp(let val=2;!(val>n);val=val+1){let other=mut.n;let gcd=mut.other;if(val=other){<result};lp(let tmp=0;!(tmp=0);tmp=tmp){let remainder=other-other/val*val;other=val;val=remainder;gcd=other;if(val=0){br};};if(gcd=1){result=result+1};};<result};",
+  "tk_tokens": 121,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "1\n1\n2\n2\n4\n2\n6\n4\n6\n4\n0\n0\n4\n8\n40"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.951
+  },
+  "references": {
+    "python_source": "def gcd(val: int, other: int) -> int:\n    while other != 0:\n        temp = other\n        other = val % other\n        val = temp\n    return val\n\ndef totient(n: int) -> int:\n    if n <= 0:\n        return 0\n    count = 0\n    for i in range(1, n + 1):\n        if gcd(i, n) == 1:\n            count += 1\n    return count\n\ndef main() -> None:\n    test_cases = [\n        (1, 1),\n        (2, 1),\n        (3, 2),\n        (4, 2),\n        (5, 4),\n        (6, 2),\n        (7, 6),\n        (8, 4),\n        (9, 6),\n        (10, 4),\n        (0, 0),\n        (-5, 0),\n        (12, 4),\n        (30, 8),\n        (100, 40),\n    ]\n    \n    for n, expected in test_cases:\n        result = totient(n)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 253,
+    "c_source": "#include <stdio.h>\n#include <stdlib.h>\n#include <stdint.h>\n\nint64_t gcd(int64_t val, int64_t other) {\n    while (other != 0) {\n        int64_t temp = other;\n        other = val - (val / other) * other;\n        val = temp;\n    }\n    return val < 0 ? -val : val;\n}\n\nint64_t totient(int64_t n) {\n    if (n <= 1) {\n        return n < 0 ? 0 : n;\n    }\n    int64_t count = 1;\n    for (int64_t k = 2; k < n; k = k + 1) {\n        if (gcd(n, k) == 1) {\n            count = count + 1;\n        }\n    }\n    return count;\n}\n\nint main() {\n    int64_t tests[] = {0, 1, 2, 3, 4, 5, 9, 12, 30, 100};\n    for (size_t i = 0; i < sizeof(tests)/sizeof(tests[0]); i++) {\n        printf(\"%ld\\n\", totient(tests[i]));\n    }\n    return 0;\n}",
+    "c_tokens": 262,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static long totient(long n) {\n        long val = n;\n        long other = n;\n        if (val == other) {\n            long result = val;\n            long i = 2L;\n            while (i * i <= result) {\n                if (result % i == 0L) {\n                    while (result % i == 0L) {\n                        result = result / i;\n                    }\n                    val = val - val / i;\n                }\n                i = i + 1L;\n            }\n            if (result > 1L) {\n                val = val - val / result;\n            }\n            return val;\n        }\n        return 0L;\n    }\n\n    public static void main(String[] args) {\n        // Test case 1: n = 1\n        System.out.println(totient(1L));\n\n        // Test case 2: n = 2 (prime)\n        System.out.println(totient(2L));\n\n        // Test case 3: n = 10\n        System.out.println(totient(10L));\n\n        // Test case 4: n = 30\n        System.out.println(totient(30L));\n\n        // Test case 5: n = 0 (edge case)\n        System.out.println(totient(0L));\n    }\n}",
+    "java_tokens": 285
+  }
+}

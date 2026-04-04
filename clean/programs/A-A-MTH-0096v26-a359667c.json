@@ -1,0 +1,34 @@
+{
+  "id": "A-A-MTH-0096v26-a359667c",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-MTH-0096v26",
+  "tk_source": "M=sumSquaresN;F=sumSquaresN(val:i64):i64{if(val<1){<0};let other=mut.0;lp(let i=1;!(i>val);i=i+1){other=other+i*i};<other}",
+  "tk_tokens": 58,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "0\n0\n1\n55\n385\n338350\n333833500"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9645
+  },
+  "references": {
+    "python_source": "def sumSquaresN(n: int) -> int:\n    if n < 1:\n        return 0\n    return n * (n + 1) * (2 * n + 1) // 6\n\ndef main() -> None:\n    test_cases = [\n        (-5, 0),\n        (0, 0),\n        (1, 1),\n        (5, 55),\n        (10, 385),\n        (100, 338350),\n        (1000, 333833500),\n    ]\n    \n    for val, expected in test_cases:\n        result = sumSquaresN(val)\n        print(result)\n        assert result == expected, f\"Failed for n={val}: got {result}, expected {expected}\"\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 169,
+    "c_source": "#include <stdio.h>\n#include <stdint.h>\n#include <inttypes.h>\n\nint64_t sumSquaresN(int64_t n) {\n    if (n < 1) {\n        return 0;\n    }\n    return n * (n + 1) * (2 * n + 1) / 6;\n}\n\nint main() {\n    printf(\"%\" PRId64 \"\\n\", sumSquaresN(-5));\n    printf(\"%\" PRId64 \"\\n\", sumSquaresN(0));\n    printf(\"%\" PRId64 \"\\n\", sumSquaresN(1));\n    printf(\"%\" PRId64 \"\\n\", sumSquaresN(5));\n    printf(\"%\" PRId64 \"\\n\", sumSquaresN(10));\n    return 0;\n}",
+    "c_tokens": 164,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static long sumSquaresN(long n) {\n        if (n < 1) {\n            return 0L;\n        }\n        return n * (n + 1) * (2 * n + 1) / 6;\n    }\n\n    public static void main(String[] args) {\n        // Test case 1: n = 0 (edge case, should return 0)\n        System.out.println(sumSquaresN(0));\n\n        // Test case 2: n = 1 (smallest positive)\n        System.out.println(sumSquaresN(1));\n\n        // Test case 3: n = 5 (1+4+9+16+25 = 55)\n        System.out.println(sumSquaresN(5));\n\n        // Test case 4: n = 10 (known formula result 385)\n        System.out.println(sumSquaresN(10));\n\n        // Test case 5: n = 100 (large value, verify formula works)\n        System.out.println(sumSquaresN(100));\n\n        // Test case 6: n = -5 (negative, should return 0)\n        System.out.println(sumSquaresN(-5));\n\n        // Test case 7: n = 20 (additional normal case)\n        System.out.println(sumSquaresN(20));\n    }\n}",
+    "java_tokens": 285
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-8133-9c0dcb1a",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-8133",
+  "tk_source": "M=fromCharCodeCountdig;F=countDigitsInStr(val:Str;other:Str):i64{if(val=other){<0};let cnt=mut.0;let n=val.len;lp(let i=0;i<n;i=i+1){let c=val[i];if(c>47){if(c<58){cnt=cnt+1}};};<cnt};F=titleCase(s:Str):Str{let len=s.len;let result=mut.\"\";let capitalizeNext=mut.true;lp(let i=0;i<len;i=i+1){let ch=s[i];if(ch=32){result=result+\" \";capitalizeNext=true}el{if(capitalizeNext){result=result+capitalize(ch);capitalizeNext=false}el{result=result+ch}}};<result};F=capitalize(ch:Str):Str{let code=charCode(ch);if(code>96){if(code<123){<fromCharCode(code-32)}el{<ch}}el{<ch}};F=charCode(ch:Str):i64{<0};F=fromCharCode(code:i64):Str{<\"\"};F=fromCharCodeCountdigitsinstr(val:Str;other:Str):Str{<fromCharCode(countDigitsInStr(val;other))};",
+  "tk_tokens": 266,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0097v2-7eee9297",
+      "A-A-STR-0026-edb34fe1"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: fromCharCode(countDigitsInStr(...))\ndef fromCharCode_countDigitsInStr(val, other):\n    return fromCharCode(countDigitsInStr(val, other))",
+    "python_tokens": 0,
+    "c_source": "// Composed: fromCharCode(countDigitsInStr(...))\nconst char* fromCharCode_countDigitsInStr(const char* val, const char* other) {\n    return fromCharCode(countDigitsInStr(val, other));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: fromCharCode(countDigitsInStr(...))\nstatic String fromCharCodeCountdigitsinstr(String val, String other) {\n    return fromCharCode(countDigitsInStr(val, other));\n}\n",
+    "java_tokens": 0
+  }
+}

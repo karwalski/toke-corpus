@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-9584-da940098",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-9584",
+  "tk_source": "M=countDigitsIsqrt;F=isqrt(n:i64):i64{let low=mut.0;let high=mut.n;let result=mut.0;lp(let i=0;i<100;i=i+1){if(!(low<high)){br};let mid=low+(high-low)/2;let sq=mid*mid;if(sq=n){<mid};if(sq<n){result=mid;low=mid+1}el{high=mid-1}};<result};F=countDigits(n:i64):i64{let absn=mut.0;if(n<0){absn=0-n}el{absn=n};let count=mut.1;let curr=absn;if(curr=0){<1};lp(let i=0;i<100;i=i+1){if(curr=0){br};curr=curr/10;count=count+1};<count};F=countDigitsIsqrt(n:i64):i64{<countDigits(isqrt(n))};",
+  "tk_tokens": 213,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-MTH-0062v46-c53507d8",
+      "A-A-MTH-0055v36-4aef464c"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: countDigits(isqrt(...))\ndef countDigits_isqrt(n):\n    return countDigits(isqrt(n))",
+    "python_tokens": 0,
+    "c_source": "// Composed: countDigits(isqrt(...))\nint64_t countDigits_isqrt(int64_t n) {\n    return countDigits(isqrt(n));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: countDigits(isqrt(...))\nstatic long countDigitsIsqrt(long n) {\n    return countDigits(isqrt(n));\n}\n",
+    "java_tokens": 0
+  }
+}

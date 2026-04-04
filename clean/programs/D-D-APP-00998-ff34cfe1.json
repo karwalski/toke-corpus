@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-00998-ff34cfe1",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-00998",
+  "tk_source": "M=strLenC;F=longestCommonPrefix(strs:[Str]):Str{if(strs.len=0 as u64){<\"\"};let prefix=mut.\"\";let minLen=mut.strs[0].len;lp(let i=1;i<strs.len;i=i+1){if(strs[i].len<minLen){minLen=strs[i].len};};lp(let j=0;j<minLen;j=j+1){let char=strs[0][j];let match=mut.true;lp(let i=1;i<strs.len;i=i+1){if(strs[i][j]=char){}el{match=false};};if(match){prefix=prefix+char}el{<prefix};};<prefix};F=strLen(val:Str):i64{<val.len};F=strLenLongestcommonprefix(strs:[Str]):i64{<strLen(longestCommonPrefix(strs))};F=itos(n:i64):Str{if(n=0){<\"0\";};let s=mut.\"\";lp(let i=0;n>0;i=i+1){let digit=n-(n/10)*10;s=((digit as u8+48 as u8)as Str)+s;n=n/10;};<s;};F=rle(lhs:Str):Str{let len=lhs.len;if(len=0){<\"\";};let result=mut.\"\";let i=mut.0;lp(let k=0;i<len;k=k+1){let current=lhs[i];let runLength=mut.1;lp(let m=i+1;m<len;m=m+1){if(lhs[m]=current){runLength=runLength+1;}el{br;}};result=result+(current as Str);if(runLength>1){result=result+itos(runLength);};i=i+runLength;};<result;};F=countUpper(s:Str):i64{let n=s.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i];if(c>64){if(c<91){count=count+1}}};<count};F=countUpperItos(n:i64):i64{<countUpper(itos(n))};F=combined(val:Str):i64{let a=strLen(val);let b=countUpper(val);<a+b};",
+  "tk_tokens": 504,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-1375-971403e5",
+      "B-B-CMP-4647-b43da85d"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

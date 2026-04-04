@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-00824-53f82bd3",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-00824",
+  "tk_source": "M=insertAtClamp;F=insertAt(s:Str;c:Str;pos:i64):Str{if(s=c){<s};let slen=s.len;let clen=c.len;let actualpos=mut.pos;if(pos<0){actualpos=0};if(pos>slen){actualpos=slen};let result=mut.\"\";lp(let i=0;i<actualpos;i=i+1){result=result+s[i as u64]};result=result+c;lp(let i=actualpos;i<slen;i=i+1){result=result+s[i as u64]};<result};F=insertAtClamped(s:Str;c:Str;pos:i64):Str{let clamped=mut.pos;if(pos<0){clamped=0};if(pos>1000){clamped=1000};<insertAt(s;c;clamped)};",
+  "tk_tokens": 184,
+  "attempts": 0,
+  "model": "mechanical-clamp",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0067v2-cd4ea91c",
+    "transform": "clamp",
+    "original_function": "insertAt"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

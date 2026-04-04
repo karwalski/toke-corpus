@@ -1,0 +1,34 @@
+{
+  "id": "A-A-STR-0045v17-4210ba08",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-STR-0045v17",
+  "tk_source": "M=rightPadSpace;F=rightPadSpace(s:Str;n:i64):Str{let m=s.len as i64;if(m<n){let diff=n-m;let result=mut.s;lp(let i=0;i<diff;i=i+1){result=result+\" \"};<result}el{<s}};",
+  "tk_tokens": 69,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "'hello     '\n'world'\n'   '\n'abc'\n'test   '\n'longword'\n'     '\n'pad'\n'x'\n'y         '"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.963
+  },
+  "references": {
+    "python_source": "def rightPadSpace(s: str, width: int) -> str:\n    n = len(s)\n    m = width\n    if n >= m:\n        return s\n    diff = m - n\n    result = s\n    i = 0\n    while i < diff:\n        result = result + \" \"\n        i = i + 1\n    return result\n\ndef main() -> None:\n    test_cases = [\n        (\"hello\", 10),\n        (\"world\", 5),\n        (\"\", 3),\n        (\"abc\", 0),\n        (\"test\", 7),\n        (\"longword\", 4),\n        (\" \", 5),\n        (\"pad\", -2),\n        (\"x\", 1),\n        (\"y\", 10)\n    ]\n    for s, w in test_cases:\n        print(repr(rightPadSpace(s, w)))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 192,
+    "c_source": "#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n\nchar* rightPadSpace(const char* s, long long width) {\n    long long len = strlen(s);\n    if (len >= width) {\n        char* result = malloc(len + 1);\n        if (!result) return NULL;\n        strcpy(result, s);\n        return result;\n    }\n    \n    long long spaces_needed = width - len;\n    char* result = malloc(width + 1);\n    if (!result) return NULL;\n    \n    strcpy(result, s);\n    for (long long i = 0; i < spaces_needed; i = i + 1) {\n        result[len + i] = ' ';\n    }\n    result[width] = '\\0';\n    return result;\n}\n\nvoid free_result(char* ptr) {\n    if (ptr) free(ptr);\n}\n\nint main() {\n    // Test 1: Normal case\n    char* r1 = rightPadSpace(\"hello\", 10);\n    printf(\"'%s'\\n\", r1);\n    free_result(r1);\n    \n    // Test 2: Already at width\n    char* r2 = rightPadSpace(\"world\", 5);\n    printf(\"'%s'\\n\", r2);\n    free_result(r2);\n    \n    // Test 3: Empty string\n    char* r3 = rightPadSpace(\"\", 6);\n    printf(\"'%s'\\n\", r3);\n    free_result(r3);\n    \n    // Test 4: Width zero\n    char* r4 = rightPadSpace(\"test\", 0);\n    printf(\"'%s'\\n\", r4);\n    free_result(r4);\n    \n    // Test 5: Single character\n    char* r5 = rightPadSpace(\"A\", 5);\n    printf(\"'%s'\\n\", r5);\n    free_result(r5);\n    \n    // Test 6: Long string\n    char* r6 = rightPadSpace(\"abcdefghij\", 15);\n    printf(\"'%s'\\n\", r6);\n    free_result(r6);\n    \n    // Test 7: Exact match\n    char* r7 = rightPadSpace(\"exact\", 5);\n    printf(\"'%s'\\n\", r7);\n    free_result(r7);\n    \n    return 0;\n}",
+    "c_tokens": 483,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static String rightPadSpace(String s, int width) {\n        int n = s.length();\n        if (n >= width) {\n            return s;\n        }\n        StringBuilder result = new StringBuilder(s);\n        int spacesNeeded = width - n;\n        for (int i = 0; i < spacesNeeded; i++) {\n            result.append(' ');\n        }\n        return result.toString();\n    }\n\n    public static void main(String[] args) {\n        // Test case 1: normal padding\n        System.out.println(rightPadSpace(\"hello\", 10));\n\n        // Test case 2: already at width\n        System.out.println(rightPadSpace(\"world\", 5));\n\n        // Test case 3: empty string\n        System.out.println(rightPadSpace(\"\", 3));\n\n        // Test case 4: width zero\n        System.out.println(rightPadSpace(\"test\", 0));\n\n        // Test case 5: width negative (should return original)\n        System.out.println(rightPadSpace(\"abc\", -2));\n\n        // Test case 6: single character\n        System.out.println(rightPadSpace(\"x\", 5));\n\n        // Test case 7: string longer than width\n        System.out.println(rightPadSpace(\"longstring\", 4));\n    }\n}",
+    "java_tokens": 271
+  }
+}

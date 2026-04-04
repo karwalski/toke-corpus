@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-5391-d9a0de84",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-5391",
+  "tk_source": "M=collapseSpacesFizzbu;F=fizzBuzz(n:i64):Str{let mod3=n-n/3*3;let mod5=n-n/5*5;if(mod3=0){if(mod5=0){<\"FizzBuzz\"};<\"Fizz\"};if(mod5=0){<\"Buzz\"};<n as Str};F=collapseSpaces(s:Str):Str{let n=s.len;let result=mut.\"\";lp(let m=0;m<n;m=m+1){let char=s[m as u64];if(!(char=32)){result=result+(char as Str);}el{if(result.len>0 as u64){let last=result[(result.len-1)as u64];if(!(last=32)){result=result+(char as Str);}}}};<result};F=collapseSpacesFizzbuzz(n:i64):Str{<collapseSpaces(fizzBuzz(n))};",
+  "tk_tokens": 188,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0042v2-113780de",
+      "A-A-STR-0050v1-9c4d2121"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: collapseSpaces(fizzBuzz(...))\ndef collapseSpaces_fizzBuzz(n):\n    return collapseSpaces(fizzBuzz(n))",
+    "python_tokens": 0,
+    "c_source": "// Composed: collapseSpaces(fizzBuzz(...))\nconst char* collapseSpaces_fizzBuzz(int64_t n) {\n    return collapseSpaces(fizzBuzz(n));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: collapseSpaces(fizzBuzz(...))\nstatic String collapseSpacesFizzbuzz(long n) {\n    return collapseSpaces(fizzBuzz(n));\n}\n",
+    "java_tokens": 0
+  }
+}

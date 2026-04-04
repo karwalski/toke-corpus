@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-02917-9fcedd23",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-02917",
+  "tk_source": "M=accReverseIntAbs;F=abs(x:i64):i64{let num1=x;let num2=0 as i64;if(num1>num2){<num1};<0-num1};F=reverseInt(n:i64):i64{let s=mut.1;let x=mut.n;if(x<0){s=-1;x=-x}el{s=1};let r=mut.0;lp(let xcopy=x;xcopy>0;xcopy=xcopy/10){r=r*10+xcopy-(xcopy/10)*10;xcopy=xcopy/10};<r*s};F=reverseIntAbs(x:i64):i64{<reverseInt(abs(x))};F=accumulate(arr:[i64]):i64{let r=mut.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+reverseIntAbs(arr[i as u64]);};<r};",
+  "tk_tokens": 209,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-2026-2cd8d58c"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

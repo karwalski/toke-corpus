@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-2915-6f7d9d1a",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-2915",
+  "tk_source": "M=numToStrParsetoint;T=ValidationErr{TooShort:Str;TooLong:Str;InvalidChar:Str};F=validateAge(input:Str):i64!ValidationErr{let p=mut.0;let q=mut.0;q=parseToInt(input);if(q<0){<ValidationErr{InvalidChar:\"not a number\"}};p=q;if(p<0){<ValidationErr{TooShort:\"too young\"}};if(p>150){<ValidationErr{TooLong:\"too old\"}};<p};F=parseToInt(s:Str):i64{let result=mut.0;let i=mut.0;lp(i=0;i<s.len;i=i+1){let c=s[i];if(c<48){<-1};if(c>57){<-1};result=result*10+(c-48);};<result};F=numToStr(val:i64):Str{if(val=0){<\"0\";};if(val<0){let num=mut.0-val;let str=mut.\"\";lp(let dummy=0;num>0;num=num/10){let digit=num-(num/10*10);let charCode=48+digit;let charStr=(charCode as u8)as Str;str=charStr+str;};<\"-\"+str;}el{let num=mut.val;let str=mut.\"\";lp(let dummy=0;num>0;num=num/10){let digit=num-(num/10*10);let charCode=48+digit;let charStr=(charCode as u8)as Str;str=charStr+str;};<str;};};F=numToStrParsetoint(s:Str):Str{<numToStr(parseToInt(s))};",
+  "tk_tokens": 373,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-ERR-0028v5-645f6d35",
+      "A-A-STR-0030v26-7ef09cfa"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: numToStr(parseToInt(...))\ndef numToStr_parseToInt(s):\n    return numToStr(parseToInt(s))",
+    "python_tokens": 0,
+    "c_source": "// Composed: numToStr(parseToInt(...))\nconst char* numToStr_parseToInt(const char* s) {\n    return numToStr(parseToInt(s));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: numToStr(parseToInt(...))\nstatic String numToStrParsetoint(String s) {\n    return numToStr(parseToInt(s));\n}\n",
+    "java_tokens": 0
+  }
+}

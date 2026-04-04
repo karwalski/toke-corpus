@@ -1,0 +1,63 @@
+{
+  "total_iterations": 3,
+  "initial_pass_rate": 0.43,
+  "final_pass_rate": 0.44,
+  "improvement": 0.01,
+  "trajectory": [
+    {
+      "iteration": 1,
+      "pass_rate": 0.43,
+      "pass_count": 43,
+      "fail_count": 57
+    },
+    {
+      "iteration": 2,
+      "pass_rate": 0.46,
+      "pass_count": 46,
+      "fail_count": 54
+    },
+    {
+      "iteration": 3,
+      "pass_rate": 0.44,
+      "pass_count": 44,
+      "fail_count": 56
+    }
+  ],
+  "final_data_mix": {
+    "1": 0.072226,
+    "2": 0.214004,
+    "3": 0.023511,
+    "4": 0.273077,
+    "5": 0.39367,
+    "6": 0.023511
+  },
+  "final_weakness_profile": {
+    "E001": 4,
+    "E006": 4,
+    "E002": 3,
+    "E003": 1,
+    "E005": 1,
+    "E012": 4,
+    "E023": 3,
+    "E024": 8,
+    "E011": 4,
+    "E021": 5,
+    "E010": 3,
+    "E014": 4,
+    "E015": 3,
+    "E020": 1,
+    "E013": 1,
+    "E022": 1,
+    "E040": 5,
+    "E031": 7,
+    "E030": 3,
+    "E043": 13,
+    "E032": 3,
+    "E034": 6,
+    "E033": 2,
+    "E042": 6,
+    "E041": 7,
+    "E051": 3,
+    "E050": 3
+  }
+}

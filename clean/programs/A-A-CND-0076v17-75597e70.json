@@ -1,0 +1,34 @@
+{
+  "id": "A-A-CND-0076v17-75597e70",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-CND-0076v17",
+  "tk_source": "M=trafficLight;F=trafficLight(state:i64):Str{if(state=1){<\"red\"};if(state=2){<\"yellow\"};if(state=3){<\"green\"};<\"unknown\"};",
+  "tk_tokens": 46,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "red\nyellow\ngreen\nunknown\nunknown\nunknown\nunknown\nunknown"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9888
+  },
+  "references": {
+    "python_source": "def trafficLight(state: int) -> str:\n    # Use only addition and subtraction to compute result\n    # Map: 1 -> \"red\", 2 -> \"yellow\", 3 -> \"green\", else -> \"unknown\"\n    \n    # Check for 1\n    temp = state - 1\n    if temp == 0:\n        return \"red\"\n    \n    # Check for 2\n    temp = state - 2\n    if temp == 0:\n        return \"yellow\"\n    \n    # Check for 3\n    temp = state - 3\n    if temp == 0:\n        return \"green\"\n    \n    # All other values\n    return \"unknown\"\n\n\ndef main() -> None:\n    # Test case 1: normal case - red\n    result1 = trafficLight(1)\n    print(result1)\n    \n    # Test case 2: normal case - yellow\n    result2 = trafficLight(2)\n    print(result2)\n    \n    # Test case 3: normal case - green\n    result3 = trafficLight(3)\n    print(result3)\n    \n    # Test case 4: edge case - zero\n    result4 = trafficLight(0)\n    print(result4)\n    \n    # Test case 5: edge case - negative value\n    result5 = trafficLight(-1)\n    print(result5)\n    \n    # Test case 6: edge case - large positive value\n    result6 = trafficLight(100)\n    print(result6)\n    \n    # Test case 7: boundary - just above valid range\n    result7 = trafficLight(4)\n    print(result7)\n    \n    # Test case 8: boundary - just below valid range\n    result8 = trafficLight(0)\n    print(result8)\n\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 383,
+    "c_source": "#include <stdio.h>\n#include <string.h>\n\nconst char* trafficLight(int state) {\n    int n = state;\n    int m = 0;\n    \n    if (n == 1) {\n        return \"red\";\n    }\n    \n    m = n - 1;\n    if (m == 1) {\n        return \"yellow\";\n    }\n    \n    m = n - 2;\n    if (m == 1) {\n        return \"green\";\n    }\n    \n    return \"unknown\";\n}\n\nint main() {\n    printf(\"%s\\n\", trafficLight(1));\n    printf(\"%s\\n\", trafficLight(2));\n    printf(\"%s\\n\", trafficLight(3));\n    printf(\"%s\\n\", trafficLight(0));\n    printf(\"%s\\n\", trafficLight(4));\n    printf(\"%s\\n\", trafficLight(-1));\n    printf(\"%s\\n\", trafficLight(100));\n    \n    return 0;\n}",
+    "c_tokens": 194,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static String trafficLight(int state) {\n        int n = state;\n        int m = 0;\n        \n        if (n == 1) {\n            m = 1;\n        } else if (n == 2) {\n            m = 2;\n        } else if (n == 3) {\n            m = 3;\n        } else {\n            m = 0;\n        }\n        \n        if (m == 1) {\n            return \"red\";\n        } else if (m == 2) {\n            return \"yellow\";\n        } else if (m == 3) {\n            return \"green\";\n        } else {\n            return \"unknown\";\n        }\n    }\n    \n    public static void main(String[] args) {\n        System.out.println(trafficLight(1));\n        System.out.println(trafficLight(2));\n        System.out.println(trafficLight(3));\n        System.out.println(trafficLight(0));\n        System.out.println(trafficLight(4));\n        System.out.println(trafficLight(-1));\n        System.out.println(trafficLight(100));\n    }\n}",
+    "java_tokens": 237
+  }
+}

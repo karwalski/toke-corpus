@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-01542-02c5bbc6",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-01542",
+  "tk_source": "M=startswithGuard;F=startsWith(val:Str;other:Str):bool{if(val=other){<true};if(val.len<other.len){<false};lp(let i=0;i<other.len;i=i+1){if(val[i]=other[i]){}el{<false};};<true};F=safeStartsWith(val:Str;other:Str):bool{if(val.len=0){<false};<startsWith(val;other)};",
+  "tk_tokens": 98,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0009v2-34513e19",
+    "transform": "guard_empty",
+    "original_function": "startsWith"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

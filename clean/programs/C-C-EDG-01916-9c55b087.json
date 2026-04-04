@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-01916-9c55b087",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-01916",
+  "tk_source": "M=indexOfGuard;F=indexOf(s:Str;sub:Str):i64{let slen=s.len;let sublen=sub.len;if(sublen=0){<0};if(!(sublen>slen)){let found=mut.false;let index=mut.0;lp(let i=0;!(i>slen-sublen);i=i+1){let match=mut.true;lp(let j=0;j<sublen;j=j+1){if(!(s[i+j as u64]=sub[j as u64])){match=false;};};if(match){found=true;index=i;br;};};if(found){<index;}el{<-1;};}el{<-1;};};F=safeIndexOf(s:Str;sub:Str):i64{if(s.len=0){<0};<indexOf(s;sub)};",
+  "tk_tokens": 181,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0023v33-7f9dd4e9",
+    "transform": "guard_empty",
+    "original_function": "indexOf"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

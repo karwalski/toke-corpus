@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-04017-1d20ff5b",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-04017",
+  "tk_source": "M=countOccurrencesGuard;F=countOccurrences(num1:Str;num2:Str):i64{let lenS=num1.len;let lenSub=num2.len;if(lenSub=0 as u64){<0};let count=mut.0;lp(let i=0;i<lenS;i=i+1){if(((i as u64)+lenSub)>lenS){br;}let match=mut.true;lp(let j=0;j<lenSub;j=j+1){if(!(num1[(i as u64)+(j as u64)as u64]=num2[j as u64])){match=false;}};if(match){count=count+1;i=i+(lenSub as i64)-1;};};<count;};F=safeCountOccurrences(num1:Str;num2:Str):i64{if(num1.len=0){<0};<countOccurrences(num1;num2)};",
+  "tk_tokens": 194,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0022v86-06870376",
+    "transform": "guard_empty",
+    "original_function": "countOccurrences"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

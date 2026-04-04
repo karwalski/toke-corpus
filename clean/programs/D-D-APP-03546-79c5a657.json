@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-03546-79c5a657",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03546",
+  "tk_source": "M=accFibonacciRec;F=fibonacciRec(n:i64):i64{if(n=0){<0};if(n=1){<1};let p=fibonacciRec(n-1);let q=fibonacciRec(n-2);let result=mut.0;result=p+q;<result};F=accumulate(arr:[i64]):i64{let r=mut.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+fibonacciRec(arr[i as u64]);};<r};",
+  "tk_tokens": 121,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "A-A-MTH-0045v5-e4d1ba41"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

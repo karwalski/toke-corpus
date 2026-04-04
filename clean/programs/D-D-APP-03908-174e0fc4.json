@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-03908-174e0fc4",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03908",
+  "tk_source": "M=boolNotIT;F=ceilDiv(n:i64;m:i64):i64{let numerator=n+m-1;let result=numerator/m;<result};F=toHex(first:i64):Str{if(first<0){<\"0\"};if(first=0){<\"0\"};let hexDigits=[48;49;50;51;52;53;54;55;56;57;97;98;99;100;101;102];let result=mut.\"\";let number=mut.first;lp(let dummy=0;dummy<1;dummy=dummy+1){let rem=number-(number/16)*16;let c=hexDigits[rem as u64];result=c as Str+result;number=number/16;if(!(number>0)){br};};<result};F=toHexCeildiv(n:i64;m:i64):Str{<toHex(ceilDiv(n;m))};F=padRight(val:Str;other:i64;fill:Str):Str{if(val=fill){<val};if(val.len=other){<val};if(val.len>other){<val};let result=mut.val;lp(let i=val.len;i<other;i=i+1){result=result+fill;};<result};F=isEmpty(s:Str):bool{if(s.len=0){<true}el{<false}};F=isEmptyPadright(val:Str;other:i64;fill:Str):bool{<isEmpty(padRight(val;other;fill))};F=boolNot(val:bool):bool{if(val=true){<false;}el{<true;};};F=pipeline(first:i64):bool{<boolNot(isEmpty(toHex(first)))};",
+  "tk_tokens": 366,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-9103-ab07caf9",
+      "B-B-CMP-0290-e3e2d2a2",
+      "A-A-CND-0015v34-5c5c1342"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

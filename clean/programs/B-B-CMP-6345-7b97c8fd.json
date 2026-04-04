@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-6345-7b97c8fd",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-6345",
+  "tk_source": "M=removePunctBmicat;F=bmiCategory(lhs:f64;rhs:f64):Str{let cats=[\"underweight\";\"normal\";\"overweight\";\"obese\"];let bounds=[18.5;25.0;30.0];lp(let i=0;i<bounds.len;i=i+1){if(lhs<bounds[i as u64]){<cats[i as u64];};};<cats[bounds.len]};F=bmiCat(bmi:f64):Str{<bmiCategory(bmi;0.0)};F=removePunct(s:Str):Str{let n=s.len;let r=mut.\"\";lp(let lhs=0;lhs<n;lhs=lhs+1){let rhs=s[lhs];if(rhs>47){if(rhs<58){r=r+(rhs as Str)}el{if(rhs>64){if(rhs<91){r=r+(rhs as Str)}el{if(rhs>96){if(rhs<123){r=r+(rhs as Str)}el{if(rhs=32){r=r+(rhs as Str)}}}}}}}};<r};F=removePunctBmicat(bmi:f64):Str{<removePunct(bmiCat(bmi))};",
+  "tk_tokens": 261,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0046v51-a710f5ed",
+      "A-A-STR-0049v3-b3719caa"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: removePunct(bmiCat(...))\ndef removePunct_bmiCat(bmi):\n    return removePunct(bmiCat(bmi))",
+    "python_tokens": 0,
+    "c_source": "// Composed: removePunct(bmiCat(...))\nconst char* removePunct_bmiCat(double bmi) {\n    return removePunct(bmiCat(bmi));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: removePunct(bmiCat(...))\nstatic String removePunctBmicat(double bmi) {\n    return removePunct(bmiCat(bmi));\n}\n",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "A-A-SRT-0067v34-abc189d3",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-SRT-0067v34",
+  "tk_source": "M=mode;F=mode(arr:[i64]):i64{let sorted=mut.[];lp(let i=0;i<arr.len;i=i+1){let val=arr[i];let inserted=mut.false;lp(let j=0;j<sorted.len;j=j+1){if(!(val>sorted[j])){let tmp=mut.[];lp(let k=0;k<j;k=k+1){tmp=tmp+[sorted[k]];};tmp=tmp+[val];lp(let k=j;k<sorted.len;k=k+1){tmp=tmp+[sorted[k]];};sorted=tmp;inserted=true;br;};};if(!inserted){sorted=sorted+[val];};};let bestVal=mut.sorted[0];let bestCnt=mut.0;let currVal=mut.sorted[0];let currCnt=mut.0;lp(let i=0;i<sorted.len;i=i+1){let val=sorted[i];if(val=currVal){currCnt=currCnt+1;}el{if(currCnt>bestCnt){bestCnt=currCnt;bestVal=currVal;};currVal=val;currCnt=1;};};if(currCnt>bestCnt){bestCnt=currCnt;bestVal=currVal;};<bestVal};",
+  "tk_tokens": 269,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "2\n1\n5\n7\n-1\nNone\n0\n30"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9106
+  },
+  "references": {
+    "python_source": "def mode(arr):\n    if not arr:\n        return None\n    counts = {}\n    for val in arr:\n        counts[val] = counts.get(val, 0) + 1\n    max_count = 0\n    result = None\n    for val, count in counts.items():\n        if count > max_count or (count == max_count and val < result):\n            max_count = count\n            result = val\n    return result\n\ndef main():\n    # Test case 1: basic example\n    print(mode([1, 2, 2, 3, 4]))\n    # Test case 2: tie, return smallest\n    print(mode([1, 1, 2, 2, 3]))\n    # Test case 3: single element\n    print(mode([5]))\n    # Test case 4: all equal\n    print(mode([7, 7, 7]))\n    # Test case 5: negative numbers\n    print(mode([-1, -1, 0, 1, 1]))\n    # Test case 6: empty list\n    print(mode([]))\n    # Test case 7: zero values\n    print(mode([0, 0, 1, 2]))\n    # Test case 8: large range\n    print(mode([10, 20, 20, 30, 30, 30]))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 301,
+    "c_source": "#include <stdio.h>\n#include <stdlib.h>\n#include <limits.h>\n\nlong long mode(const long long arr[], size_t n) {\n    if (n == 0) return 0;\n    \n    long long best_val = arr[0];\n    size_t best_count = 1;\n    \n    for (size_t i = 0; i < n; ++i) {\n        long long val = arr[i];\n        size_t count = 1;\n        \n        for (size_t j = i + 1; j < n; ++j) {\n            long long other = arr[j];\n            if (val == other) {\n                count++;\n            }\n        }\n        \n        if (count > best_count || (count == best_count && val < best_val)) {\n            best_val = val;\n            best_count = count;\n        }\n    }\n    \n    return best_val;\n}\n\nint main(void) {\n    // Test 1: Basic case\n    long long arr1[] = {1, 2, 2, 3, 3, 3, 4};\n    size_t n1 = sizeof(arr1) / sizeof(arr1[0]);\n    printf(\"%lld\\n\", mode(arr1, n1));\n    \n    // Test 2: Tie - return smallest\n    long long arr2[] = {5, 5, 6, 6, 7};\n    size_t n2 = sizeof(arr2) / sizeof(arr2[0]);\n    printf(\"%lld\\n\", mode(arr2, n2));\n    \n    // Test 3: Single element\n    long long arr3[] = {42};\n    size_t n3 = sizeof(arr3) / sizeof(arr3[0]);\n    printf(\"%lld\\n\", mode(arr3, n3));\n    \n    // Test 4: All equal\n    long long arr4[] = {9, 9, 9, 9};\n    size_t n4 = sizeof(arr4) / sizeof(arr4[0]);\n    printf(\"%lld\\n\", mode(arr4, n4));\n    \n    // Test 5: Negative numbers and zero\n    long long arr5[] = {-1, 0, 0, -1, 2, -1};\n    size_t n5 = sizeof(arr5) / sizeof(arr5[0]);\n    printf(\"%lld\\n\", mode(arr5, n5));\n    \n    return 0;\n}",
+    "c_tokens": 502,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static int mode(int[] arr) {\n        if (arr.length == 0) {\n            return 0;\n        }\n        Map<Integer, Integer> freq = new HashMap<>();\n        for (int val : arr) {\n            freq.put(val, freq.getOrDefault(val, 0) + 1);\n        }\n        int bestVal = arr[0];\n        int bestFreq = freq.get(bestVal);\n        for (Map.Entry<Integer, Integer> entry : freq.entrySet()) {\n            int val = entry.getKey();\n            int other = entry.getValue();\n            if (other > bestFreq || (other == bestFreq && val < bestVal)) {\n                bestVal = val;\n                bestFreq = other;\n            }\n        }\n        return bestVal;\n    }\n\n    public static void main(String[] args) {\n        // Test 1: normal case\n        int[] arr1 = {1, 2, 2, 3, 3, 3, 4};\n        System.out.println(mode(arr1));\n\n        // Test 2: tie, return smallest\n        int[] arr2 = {5, 5, 6, 6, 7};\n        System.out.println(mode(arr2));\n\n        // Test 3: single element\n        int[] arr3 = {42};\n        System.out.println(mode(arr3));\n\n        // Test 4: all equal (edge case)\n        int[] arr4 = {9, 9, 9, 9};\n        System.out.println(mode(arr4));\n\n        // Test 5: negative numbers and zero\n        int[] arr5 = {-1, 0, -1, 2, 0, -1, 0};\n        System.out.println(mode(arr5));\n\n        // Test 6: empty array (edge case)\n        int[] arr6 = {};\n        System.out.println(mode(arr6));\n    }\n}",
+    "java_tokens": 399
+  }
+}

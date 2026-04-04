@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-3498-10ae1d4c",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-3498",
+  "tk_source": "M=wordCountZipstrs;F=zipStrs(val:Str;other:Str):Str{if(val=other){<val};let lenVal=val.len;let lenOther=other.len;let minLen=mut.0;if(lenVal<lenOther){minLen=lenVal}el{minLen=lenOther};let result=mut.\"\";lp(let i=0 as u64;i<minLen;i=i+1){result=result+(val[(i as u64)]as Str);result=result+(other[(i as u64)]as Str);};if(lenVal>minLen){lp(let j=0 as u64;j<lenVal;j=j+1){if(!(j<minLen)){result=result+(val[(j as u64)]as Str);};};};if(lenOther>minLen){lp(let k=0 as u64;k<lenOther;k=k+1){if(!(k<minLen)){result=result+(other[(k as u64)]as Str);};};};<result;};F=wordCount(s:Str):i64{let n=s.len;let p=mut.0;let q=mut.0;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(p=0){if(c>32){p=1;q=1;}el{q=0;}}el{if(c=32){if(q=1){count=count+1;q=0;}el{}}el{q=1;}};};if(q=1){count=count+1;};<count};F=wordCountZipstrs(val:Str;other:Str):i64{<wordCount(zipStrs(val;other))};",
+  "tk_tokens": 371,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0094v2-e3829513",
+      "A-A-STR-0033v85-2bc98262"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: wordCount(zipStrs(...))\ndef wordCount_zipStrs(val, other):\n    return wordCount(zipStrs(val, other))",
+    "python_tokens": 0,
+    "c_source": "// Composed: wordCount(zipStrs(...))\nint64_t wordCount_zipStrs(const char* val, const char* other) {\n    return wordCount(zipStrs(val, other));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: wordCount(zipStrs(...))\nstatic long wordCountZipstrs(String val, String other) {\n    return wordCount(zipStrs(val, other));\n}\n",
+    "java_tokens": 0
+  }
+}

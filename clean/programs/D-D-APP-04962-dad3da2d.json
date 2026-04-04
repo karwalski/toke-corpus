@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-04962-dad3da2d",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-04962",
+  "tk_source": "M=charFreqA;F=charFreq(p:Str):i64{let q=mut.0;lp(let i=0;i<p.len;i=i+1){q=q+1};<q};F=isPalindromeNum(n:i64):bool{if(n<0){<false};let first=n;let second=mut.0;let digits=mut.0;let x=first;lp(let temp=x;temp>0;temp=temp/10){digits=digits+1;};lp(let i=0;i<digits/2;i=i+1){let pow1=1;let pow2=1;lp(let j=0;j<digits-i-1;j=j+1){pow1=pow1*10;};lp(let j=0;j<i;j=j+1){pow2=pow2*10;};let fd=(first/pow1)-(first/pow1/10)*10;let ld=(first/pow2)-(first/pow2/10)*10;if(!(fd=ld)){<false};};<true;};F=isPalindromeNumCharfreq(p:Str):bool{<isPalindromeNum(charFreq(p))};F=countSentences(lhs:Str):i64{let count=mut.0;let n=lhs.len;lp(let i=0;i<n;i=i+1){if(lhs[i as u64]=46 as u8){count=count+1;};};<count;};F=abs(x:i64):i64{let n=x;if(n<0){let m=0-n;<m;}el{<n;}};F=absCountsentences(lhs:Str):i64{<abs(countSentences(lhs))};F=combined(p:Str):i64{let a=charFreq(p);let b=absCountsentences(p);<a+b};",
+  "tk_tokens": 391,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-1203-c57c8bab",
+      "B-B-CMP-7775-eb57ece7"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-02447-ac2dd39c",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-02447",
+  "tk_source": "M=toLowerGuard;F=toLower(s:Str):Str{let n=s.len;let result=mut.\"\";lp(let i=0 as u64;i<n;i=i+1){let c=s[i];if(c>64){if(c<91){c=c+32;};};result=result+c as Str;};<result};F=safeToLower(s:Str):Str{if(s.len=0){<\"\"};<toLower(s)};",
+  "tk_tokens": 99,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0003v35-64a83cb9",
+    "transform": "guard_empty",
+    "original_function": "toLower"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

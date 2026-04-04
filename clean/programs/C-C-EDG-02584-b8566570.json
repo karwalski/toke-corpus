@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-02584-b8566570",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-02584",
+  "tk_source": "M=capitalizeGuard;F=capitalize(s:Str):Str{let n=s.len;if(n=0 as u64){<\"\"}el{let first=s[0];if(first>96){if(first<123){let upper=first-32 as u8;let result=mut.(upper as Str);lp(let i=1;i<n;i=i+1){result=result+(s[i]as Str)};<result}el{<s}}el{<s}}};F=safeCapitalize(s:Str):Str{if(s.len=0){<\"\"};<capitalize(s)};",
+  "tk_tokens": 126,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0025v54-2b8047af",
+    "transform": "guard_empty",
+    "original_function": "capitalize"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

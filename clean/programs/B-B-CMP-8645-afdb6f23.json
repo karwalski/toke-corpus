@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-8645-afdb6f23",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-8645",
+  "tk_source": "M=isPalindromeNClamp;F=clamp(x:i64;lo:i64;hi:i64):i64{if(x<lo){<lo};if(x>hi){<hi};<x};F=isPalindromeN(n:i64):bool{if(n<0){<false}el{let num=mut.n;let reversed=mut.0;lp(let temp=num;temp>0;temp=temp/10){let digit=temp-(temp/10)*10;reversed=reversed*10+digit;};if(reversed=n){<true}el{<false}}};F=isPalindromeNClamp(x:i64;lo:i64;hi:i64):bool{<isPalindromeN(clamp(x;lo;hi))};",
+  "tk_tokens": 158,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-MTH-0032v6-68b3ae1f",
+      "A-A-CND-0079-18536e9a"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: isPalindromeN(clamp(...))\ndef isPalindromeN_clamp(x, lo, hi):\n    return isPalindromeN(clamp(x, lo, hi))",
+    "python_tokens": 0,
+    "c_source": "// Composed: isPalindromeN(clamp(...))\nint isPalindromeN_clamp(int64_t x, int64_t lo, int64_t hi) {\n    return isPalindromeN(clamp(x, lo, hi));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: isPalindromeN(clamp(...))\nstatic boolean isPalindromeNClamp(long x, long lo, long hi) {\n    return isPalindromeN(clamp(x, lo, hi));\n}\n",
+    "java_tokens": 0
+  }
+}

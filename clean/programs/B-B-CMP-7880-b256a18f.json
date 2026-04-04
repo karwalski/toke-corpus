@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-7880-b256a18f",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-7880",
+  "tk_source": "M=ageGroupCountconsona;F=countConsonants(s:Str):i64{let n=s.len;let m=mut.0;let count=mut.0;lp(let i=0;i<n;i=i+1){m=s[i];let isConsonant=mut.true;if(m=97){isConsonant=false};if(m=101){isConsonant=false};if(m=105){isConsonant=false};if(m=111){isConsonant=false};if(m=117){isConsonant=false};if(m=65){isConsonant=false};if(m=69){isConsonant=false};if(m=73){isConsonant=false};if(m=79){isConsonant=false};if(m=85){isConsonant=false};if(m>96){if(m<123){if(isConsonant){count=count+1}}};if(m>64){if(m<91){if(isConsonant){count=count+1}}}};<count};F=ageGroup(age:i64):Str{if(age<0){<\"invalid\"};if(!(age>1)){<\"infant\"};if(!(age>12)){<\"child\"};if(!(age>17)){<\"teen\"};if(!(age>64)){<\"adult\"};<\"senior\"};F=ageGroupCountconsonants(s:Str):Str{<ageGroup(countConsonants(s))};",
+  "tk_tokens": 310,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0058v1-1c00177b",
+      "A-A-CND-0070v2-6c4d7f11"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: ageGroup(countConsonants(...))\ndef ageGroup_countConsonants(s):\n    return ageGroup(countConsonants(s))",
+    "python_tokens": 0,
+    "c_source": "// Composed: ageGroup(countConsonants(...))\nconst char* ageGroup_countConsonants(const char* s) {\n    return ageGroup(countConsonants(s));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: ageGroup(countConsonants(...))\nstatic String ageGroupCountconsonants(String s) {\n    return ageGroup(countConsonants(s));\n}\n",
+    "java_tokens": 0
+  }
+}

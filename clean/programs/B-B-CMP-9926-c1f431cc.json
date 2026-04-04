@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-9926-c1f431cc",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-9926",
+  "tk_source": "M=httpMethodCountprime;F=countPrimes(n:i64):i64{if(n<2){<0};let limit=n+1;let sieve=mut.[false;false;false;false;false;false;false;false;false;false];let i=mut.0;lp(let j=0;j<limit;j=j+1){sieve[j as u64]=true};sieve[0 as u64]=false;sieve[1 as u64]=false;lp(let p=2;p*!(p>n);p=p+1){if(sieve[p as u64]=true){lp(let m=p*p;!(m>n);m=m+p){sieve[m as u64]=false}}};let count=mut.0;lp(let x=2;!(x>n);x=x+1){if(sieve[x as u64]=true){count=count+1}};<count};F=httpMethod(code:i64):Str{if(code=1){<\"GET\"};if(code=2){<\"POST\"};if(code=3){<\"PUT\"};if(code=4){<\"DELETE\"};if(code=5){<\"PATCH\"};<\"UNKNOWN\"};F=httpMethodCountprimes(n:i64):Str{<httpMethod(countPrimes(n))};",
+  "tk_tokens": 273,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-MTH-0060v10-8b2092dd",
+      "A-A-CND-0095-bf68e699"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: httpMethod(countPrimes(...))\ndef httpMethod_countPrimes(n):\n    return httpMethod(countPrimes(n))",
+    "python_tokens": 0,
+    "c_source": "// Composed: httpMethod(countPrimes(...))\nconst char* httpMethod_countPrimes(int64_t n) {\n    return httpMethod(countPrimes(n));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: httpMethod(countPrimes(...))\nstatic String httpMethodCountprimes(long n) {\n    return httpMethod(countPrimes(n));\n}\n",
+    "java_tokens": 0
+  }
+}

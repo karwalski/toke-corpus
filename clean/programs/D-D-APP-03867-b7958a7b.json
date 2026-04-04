@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-03867-b7958a7b",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03867",
+  "tk_source": "M=strLenC;F=strLen(s:Str):i64{if(s.len<0){<0}el{<s.len}};F=longestWord(s:Str):Str{let n=s.len;if(n=0){<\"\"};let m=mut.0;let word=mut.\"\";let longest=mut.\"\";let current=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(c=32){if(longest.len>m){}el{longest=current;m=longest.len;};current=\"\"}el{current=current+(c as Str);};};if(longest.len>m){}el{longest=current;m=longest.len;};<longest};F=countConsonants(s:Str):i64{let n=s.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let lhs=s[i];let rhs=mut.lhs;if(rhs>64){if(rhs<91){rhs=rhs+32}};let iscon=mut.false;if(rhs>96){if(rhs<123){let zor=mut.false;if(rhs=97){zor=true};if(rhs=101){zor=true};if(rhs=105){zor=true};if(rhs=111){zor=true};if(rhs=117){zor=true};if(!(zor)){iscon=true}}};if(iscon){count=count+1}};<count};F=countConsonantsLongestword(s:Str):i64{<countConsonants(longestWord(s))};F=combined(s:Str):i64{let a=strLen(s);let b=countConsonants(s);<a+b};",
+  "tk_tokens": 367,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "A-A-STR-0004v84-c46eda24",
+      "B-B-CMP-3897-428f538f"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

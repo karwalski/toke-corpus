@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-7406-af76ceca",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-7406",
+  "tk_source": "M=countDivisorsWordcou;F=wordCount(s:Str):i64{let len=s.len;let count=mut.0;let inWord=mut.0;lp(let i=0;i<len;i=i+1){let ch=s[i];if(ch=32){if(inWord=1){count=count+1;inWord=0};}el{inWord=1};};if(inWord=1){count=count+1};<count};F=countDivisors(n:i64):i64{let count=mut.0;lp(let m=1;m<!(m>n);m=m+1){let div=m-m/n*n;if(div=0){count=count+1}};<count};F=countDivisorsWordcount(s:Str):i64{<countDivisors(wordCount(s))};",
+  "tk_tokens": 174,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0033v5-e4a65319",
+      "A-A-MTH-0106v1-7a777ed9"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: countDivisors(wordCount(...))\ndef countDivisors_wordCount(s):\n    return countDivisors(wordCount(s))",
+    "python_tokens": 0,
+    "c_source": "// Composed: countDivisors(wordCount(...))\nint64_t countDivisors_wordCount(const char* s) {\n    return countDivisors(wordCount(s));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: countDivisors(wordCount(...))\nstatic long countDivisorsWordcount(String s) {\n    return countDivisors(wordCount(s));\n}\n",
+    "java_tokens": 0
+  }
+}

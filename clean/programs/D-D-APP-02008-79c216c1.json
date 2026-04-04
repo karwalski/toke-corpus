@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-02008-79c216c1",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-02008",
+  "tk_source": "M=accSign;F=countDigits(n:i64;m:i64):i64{let absN=0-n;if(absN<0){absN=n};if(absN=0){<1};let count=0;lp(let dummy=0;absN>0;dummy=dummy+1){count=count+1;absN=absN-1};<count};F=sign(x:i64):i64{let p=x;let q=mut.0;if(p<0){q=-1}el{if(p=0){q=0}el{q=1}};<q};F=signCountdigits(n:i64;m:i64):i64{<sign(countDigits(n;m))};F=accumulate(arr:[i64]):i64{let r=mut.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+sign(arr[i as u64]);};<r};",
+  "tk_tokens": 202,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-9415-3a0f8117"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-03989-17f36abb",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-03989",
+  "tk_source": "M=padLeftGuard;F=padLeft(s:Str;width:i64;fill:Str):Str{let slen=s.len;let wlen=width as u64;if(!(slen<wlen)){<s}el{let padcount=mut.0;padcount=width-slen;let filllen=fill.len as i64;if(filllen=0){<s}el{let result=mut.\"\";lp(let i=0;i<padcount;i=i+1){result=result+fill};result=result+s;<result}}};F=safePadLeft(s:Str;width:i64;fill:Str):Str{if(s.len=0){<\"\"};<padLeft(s;width;fill)};",
+  "tk_tokens": 152,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0020v70-fad9f517",
+    "transform": "guard_empty",
+    "original_function": "padLeft"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

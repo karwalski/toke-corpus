@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-03707-25faf74e",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03707",
+  "tk_source": "M=wordCountCharfreqB;F=charFreq(x:Str):Str{let y=mut.\"\";lp(let i=0;i<x.len;i=i+1){let c=x[i]as Str;let found=mut.false;lp(let j=0;j<y.len;j=j+1){if(y[j]=c){found=true;br}};if(!(found)){y=y+c}};<y};F=wordCount(s:Str):i64{let n=s.len;let p=mut.0;let q=mut.0;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(p=0){if(c>32){p=1;q=1;}el{q=0;}}el{if(c=32){if(q=1){count=count+1;q=0;}el{}}el{q=1;}};};if(q=1){count=count+1;};<count};F=wordCountCharfreq(x:Str):i64{<wordCount(charFreq(x))};F=countConsonants(s:Str):i64{let n=s.len;let m=mut.0;let count=mut.0;lp(let i=0;i<n;i=i+1){m=s[i];let isConsonant=mut.true;if(m=97){isConsonant=false};if(m=101){isConsonant=false};if(m=105){isConsonant=false};if(m=111){isConsonant=false};if(m=117){isConsonant=false};if(m=65){isConsonant=false};if(m=69){isConsonant=false};if(m=73){isConsonant=false};if(m=79){isConsonant=false};if(m=85){isConsonant=false};if(m>96){if(m<123){if(isConsonant){count=count+1}}};if(m>64){if(m<91){if(isConsonant){count=count+1}}}};<count};F=bitLen(n:i64):i64{if(n=0){<0};let count=mut.0;let num=mut.n;lp(let i=0;i<64;i=i+1){if(num=0){br};count=count+1;num=num/2};<count};F=bitLenCountconsonants(s:Str):i64{<bitLen(countConsonants(s))};F=combined(x:Str):i64{let a=wordCountCharfreq(x);let b=bitLenCountconsonants(x);<a+b};",
+  "tk_tokens": 570,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-4424-e9829210",
+      "B-B-CMP-7860-f4db3fff"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-01885-4401e8c2",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-01885",
+  "tk_source": "M=rleCP;F=priority(score:i64):Str{if(score<0){<\"invalid\"};if(score>100){<\"invalid\"};if(score>75){<\"critical\"};if(score>50){<\"high\"};if(score>25){<\"medium\"};<\"low\"};F=toLower(s:Str):Str{let result=mut.\"\";lp(let i=0;i<s.len;i=i+1){let c=s[i];if(c>64){if(c<91){c=c+32}};result=result+(c as Str)};<result};F=sortString(s:Str):Str{let len=s.len;let sorted=s;lp(let i=0;i<len;i=i+1){lp(let j=0;j<len-i-1;j=j+1){if(sorted[j]>sorted[j+1]){let newStr=mut.\"\";lp(let k=0;k<len;k=k+1){if(k=j){newStr=newStr+(sorted[j+1]as Str)}el{if(k=j+1){newStr=newStr+(sorted[j]as Str)}el{newStr=newStr+(sorted[k]as Str)}}};sorted=newStr}}};<sorted};F=isAnagram(n:Str;m:Str):bool{let lowerN=toLower(n);let lowerM=toLower(m);if(lowerN.len=lowerM.len){let sortedN=sortString(lowerN);let sortedM=sortString(lowerM);<sortedN=sortedM}el{<false}};F=sortStringPriority(score:i64):Str{<sortString(priority(score))};F=charFreq(x:Str):Str{let y=mut.\"\";lp(let i=0;i<x.len;i=i+1){let c=x[i]as Str;let found=mut.false;lp(let j=0;j<y.len;j=j+1){if(y[j]=c){found=true;br}};if(!(found)){y=y+c}};<y};F=toCamelCase(lhs:Str):Str{let rhs=mut.\"\";let n=lhs.len;let i=mut.0;let capNext=mut.false;lp(let i=0;i<n;i=i+1){let c=lhs[i];if(c=95){capNext=true}el{if(capNext){if(c>96){let c=c-32;rhs=rhs+(c as Str);capNext=false}el{rhs=rhs+(c as Str);capNext=false}}el{rhs=rhs+(c as Str)}}};<rhs};F=toCamelCaseCharfreq(x:Str):Str{<toCamelCase(charFreq(x))};F=rle(s:Str):Str{let n=s.len;let result=mut.\"\";if(n=0 as u64){<\"\"};let currentChar=s[0 as u64];let count=mut.1 as u64;lp(let i=1 as u64;i<n;i=i+1){if(s[i as u64]=currentChar){count=count+1;}el{result=result+(currentChar as Str);if(count>1 as u64){result=result+(count as Str);};currentChar=s[i as u64];count=1 as u64;};};result=result+(currentChar as Str);if(count>1 as u64){result=result+(count as Str);};<result;};F=wordCount(s:Str):i64{let n=s.len;let p=mut.0;let q=mut.0;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(p=0){if(c>32){p=1;q=1;}el{q=0;}}el{if(c=32){if(q=1){count=count+1;q=0;}el{}}el{q=1;}};};if(q=1){count=count+1;};<count};F=wordCountRle(s:Str):i64{<wordCount(rle(s))};F=pipeline(score:i64):Str{<rle(charFreq(priority(score)))};",
+  "tk_tokens": 884,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-5698-27aa4ac9",
+      "B-B-CMP-0503-3df4349e",
+      "B-B-CMP-0006-4abbf36c"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

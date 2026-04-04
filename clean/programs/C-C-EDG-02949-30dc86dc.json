@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-02949-30dc86dc",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-02949",
+  "tk_source": "M=trimRightGuard;F=trimRight(s:Str):Str{let n=s.len;if(n=0 as u64){<\"\"};let x=mut.n-1 as i64;let y=mut.true;lp(let i=0;i<n;i=i+1){if(y){let c=s[x as u64];if(c=32){x=x-1}el{if(c=9){x=x-1}el{if(c=10){x=x-1}el{if(c=13){x=x-1}el{y=false}}}}}};let result=mut.\"\";lp(let j=0;j<x+1;j=j+1){result=result+s[j as u64]as Str};<result};F=safeTrimRight(s:Str):Str{if(s.len=0){<\"\"};<trimRight(s)};",
+  "tk_tokens": 185,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0014v40-40212e0b",
+    "transform": "guard_empty",
+    "original_function": "trimRight"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

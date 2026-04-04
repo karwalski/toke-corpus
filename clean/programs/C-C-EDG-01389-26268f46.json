@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-01389-26268f46",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-01389",
+  "tk_source": "M=palinGuard;F=isPalindrome(s:Str):bool{let n=s.len;let m=n-1;let i=mut.0;lp(let i=0;i<n;i=i+1){if(i>m-i){br};if(s[i]=s[m-i]){}el{<false}};<true};F=safeIsPalindrome(s:Str):bool{if(s.len=0){<false};<isPalindrome(s)};",
+  "tk_tokens": 94,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0024v1-9b4724dd",
+    "transform": "guard_empty",
+    "original_function": "isPalindrome"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

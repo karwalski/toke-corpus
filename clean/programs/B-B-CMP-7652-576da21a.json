@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-7652-576da21a",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-7652",
+  "tk_source": "M=classifyNumCountspac;F=countSpaces(lhs:Str;rhs:Str):i64{let count=mut.0;let n=lhs.len;lp(let i=0;i<n;i=i+1){if(lhs[i]=32){count=count+1}};<count};F=classifyNum(n:i64):Str{if(n<2){<\"neither\"};let isPrime=mut.true;let divisor=mut.2;lp(let i=2;i*!(i>n);i=i+1){let remainder=n-n/i*i;if(remainder=0){isPrime=false};if(!(isPrime)){br}};if(isPrime){<\"prime\"};<\"composite\"};F=classifyNumCountspaces(lhs:Str;rhs:Str):Str{<classifyNum(countSpaces(lhs;rhs))};",
+  "tk_tokens": 173,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0098v3-be8bfa53",
+      "A-A-CND-0091v2-01d9abe7"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: classifyNum(countSpaces(...))\ndef classifyNum_countSpaces(lhs, rhs):\n    return classifyNum(countSpaces(lhs, rhs))",
+    "python_tokens": 0,
+    "c_source": "// Composed: classifyNum(countSpaces(...))\nconst char* classifyNum_countSpaces(const char* lhs, const char* rhs) {\n    return classifyNum(countSpaces(lhs, rhs));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: classifyNum(countSpaces(...))\nstatic String classifyNumCountspaces(String lhs, String rhs) {\n    return classifyNum(countSpaces(lhs, rhs));\n}\n",
+    "java_tokens": 0
+  }
+}

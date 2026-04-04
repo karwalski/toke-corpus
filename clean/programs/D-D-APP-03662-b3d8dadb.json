@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-03662-b3d8dadb",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03662",
+  "tk_source": "M=collatzStepsWL;F=repeat(s:Str;num1:i64):Str{let result=mut.\"\";lp(let i=0;i<num1;i=i+1){result=result+s;};<result};F=longestWord(s:Str):Str{let n=s.len;if(n=0 as u64){<\"\"};let longest=mut.\"\";let longestLen=mut.0 as u64;let currentWord=mut.\"\";let i=mut.0 as u64;lp(let j=0 as u64;j<n;j=j+1){let c=s[j];if(c=32 as u8){let clen=currentWord.len;if(clen>longestLen){longest=currentWord;longestLen=clen};currentWord=\"\"}el{currentWord=currentWord+(c as Str)}};let clen=currentWord.len;if(clen>longestLen){longest=currentWord};<longest};F=longestWordRepeat(s:Str;num1:i64):Str{<longestWord(repeat(s;num1))};F=wordCount(s:Str):i64{let count=mut.0;let inWord=mut.false;lp(let i=0;i<s.len;i=i+1){let c=s[i]as u8;if(c=32){inWord=false;}el{if(inWord=false){count=count+1;inWord=true;};};};<count};F=countSpaces(lhs:Str;rhs:Str):i64{let count=mut.0;let n=lhs.len;lp(let i=0;i<n;i=i+1){if(lhs[i]=32){count=count+1}};<count};F=collatzSteps(n:i64):i64{let steps=mut.0;let current=mut.n;lp(let dummy=0;!(current=1);dummy=dummy+1){let iseven=current/2;let doubled=iseven*2;if(doubled=current){current=current/2}el{current=3*current+1};steps=steps+1};<steps};F=collatzStepsCountspaces(lhs:Str;rhs:Str):i64{<collatzSteps(countSpaces(lhs;rhs))};F=pipeline(s:Str):i64{<collatzSteps(wordCount(longestWord(s)))};",
+  "tk_tokens": 495,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-0423-35122e60",
+      "A-A-STR-0033-30f0a962",
+      "B-B-CMP-7599-a06404f6"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-6826-bc0962f3",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-6826",
+  "tk_source": "M=signProduct;F=product(arr:[f64]):f64{let lhs=mut.1.0;let rhs=0;lp(let i=0;i<arr.len;i=i+1){lhs=lhs*arr[i];};<lhs};F=sign(p:f64):i64{let q=mut.0;if(p<0.0){q=0-1;}el{if(p>0.0){q=1;};};<q};F=signProduct(arr:[f64]):i64{<sign(product(arr))};",
+  "tk_tokens": 120,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-ARR-0006v11-2a01c9e0",
+      "A-A-MTH-0071v45-df904e92"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: sign(product(...))\ndef sign_product(arr):\n    return sign(product(arr))",
+    "python_tokens": 0,
+    "c_source": "// Composed: sign(product(...))\nint64_t sign_product(int64_t arr) {\n    return sign(product(arr));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: sign(product(...))\nstatic long signProduct(long arr) {\n    return sign(product(arr));\n}\n",
+    "java_tokens": 0
+  }
+}

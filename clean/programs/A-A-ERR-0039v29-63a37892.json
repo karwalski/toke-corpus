@@ -1,0 +1,34 @@
+{
+  "id": "A-A-ERR-0039v29-63a37892",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-ERR-0039v29",
+  "tk_source": "M=safeSum;T=LookupErr{NotFound:Str;EmptyCollection:bool};F=safeSum(arr:[i64]):i64!LookupErr{if(arr.len=0 as u64){<LookupErr{EmptyCollection:true}};let p=mut.0 as i64;let q=arr.len;lp(let idx=0 as u64;idx<q;idx=idx+1 as u64){p=p+arr[idx]};<p};",
+  "tk_tokens": 100,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "Test 1: 15\nTest 2: Error - EmptyCollection=True\nTest 3: 0\nTest 4: 10\nTest 5: 0"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9588
+  },
+  "references": {
+    "python_source": "from typing import List, Union\n\nclass LookupErr:\n    def __init__(self, NotFound: str = \"\", EmptyCollection: bool = False):\n        self.NotFound = NotFound\n        self.EmptyCollection = EmptyCollection\n\ndef safeSum(arr: List[int]) -> Union[int, LookupErr]:\n    if len(arr) == 0:\n        return LookupErr(EmptyCollection=True)\n    \n    q = 0\n    for p in arr:\n        q = q + p\n    return q\n\ndef main():\n    test_cases = [\n        [1, 2, 3, 4, 5],\n        [],\n        [0, 0, 0, 0],\n        [-5, 10, -3, 8],\n        [1000000, -1000000]\n    ]\n    \n    for i, arr in enumerate(test_cases):\n        result = safeSum(arr)\n        if isinstance(result, LookupErr):\n            print(f\"Test {i+1}: Error - EmptyCollection={result.EmptyCollection}\")\n        else:\n            print(f\"Test {i+1}: {result}\")\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 238,
+    "c_source": "#include <stdio.h>\n#include <stdint.h>\n#include <stdbool.h>\n#include <string.h>\n#include <stdlib.h>\n\ntypedef struct {\n    char* NotFound;\n    bool EmptyCollection;\n} LookupErr;\n\ntypedef struct {\n    bool is_error;\n    union {\n        int64_t value;\n        LookupErr error;\n    } data;\n} Result_i64_LookupErr;\n\nResult_i64_LookupErr safeSum(int64_t* arr, size_t len) {\n    if (len == 0) {\n        LookupErr err = { .NotFound = NULL, .EmptyCollection = true };\n        Result_i64_LookupErr result = { .is_error = true, .data.error = err };\n        return result;\n    }\n    int64_t sum = 0;\n    for (size_t i = 0; i < len; i++) {\n        sum += arr[i];\n    }\n    Result_i64_LookupErr result = { .is_error = false, .data.value = sum };\n    return result;\n}\n\nvoid print_result(Result_i64_LookupErr r) {\n    if (r.is_error) {\n        if (r.data.error.EmptyCollection) {\n            printf(\"Error: EmptyCollection\\n\");\n        } else if (r.data.error.NotFound != NULL) {\n            printf(\"Error: NotFound(%s)\\n\", r.data.error.NotFound);\n        } else {\n            printf(\"Error: unknown variant\\n\");\n        }\n    } else {\n        printf(\"%ld\\n\", r.data.value);\n    }\n}\n\nint main() {\n    int64_t test1[] = {1, 2, 3, 4, 5};\n    Result_i64_LookupErr r1 = safeSum(test1, 5);\n    print_result(r1);\n\n    int64_t test2[] = {};\n    Result_i64_LookupErr r2 = safeSum(test2, 0);\n    print_result(r2);\n\n    int64_t test3[] = {0, 0, 0, 0};\n    Result_i64_LookupErr r3 = safeSum(test3, 4);\n    print_result(r3);\n\n    int64_t test4[] = {-10, 20, -30, 40};\n    Result_i64_LookupErr r4 = safeSum(test4, 4);\n    print_result(r4);\n\n    int64_t test5[] = {1000000, 2000000, 3000000};\n    Result_i64_LookupErr r5 = safeSum(test5, 3);\n    print_result(r5);\n\n    return 0;\n}",
+    "c_tokens": 545,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static class LookupErr {\n        public final String NotFound;\n        public final Boolean EmptyCollection;\n        \n        private LookupErr(String NotFound, Boolean EmptyCollection) {\n            this.NotFound = NotFound;\n            this.EmptyCollection = EmptyCollection;\n        }\n        \n        public static LookupErr fromNotFound(String msg) {\n            return new LookupErr(msg, null);\n        }\n        \n        public static LookupErr fromEmptyCollection() {\n            return new LookupErr(null, true);\n        }\n        \n        @Override\n        public String toString() {\n            if (EmptyCollection != null) {\n                return \"LookupErr{EmptyCollection=true}\";\n            } else {\n                return \"LookupErr{NotFound=\" + NotFound + \"}\";\n            }\n        }\n    }\n    \n    public static Object safeSum(int[] arr) {\n        if (arr.length == 0) {\n            return LookupErr.fromEmptyCollection();\n        }\n        \n        int p = 0;\n        int q = 0;\n        while (q < arr.length) {\n            p = p + arr[q];\n            q = q + 1;\n        }\n        return p;\n    }\n    \n    public static void main(String[] args) {\n        // Test 1: Normal array with positive numbers\n        int[] test1 = {1, 2, 3, 4, 5};\n        Object result1 = safeSum(test1);\n        System.out.println(result1 instanceof Integer ? result1 : result1);\n        \n        // Test 2: Empty array (should return error)\n        int[] test2 = {};\n        Object result2 = safeSum(test2);\n        System.out.println(result2 instanceof Integer ? result2 : result2);\n        \n        // Test 3: Array with negative numbers\n        int[] test3 = {-5, -3, 0, 2, 7};\n        Object result3 = safeSum(test3);\n        System.out.println(result3 instanceof Integer ? result3 : result3);\n        \n        // Test 4: Single element array\n        int[] test4 = {42};\n        Object result4 = safeSum(test4);\n        System.out.println(result4 instanceof Integer ? result4 : result4);\n        \n        // Test 5: Array with zeros only\n        int[] test5 = {0, 0, 0, 0};\n        Object result5 = safeSum(test5);\n        System.out.println(result5 instanceof Integer ? result5 : result5);\n    }\n}",
+    "java_tokens": 510
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-04684-edf798fb",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-04684",
+  "tk_source": "M=trimLeftGuard;F=trimLeft(s:Str):Str{let n=s.len;let lhs=mut.0 as u64;let rhs=mut.n;lp(let i=0 as u64;i<n;i=i+1){let c=s[lhs];if(c=32){if(c=9){if(c=10){if(c=13){<s}}}};lhs=lhs+1};<s};F=safeTrimLeft(s:Str):Str{if(s.len=0){<\"\"};<trimLeft(s)};",
+  "tk_tokens": 118,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0013v43-7d24ee74",
+    "transform": "guard_empty",
+    "original_function": "trimLeft"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

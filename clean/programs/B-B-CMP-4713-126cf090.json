@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-4713-126cf090",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-4713",
+  "tk_source": "M=longestWordNumtostrp;F=numToStr(first:f64;second:f64):Str{if(first<0 as f64){let neg=0 as f64-first;<\"-\"+numToStrPositive(neg)}el{<numToStrPositive(first)}};F=numToStrPositive(x:f64):Str{let intPart=x as i64;let fracPart=x-(intPart as f64);let intStr=intToStr(intPart);if(fracPart=0 as f64){<intStr}el{let fracStr=fracToStr(fracPart);<intStr+\".\"+fracStr}};F=intToStr(n:i64):Str{if(n=0){<\"0\"}el{let num=mut.n;if(num<0){num=0-num};let result=mut.\"\";lp(let i=0;num>0;i=i+1){let digit=num-num/10*10;result=digitToStr(digit)+result;num=num/10};<result}};F=digitToStr(d:i64):Str{if(d=0){<\"0\"}el{if(d=1){<\"1\"}el{if(d=2){<\"2\"}el{if(d=3){<\"3\"}el{if(d=4){<\"4\"}el{if(d=5){<\"5\"}el{if(d=6){<\"6\"}el{if(d=7){<\"7\"}el{if(d=8){<\"8\"}el{<\"9\"}}}}}}}}}};F=fracToStr(f:f64):Str{let result=mut.\"\";let fval=mut.f;lp(let i=0;i<6;i=i+1){fval=fval*10 as f64;let digit=fval as i64;result=result+digitToStr(digit);fval=fval-(digit as f64)};<result};F=longestWord(s:Str):Str{let n=s.len;if(n=0 as u64){<\"\"};let longest=mut.\"\";let longestLen=mut.0 as u64;let currentWord=mut.\"\";let i=mut.0 as u64;lp(let j=0 as u64;j<n;j=j+1){let c=s[j];if(c=32 as u8){let clen=currentWord.len;if(clen>longestLen){longest=currentWord;longestLen=clen};currentWord=\"\"}el{currentWord=currentWord+(c as Str)}};let clen=currentWord.len;if(clen>longestLen){longest=currentWord};<longest};F=longestWordNumtostrpositive(x:f64):Str{<longestWord(numToStrPositive(x))};",
+  "tk_tokens": 569,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0032v84-15a63dd5",
+      "A-A-STR-0061-d7189140"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: longestWord(numToStrPositive(...))\ndef longestWord_numToStrPositive(x):\n    return longestWord(numToStrPositive(x))",
+    "python_tokens": 0,
+    "c_source": "// Composed: longestWord(numToStrPositive(...))\nconst char* longestWord_numToStrPositive(double x) {\n    return longestWord(numToStrPositive(x));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: longestWord(numToStrPositive(...))\nstatic String longestWordNumtostrpositive(double x) {\n    return longestWord(numToStrPositive(x));\n}\n",
+    "java_tokens": 0
+  }
+}

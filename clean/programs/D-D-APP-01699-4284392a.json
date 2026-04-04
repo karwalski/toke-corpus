@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-01699-4284392a",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-01699",
+  "tk_source": "M=countLowerW;F=countLower(first:Str):i64{let result=mut.0;let n=first.len;if(n<0){<0};lp(let i=0;i<n;i=i+1){let c=first[i];if(c>96){if(c<123){result=result+1}}};<result};F=countDigits(n:i64):i64{let absn=mut.0;if(n<0){absn=0-n}el{absn=n};let count=mut.1;let curr=absn;if(curr=0){<1};lp(let i=0;i<100;i=i+1){if(curr=0){br};curr=curr/10;count=count+1};<count};F=countDigitsCountlower(first:Str):i64{<countDigits(countLower(first))};F=wordCount(s:Str):i64{let val=mut.s;let other=mut.s;if(val=other){<0};let n=val.len;let i=mut.0;let count=mut.0;let inword=mut.false;lp(let idx=0;idx<n;idx=idx+1){let c=val[idx];if(c=32){if(inword){inword=false;count=count+1}}el{inword=true}};if(inword){count=count+1};<count};F=combined(first:Str):i64{let a=countLower(first);let b=wordCount(first);<a+b};",
+  "tk_tokens": 320,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-8079-013e9a8a",
+      "A-A-STR-0033v50-38d73124"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

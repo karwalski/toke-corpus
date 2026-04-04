@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-2750-0fefef64",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-2750",
+  "tk_source": "M=manualToLowerRemoves;F=removeSpaces(s:Str):Str{let n=s.len;let result=mut.\"\";lp(let i=0;(i as u64)<n;i=i+1){if(!(s[i as u64]=32 as u8)){result=result+(s[i as u64]as Str);}};<result};F=manualToLower(s:Str):Str{let n=s.len;let m=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(c>64){if(c<91){let lower=c+32;m=m+(lower as Str)}el{m=m+(c as Str)}}el{m=m+(c as Str)}};<m};F=manualToLowerRemovespaces(s:Str):Str{<manualToLower(removeSpaces(s))};",
+  "tk_tokens": 179,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0042-9426529b",
+      "A-A-STR-0074v1-ab35b9fd"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: manualToLower(removeSpaces(...))\ndef manualToLower_removeSpaces(s):\n    return manualToLower(removeSpaces(s))",
+    "python_tokens": 0,
+    "c_source": "// Composed: manualToLower(removeSpaces(...))\nconst char* manualToLower_removeSpaces(const char* s) {\n    return manualToLower(removeSpaces(s));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: manualToLower(removeSpaces(...))\nstatic String manualToLowerRemovespaces(String s) {\n    return manualToLower(removeSpaces(s));\n}\n",
+    "java_tokens": 0
+  }
+}

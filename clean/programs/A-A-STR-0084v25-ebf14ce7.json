@@ -1,0 +1,34 @@
+{
+  "id": "A-A-STR-0084v25-ebf14ce7",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-STR-0084v25",
+  "tk_source": "M=mostFreqChar;F=mostFreqChar(s:Str):Str{let n=s.len;if(n=0 as u64){<\"\"};let m=mut.0 as u64;let maxCount=mut.0 as u64;let result=mut.\"\";lp(let i=0 as u64;i<n;i=i+1){let count=mut.0 as u64;lp(let j=0 as u64;j<n;j=j+1){if(s[i]=s[j]){count=count+1}};if(count>maxCount){maxCount=count;result=s[i]as Str}el{if(count=maxCount){let found=mut.false;lp(let k=0 as u64;k<i;k=k+1){if(s[k]=s[i]){found=true}};if(!(found)){result=s[i]as Str}}}};<result};",
+  "tk_tokens": 183,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "l\na\nt\na\n\nz\na\n1\np\né"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9362
+  },
+  "references": {
+    "python_source": "def mostFreqChar(s: str) -> str:\n    if not s:\n        return \"\"\n    n = len(s)\n    m = 256\n    counts = [0] * m\n    first_pos = [-1] * m\n    for i in range(n):\n        c = ord(s[i])\n        if first_pos[c] == -1:\n            first_pos[c] = i\n        counts[c] = counts[c] + 1\n    max_count = 0\n    result_char = \"\"\n    result_pos = n\n    for i in range(m):\n        if counts[i] > max_count:\n            max_count = counts[i]\n            result_char = chr(i)\n            result_pos = first_pos[i]\n        elif counts[i] == max_count and counts[i] > 0:\n            if first_pos[i] < result_pos:\n                result_pos = first_pos[i]\n                result_char = chr(i)\n    return result_char\n\ndef main():\n    test_cases = [\n        \"hello world\",\n        \"abracadabra\",\n        \"tie test\",\n        \"A man a plan a canal Panama\",\n        \"\",\n        \"zzzzzz\",\n        \"aabb\",\n        \"123 321 123\",\n        \"python programming\",\n        \"été\",\n    ]\n    for test in test_cases:\n        result = mostFreqChar(test)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 293,
+    "c_source": "#include <stdio.h>\n#include <string.h>\n#include <limits.h>\n\nchar mostFreqChar(const char *s) {\n    if (s == NULL || s[0] == '\\0') {\n        return '\\0';\n    }\n    \n    int freq[256] = {0};\n    int maxFreq = 0;\n    char result = '\\0';\n    \n    for (int i = 0; s[i] != '\\0'; i++) {\n        unsigned char c = (unsigned char)s[i];\n        freq[c]++;\n        \n        if (freq[c] > maxFreq) {\n            maxFreq = freq[c];\n            result = c;\n        }\n    }\n    \n    return result;\n}\n\nint main() {\n    // Test case 1: Normal case with unique maximum\n    const char *test1 = \"hello world\";\n    char result1 = mostFreqChar(test1);\n    printf(\"Test 1: '%s' -> '%c'\\n\", test1, result1);\n    \n    // Test case 2: Tie - should return first occurring\n    const char *test2 = \"aabb\";\n    char result2 = mostFreqChar(test2);\n    printf(\"Test 2: '%s' -> '%c'\\n\", test2, result2);\n    \n    // Test case 3: Empty string\n    const char *test3 = \"\";\n    char result3 = mostFreqChar(test3);\n    printf(\"Test 3: '%s' -> '%c'\\n\", test3, result3 ? result3 : ' ');\n    \n    // Test case 4: Single character\n    const char *test4 = \"zzzz\";\n    char result4 = mostFreqChar(test4);\n    printf(\"Test 4: '%s' -> '%c'\\n\", test4, result4);\n    \n    // Test case 5: Mixed case with numbers\n    const char *test5 = \"test123test\";\n    char result5 = mostFreqChar(test5);\n    printf(\"Test 5: '%s' -> '%c'\\n\", test5, result5);\n    \n    return 0;\n}",
+    "c_tokens": 440,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static String mostFreqChar(String s) {\n        if (s.isEmpty()) {\n            return \"\";\n        }\n        int n = s.length();\n        int[] counts = new int[256];\n        int[] firstPos = new int[256];\n        Arrays.fill(firstPos, -1);\n        for (int i = 0; i < n; i++) {\n            char c = s.charAt(i);\n            int idx = c;\n            counts[idx]++;\n            if (firstPos[idx] == -1) {\n                firstPos[idx] = i;\n            }\n        }\n        int maxCount = 0;\n        int bestChar = 0;\n        for (int i = 0; i < 256; i++) {\n            if (counts[i] > maxCount) {\n                maxCount = counts[i];\n                bestChar = i;\n            } else if (counts[i] == maxCount && maxCount > 0) {\n                if (firstPos[i] < firstPos[bestChar]) {\n                    bestChar = i;\n                }\n            }\n        }\n        return String.valueOf((char) bestChar);\n    }\n\n    public static void main(String[] args) {\n        System.out.println(mostFreqChar(\"\"));                     // empty\n        System.out.println(mostFreqChar(\"a\"));                    // single char\n        System.out.println(mostFreqChar(\"abacabad\"));             // 'a' appears 4 times\n        System.out.println(mostFreqChar(\"hello world\"));          // 'l' appears 3 times\n        System.out.println(mostFreqChar(\"tie test\"));             // 't' and 'e' tie, 't' first\n        System.out.println(mostFreqChar(\"aaabbb\"));               // 'a' and 'b' tie, 'a' first\n        System.out.println(mostFreqChar(\"AaaBBb\"));               // case sensitive\n    }\n}",
+    "java_tokens": 405
+  }
+}

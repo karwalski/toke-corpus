@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-02927-050573b1",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-02927",
+  "tk_source": "M=accFibonacciRec;F=fibonacciRec(n:i64):i64{if(n=0){<0};if(n=1){<1};let num1=fibonacciRec(n-1);let num2=fibonacciRec(n-2);<num1+num2};F=parityBit(n:i64):bool{let count=mut.0;let x=mut.n;lp(let i=0;i<64;i=i+1){let bit=x-x/2*2;if(bit=1){count=count+1};x=x/2};let parity=count-count/2*2;if(parity=0){<true};<false};F=parityBitFibonaccirec(n:i64):bool{<parityBit(fibonacciRec(n))};F=accumulate(arr:[i64]):i64{let r=mut.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+fibonacciRec(arr[i as u64]);};<r};",
+  "tk_tokens": 221,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-9319-53d37318"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

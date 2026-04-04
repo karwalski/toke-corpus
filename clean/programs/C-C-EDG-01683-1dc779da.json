@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-01683-1dc779da",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-01683",
+  "tk_source": "M=toUpperGuard;F=toUpper(num1:Str):Str{let n=num1.len;let result=mut.\"\";lp(let i=0;i<n;i=i+1){let c=mut.num1[i as u64];if(c>96){if(c<123){c=c-32}};result=result+(c as Str)};<result};F=safeToUpper(num1:Str):Str{if(num1.len=0){<\"\"};<toUpper(num1)};",
+  "tk_tokens": 106,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0002v70-a113532a",
+    "transform": "guard_empty",
+    "original_function": "toUpper"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

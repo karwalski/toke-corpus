@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-03401-6ccf5dcf",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-03401",
+  "tk_source": "M=isSubsequenceGuard;F=isSubsequence(val:Str;other:Str):bool{if(val=other){<true};let i=mut.0;let j=mut.0;let n=val.len as i64;let m=other.len as i64;lp(let k=0;!(i>n);k=k+1){if(i=n){<true};if(j=m){<false};if(val[i as u64]=other[j as u64]){i=i+1;j=j+1}el{j=j+1}};<false};F=safeIsSubsequence(val:Str;other:Str):bool{if(val.len=0){<false};<isSubsequence(val;other)};",
+  "tk_tokens": 153,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0087v2-bd1abff0",
+    "transform": "guard_empty",
+    "original_function": "isSubsequence"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

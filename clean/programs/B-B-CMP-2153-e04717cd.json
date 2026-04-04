@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-2153-e04717cd",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-2153",
+  "tk_source": "M=sortStringCommonpref;F=commonPrefix(val:Str;other:Str):Str{if(val=other){<val};let vlen=val.len;let olen=other.len;let minlen=mut.vlen;if(olen<vlen){minlen=olen};let i=mut.0 as u64;lp(let j=0 as u64;j<minlen;j=j+1){if(!(val[j]=other[j])){i=j;br};i=j+1};let prefix=mut.\"\";lp(let k=0 as u64;k<i;k=k+1){prefix=prefix+val[k]as Str};<prefix};F=toLower(s:Str):Str{let result=mut.\"\";lp(let i=0;i<s.len;i=i+1){let c=s[i];if(c>64){if(c<91){c=c+32}};result=result+(c as Str)};<result};F=sortString(s:Str):Str{let len=s.len;let sorted=s;lp(let i=0;i<len;i=i+1){lp(let j=0;j<len-i-1;j=j+1){if(sorted[j]>sorted[j+1]){let newStr=mut.\"\";lp(let k=0;k<len;k=k+1){if(k=j){newStr=newStr+(sorted[j+1]as Str)}el{if(k=j+1){newStr=newStr+(sorted[j]as Str)}el{newStr=newStr+(sorted[k]as Str)}}};sorted=newStr}}};<sorted};F=isAnagram(n:Str;m:Str):bool{let lowerN=toLower(n);let lowerM=toLower(m);if(lowerN.len=lowerM.len){let sortedN=sortString(lowerN);let sortedM=sortString(lowerM);<sortedN=sortedM}el{<false}};F=sortStringCommonprefix(val:Str;other:Str):Str{<sortString(commonPrefix(val;other))};",
+  "tk_tokens": 426,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0077v2-a6a3fd31",
+      "A-A-STR-0037v81-7d4c4a5e"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: sortString(commonPrefix(...))\ndef sortString_commonPrefix(val, other):\n    return sortString(commonPrefix(val, other))",
+    "python_tokens": 0,
+    "c_source": "// Composed: sortString(commonPrefix(...))\nconst char* sortString_commonPrefix(const char* val, const char* other) {\n    return sortString(commonPrefix(val, other));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: sortString(commonPrefix(...))\nstatic String sortStringCommonprefix(String val, String other) {\n    return sortString(commonPrefix(val, other));\n}\n",
+    "java_tokens": 0
+  }
+}

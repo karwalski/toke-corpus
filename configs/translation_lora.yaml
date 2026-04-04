@@ -1,0 +1,39 @@
+# Translation LoRA fine-tuning configuration
+# Story 9.3.3 -- Python-to-toke translation fine-tuning
+#
+# Compatible with MLX LoRA training (mlx-lm).
+# Usage:
+#   python -m mlx_lm.lora --config configs/translation_lora.yaml
+
+# Model
+model: "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit"
+
+# LoRA hyperparameters
+lora_layers: 16
+lora_parameters:
+  rank: 16
+  alpha: 32.0
+  dropout: 0.05
+  scale: 2.0  # alpha / rank
+
+# Training
+learning_rate: 2.0e-5
+warmup_steps: 100
+batch_size: 1
+iters: 1000
+grad_checkpoint: true
+max_seq_length: 2048
+
+# Data paths (relative to toke-corpus root)
+data: "../toke-corpus/data"
+train: "translation_train.jsonl"
+valid: "translation_val.jsonl"
+
+# Output
+adapter_path: "adapters/translation-lora"
+save_every: 200
+
+# Evaluation
+val_batches: 25
+test: "translation_test.jsonl"
+test_batches: -1  # all

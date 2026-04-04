@@ -1,0 +1,34 @@
+{
+  "id": "A-A-CND-0066v27-c35cd98c",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-CND-0066v27",
+  "tk_source": "M=windDir;F=windDir(lhs:i64;rhs:i64):Str{let dirs=[[\"N\";\"NE\";\"E\";\"SE\";\"S\";\"SW\";\"W\";\"NW\"];[\"N\"]];let bounds=[0;45;90;135;180;225;270;315;360];let deg=lhs;let result=mut.\"\";let idx=mut.0 as u64;lp(let i=0;i<8;i=i+1){let lo=bounds[i];let hi=bounds[i+1];if(!(deg<lo)){if(deg<hi){idx=i as u64;}}};result=dirs[0][idx];<result};",
+  "tk_tokens": 149,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "N\nNE\nE\nSE\nS\nSW\nW\nNW\nNW\nN\nW\nS\nSW"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9296
+  },
+  "references": {
+    "python_source": "def windDir(deg: int) -> str:\n    directions = [\n        (0, 44, \"N\"),\n        (45, 89, \"NE\"),\n        (90, 134, \"E\"),\n        (135, 179, \"SE\"),\n        (180, 224, \"S\"),\n        (225, 269, \"SW\"),\n        (270, 314, \"W\"),\n        (315, 359, \"NW\")\n    ]\n    for lhs, rhs, name in directions:\n        if lhs <= deg <= rhs:\n            return name\n    return \"N\"  # fallback for 0-44 wrap-around (though 0-44 already covered)\n\ndef main():\n    test_cases = [0, 45, 90, 135, 180, 225, 270, 315, 359, 22, 300, 224, 269]\n    for deg in test_cases:\n        print(windDir(deg))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 213,
+    "c_source": "#include <stdio.h>\n#include <string.h>\n#include <stdlib.h>\n\nconst char* windDir(int deg) {\n    const char* directions[] = {\"N\", \"NE\", \"E\", \"SE\", \"S\", \"SW\", \"W\", \"NW\"};\n    int bounds[] = {0, 45, 90, 135, 180, 225, 270, 315, 360};\n    \n    for (int i = 0; i < 8; i++) {\n        if (deg >= bounds[i] && deg < bounds[i+1]) {\n            return directions[i];\n        }\n    }\n    \n    return \"N\";\n}\n\nint main() {\n    int test_cases[] = {0, 44, 45, 89, 90, 134, 135, 179, 180, 224, 225, 269, 270, 314, 315, 359, 360, -1, 720};\n    int num_tests = sizeof(test_cases) / sizeof(test_cases[0]);\n    \n    for (int i = 0; i < num_tests; i++) {\n        int deg = test_cases[i];\n        if (deg < 0 || deg >= 360) {\n            deg = (deg % 360 + 360) % 360;\n        }\n        printf(\"%d -> %s\\n\", test_cases[i], windDir(deg));\n    }\n    \n    return 0;\n}",
+    "c_tokens": 305,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static String windDir(int deg) {\n        if (deg < 0 || deg > 359) {\n            return \"Invalid\";\n        }\n        String[] directions = {\"N\", \"NE\", \"E\", \"SE\", \"S\", \"SW\", \"W\", \"NW\"};\n        int[] bounds = {45, 90, 135, 180, 225, 270, 315, 360};\n        for (int i = 0; i < bounds.length; i++) {\n            if (deg < bounds[i]) {\n                return directions[i];\n            }\n        }\n        return \"N\";\n    }\n\n    public static void main(String[] args) {\n        System.out.println(windDir(0));\n        System.out.println(windDir(44));\n        System.out.println(windDir(90));\n        System.out.println(windDir(179));\n        System.out.println(windDir(359));\n    }\n}",
+    "java_tokens": 202
+  }
+}

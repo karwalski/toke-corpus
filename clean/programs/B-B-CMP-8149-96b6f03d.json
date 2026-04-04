@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-8149-96b6f03d",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-8149",
+  "tk_source": "M=fibonacciCountdigits;F=countDigitsInStr(val:Str;other:Str):i64{if(val=other){<0};let cnt=mut.0;let n=val.len;lp(let i=0;i<n;i=i+1){let c=val[i];if(c>47){if(c<58){cnt=cnt+1}};};<cnt};F=fibonacci(n:i64):i64{if(n=0){<0};if(n=1){<1};let a=mut.0;let b=mut.1;lp(let i=2;i<n+1;i=i+1){let next=a+b;a=b;b=next;};<b};F=fibonacciCountdigitsinstr(val:Str;other:Str):i64{<fibonacci(countDigitsInStr(val;other))};",
+  "tk_tokens": 180,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0097v2-7eee9297",
+      "A-A-MTH-0043-738d9052"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: fibonacci(countDigitsInStr(...))\ndef fibonacci_countDigitsInStr(val, other):\n    return fibonacci(countDigitsInStr(val, other))",
+    "python_tokens": 0,
+    "c_source": "// Composed: fibonacci(countDigitsInStr(...))\nint64_t fibonacci_countDigitsInStr(const char* val, const char* other) {\n    return fibonacci(countDigitsInStr(val, other));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: fibonacci(countDigitsInStr(...))\nstatic long fibonacciCountdigitsinstr(String val, String other) {\n    return fibonacci(countDigitsInStr(val, other));\n}\n",
+    "java_tokens": 0
+  }
+}

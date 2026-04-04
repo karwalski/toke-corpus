@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-02835-a61248f8",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-02835",
+  "tk_source": "M=charFreqW;F=charFreq(p:Str):i64{let q=mut.0;lp(let i=0;i<p.len;i=i+1){q=q+1};<q};F=isZero(n:i64;m:i64):bool{let sum=n+m;if(sum=0){<true};<false};F=isZero2(x:i64):bool{<isZero(x as i64;0 as i64)};F=isZero2Charfreq(p:Str):bool{<isZero2(charFreq(p))};F=wordCount(s:Str):i64{let num1=mut.s.len;let num2=mut.0;let inword=mut.false;lp(let i=0;i<num1;i=i+1){let c=s[i];if(c=32){if(inword){num2=num2+1;inword=false}}el{inword=true}};let result=mut.num2;if(inword){result=result+1};result|{Ok:v v;Err:e 0}};F=combined(p:Str):i64{let a=charFreq(p);let b=wordCount(p);<a+b};",
+  "tk_tokens": 252,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-8389-566ade8c",
+      "A-A-STR-0033v62-7fedd46b"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

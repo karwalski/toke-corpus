@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-00974-08218dc8",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-00974",
+  "tk_source": "M=boolNotIL;F=letterGrade(pct:f64):Str{if(!(pct<97.0)){<\"A+\";}el{if(!(pct<93.0)){<\"A\";}el{if(!(pct<90.0)){<\"A-\";}el{if(!(pct<87.0)){<\"B+\";}el{if(!(pct<83.0)){<\"B\";}el{if(!(pct<80.0)){<\"B-\";}el{if(!(pct<77.0)){<\"C+\";}el{if(!(pct<73.0)){<\"C\";}el{if(!(pct<70.0)){<\"C-\";}el{if(!(pct<60.0)){<\"D\";}el{<\"F\";}}}}}}}}}}};F=collapseSpaces(s:Str):Str{let n=s.len;let result=mut.\"\";lp(let m=0;m<n;m=m+1){let char=s[m as u64];if(!(char=32)){result=result+(char as Str);}el{if(result.len>0 as u64){let last=result[(result.len-1)as u64];if(!(last=32)){result=result+(char as Str);}}}};<result};F=collapseSpacesLettergrade(pct:f64):Str{<collapseSpaces(letterGrade(pct))};F=toCamelCase(s:Str):Str{let n=s.len;let result=mut.\"\";let capNext=mut.false;lp(let p=0;p<n;p=p+1){let q=s[p];if(q=95){capNext=true}el{if(capNext){if(q>96){let up=q-32;result=result+(up as Str)}el{result=result+(q as Str)};capNext=false}el{result=result+(q as Str)}}};<result};F=isConsonant(lhs:Str):bool{let vowels=[\"a\";\"e\";\"i\";\"o\";\"u\";\"A\";\"E\";\"I\";\"O\";\"U\"];let alpha=\"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\";let foundVowel=mut.false;let foundAlpha=mut.false;let i=mut.0 as u64;lp(let i=0 as u64;i<alpha.len;i=i+1 as u64){if(alpha[i]=lhs){foundAlpha=true;br;}};if(!foundAlpha){<false};lp(let i=0 as u64;i<vowels.len;i=i+1 as u64){if(vowels[i]=lhs){foundVowel=true;br;}};<!foundVowel};F=isConsonantTocamelcase(s:Str):bool{<isConsonant(toCamelCase(s))};F=boolNot(first:bool):bool{if(first=false){<true};<false};F=pipeline(pct:f64):bool{<boolNot(isConsonant(letterGrade(pct)))};",
+  "tk_tokens": 622,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-6083-d3baf2d0",
+      "B-B-CMP-1369-f16a5d25",
+      "A-A-CND-0015v4-d1552087"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

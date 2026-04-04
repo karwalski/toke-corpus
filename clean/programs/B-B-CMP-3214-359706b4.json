@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-3214-359706b4",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-3214",
+  "tk_source": "M=charToStrProduct;F=product(arr:[u64]):u64{let n=arr.len;if(n=0 as u64){<1 as u64}el{let result=mut.1;lp(let i=0;i<n;i=i+1){let left=result;let right=arr[i];result=left*right;};<result}};F=isAnagram(val:Str;other:Str):bool{if(val=other){<true};if(val.len>other.len){<false};if(val.len<other.len){<false};let valLower=toLower(val);let otherLower=toLower(other);let valSorted=sortStr(valLower);let otherSorted=sortStr(otherLower);<valSorted=otherSorted};F=toLower(s:Str):Str{let result=mut.\"\";lp(let i=0;i<s.len;i=i+1){let c=s[i];if(c>64){if(c<91){result=result+charToStr(c+32)}el{result=result+charToStr(c)}}el{result=result+charToStr(c)}};<result};F=sortStr(s:Str):Str{let chars=[s.len:u64];lp(let i=0;i<s.len;i=i+1){chars[i]=s[i]};bubbleSort(chars);let result=mut.\"\";lp(let i=0;i<chars.len;i=i+1){result=result+charToStr(chars[i])};<result};F=bubbleSort(arr:[u64]):void{lp(let i=0;i<arr.len;i=i+1){lp(let j=0;j<arr.len-i-1;j=j+1){if(arr[j]>arr[j+1]){let temp=arr[j];arr[j]=arr[j+1];arr[j+1]=temp}}}};F=charToStr(c:u64):Str{let s=mut.\"\";s=s+c;<s};F=charToStrProduct(arr:[u64]):Str{<charToStr(product(arr))};",
+  "tk_tokens": 426,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-ARR-0005v7-d1422cdc",
+      "A-A-STR-0037v10-d0dcd5e0"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: charToStr(product(...))\ndef charToStr_product(arr):\n    return charToStr(product(arr))",
+    "python_tokens": 0,
+    "c_source": "// Composed: charToStr(product(...))\nconst char* charToStr_product(int64_t arr) {\n    return charToStr(product(arr));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: charToStr(product(...))\nstatic String charToStrProduct(long arr) {\n    return charToStr(product(arr));\n}\n",
+    "java_tokens": 0
+  }
+}

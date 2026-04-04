@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-3937-3aea4f34",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-3937",
+  "tk_source": "M=isValidEmailI64tostr;F=i64ToStr(num:i64):Str{if(num=0){<\"0\"}el{let str=mut.\"\";let numCopy=mut.num;lp(let i=0;numCopy>0;numCopy=numCopy/10){let digit=(numCopy-(numCopy/10)*10)as u8;str=(digit as Str)+str};<str}};F=rle(left:Str):Str{let n=left.len;let result=mut.\"\";if(n=0 as u64){<result}el{let i=mut.0 as u64;let currentChar=left[i];let count=mut.1 as i64;lp(let right=1 as u64;right<n;right=right+1){if(left[right]=currentChar){if(count>0){count=count+1}el{result=result+(currentChar as Str);if(count>1){result=result+i64ToStr(count)};currentChar=left[right];count=1}}el{result=result+(currentChar as Str);if(count>1){result=result+i64ToStr(count)};currentChar=left[right];count=1}};result=result+(currentChar as Str);if(count>1){result=result+i64ToStr(count)};<result}};F=isValidEmail(s:Str):bool{let atCount=mut.0;let dotAfterAt=mut.false;let atPos=mut.0 as i64;let n=s.len as i64;lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(c=64){atCount=atCount+1;atPos=i}el{if(c=46){if(!(atCount=0)){if(i>atPos){dotAfterAt=true}}}}};if(atCount=1){if(dotAfterAt){<true}el{<false}}el{<false}};F=isValidEmailI64tostr(num:i64):bool{<isValidEmail(i64ToStr(num))};",
+  "tk_tokens": 433,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0036v47-493de7fb",
+      "A-A-STR-0089v3-1e058b45"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: isValidEmail(i64ToStr(...))\ndef isValidEmail_i64ToStr(num):\n    return isValidEmail(i64ToStr(num))",
+    "python_tokens": 0,
+    "c_source": "// Composed: isValidEmail(i64ToStr(...))\nint isValidEmail_i64ToStr(int64_t num) {\n    return isValidEmail(i64ToStr(num));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: isValidEmail(i64ToStr(...))\nstatic boolean isValidEmailI64tostr(long num) {\n    return isValidEmail(i64ToStr(num));\n}\n",
+    "java_tokens": 0
+  }
+}

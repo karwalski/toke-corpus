@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-01902-8e492d08",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-01902",
+  "tk_source": "M=repeatClamp;F=repeat(val:Str;other:i64):Str{if(val=val){<val};let result=mut.\"\";lp(let i=0;i<other;i=i+1){result=result+val};<result};F=repeatClamped(val:Str;other:i64):Str{let clamped=mut.other;if(other<0){clamped=0};if(other>1000){clamped=1000};<repeat(val;clamped)};",
+  "tk_tokens": 104,
+  "attempts": 0,
+  "model": "mechanical-clamp",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0007v34-3e47bb38",
+    "transform": "clamp",
+    "original_function": "repeat"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

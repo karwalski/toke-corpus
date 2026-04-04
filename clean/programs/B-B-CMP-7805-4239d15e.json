@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-7805-4239d15e",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-7805",
+  "tk_source": "M=seasonCountsentences;F=countSentences(lhs:Str):i64{let count=mut.0;let n=lhs.len;lp(let i=0;i<n;i=i+1){if(lhs[i as u64]=46 as u8){count=count+1;};};<count;};F=season(month:i64):Str{if(month=1){<\"winter\"};if(month=2){<\"winter\"};if(month=12){<\"winter\"};if(month=3){<\"spring\"};if(month=4){<\"spring\"};if(month=5){<\"spring\"};if(month=6){<\"summer\"};if(month=7){<\"summer\"};if(month=8){<\"summer\"};if(month=9){<\"autumn\"};if(month=10){<\"autumn\"};if(month=11){<\"autumn\"};<\"invalid\"};F=seasonCountsentences(lhs:Str):Str{<season(countSentences(lhs))};",
+  "tk_tokens": 210,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0060v3-10525f6f",
+      "A-A-CND-0064-27c86e11"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: season(countSentences(...))\ndef season_countSentences(lhs):\n    return season(countSentences(lhs))",
+    "python_tokens": 0,
+    "c_source": "// Composed: season(countSentences(...))\nconst char* season_countSentences(const char* lhs) {\n    return season(countSentences(lhs));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: season(countSentences(...))\nstatic String seasonCountsentences(String lhs) {\n    return season(countSentences(lhs));\n}\n",
+    "java_tokens": 0
+  }
+}

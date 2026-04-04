@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-01423-c398ec0d",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-01423",
+  "tk_source": "M=accDigitalRoot;F=digitalRoot(n:i64):i64{let m=mut.n;if(m<0){m=0-m};let sum=mut.0;lp(let i=0;i<1;i=i+1){if(m=0){<0};sum=0;let curr=m;lp(let j=0;j<1;j=j+1){if(curr=0){br};let digit=curr-curr/10*10;sum=sum+digit;curr=curr/10};if(sum<10){<sum};m=sum};<sum};F=accumulate(arr:[i64]):i64{let r=mut.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+digitalRoot(arr[i as u64]);};<r};",
+  "tk_tokens": 174,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "A-A-MTH-0074v9-9e024fd8"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

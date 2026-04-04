@@ -1,0 +1,34 @@
+{
+  "id": "A-A-SRT-0100v28-fddae0fb",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-SRT-0100v28",
+  "tk_source": "M=sortposneg;F=sortPosNeg(arr:[i64]):[i64]{let pos=mut.[];let neg=mut.[];lp(let i=0;i<arr.len;i=i+1){let elem=arr[i];if(elem<0){neg=neg+[elem];}el{pos=pos+[elem];};};let first=mut.[];let second=mut.[];lp(let i=0;i<pos.len;i=i+1){let minIdx=mut.i;lp(let j=i+1;j<pos.len;j=j+1){if(pos[j]<pos[minIdx]){minIdx=j;};};if(!(minIdx=i)){let tmp=pos[i];pos[i]=pos[minIdx];pos[minIdx]=tmp;};first=first+[pos[i]];};lp(let i=0;i<neg.len;i=i+1){let minIdx=mut.i;lp(let j=i+1;j<neg.len;j=j+1){if(neg[j]<neg[minIdx]){minIdx=j;};};if(!(minIdx=i)){let tmp=neg[i];neg[i]=neg[minIdx];neg[minIdx]=tmp;};second=second+[neg[i]];};<first+second};",
+  "tk_tokens": 262,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "[0, 2, 3, 4, -5, -3, -1]\n[0, 0, 1, 3, 4, 5]\n[-9, -7, -3, -2, -1]\n[]\n[-42]\n[0, 1, 2, 3, -4, -3, -2]\n[0, 0, 0, 0]"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9282
+  },
+  "references": {
+    "python_source": "def sortPosNeg(arr):\n    if not arr:\n        return []\n    \n    # separate positives (including zeros) and negatives\n    first = []\n    second = []\n    \n    for num in arr:\n        if num >= 0:\n            first.append(num)\n        else:\n            second.append(num)\n    \n    # sort both parts ascending\n    first.sort()\n    second.sort()\n    \n    # combine: positives first, then negatives\n    return first + second\n\n\ndef main():\n    # Test case 1: mixed values\n    test1 = [3, -1, 0, -5, 2, -3, 4]\n    print(sortPosNeg(test1))\n    \n    # Test case 2: all positives (including zeros)\n    test2 = [5, 0, 3, 1, 0, 4]\n    print(sortPosNeg(test2))\n    \n    # Test case 3: all negatives\n    test3 = [-7, -2, -9, -1, -3]\n    print(sortPosNeg(test3))\n    \n    # Test case 4: empty array\n    test4 = []\n    print(sortPosNeg(test4))\n    \n    # Test case 5: single element\n    test5 = [-42]\n    print(sortPosNeg(test5))\n    \n    # Test case 6: already sorted\n    test6 = [0, 1, 2, 3, -4, -3, -2]\n    print(sortPosNeg(test6))\n    \n    # Test case 7: all zeros\n    test7 = [0, 0, 0, 0]\n    print(sortPosNeg(test7))\n\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 362,
+    "c_source": "#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nint compare_i64(const void *a, const void *b) {\n    long long ia = *(const long long *)a;\n    long long ib = *(const long long *)b;\n    if (ia < ib) return -1;\n    if (ia > ib) return 1;\n    return 0;\n}\n\nlong long *sortPosNeg(const long long *arr, size_t len, size_t *out_len) {\n    if (len == 0) {\n        *out_len = 0;\n        long long *result = malloc(sizeof(long long));\n        if (!result) return NULL;\n        return result;\n    }\n    \n    long long *positives = malloc(len * sizeof(long long));\n    long long *negatives = malloc(len * sizeof(long long));\n    if (!positives || !negatives) {\n        free(positives);\n        free(negatives);\n        *out_len = 0;\n        return NULL;\n    }\n    \n    size_t pos_count = 0;\n    size_t neg_count = 0;\n    \n    for (size_t i = 0; i < len; i++) {\n        if (arr[i] >= 0) {\n            positives[pos_count++] = arr[i];\n        } else {\n            negatives[neg_count++] = arr[i];\n        }\n    }\n    \n    qsort(positives, pos_count, sizeof(long long), compare_i64);\n    qsort(negatives, neg_count, sizeof(long long), compare_i64);\n    \n    long long *result = malloc(len * sizeof(long long));\n    if (!result) {\n        free(positives);\n        free(negatives);\n        *out_len = 0;\n        return NULL;\n    }\n    \n    size_t idx = 0;\n    for (size_t i = 0; i < pos_count; i++) {\n        result[idx++] = positives[i];\n    }\n    for (size_t i = 0; i < neg_count; i++) {\n        result[idx++] = negatives[i];\n    }\n    \n    free(positives);\n    free(negatives);\n    *out_len = len;\n    return result;\n}\n\nvoid print_array(const long long *arr, size_t len) {\n    printf(\"[\");\n    for (size_t i = 0; i < len; i++) {\n        printf(\"%lld\", arr[i]);\n        if (i < len - 1) printf(\", \");\n    }\n    printf(\"]\");\n}\n\nint main(void) {\n    struct {\n        long long *arr;\n        size_t len;\n    } test_cases[] = {\n        {(long long[]){3, -1, 2, -5, 0, 4, -2}, 7},\n        {(long long[]){}, 0},\n        {(long long[]){-10, -20, -30}, 3},\n        {(long long[]){5, 4, 3, 2, 1}, 5},\n        {(long long[]){0, 0, -1, 1, -2, 2}, 6}\n    };\n    \n    const size_t num_tests = sizeof(test_cases) / sizeof(test_cases[0]);\n    \n    for (size_t i = 0; i < num_tests; i++) {\n        size_t result_len;\n        long long *result = sortPosNeg(test_cases[i].arr, test_cases[i].len, &result_len);\n        \n        printf(\"Test %zu: Input = \", i + 1);\n        print_array(test_cases[i].arr, test_cases[i].len);\n        printf(\", Output = \");\n        print_array(result, result_len);\n        printf(\"\\n\");\n        \n        free(result);\n    }\n    \n    return 0;\n}",
+    "c_tokens": 791,
+    "java_source": "import java.util.Arrays;\n\npublic class Solution {\n    public static int[] sortPosNeg(int[] arr) {\n        int[] positives = new int[arr.length];\n        int[] negatives = new int[arr.length];\n        int first = 0;\n        int second = 0;\n        \n        for (int num : arr) {\n            if (num >= 0) {\n                positives[first++] = num;\n            } else {\n                negatives[second++] = num;\n            }\n        }\n        \n        Arrays.sort(positives, 0, first);\n        Arrays.sort(negatives, 0, second);\n        \n        int[] result = new int[arr.length];\n        System.arraycopy(positives, 0, result, 0, first);\n        System.arraycopy(negatives, 0, result, first, second);\n        \n        return result;\n    }\n    \n    public static void main(String[] args) {\n        // Test case 1: Mixed positive, negative, and zero\n        int[] arr1 = {3, -1, 0, -5, 2, -2, 4};\n        System.out.println(Arrays.toString(sortPosNeg(arr1)));\n        \n        // Test case 2: All positives including zeros\n        int[] arr2 = {5, 0, 3, 1, 0, 4};\n        System.out.println(Arrays.toString(sortPosNeg(arr2)));\n        \n        // Test case 3: All negatives\n        int[] arr3 = {-7, -2, -9, -1, -3};\n        System.out.println(Arrays.toString(sortPosNeg(arr3)));\n        \n        // Test case 4: Empty array\n        int[] arr4 = {};\n        System.out.println(Arrays.toString(sortPosNeg(arr4)));\n        \n        // Test case 5: Single element boundary\n        int[] arr5 = {-1};\n        System.out.println(Arrays.toString(sortPosNeg(arr5)));\n    }\n}",
+    "java_tokens": 398
+  }
+}

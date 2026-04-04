@@ -1,0 +1,33 @@
+{
+  "id": "A-A-MTH-0101v9-a3f909b4",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-MTH-0101v9",
+  "tk_source": "M=armstrong;F=isArmstrong(n:i64):bool{let d=mut.0;let tmp=mut.n;if(tmp<0){tmp=0-tmp};if(tmp=0){d=1};if(!(tmp=0)){lp(let i=0;!(tmp=0);i=i+1){tmp=tmp/10;d=d+1}};let sum=mut.0;let num=mut.n;if(num<0){num=0-num};let pow=mut.0;lp(let i=0;i<d;i=i+1){let digit=mut.num;let j=mut.0;if(!(j=i)){lp(let k=0;k<i;k=k+1){digit=digit/10}};digit=digit-digit/10*10;pow=digit;if(!(i=0)){lp(let k=1;k<d;k=k+1){let mul=mut.0;lp(let l=0;l<digit;l=l+1){mul=mul+pow};pow=mul}};sum=sum+pow};if(sum=n){<true};<false};",
+  "tk_tokens": 232,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "java",
+      "python"
+    ],
+    "majority_output": "True\nTrue\nTrue\nTrue\nTrue\nTrue\nTrue\nTrue\nTrue\nFalse"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9224
+  },
+  "references": {
+    "python_source": "def isArmstrong(n: int) -> bool:\n    if n < 0:\n        n = -n\n    if n == 0:\n        return True\n    \n    # Count digits using only addition and subtraction\n    d = 0\n    temp = n\n    while temp > 0:\n        d = d + 1\n        temp = temp // 10\n    \n    # Compute sum of digits^d using only addition and subtraction\n    total = 0\n    temp = n\n    while temp > 0:\n        digit = temp % 10\n        # Compute digit^d using repeated multiplication (only addition)\n        power_val = 1\n        count = 0\n        while count < d:\n            # Multiply power_val by digit using only addition\n            product = 0\n            add_count = 0\n            while add_count < digit:\n                product = product + power_val\n                add_count = add_count + 1\n            power_val = product\n            count = count + 1\n        total = total + power_val\n        temp = temp // 10\n    \n    return total == n\n\ndef main():\n    # Test cases\n    test_numbers = [0, 1, 153, 370, 371, 407, 1634, 8208, 9474, 9475]\n    \n    for num in test_numbers:\n        result = isArmstrong(num)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 313,
+    "c_source": "#include <stdio.h>\n#include <stdbool.h>\n#include <math.h>\n\nbool isArmstrong(int64_t n) {\n    if (n < 0) {\n        return false;\n    }\n    if (n == 0) {\n        return true;\n    }\n    \n    int64_t original = n;\n    int d = 0;\n    int64_t temp = n;\n    \n    while (temp != 0) {\n        temp = temp / 10;\n        d++;\n    }\n    \n    int64_t sum = 0;\n    temp = n;\n    \n    while (temp != 0) {\n        int64_t digit = temp % 10;\n        int64_t power = 1;\n        for (int i = 0; i < d; i++) {\n            power = power * digit;\n        }\n        sum = sum + power;\n        temp = temp / 10;\n    }\n    \n    return sum == original;\n}\n\nint main() {\n    printf(\"%d\\n\", isArmstrong(0));\n    printf(\"%d\\n\", isArmstrong(1));\n    printf(\"%d\\n\", isArmstrong(153));\n    printf(\"%d\\n\", isArmstrong(370));\n    printf(\"%d\\n\", isArmstrong(371));\n    printf(\"%d\\n\", isArmstrong(407));\n    printf(\"%d\\n\", isArmstrong(1634));\n    printf(\"%d\\n\", isArmstrong(8208));\n    printf(\"%d\\n\", isArmstrong(9474));\n    printf(\"%d\\n\", isArmstrong(9475));\n    printf(\"%d\\n\", isArmstrong(-153));\n    \n    return 0;\n}",
+    "c_tokens": 344,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static boolean isArmstrong(long n) {\n        if (n < 0) return false;\n        if (n == 0) return true;\n        \n        long original = n;\n        int d = 0;\n        long temp = n;\n        while (temp > 0) {\n            d++;\n            temp = temp / 10;\n        }\n        \n        long sum = 0;\n        temp = n;\n        while (temp > 0) {\n            long digit = temp % 10;\n            long power = 1;\n            for (int i = 0; i < d; i++) {\n                power = power * digit;\n            }\n            sum = sum + power;\n            temp = temp / 10;\n        }\n        \n        return sum == original;\n    }\n    \n    public static void main(String[] args) {\n        System.out.println(isArmstrong(0));\n        System.out.println(isArmstrong(1));\n        System.out.println(isArmstrong(153));\n        System.out.println(isArmstrong(370));\n        System.out.println(isArmstrong(371));\n        System.out.println(isArmstrong(407));\n        System.out.println(isArmstrong(1634));\n        System.out.println(isArmstrong(8208));\n        System.out.println(isArmstrong(9474));\n        System.out.println(isArmstrong(9475));\n    }\n}",
+    "java_tokens": 290
+  }
+}

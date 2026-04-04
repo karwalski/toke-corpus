@@ -1,0 +1,33 @@
+{
+  "id": "A-A-ARR-0110v22-e9fd9d7f",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-ARR-0110v22",
+  "tk_source": "M=swapAt;F=swapAt(arr:[i64];num1:i64;num2:i64):[i64]{let idx1=num1 as u64;let idx2=num2 as u64;let result=mut.[];lp(let i=0;i<arr.len;i=i+1){if(i=idx1){result=result+[arr[idx2]]}el{if(i=idx2){result=result+[arr[idx1]]}el{result=result+[arr[i]]}}};<result};",
+  "tk_tokens": 110,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java"
+    ],
+    "majority_output": "[5;2;3;4;1]\n[10]\n[]\n[7;9;8]\n[400;200;300;100]"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9599
+  },
+  "references": {
+    "python_source": "def swapAt(arr: list[int], i: int, j: int) -> list[int]:\n    result = arr.copy()\n    result[i], result[j] = result[j], result[i]\n    return result\n\ndef main() -> None:\n    # Test 1: normal swap\n    print(swapAt([1, 2, 3, 4], 0, 2))\n    # Test 2: swap with negative numbers in array\n    print(swapAt([-5, 0, 7, -2], 1, 3))\n    # Test 3: empty array\n    print(swapAt([], 0, 0))\n    # Test 4: single element array\n    print(swapAt([42], 0, 0))\n    # Test 5: swap adjacent elements\n    print(swapAt([10, 20, 30, 40, 50], 2, 3))\n    # Test 6: swap first and last\n    print(swapAt([9, 8, 7, 6], 0, 3))\n    # Test 7: array with duplicates\n    print(swapAt([5, 5, 5, 5], 1, 2))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 277,
+    "c_source": "#include <stdio.h>\n#include <stdlib.h>\n#include <stdint.h>\n\ntypedef struct {\n    int64_t* data;\n    size_t len;\n} Arr_i64;\n\nArr_i64 swapAt(Arr_i64 arr, int64_t num1, int64_t num2) {\n    if (arr.len == 0) return arr;\n    Arr_i64 result;\n    result.len = arr.len;\n    result.data = malloc(arr.len * sizeof(int64_t));\n    if (result.data == NULL) exit(1);\n    for (size_t k = 0; k < arr.len; k++) {\n        result.data[k] = arr.data[k];\n    }\n    result.data[num1] = arr.data[num2];\n    result.data[num2] = arr.data[num1];\n    return result;\n}\n\nvoid print_arr(Arr_i64 arr) {\n    printf(\"[\");\n    for (size_t i = 0; i < arr.len; i++) {\n        printf(\"%ld\", arr.data[i]);\n        if (i < arr.len - 1) printf(\";\");\n    }\n    printf(\"]\");\n}\n\nint main() {\n    Arr_i64 arr1 = { (int64_t[]){1,2,3,4,5}, 5 };\n    Arr_i64 arr2 = { (int64_t[]){10}, 1 };\n    Arr_i64 arr3 = { NULL, 0 };\n    Arr_i64 arr4 = { (int64_t[]){7,8,9}, 3 };\n    Arr_i64 arr5 = { (int64_t[]){100,200,300,400}, 4 };\n\n    Arr_i64 r1 = swapAt(arr1, 0, 4);\n    Arr_i64 r2 = swapAt(arr2, 0, 0);\n    Arr_i64 r3 = swapAt(arr3, 0, 0);\n    Arr_i64 r4 = swapAt(arr4, 1, 2);\n    Arr_i64 r5 = swapAt(arr5, 0, 3);\n\n    print_arr(r1); printf(\"\\n\");\n    print_arr(r2); printf(\"\\n\");\n    print_arr(r3); printf(\"\\n\");\n    print_arr(r4); printf(\"\\n\");\n    print_arr(r5); printf(\"\\n\");\n\n    free(r1.data);\n    free(r2.data);\n    free(r3.data);\n    free(r4.data);\n    free(r5.data);\n    return 0;\n}",
+    "c_tokens": 517,
+    "java_source": "import java.util.Arrays;\n\npublic class Solution {\n    public static int[] swapAt(int[] arr, int i, int j) {\n        if (arr == null || arr.length == 0) {\n            return new int[0];\n        }\n        int[] result = Arrays.copyOf(arr, arr.length);\n        int temp = result[i];\n        result[i] = result[j];\n        result[j] = temp;\n        return result;\n    }\n\n    public static void main(String[] args) {\n        // Test 1: Normal case\n        int[] arr1 = {1, 2, 3, 4, 5};\n        int[] res1 = swapAt(arr1, 1, 3);\n        System.out.println(Arrays.toString(res1));\n\n        // Test 2: Swap first and last\n        int[] arr2 = {10, 20, 30, 40, 50};\n        int[] res2 = swapAt(arr2, 0, 4);\n        System.out.println(Arrays.toString(res2));\n\n        // Test 3: Empty array\n        int[] arr3 = {};\n        int[] res3 = swapAt(arr3, 0, 0);\n        System.out.println(Arrays.toString(res3));\n\n        // Test 4: Single element array\n        int[] arr4 = {42};\n        int[] res4 = swapAt(arr4, 0, 0);\n        System.out.println(Arrays.toString(res4));\n\n        // Test 5: Swap adjacent elements\n        int[] arr5 = {5, 6, 7, 8};\n        int[] res5 = swapAt(arr5, 1, 2);\n        System.out.println(Arrays.toString(res5));\n    }\n}",
+    "java_tokens": 358
+  }
+}

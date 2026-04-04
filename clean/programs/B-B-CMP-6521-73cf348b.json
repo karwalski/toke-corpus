@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-6521-73cf348b",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-6521",
+  "tk_source": "M=letterGradeMultiply;F=multiply(n:f64;m:f64):f64{if(n<0.0){if(m<0.0){<multiply(-n;-m)};<-multiply(-n;m)}el{if(m<0.0){<-multiply(n;-m)};let product=mut.0.0;let count=mut.0.0;lp(let count=0.0;count<m;count=count+1.0){product=product+n};<product}};F=letterGrade(pct:f64):Str{if(!(pct<97.0)){<\"A+\";}el{if(!(pct<93.0)){<\"A\";}el{if(!(pct<90.0)){<\"A-\";}el{if(!(pct<87.0)){<\"B+\";}el{if(!(pct<83.0)){<\"B\";}el{if(!(pct<80.0)){<\"B-\";}el{if(!(pct<77.0)){<\"C+\";}el{if(!(pct<73.0)){<\"C\";}el{if(!(pct<70.0)){<\"C-\";}el{if(!(pct<60.0)){<\"D\";}el{<\"F\";}}}}}}}}}}};F=letterGradeMultiply(n:f64;m:f64):Str{<letterGrade(multiply(n;m))};",
+  "tk_tokens": 297,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-MTH-0009v1-f3cabc8d",
+      "A-A-CND-0077v2-32355a0d"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: letterGrade(multiply(...))\ndef letterGrade_multiply(n, m):\n    return letterGrade(multiply(n, m))",
+    "python_tokens": 0,
+    "c_source": "// Composed: letterGrade(multiply(...))\nconst char* letterGrade_multiply(double n, double m) {\n    return letterGrade(multiply(n, m));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: letterGrade(multiply(...))\nstatic String letterGradeMultiply(double n, double m) {\n    return letterGrade(multiply(n, m));\n}\n",
+    "java_tokens": 0
+  }
+}

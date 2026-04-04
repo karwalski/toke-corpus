@@ -1,0 +1,33 @@
+{
+  "id": "A-A-ARR-0061v5-543a0009",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-ARR-0061v5",
+  "tk_source": "M=arrMin;F=arrMin(arr:[u64]):u64{let p=mut.arr[0];let q=mut.1;lp(let i=0;i<arr.len;i=i+1){if(arr[i]<p){p=arr[i]}};<p};",
+  "tk_tokens": 61,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "python"
+    ],
+    "majority_output": "1\n100\n0\n1\n17"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9647
+  },
+  "references": {
+    "python_source": "def arrMin(arr):\n    if not arr:\n        raise ValueError(\"Array must be non-empty\")\n    p = arr[0]\n    q = mut = p\n    for val in arr[1:]:\n        if val < q:\n            q = val\n    return q\n\ndef main():\n    test_cases = [\n        [5, 3, 8, 1, 9],\n        [100],\n        [0, 0, 0],\n        [10, 9, 8, 7, 6, 5, 4, 3, 2, 1],\n        [42, 17, 23, 42, 17],\n    ]\n    for arr in test_cases:\n        result = arrMin(arr)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 173,
+    "c_source": "#include <stdio.h>\n#include <stdlib.h>\n#include <limits.h>\n\nunsigned long long arrMin(unsigned long long *arr, size_t len) {\n    unsigned long long p = ULLONG_MAX;\n    unsigned long long q = 0;\n    for (size_t i = 0; i < len; i++) {\n        q = arr[i];\n        if (q < p) {\n            p = q;\n        }\n    }\n    return p;\n}\n\nint main() {\n    unsigned long long test1[] = {5, 2, 8, 1, 9};\n    printf(\"%llu\\n\", arrMin(test1, 5));\n\n    unsigned long long test2[] = {100};\n    printf(\"%llu\\n\", arrMin(test2, 1));\n\n    unsigned long long test3[] = {0, 0, 0};\n    printf(\"%llu\\n\", arrMin(test3, 3));\n\n    unsigned long long test4[] = {ULLONG_MAX, ULLONG_MAX - 1};\n    printf(\"%llu\\n\", arrMin(test4, 2));\n\n    unsigned long long test5[] = {42, 7, 42, 7, 42};\n    printf(\"%llu\\n\", arrMin(test5, 5));\n\n    return 0;\n}",
+    "c_tokens": 271,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static long arrMin(long[] arr) {\n        long p = arr[0];\n        long q = mut.0;\n        for (int i = 1; i < arr.length; i++) {\n            if (arr[i] < p) {\n                q = p;\n                p = arr[i];\n            }\n        }\n        return p;\n    }\n\n    public static void main(String[] args) {\n        // Test 1: Basic case\n        long[] arr1 = {5, 3, 9, 1, 7};\n        System.out.println(arrMin(arr1));\n\n        // Test 2: Single element\n        long[] arr2 = {42};\n        System.out.println(arrMin(arr2));\n\n        // Test 3: All same values\n        long[] arr3 = {8, 8, 8, 8};\n        System.out.println(arrMin(arr3));\n\n        // Test 4: Contains zero\n        long[] arr4 = {10, 0, 5, 3};\n        System.out.println(arrMin(arr4));\n\n        // Test 5: Large numbers\n        long[] arr5 = {1000000000L, 999999999L, 1000000001L};\n        System.out.println(arrMin(arr5));\n    }\n}",
+    "java_tokens": 279
+  }
+}

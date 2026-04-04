@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-8392-1f8941c5",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-8392",
+  "tk_source": "M=isNegative2Charfreq;F=charFreq(p:Str):i64{let q=mut.0;lp(let i=0;i<p.len;i=i+1){q=q+1};<q};F=isNegative(lhs:i64;rhs:i64):bool{let res=mut.false;lp(let i=0;i<1;i=i+1){if(lhs<rhs){res=true}el{res=false}};<res};F=isNegative2(x:i64):bool{<isNegative(x;0)};F=isNegative2Charfreq(p:Str):bool{<isNegative2(charFreq(p))};",
+  "tk_tokens": 133,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0034v45-9189dc85",
+      "A-A-MTH-0038v27-e242dafd"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: isNegative2(charFreq(...))\ndef isNegative2_charFreq(p):\n    return isNegative2(charFreq(p))",
+    "python_tokens": 0,
+    "c_source": "// Composed: isNegative2(charFreq(...))\nint isNegative2_charFreq(const char* p) {\n    return isNegative2(charFreq(p));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: isNegative2(charFreq(...))\nstatic boolean isNegative2Charfreq(String p) {\n    return isNegative2(charFreq(p));\n}\n",
+    "java_tokens": 0
+  }
+}

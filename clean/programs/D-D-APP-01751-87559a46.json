@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-01751-87559a46",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-01751",
+  "tk_source": "M=countUpperTosnakecas;F=toSnakeCase(s:Str):Str{let x=s.len;let y=mut.\"\";lp(let i=0;i<x;i=i+1){let c=s[i];if(c>64){if(c<91){if(y.len>0){y=y+\"_\"};y=y+(c+32 as Str)}el{y=y+(c as Str)}}el{y=y+(c as Str)}};<y};F=countUpper(s:Str):i64{let n=s.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i];if(c>64){if(c<91){count=count+1}}};<count};F=countUpperTosnakecase(s:Str):i64{<countUpper(toSnakeCase(s))};F=lastWord(s:Str):Str{let n=s.len;if(n=0 as u64){<\"\"};let laststart=mut.0 as u64;let found=mut.false;lp(let i=0 as u64;i<n;i=i+1){let c=s[i];if(c=32){found=true;laststart=i+1 as u64}};if(!(found)){<s};if(laststart=n){<\"\"};let result=mut.\"\";lp(let j=laststart;j<n;j=j+1){result=result+(s[j]as Str)};<result};F=countConsonants(s:Str):i64{let n=s.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let lhs=s[i];let rhs=mut.lhs;if(rhs>64){if(rhs<91){rhs=rhs+32}};let iscon=mut.false;if(rhs>96){if(rhs<123){let zor=mut.false;if(rhs=97){zor=true};if(rhs=101){zor=true};if(rhs=105){zor=true};if(rhs=111){zor=true};if(rhs=117){zor=true};if(!(zor)){iscon=true}}};if(iscon){count=count+1}};<count};F=countConsonantsLastword(s:Str):i64{<countConsonants(lastWord(s))};F=combined(s:Str):i64{let a=countUpperTosnakecase(s);let b=countConsonantsLastword(s);<a+b};",
+  "tk_tokens": 519,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-1104-b0271f09",
+      "B-B-CMP-4142-8f8e2cee"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

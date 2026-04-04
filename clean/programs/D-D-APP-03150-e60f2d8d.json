@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-03150-e60f2d8d",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-03150",
+  "tk_source": "M=accFactorialRecWrapp;F=multiply(left:i64;right:i64):i64{let result=mut.0;if(left=0){<0};if(right=0){<0};if(left<0){if(right<0){let l=0-left;let r=0-right;lp(let i=0;i<r;i=i+1){result=result+l};<result}el{let l=0-left;lp(let i=0;i<right;i=i+1){result=result-l};<result}}el{if(right<0){let r=0-right;lp(let i=0;i<r;i=i+1){result=result-left};<result}el{lp(let i=0;i<right;i=i+1){result=result+left};<result}}};F=factorialRec(val:i64;other:i64):i64{if(val=other){<1};if(!(val>1)){<1}el{<val*factorialRec(val-1;other)}};F=factorialRecWrapper(n:i64):i64{<factorialRec(n;n)};F=factorialRecWrapperMultiply(left:i64;right:i64):i64{<factorialRecWrapper(multiply(left;right))};F=accumulate(arr:[i64]):i64{let r=mut.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+factorialRecWrapper(arr[i as u64]);};<r};",
+  "tk_tokens": 321,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-8771-c1294e3f"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

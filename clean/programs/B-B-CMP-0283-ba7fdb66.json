@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-0283-ba7fdb66",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-0283",
+  "tk_source": "M=countLowerDeleteat;F=deleteAt(s:Str;pos:i64):Str{let n=s.len;let posU=pos as u64;if(pos<0){<s};if(posU>n-1 as u64){<s};let result=mut.\"\";lp(let i=0;i<n;i=i+1){let iU=i as u64;if(!(iU=posU)){result=result+s[iU]}};<result};F=countLower(s:Str):i64{let n=s.len;let m=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i];if(c>96){if(c<123){m=m+1}};};<m};F=countLowerDeleteat(s:Str;pos:i64):i64{<countLower(deleteAt(s;pos))};",
+  "tk_tokens": 180,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0068v2-8e3bffae",
+      "A-A-STR-0096v1-b889a68e"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: countLower(deleteAt(...))\ndef countLower_deleteAt(s, pos):\n    return countLower(deleteAt(s, pos))",
+    "python_tokens": 0,
+    "c_source": "// Composed: countLower(deleteAt(...))\nint64_t countLower_deleteAt(const char* s, int64_t pos) {\n    return countLower(deleteAt(s, pos));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: countLower(deleteAt(...))\nstatic long countLowerDeleteat(String s, long pos) {\n    return countLower(deleteAt(s, pos));\n}\n",
+    "java_tokens": 0
+  }
+}

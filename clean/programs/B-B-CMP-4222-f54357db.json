@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-4222-f54357db",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-4222",
+  "tk_source": "M=countDigitsInStrRemo;F=removeLeadingZeros(lhs:Str):Str{let n=lhs.len;let idx=mut.0;lp(let i=0;i<n;i=i+1){if(lhs[i]=48){idx=i+1}el{br}};let rhs=mut.\"\";lp(let i=idx;i<n;i=i+1){rhs=rhs+lhs[i]as Str};if(rhs=\"\"){<\"0\"}el{<rhs}};F=countDigitsInStr(s:Str):i64{let n=s.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(c>47){if(c<58){count=count+1}}};<count};F=countDigitsInStrRemoveleadingzeros(lhs:Str):i64{<countDigitsInStr(removeLeadingZeros(lhs))};",
+  "tk_tokens": 192,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-STR-0043v3-7a73ee9a",
+      "A-A-STR-0097-b6ee0c98"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: countDigitsInStr(removeLeadingZeros(...))\ndef countDigitsInStr_removeLeadingZeros(lhs):\n    return countDigitsInStr(removeLeadingZeros(lhs))",
+    "python_tokens": 0,
+    "c_source": "// Composed: countDigitsInStr(removeLeadingZeros(...))\nint64_t countDigitsInStr_removeLeadingZeros(const char* lhs) {\n    return countDigitsInStr(removeLeadingZeros(lhs));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: countDigitsInStr(removeLeadingZeros(...))\nstatic long countDigitsInStrRemoveleadingzeros(String lhs) {\n    return countDigitsInStr(removeLeadingZeros(lhs));\n}\n",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "A-A-CND-0039v7-f264d3de",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-CND-0039v7",
+  "tk_source": "M=isBetween;F=isBetween(x:f64;lo:f64;hi:f64):bool{if(!(lo>x)){if(!(x>hi)){<true}el{<false}}el{<false}};",
+  "tk_tokens": 46,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "True\nTrue\nTrue\nTrue\nFalse\nFalse\nFalse\nTrue\nTrue\nTrue"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9808
+  },
+  "references": {
+    "python_source": "def isBetween(x: float, left: float, right: float) -> bool:\n    if left > right:\n        return False\n    if x < left:\n        return False\n    if x > right:\n        return False\n    return True\n\ndef main():\n    test_cases = [\n        (5.0, 1.0, 10.0),\n        (0.0, -1.0, 1.0),\n        (10.0, 10.0, 10.0),\n        (15.0, 10.0, 20.0),\n        (9.0, 10.0, 20.0),\n        (25.0, 10.0, 20.0),\n        (5.0, 20.0, 10.0),\n        (-5.0, -10.0, 0.0),\n        (0.0, 0.0, 0.0),\n        (3.14, 3.0, 4.0)\n    ]\n    \n    for x, left, right in test_cases:\n        result = isBetween(x, left, right)\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 260,
+    "c_source": "#include <stdio.h>\n#include <stdbool.h>\n\nbool isBetween(double x, double left, double right) {\n    if (!(left > right)) {\n        if (!(x < left)) {\n            if (!(x > right)) {\n                return true;\n            }\n        }\n    }\n    return false;\n}\n\nint main() {\n    // Test case 1: normal case, inside range\n    printf(\"%d\\n\", isBetween(5.0, 1.0, 10.0));\n    \n    // Test case 2: at left boundary\n    printf(\"%d\\n\", isBetween(1.0, 1.0, 10.0));\n    \n    // Test case 3: at right boundary\n    printf(\"%d\\n\", isBetween(10.0, 1.0, 10.0));\n    \n    // Test case 4: below range\n    printf(\"%d\\n\", isBetween(0.5, 1.0, 10.0));\n    \n    // Test case 5: above range\n    printf(\"%d\\n\", isBetween(10.5, 1.0, 10.0));\n    \n    // Test case 6: reversed bounds (should always be false)\n    printf(\"%d\\n\", isBetween(5.0, 10.0, 1.0));\n    \n    // Test case 7: zero values\n    printf(\"%d\\n\", isBetween(0.0, 0.0, 0.0));\n    \n    // Test case 8: negative range\n    printf(\"%d\\n\", isBetween(-2.0, -5.0, 5.0));\n    \n    // Test case 9: exactly in middle\n    printf(\"%d\\n\", isBetween(0.0, -1.0, 1.0));\n    \n    // Test case 10: floating point precision test\n    printf(\"%d\\n\", isBetween(0.1 + 0.2, 0.3, 0.3));\n    \n    return 0;\n}",
+    "c_tokens": 430,
+    "java_source": "public class Solution {\n    public static boolean isBetween(double x, double left, double right) {\n        if (!(left > x)) {\n            if (!(x > right)) {\n                return true;\n            }\n        }\n        return false;\n    }\n\n    public static void main(String[] args) {\n        System.out.println(isBetween(5.0, 1.0, 10.0));\n        System.out.println(isBetween(0.0, -1.0, 1.0));\n        System.out.println(isBetween(10.0, 10.0, 20.0));\n        System.out.println(isBetween(20.0, 10.0, 20.0));\n        System.out.println(isBetween(15.0, 20.0, 10.0));\n    }\n}",
+    "java_tokens": 168
+  }
+}

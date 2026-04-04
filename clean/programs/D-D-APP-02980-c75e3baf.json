@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-02980-c75e3baf",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-02980",
+  "tk_source": "M=charCodeW;F=reverse(s:Str):Str{let n=s.len;let m=mut.(n as i64)-1;let r=mut.\"\";lp(let i=0;i<n;i=i+1){r=r+s[m];m=m-1;};<r};F=intToStr(n:i64):Str{if(n<0){<\"-\"+intToStr(-n)}el{if(n=0){<\"0\"}el{let result=mut.\"\";lp(let temp=n;temp>0;temp=temp/10){let digit=(temp-(temp/10)*10)as u8;let zeroChar=\"0\"[0];let charDigit=((digit as u8)+zeroChar)as Str;result=result+charDigit;};<reverse(result)}}};F=repeat(val:Str;other:i64):Str{if(other<0){<\"\"}el{if(val=intToStr(other)){<val}el{let result=mut.\"\";lp(let i=0;i<other;i=i+1){result=result+val};<result}}};F=titleCase(s:Str):Str{let len=s.len;let result=mut.\"\";let capitalizeNext=mut.true;lp(let i=0;i<len;i=i+1){let ch=s[i];if(ch=32){result=result+\" \";capitalizeNext=true}el{if(capitalizeNext){result=result+capitalize(ch);capitalizeNext=false}el{result=result+ch}}};<result};F=capitalize(ch:Str):Str{let code=charCode(ch);if(code>96){if(code<123){<fromCharCode(code-32)}el{<ch}}el{<ch}};F=charCode(ch:Str):i64{<0};F=fromCharCode(code:i64):Str{<\"\"};F=charCodeInttostr(n:i64):i64{<charCode(intToStr(n))};F=toHex(first:i64):Str{if(first<0){<\"0\"};if(first=0){<\"0\"};let hexDigits=[48;49;50;51;52;53;54;55;56;57;97;98;99;100;101;102];let result=mut.\"\";let number=mut.first;lp(let dummy=0;dummy<1;dummy=dummy+1){let rem=number-(number/16)*16;let c=hexDigits[rem as u64];result=c as Str+result;number=number/16;if(!(number>0)){br};};<result};F=wordCount(s:Str):i64{let n=s.len;let p=mut.0;let q=mut.0;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(p=0){if(c>32){p=1;q=1;}el{q=0;}}el{if(c=32){if(q=1){count=count+1;q=0;}el{}}el{q=1;}};};if(q=1){count=count+1;};<count};F=wordCountTohex(first:i64):i64{<wordCount(toHex(first))};F=combined(ch:Str):i64{let a=charCode(ch);let b=wordCount(ch);<a+b};",
+  "tk_tokens": 722,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-1180-72fdea36",
+      "B-B-CMP-1567-cdfd9e45"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

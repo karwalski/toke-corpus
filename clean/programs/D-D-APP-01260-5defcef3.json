@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-01260-5defcef3",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-01260",
+  "tk_source": "M=countVowelsS;F=countVowels(s:Str):i64{let n=s.len;let m=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i as u64];let zc=mut.false;if(c>64){if(c<91){let cl=c+32;if(cl=97){zc=true}el{if(cl=101){zc=true}el{if(cl=105){zc=true}el{if(cl=111){zc=true}el{if(cl=117){zc=true}}}}};}el{if(c=97){zc=true}el{if(c=101){zc=true}el{if(c=105){zc=true}el{if(c=111){zc=true}el{if(c=117){zc=true}}}}};};}el{if(c=97){zc=true}el{if(c=101){zc=true}el{if(c=105){zc=true}el{if(c=111){zc=true}el{if(c=117){zc=true}}}}};};if(zc){m=m+1};};<m;};F=isPositive(val:i64;other:i64):bool{if(val=other){<false};if(val>0){<true}el{<false}};F=isPositiveOther(x:i64):bool{<isPositive(x;0)};F=isPositiveOtherCountvowels(s:Str):bool{<isPositiveOther(countVowels(s))};F=leastFreqChar(s:Str):Str{if(s.len=0){<\"\"};let freq=mut.[0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];lp(let i=0;i<s.len;i=i+1){let c=s[i];if(c>95){if(c<123){freq[c-97]=freq[c-97]+1}el{if(c>64){if(c<91){freq[c-65+26]=freq[c-65+26]+1}el{}}el{if(c>47){if(c<58){freq[c-48+52]=freq[c-48+52]+1}el{}}el{}}}}el{if(c>31){if(c<48){freq[c]=freq[c]+1}el{}}el{}}};let minfreq=mut.0;let first=mut.0;let firstchar=mut.\"\";let found=mut.false;lp(let i=0;i<s.len;i=i+1){let c=s[i];let idx=mut.0;if(c>95){if(c<123){idx=c-97}el{if(c>64){if(c<91){idx=c-65+26}el{idx=0}}el{if(c>47){if(c<58){idx=c-48+52}el{idx=0}}el{idx=0}}}}el{if(c>31){if(c<48){idx=c}el{idx=0}}el{idx=0}};if(!(idx=0)){let f=freq[idx];if(!found){minfreq=f;first=i;firstchar=c as Str;found=true}el{if(f<minfreq){minfreq=f;first=i;firstchar=c as Str}}}};<firstchar};F=strLen(val:Str):i64{<val.len};F=strLenLeastfreqchar(s:Str):i64{<strLen(leastFreqChar(s))};F=combined(s:Str):i64{let a=countVowels(s);let b=strLenLeastfreqchar(s);<a+b};",
+  "tk_tokens": 810,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-8329-f3f59aaa",
+      "B-B-CMP-3058-d00ab563"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

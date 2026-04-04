@@ -1,0 +1,34 @@
+{
+  "id": "A-A-SRT-0075v23-607f152c",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-SRT-0075v23",
+  "tk_source": "M=lis;F=lisLength(arr:[i64]):i64{let n=arr.len;if(n=0){<0};let dp=mut.[];lp(let i=0;i<n;i=i+1){dp=dp+[1];};let ans=mut.1;lp(let left=0;left<n;left=left+1){lp(let right=0;right<left;right=right+1){if(arr[right]<arr[left]){let cand=dp[right]+1;if(cand>dp[left]){dp[left]=cand;if(cand>ans){ans=cand;};};};};};<ans};",
+  "tk_tokens": 135,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "6\n0\n1\n1\n1\n5\n4"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9608
+  },
+  "references": {
+    "python_source": "def lisLength(arr):\n    if not arr:\n        return 0\n    n = len(arr)\n    dp = [1] * n\n    for right in range(n):\n        for left in range(right):\n            if arr[left] < arr[right]:\n                if dp[left] + 1 > dp[right]:\n                    dp[right] = dp[left] + 1\n    return max(dp)\n\ndef main():\n    # Test case 1: normal case\n    arr1 = [10, 22, 9, 33, 21, 50, 41, 60, 80]\n    print(lisLength(arr1))\n    \n    # Test case 2: empty array\n    arr2 = []\n    print(lisLength(arr2))\n    \n    # Test case 3: single element\n    arr3 = [5]\n    print(lisLength(arr3))\n    \n    # Test case 4: strictly decreasing\n    arr4 = [5, 4, 3, 2, 1]\n    print(lisLength(arr4))\n    \n    # Test case 5: all equal\n    arr5 = [7, 7, 7, 7]\n    print(lisLength(arr5))\n    \n    # Test case 6: negative numbers\n    arr6 = [-5, -4, -3, -2, -1]\n    print(lisLength(arr6))\n    \n    # Test case 7: mixed positive/negative\n    arr7 = [3, 4, -1, 0, 6, 2, 3]\n    print(lisLength(arr7))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 352,
+    "c_source": "#include <stdio.h>\n#include <stdlib.h>\n\nlong long lisLength(const long long* arr, long long n) {\n    if (n == 0) return 0;\n    long long* dp = (long long*)malloc(n * sizeof(long long));\n    long long result = 1;\n    for (long long right = 0; right < n; ++right) {\n        dp[right] = 1;\n        for (long long left = 0; left < right; ++left) {\n            if (arr[left] < arr[right]) {\n                if (dp[left] + 1 > dp[right]) {\n                    dp[right] = dp[left] + 1;\n                }\n            }\n        }\n        if (dp[right] > result) {\n            result = dp[right];\n        }\n    }\n    free(dp);\n    return result;\n}\n\nint main() {\n    long long test1[] = {10, 9, 2, 5, 3, 7, 101, 18};\n    printf(\"%lld\\n\", lisLength(test1, 8));\n    \n    long long test2[] = {0, 1, 0, 3, 2, 3};\n    printf(\"%lld\\n\", lisLength(test2, 6));\n    \n    long long test3[] = {7, 7, 7, 7, 7, 7};\n    printf(\"%lld\\n\", lisLength(test3, 6));\n    \n    long long test4[] = {};\n    printf(\"%lld\\n\", lisLength(test4, 0));\n    \n    long long test5[] = {1};\n    printf(\"%lld\\n\", lisLength(test5, 1));\n    \n    long long test6[] = {5, 4, 3, 2, 1};\n    printf(\"%lld\\n\", lisLength(test6, 5));\n    \n    long long test7[] = {1, 3, 6, 7, 9, 4, 10, 5, 6};\n    printf(\"%lld\\n\", lisLength(test7, 9));\n    \n    return 0;\n}",
+    "c_tokens": 448,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static long lisLength(long[] arr) {\n        int n = arr.length;\n        if (n == 0) return 0;\n        \n        long[] dp = new long[n];\n        Arrays.fill(dp, 1);\n        \n        for (int right = 0; right < n; right++) {\n            for (int left = 0; left < right; left++) {\n                if (arr[left] < arr[right]) {\n                    if (dp[left] + 1 > dp[right]) {\n                        dp[right] = dp[left] + 1;\n                    }\n                }\n            }\n        }\n        \n        long maxLen = 1;\n        for (long val : dp) {\n            if (val > maxLen) maxLen = val;\n        }\n        return maxLen;\n    }\n    \n    public static void main(String[] args) {\n        // Test case 1: normal case\n        long[] arr1 = {10, 22, 9, 33, 21, 50, 41, 60, 80};\n        System.out.println(lisLength(arr1));\n        \n        // Test case 2: empty array\n        long[] arr2 = {};\n        System.out.println(lisLength(arr2));\n        \n        // Test case 3: all decreasing\n        long[] arr3 = {5, 4, 3, 2, 1};\n        System.out.println(lisLength(arr3));\n        \n        // Test case 4: all equal\n        long[] arr4 = {7, 7, 7, 7};\n        System.out.println(lisLength(arr4));\n        \n        // Test case 5: single element\n        long[] arr5 = {42};\n        System.out.println(lisLength(arr5));\n        \n        // Test case 6: with zero and negative values\n        long[] arr6 = {0, -5, 3, -2, 1, 4};\n        System.out.println(lisLength(arr6));\n    }\n}",
+    "java_tokens": 428
+  }
+}

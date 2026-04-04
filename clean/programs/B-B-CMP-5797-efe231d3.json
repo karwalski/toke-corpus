@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-5797-efe231d3",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-5797",
+  "tk_source": "M=trimSeason;F=season(month:i64):Str{if(month=1){<\"winter\"};if(month=2){<\"winter\"};if(month=12){<\"winter\"};if(month=3){<\"spring\"};if(month=4){<\"spring\"};if(month=5){<\"spring\"};if(month=6){<\"summer\"};if(month=7){<\"summer\"};if(month=8){<\"summer\"};if(month=9){<\"autumn\"};if(month=10){<\"autumn\"};if(month=11){<\"autumn\"};<\"invalid\"};F=trim(s:Str):Str{let n=s.len;if(n=0){<\"\"};let start=mut.0;lp(let i=0;i<n;i=i+1){if(!(s[i]=32 as u8)){start=i;br;}};let m=mut.(n-1);lp(let i=n-1;!(i<0);i=i-1){if(!(s[i]=32 as u8)){m=i;br;}};if(s[start]=32 as u8){<\"\"};let result=mut.\"\";lp(let i=start;!(i>m);i=i+1){result=result+(s[i]as Str);};<result;};F=trimSeason(month:i64):Str{<trim(season(month))};",
+  "tk_tokens": 290,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0064-27c86e11",
+      "A-A-STR-0012v41-c82c9df9"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: trim(season(...))\ndef trim_season(month):\n    return trim(season(month))",
+    "python_tokens": 0,
+    "c_source": "// Composed: trim(season(...))\nconst char* trim_season(int64_t month) {\n    return trim(season(month));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: trim(season(...))\nstatic String trimSeason(long month) {\n    return trim(season(month));\n}\n",
+    "java_tokens": 0
+  }
+}

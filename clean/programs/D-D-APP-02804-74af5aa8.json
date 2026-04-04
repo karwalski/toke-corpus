@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-02804-74af5aa8",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-02804",
+  "tk_source": "M=rot13SL;F=longestCommonPrefix(strs:[Str]):Str{if(strs.len=0 as u64){<\"\"};let prefix=mut.\"\";let minLen=mut.strs[0].len;lp(let i=1;i<strs.len;i=i+1){if(strs[i].len<minLen){minLen=strs[i].len};};lp(let j=0;j<minLen;j=j+1){let char=strs[0][j];let match=mut.true;lp(let i=1;i<strs.len;i=i+1){if(strs[i][j]=char){}el{match=false};};if(match){prefix=prefix+char}el{<prefix};};<prefix};F=titleCase(s:Str):Str{let len=s.len;let result=mut.\"\";let capitalizeNext=mut.true;lp(let i=0;i<len;i=i+1){let ch=s[i];if(ch=32){result=result+\" \";capitalizeNext=true}el{if(capitalizeNext){result=result+capitalize(ch);capitalizeNext=false}el{result=result+ch}}};<result};F=capitalize(ch:Str):Str{let code=charCode(ch);if(code>96){if(code<123){<fromCharCode(code-32)}el{<ch}}el{<ch}};F=charCode(ch:Str):i64{<0};F=fromCharCode(code:i64):Str{<\"\"};F=charCodeLongestcommonprefix(strs:[Str]):i64{<charCode(longestCommonPrefix(strs))};F=reverse(s:Str):Str{let n=s.len;let m=mut.n-1;let r=mut.\"\";lp(let i=0;i<n;i=i+1){r=r+s[m];m=m-1;};<r};F=numToStr(p:u64):Str{if(p=(0 as u64)){<\"0\";}el{let q=mut.\"\";let temp=mut.p;lp(let i=0;temp>(0 as u64);temp=temp/10){let digit=temp-(temp/10)*10;let charCode=(48 as u64)+digit;let byte=charCode as u8;let charStr=byte as Str;q=q+charStr;};let reversed=reverse(q);<reversed;};};F=shortestWord(s:Str):Str{let n=s.len;if(n=0 as u64){<\"\"};let shortest=mut.\"\";let current=mut.\"\";let i=mut.0 as u64;lp(let j=0 as u64;j<n;j=j+1){let ch=s[j];if(ch=32 as u8){if(shortest=\"\"){shortest=current}el{let currLen=current.len;let shortLen=shortest.len;if(currLen<shortLen){shortest=current};};current=\"\"}el{current=current+(ch as Str)};};if(!(current=\"\")){if(shortest=\"\"){shortest=current}el{let currLen=current.len;let shortLen=shortest.len;if(currLen<shortLen){shortest=current};};};<shortest};F=shortestWordReverse(s:Str):Str{<shortestWord(reverse(s))};F=rot13(s:Str):Str{let n=s.len;let m=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i];let z=mut.c;if(c>64){if(c<91){let x=c-65;let y=x+13;let b=y-y/26*26;z=b+65;}el{if(c>96){if(c<123){let x=c-97;let y=x+13;let b=y-y/26*26;z=b+97;}}}};m=m+(z as Str);};<m};F=lastChar(first:Str):Str{let n=first.len;if(n=0 as u64){<\"\"}el{let index=n-(1 as u64);let char=first[index];let result=char as Str;<result};};F=lastCharRot13(s:Str):Str{<lastChar(rot13(s))};F=pipeline(strs:[Str]):Str{<rot13(shortestWord(longestCommonPrefix(strs)))};",
+  "tk_tokens": 927,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-1431-667ce9e5",
+      "B-B-CMP-1019-7eccabbb",
+      "B-B-CMP-3200-b54be4db"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "A-A-SRT-0068v11-ce1b3efd",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-SRT-0068v11",
+  "tk_source": "M=permcheck;F=isPermutation(lhs:[i64];rhs:[i64]):bool{if(lhs.len=rhs.len){let sortedLhs=mut.lhs;let sortedRhs=mut.rhs;lp(let i=0;i<sortedLhs.len;i=i+1){lp(let j=i+1;j<sortedLhs.len;j=j+1){if(sortedLhs[i]>sortedLhs[j]){let tmp=sortedLhs[i];sortedLhs[i]=sortedLhs[j];sortedLhs[j]=tmp;};};};lp(let i=0;i<sortedRhs.len;i=i+1){lp(let j=i+1;j<sortedRhs.len;j=j+1){if(sortedRhs[i]>sortedRhs[j]){let tmp=sortedRhs[i];sortedRhs[i]=sortedRhs[j];sortedRhs[j]=tmp;};};};lp(let i=0;i<sortedLhs.len;i=i+1){if(!(sortedLhs[i]=sortedRhs[i])){<false;};};<true;}el{<false;};};",
+  "tk_tokens": 234,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "True\nTrue\nTrue\nFalse\nTrue\nFalse\nTrue\nFalse\nTrue\nTrue"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9243
+  },
+  "references": {
+    "python_source": "def isPermutation(lhs, rhs):\n    if len(lhs) != len(rhs):\n        return False\n    sorted_lhs = sorted(lhs)\n    sorted_rhs = sorted(rhs)\n    for i in range(len(sorted_lhs)):\n        if sorted_lhs[i] != sorted_rhs[i]:\n            return False\n    return True\n\ndef main():\n    test_cases = [\n        ([], [], True),\n        ([1], [1], True),\n        ([1, 2, 3], [3, 2, 1], True),\n        ([1, 2, 3], [1, 2, 4], False),\n        ([5, 0, -1], [-1, 5, 0], True),\n        ([1, 2, 3], [1, 2], False),\n        ([1, 1, 2], [2, 1, 1], True),\n        ([1, 1, 2], [1, 2, 2], False),\n        ([1000000, -1000000], [-1000000, 1000000], True),\n        ([0, 0, 0], [0, 0, 0], True),\n    ]\n    for lhs, rhs, expected in test_cases:\n        result = isPermutation(lhs, rhs)\n        print(result)\n        assert result == expected, f\"Failed for lhs={lhs}, rhs={rhs}\"\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 309,
+    "c_source": "#include <stdio.h>\n#include <stdlib.h>\n#include <stdbool.h>\n\nint compare_i64(const void *a, const void *b) {\n    long long ia = *(const long long*)a;\n    long long ib = *(const long long*)b;\n    return (ia > ib) - (ia < ib);\n}\n\nbool isPermutation(long long *lhs, size_t lhs_len, long long *rhs, size_t rhs_len) {\n    if (lhs_len != rhs_len) {\n        return false;\n    }\n    if (lhs_len == 0) {\n        return true;\n    }\n    long long *sorted_lhs = malloc(lhs_len * sizeof(long long));\n    long long *sorted_rhs = malloc(rhs_len * sizeof(long long));\n    if (!sorted_lhs || !sorted_rhs) {\n        free(sorted_lhs);\n        free(sorted_rhs);\n        return false;\n    }\n    for (size_t i = 0; i < lhs_len; i++) {\n        sorted_lhs[i] = lhs[i];\n        sorted_rhs[i] = rhs[i];\n    }\n    qsort(sorted_lhs, lhs_len, sizeof(long long), compare_i64);\n    qsort(sorted_rhs, rhs_len, sizeof(long long), compare_i64);\n    bool result = true;\n    for (size_t i = 0; i < lhs_len; i++) {\n        if (sorted_lhs[i] != sorted_rhs[i]) {\n            result = false;\n            break;\n        }\n    }\n    free(sorted_lhs);\n    free(sorted_rhs);\n    return result;\n}\n\nint main() {\n    long long test1_lhs[] = {1, 2, 3};\n    long long test1_rhs[] = {3, 2, 1};\n    printf(\"%d\\n\", isPermutation(test1_lhs, 3, test1_rhs, 3));\n\n    long long test2_lhs[] = {5, 0, -1};\n    long long test2_rhs[] = {0, 5, -1};\n    printf(\"%d\\n\", isPermutation(test2_lhs, 3, test2_rhs, 3));\n\n    long long test3_lhs[] = {7, 7, 7};\n    long long test3_rhs[] = {7, 7, 8};\n    printf(\"%d\\n\", isPermutation(test3_lhs, 3, test3_rhs, 3));\n\n    long long test4_lhs[] = {};\n    long long test4_rhs[] = {};\n    printf(\"%d\\n\", isPermutation(test4_lhs, 0, test4_rhs, 0));\n\n    long long test5_lhs[] = {100, -200, 300};\n    long long test5_rhs[] = {100, -200};\n    printf(\"%d\\n\", isPermutation(test5_lhs, 3, test5_rhs, 2));\n\n    return 0;\n}",
+    "c_tokens": 594,
+    "java_source": "import java.util.Arrays;\n\npublic class Solution {\n    public static boolean isPermutation(int[] lhs, int[] rhs) {\n        if (lhs.length != rhs.length) {\n            return false;\n        }\n        int[] sortedLhs = lhs.clone();\n        int[] sortedRhs = rhs.clone();\n        Arrays.sort(sortedLhs);\n        Arrays.sort(sortedRhs);\n        for (int i = 0; i < sortedLhs.length; i++) {\n            if (sortedLhs[i] != sortedRhs[i]) {\n                return false;\n            }\n        }\n        return true;\n    }\n\n    public static void main(String[] args) {\n        // Test 1: identical arrays\n        int[] a1 = {1, 2, 3, 4, 5};\n        int[] b1 = {1, 2, 3, 4, 5};\n        System.out.println(isPermutation(a1, b1));\n\n        // Test 2: permutation\n        int[] a2 = {5, 3, 1, 4, 2};\n        int[] b2 = {1, 2, 3, 4, 5};\n        System.out.println(isPermutation(a2, b2));\n\n        // Test 3: different lengths\n        int[] a3 = {1, 2, 3};\n        int[] b3 = {1, 2, 3, 4};\n        System.out.println(isPermutation(a3, b3));\n\n        // Test 4: empty arrays\n        int[] a4 = {};\n        int[] b4 = {};\n        System.out.println(isPermutation(a4, b4));\n\n        // Test 5: same elements, different counts\n        int[] a5 = {1, 2, 2, 3};\n        int[] b5 = {1, 2, 3, 3};\n        System.out.println(isPermutation(a5, b5));\n    }\n}",
+    "java_tokens": 415
+  }
+}

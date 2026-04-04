@@ -1,0 +1,37 @@
+{
+  "id": "D-D-APP-04362-987210f6",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-04362",
+  "tk_source": "M=wordCountC;F=numToStr(first:f64;second:f64):Str{if(first<0 as f64){let neg=0 as f64-first;<\"-\"+numToStrPositive(neg)}el{<numToStrPositive(first)}};F=numToStrPositive(x:f64):Str{let intPart=x as i64;let fracPart=x-(intPart as f64);let intStr=intToStr(intPart);if(fracPart=0 as f64){<intStr}el{let fracStr=fracToStr(fracPart);<intStr+\".\"+fracStr}};F=intToStr(n:i64):Str{if(n=0){<\"0\"}el{let num=mut.n;if(num<0){num=0-num};let result=mut.\"\";lp(let i=0;num>0;i=i+1){let digit=num-num/10*10;result=digitToStr(digit)+result;num=num/10};<result}};F=digitToStr(d:i64):Str{if(d=0){<\"0\"}el{if(d=1){<\"1\"}el{if(d=2){<\"2\"}el{if(d=3){<\"3\"}el{if(d=4){<\"4\"}el{if(d=5){<\"5\"}el{if(d=6){<\"6\"}el{if(d=7){<\"7\"}el{if(d=8){<\"8\"}el{<\"9\"}}}}}}}}}};F=fracToStr(f:f64):Str{let result=mut.\"\";let fval=mut.f;lp(let i=0;i<6;i=i+1){fval=fval*10 as f64;let digit=fval as i64;result=result+digitToStr(digit);fval=fval-(digit as f64)};<result};F=wordCount(s:Str):i64{let n=s.len;let p=mut.0;let q=mut.0;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i as u64];if(p=0){if(c>32){p=1;q=1;}el{q=0;}}el{if(c=32){if(q=1){count=count+1;q=0;}el{}}el{q=1;}};};if(q=1){count=count+1;};<count};F=wordCountNumtostrpositive(x:f64):i64{<wordCount(numToStrPositive(x))};F=alternateCase(first:Str;second:Str):Str{let n=first.len;if(n=0 as u64){<\"\"};let result=mut.\"\";lp(let i=0 as u64;i<n;i=i+1){let char=first[i];let mod2=i-i/2 as u64*2 as u64;if(mod2=0 as u64){if(char>96){if(char<123){result=result+(char as Str)}el{result=result+(char as Str)}}el{result=result+(char as Str)}}el{if(char>96){if(char<123){let upper=char-32 as u64;result=result+(upper as Str)}el{result=result+(char as Str)}}el{if(char>64){if(char<91){result=result+(char as Str)}el{result=result+(char as Str)}}el{result=result+(char as Str)}}}};<result};F=countUpper(s:Str):i64{let n=s.len;let count=mut.0;lp(let i=0;i<n;i=i+1){let c=s[i];if(c>64){if(c<91){count=count+1}}};<count};F=countUpperAlternatecase(first:Str;second:Str):i64{<countUpper(alternateCase(first;second))};F=combined(s:Str):i64{let a=wordCount(s);let b=countUpper(s);<a+b};",
+  "tk_tokens": 848,
+  "attempts": 0,
+  "model": "mechanical-fanout",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-4673-77035f2f",
+      "B-B-CMP-4399-90d733bd"
+    ],
+    "pattern": "fanout"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

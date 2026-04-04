@@ -1,0 +1,38 @@
+{
+  "id": "D-D-APP-04876-946eae7b",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-04876",
+  "tk_source": "M=boolNotIR;F=min(val:i64;other:i64):i64{if(val=other){<val};if(val>other){<other}el{<val}};F=reverse(s:Str):Str{let n=s.len;let m=mut.(n as i64)-1;let r=mut.\"\";lp(let i=0;i<n;i=i+1){r=r+s[m];m=m-1;};<r};F=intToStr(n:i64):Str{if(n<0){<\"-\"+intToStr(-n)}el{if(n=0){<\"0\"}el{let result=mut.\"\";lp(let temp=n;temp>0;temp=temp/10){let digit=(temp-(temp/10)*10)as u8;let zeroChar=\"0\"[0];let charDigit=((digit as u8)+zeroChar)as Str;result=result+charDigit;};<reverse(result)}}};F=repeat(val:Str;other:i64):Str{if(other<0){<\"\"}el{if(val=intToStr(other)){<val}el{let result=mut.\"\";lp(let i=0;i<other;i=i+1){result=result+val};<result}}};F=intToStrMin(val:i64;other:i64):Str{<intToStr(min(val;other))};F=swapCase(s:Str):Str{let n=s.len;let m=mut.0;let result=mut.\"\";lp(let i=0;i<n;i=i+1){let c=s[i];let isUpper=mut.false;let isLower=mut.false;if(c>64){if(c<91){isUpper=true}};if(c>96){if(c<123){isLower=true}};if(isUpper){m=c+32;result=result+(m as Str)}el{if(isLower){m=c-32;result=result+(m as Str)}el{result=result+(c as Str)}}};<result};F=isVowel(c:Str):bool{let n=mut.false;let m=mut.false;if(c=\"a\"){n=true};if(c=\"e\"){n=true};if(c=\"i\"){n=true};if(c=\"o\"){n=true};if(c=\"u\"){n=true};if(c=\"A\"){m=true};if(c=\"E\"){m=true};if(c=\"I\"){m=true};if(c=\"O\"){m=true};if(c=\"U\"){m=true};if(n){<true};if(m){<true};<false};F=isVowelSwapcase(s:Str):bool{<isVowel(swapCase(s))};F=boolNot(x:bool):bool{let result=mut.false;if(x=false){result=true};if(x=true){result=false};<result};F=pipeline(s:Str):bool{<boolNot(isVowel(reverse(s)))};",
+  "tk_tokens": 610,
+  "attempts": 0,
+  "model": "mechanical-pipeline3",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-1325-37ac03ff",
+      "B-B-CMP-4602-1a944a8f",
+      "A-A-CND-0015v8-3fe2b0bf"
+    ],
+    "pattern": "pipeline3"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

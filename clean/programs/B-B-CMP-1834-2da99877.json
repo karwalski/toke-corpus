@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-1834-2da99877",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-1834",
+  "tk_source": "M=isPositiveXFactorial;F=factorial(val:i64;other:i64):i64{if(val=other){<1};if(val=0){<1};let result=mut.1;lp(let i=1;i<val;i=i+1){result=result*i;};<result};F=isPositive(n:i64;m:i64):bool{if(m-n>0){<true};<false};F=isPositiveX(x:i64):bool{<isPositive(0;x)};F=isPositiveXFactorial(val:i64;other:i64):bool{<isPositiveX(factorial(val;other))};",
+  "tk_tokens": 135,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-MTH-0040v10-0c257f62",
+      "A-A-MTH-0037v1-1133c8e1"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: isPositiveX(factorial(...))\ndef isPositiveX_factorial(val, other):\n    return isPositiveX(factorial(val, other))",
+    "python_tokens": 0,
+    "c_source": "// Composed: isPositiveX(factorial(...))\nint isPositiveX_factorial(int64_t val, int64_t other) {\n    return isPositiveX(factorial(val, other));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: isPositiveX(factorial(...))\nstatic boolean isPositiveXFactorial(long val, long other) {\n    return isPositiveX(factorial(val, other));\n}\n",
+    "java_tokens": 0
+  }
+}

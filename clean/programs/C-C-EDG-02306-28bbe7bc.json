@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-02306-28bbe7bc",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-02306",
+  "tk_source": "M=isAnagramGuard;F=toLower(c:u8):u8{if(c>64){if(c<91){<c+32}el{<c}}el{<c}};F=sortString(s:Str):Str{let n=s.len;let chars=mut.[0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];let count=mut.0 as u64;lp(let i=0;i<n;i=i+1){let idx=i as u64;chars[count]=toLower(s[idx]);count=count+1};let i=mut.0 as u64;lp(let ii=0;ii<count-1 as i64;ii=ii+1){let j=mut.0 as u64;lp(let jj=0;jj<count-1 as i64-ii;jj=jj+1){if(chars[j]>chars[j+1 as u64]){let temp=chars[j];chars[j]=chars[j+1 as u64];chars[j+1 as u64]=temp};j=j+1 as u64};i=i+1 as u64};let result=mut.\"\";lp(let k=0;k<count as i64;k=k+1){result=result+(chars[k as u64]as Str)};<result};F=isAnagram(x:Str;y:Str):bool{if(x.len=y.len){let intermediate=mut.sortString(x)=sortString(y);<intermediate}el{<false}};F=safeIsAnagram(x:Str;y:Str):bool{if(x.len=0){<false};<isAnagram(x;y)};",
+  "tk_tokens": 384,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0037v16-fac937f9",
+    "transform": "guard_empty",
+    "original_function": "isAnagram"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

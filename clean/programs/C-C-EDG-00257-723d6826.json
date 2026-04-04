@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-00257-723d6826",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-00257",
+  "tk_source": "M=replaceFirstGuard;F=replaceFirst(s:Str;old:Str;new:Str):Str{let oldLen=old.len;let sLen=s.len;let found=mut.false;let idx=mut.0 as u64;lp(let i=0;i<sLen;i=i+1){if(!(found)){let iU=i as u64;let maxCheck=sLen-oldLen;if(!(iU>maxCheck)){let match=mut.true;lp(let j=0;j<oldLen;j=j+1){let jU=j as u64;if(s[iU+jU]=old[jU]){}el{match=false};};if(match){found=true;idx=iU};};};};let result=mut.\"\";if(found){lp(let i=0;i<idx;i=i+1){let iU=i as u64;result=result+(s[iU]as Str)};result=result+new;let afterIdx=idx+oldLen;lp(let i=afterIdx;i<sLen;i=i+1){result=result+(s[i]as Str)};}el{result=s};<result};F=safeReplaceFirst(s:Str;old:Str;new:Str):Str{if(s.len=0){<\"\"};<replaceFirst(s;old;new)};",
+  "tk_tokens": 276,
+  "attempts": 0,
+  "model": "mechanical-guard_empty",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0016v88-89f8df85",
+    "transform": "guard_empty",
+    "original_function": "replaceFirst"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

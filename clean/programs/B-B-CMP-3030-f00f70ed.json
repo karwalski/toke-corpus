@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-3030-f00f70ed",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-3030",
+  "tk_source": "M=isPositiveMin2;F=min2(x:i64;y:i64):i64{let r=mut.x;if(y<r){r=y};<r};F=isPositive(x:i64):bool{if(x>0){<true}el{<false}};F=isPositiveMin2(x:i64;y:i64):bool{<isPositive(min2(x;y))};",
+  "tk_tokens": 80,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0004v8-4c9369e7",
+      "A-A-MTH-0037-8de63378"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: isPositive(min2(...))\ndef isPositive_min2(x, y):\n    return isPositive(min2(x, y))",
+    "python_tokens": 0,
+    "c_source": "// Composed: isPositive(min2(...))\nint isPositive_min2(int64_t x, int64_t y) {\n    return isPositive(min2(x, y));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: isPositive(min2(...))\nstatic boolean isPositiveMin2(long x, long y) {\n    return isPositive(min2(x, y));\n}\n",
+    "java_tokens": 0
+  }
+}

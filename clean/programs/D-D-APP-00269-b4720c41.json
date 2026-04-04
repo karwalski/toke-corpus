@@ -1,0 +1,36 @@
+{
+  "id": "D-D-APP-00269-b4720c41",
+  "version": 1,
+  "phase": "D",
+  "task_id": "D-APP-00269",
+  "tk_source": "M=accFibonacciRec;F=gcd(a:i64;b:i64):i64{let x=mut.a;let y=mut.b;lp(let dummy=0;!(y=0 as i64);dummy=dummy+1){let temp=y;let q=mut.0;let r=mut.x;lp(let s=0;!(r<y);s=s+1){r=r-y;q=q+1;};y=r;x=temp;};<x};F=lcm(n:i64;m:i64):i64{let g=gcd(n;m);let quot=mut.0;let prod=mut.0;lp(let s=0;s<1000000;s=s+1){let sum=g*quot;if(sum=n){br};if(sum>n){br};quot=quot+1;};prod=quot*m;<prod};F=fibonacciRec(val:i64):i64{if(val=0){<0};if(val=1){<1};<fibonacciRec(val-1)+fibonacciRec(val-2)};F=fibonacciRecGcd(a:i64;b:i64):i64{<fibonacciRec(gcd(a;b))};F=accumulate(arr:[i64]):i64{let r=mut.0;lp(let i=0;i<arr.len as i64;i=i+1){r=r+fibonacciRec(arr[i as u64]);};<r};",
+  "tk_tokens": 305,
+  "attempts": 0,
+  "model": "mechanical-accumulator",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "application": {
+    "source_entry_ids": [
+      "B-B-CMP-1642-e6d2fbfe"
+    ],
+    "pattern": "accumulator"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

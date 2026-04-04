@@ -1,0 +1,34 @@
+{
+  "id": "A-A-MTH-0107v19-74a259c4",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-MTH-0107v19",
+  "tk_source": "M=sumDivisors;F=sumDivisors(lhs:i64):i64{let sum=mut.0;lp(let i=1;!(i>lhs);i=i+1){let rem=lhs-lhs/i*i;if(rem=0){sum=sum+i}};<sum};",
+  "tk_tokens": 60,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "1\n3\n6\n28\n56\n217\n0\n0\n18\n2340"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9719
+  },
+  "references": {
+    "python_source": "def sumDivisors(n: int) -> int:\n    if n <= 0:\n        return 0\n    total = 0\n    lhs = 1\n    while lhs <= n:\n        if n % lhs == 0:\n            total += lhs\n        lhs += 1\n    return total\n\ndef main() -> None:\n    test_cases = [\n        (1, 1),\n        (2, 3),\n        (5, 6),\n        (12, 28),\n        (28, 56),\n        (100, 217),\n        (0, 0),\n        (-5, 0),\n        (17, 18),\n        (1000, 2340)\n    ]\n    \n    for input_val, expected in test_cases:\n        result = sumDivisors(input_val)\n        print(result)\n        # Optional: uncomment to verify correctness\n        # if result != expected:\n        #     print(f\"Error: sumDivisors({input_val}) = {result}, expected {expected}\")\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 224,
+    "c_source": "#include <stdio.h>\n#include <stdint.h>\n\nint64_t sumDivisors(int64_t lhs) {\n    int64_t rhs = 0;\n    for (int64_t i = 1; i <= lhs; i = i + 1) {\n        if (lhs - (lhs / i) * i == 0) {\n            rhs = rhs + i;\n        }\n    }\n    return rhs;\n}\n\nint main() {\n    printf(\"%ld\\n\", sumDivisors(1));\n    printf(\"%ld\\n\", sumDivisors(2));\n    printf(\"%ld\\n\", sumDivisors(6));\n    printf(\"%ld\\n\", sumDivisors(12));\n    printf(\"%ld\\n\", sumDivisors(28));\n    return 0;\n}",
+    "c_tokens": 157,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static long sumDivisors(long n) {\n        long total = 0;\n        for (long i = 1; i <= n; i++) {\n            if (n % i == 0) {\n                total += i;\n            }\n        }\n        return total;\n    }\n\n    public static void main(String[] args) {\n        // Test case 1: n = 1\n        System.out.println(sumDivisors(1));\n\n        // Test case 2: n = 6 (perfect number)\n        System.out.println(sumDivisors(6));\n\n        // Test case 3: n = 12\n        System.out.println(sumDivisors(12));\n\n        // Test case 4: n = 28 (perfect number)\n        System.out.println(sumDivisors(28));\n\n        // Test case 5: n = 100\n        System.out.println(sumDivisors(100));\n    }\n}",
+    "java_tokens": 197
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "C-C-EDG-01112-1513ebda",
+  "version": 1,
+  "phase": "C",
+  "task_id": "C-EDG-01112",
+  "tk_source": "M=astr0024v74Not;F=isPalindrome(val:Str):bool{let other=val;if(val=other){<true};let len=val.len;lp(let i=0;i<len/2;i=i+1){if(val[i]=val[len-1-i]){}el{<false};};<true};F=notIsPalindrome(val:Str):bool{<!(isPalindrome(val))};",
+  "tk_tokens": 86,
+  "attempts": 0,
+  "model": "mechanical-invert",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "edge_case": {
+    "source_entry_id": "A-A-STR-0024v74-8795dfa3",
+    "transform": "invert",
+    "original_function": "isPalindrome"
+  },
+  "references": {
+    "python_source": "",
+    "python_tokens": 0,
+    "c_source": "",
+    "c_tokens": 0,
+    "java_source": "",
+    "java_tokens": 0
+  }
+}

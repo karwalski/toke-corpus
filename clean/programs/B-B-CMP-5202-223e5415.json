@@ -1,0 +1,37 @@
+{
+  "id": "B-B-CMP-5202-223e5415",
+  "version": 1,
+  "phase": "B",
+  "task_id": "B-CMP-5202",
+  "tk_source": "M=collapseSpacesTempca;F=tempCategory(celsius:f64):Str{let categories=[\"freezing\";\"cold\";\"mild\";\"warm\";\"hot\"];let lhs=[-9999999999.0;0.0;10.0;20.0;30.0];let rhs=[0.0;10.0;20.0;30.0;9999999999.0];let res=mut.\"hot\";lp(let i=0;i<categories.len;i=i+1){if(lhs[i as u64]>celsius){}el{if(!(celsius>rhs[i as u64])){res=categories[i as u64];br;}}};<res};F=collapseSpaces(s:Str):Str{let n=s.len;let result=mut.\"\";lp(let m=0;m<n;m=m+1){let char=s[m as u64];if(!(char=32)){result=result+(char as Str);}el{if(result.len>0 as u64){let last=result[(result.len-1)as u64];if(!(last=32)){result=result+(char as Str);}}}};<result};F=collapseSpacesTempcategory(celsius:f64):Str{<collapseSpaces(tempCategory(celsius))};",
+  "tk_tokens": 268,
+  "attempts": 0,
+  "model": "mechanical-compose",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [],
+    "majority_output": ""
+  },
+  "judge": {
+    "accepted": true,
+    "score": 1.0
+  },
+  "composition": {
+    "source_a_ids": [
+      "A-A-CND-0067v3-820bd63e",
+      "A-A-STR-0050v1-9c4d2121"
+    ],
+    "composition_type": "chain"
+  },
+  "references": {
+    "python_source": "# Composed: collapseSpaces(tempCategory(...))\ndef collapseSpaces_tempCategory(celsius):\n    return collapseSpaces(tempCategory(celsius))",
+    "python_tokens": 0,
+    "c_source": "// Composed: collapseSpaces(tempCategory(...))\nconst char* collapseSpaces_tempCategory(double celsius) {\n    return collapseSpaces(tempCategory(celsius));\n}\n",
+    "c_tokens": 0,
+    "java_source": "// Composed: collapseSpaces(tempCategory(...))\nstatic String collapseSpacesTempcategory(double celsius) {\n    return collapseSpaces(tempCategory(celsius));\n}\n",
+    "java_tokens": 0
+  }
+}

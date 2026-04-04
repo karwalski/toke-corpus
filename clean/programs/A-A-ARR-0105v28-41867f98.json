@@ -1,0 +1,34 @@
+{
+  "id": "A-A-ARR-0105v28-41867f98",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-ARR-0105v28",
+  "tk_source": "M=arrEquals;F=arrEquals(first:[i64];second:[i64]):bool{if(first.len=second.len){let i=mut.0 as u64;lp(let i=0;i<first.len;i=i+1){if(!(first[i]=second[i])){<false}};<true}el{<false}};",
+  "tk_tokens": 73,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "True\nFalse\nTrue\nFalse\nTrue\nTrue\nTrue\nFalse"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9759
+  },
+  "references": {
+    "python_source": "def arrEquals(first: list[int], second: list[int]) -> bool:\n    if first is None or second is None:\n        return False\n    if len(first) != len(second):\n        return False\n    for i in range(len(first)):\n        if first[i] != second[i]:\n            return False\n    return True\n\ndef main():\n    # Test 1: equal arrays\n    print(arrEquals([1, 2, 3], [1, 2, 3]))\n    \n    # Test 2: different lengths\n    print(arrEquals([1, 2], [1, 2, 3]))\n    \n    # Test 3: empty arrays\n    print(arrEquals([], []))\n    \n    # Test 4: same length, different elements\n    print(arrEquals([1, 2, 3], [1, 2, 4]))\n    \n    # Test 5: arrays with zero and negative values\n    print(arrEquals([0, -1, 5], [0, -1, 5]))\n    \n    # Test 6: single element arrays\n    print(arrEquals([42], [42]))\n    \n    # Test 7: large arrays\n    print(arrEquals([10] * 100, [10] * 100))\n    \n    # Test 8: arrays with same values but different order\n    print(arrEquals([1, 2, 3], [3, 2, 1]))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 316,
+    "c_source": "#include <stdio.h>\n#include <stdbool.h>\n#include <stdlib.h>\n\ntypedef struct {\n    long long* data;\n    size_t len;\n} Array_i64;\n\nbool arrEquals(Array_i64 first, Array_i64 second) {\n    if (first.len != second.len) {\n        return false;\n    }\n    for (size_t i = 0; i < first.len; i++) {\n        if (first.data[i] != second.data[i]) {\n            return false;\n        }\n    }\n    return true;\n}\n\nvoid printBool(bool b) {\n    printf(b ? \"true\\n\" : \"false\\n\");\n}\n\nint main() {\n    // Test 1: equal arrays\n    long long d1[] = {1, 2, 3};\n    long long d2[] = {1, 2, 3};\n    Array_i64 a1 = {d1, 3};\n    Array_i64 a2 = {d2, 3};\n    printBool(arrEquals(a1, a2));\n\n    // Test 2: different lengths\n    long long d3[] = {1, 2};\n    Array_i64 a3 = {d3, 2};\n    printBool(arrEquals(a1, a3));\n\n    // Test 3: empty arrays\n    long long* d4 = NULL;\n    long long* d5 = NULL;\n    Array_i64 a4 = {d4, 0};\n    Array_i64 a5 = {d5, 0};\n    printBool(arrEquals(a4, a5));\n\n    // Test 4: same length, different elements\n    long long d6[] = {1, 2, 4};\n    Array_i64 a6 = {d6, 3};\n    printBool(arrEquals(a1, a6));\n\n    // Test 5: negative values\n    long long d7[] = {-5, 0, 7};\n    long long d8[] = {-5, 0, 7};\n    Array_i64 a7 = {d7, 3};\n    Array_i64 a8 = {d8, 3};\n    printBool(arrEquals(a7, a8));\n\n    return 0;\n}",
+    "c_tokens": 465,
+    "java_source": "import java.util.Arrays;\n\npublic class Solution {\n    public static boolean arrEquals(long[] first, long[] second) {\n        if (first == null || second == null) {\n            return false;\n        }\n        if (first.length != second.length) {\n            return false;\n        }\n        for (int i = 0; i < first.length; i++) {\n            if (first[i] != second[i]) {\n                return false;\n            }\n        }\n        return true;\n    }\n\n    public static void main(String[] args) {\n        // Test case 1: equal arrays\n        long[] a1 = {1, 2, 3};\n        long[] b1 = {1, 2, 3};\n        System.out.println(arrEquals(a1, b1));\n\n        // Test case 2: different lengths\n        long[] a2 = {1, 2, 3};\n        long[] b2 = {1, 2};\n        System.out.println(arrEquals(a2, b2));\n\n        // Test case 3: empty arrays\n        long[] a3 = {};\n        long[] b3 = {};\n        System.out.println(arrEquals(a3, b3));\n\n        // Test case 4: arrays with negative values\n        long[] a4 = {-5, 0, 7};\n        long[] b4 = {-5, 0, 7};\n        System.out.println(arrEquals(a4, b4));\n\n        // Test case 5: same length but different elements\n        long[] a5 = {10, 20, 30};\n        long[] b5 = {10, 25, 30};\n        System.out.println(arrEquals(a5, b5));\n    }\n}",
+    "java_tokens": 359
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "id": "A-A-ARR-0056v23-824d64c7",
+  "version": 1,
+  "phase": "A",
+  "task_id": "A-ARR-0056v23",
+  "tk_source": "M=arrslice;F=arrSlice(arr:[f64];left:i64;right:i64):[f64]{let result=mut.[];let n=arr.len;if(!(left>right)){if(!(left<0)){if(!(left>n as i64)){if(!(right<0)){if(!(right>n as i64)){let start=left as u64;let end=right as u64;lp(let i=start;i<end;i=i+1){result=result+[arr[i]];}}}}}};<result};",
+  "tk_tokens": 112,
+  "attempts": 1,
+  "model": "deepseek-chat",
+  "validation": {
+    "compiler_exit_code": 0,
+    "error_codes": []
+  },
+  "differential": {
+    "languages_agreed": [
+      "c",
+      "java",
+      "python"
+    ],
+    "majority_output": "[2.0, 3.0, 4.0]\n[1.0, 2.0]\n[]\n[]\n[]\n[5.0, 6.0, 7.0]\n[]"
+  },
+  "judge": {
+    "accepted": true,
+    "score": 0.9704
+  },
+  "references": {
+    "python_source": "def arrSlice(arr: list[float], start: int, end: int) -> list[float]:\n    result = []\n    if start < 0:\n        if end < 0:\n            pass\n        else:\n            if end > len(arr):\n                pass\n            else:\n                if start > end:\n                    pass\n                else:\n                    i = 0\n                    while i < len(arr):\n                        if i >= start:\n                            if i < end:\n                                result.append(arr[i])\n                        i = i + 1\n    else:\n        if start > len(arr):\n            pass\n        else:\n            if end < 0:\n                pass\n            else:\n                if end > len(arr):\n                    pass\n                else:\n                    if start > end:\n                        pass\n                    else:\n                        i = 0\n                        while i < len(arr):\n                            if i >= start:\n                                if i < end:\n                                    result.append(arr[i])\n                            i = i + 1\n    return result\n\ndef main():\n    # Test 1: normal slice\n    print(arrSlice([1.0, 2.0, 3.0, 4.0, 5.0], 1, 4))\n    # Test 2: start negative\n    print(arrSlice([1.0, 2.0, 3.0], -1, 2))\n    # Test 3: end beyond length\n    print(arrSlice([1.0, 2.0, 3.0], 1, 10))\n    # Test 4: empty array\n    print(arrSlice([], 0, 1))\n    # Test 5: start equals end\n    print(arrSlice([1.0, 2.0, 3.0], 2, 2))\n    # Test 6: full slice\n    print(arrSlice([5.0, 6.0, 7.0], 0, 3))\n    # Test 7: start > end\n    print(arrSlice([1.0, 2.0, 3.0], 2, 1))\n\nif __name__ == \"__main__\":\n    main()",
+    "python_tokens": 456,
+    "c_source": "#include <stdio.h>\n#include <stdlib.h>\n#include <math.h>\n\ntypedef struct {\n    double* data;\n    size_t len;\n} Arr_f64;\n\nArr_f64 arrSlice(Arr_f64 arr, long long start, long long end) {\n    Arr_f64 result;\n    result.data = NULL;\n    result.len = 0;\n\n    if (arr.len == 0) {\n        return result;\n    }\n\n    if (start < 0) {\n        start = 0;\n    } else {\n        if (start > (long long)arr.len) {\n            start = (long long)arr.len;\n        }\n    }\n\n    if (end < 0) {\n        end = 0;\n    } else {\n        if (end > (long long)arr.len) {\n            end = (long long)arr.len;\n        }\n    }\n\n    if (start >= end) {\n        return result;\n    }\n\n    size_t slice_len = (size_t)(end - start);\n    result.data = (double*)malloc(slice_len * sizeof(double));\n    if (result.data == NULL) {\n        exit(1);\n    }\n    result.len = slice_len;\n\n    for (size_t i = 0; i < slice_len; i++) {\n        result.data[i] = arr.data[start + i];\n    }\n\n    return result;\n}\n\nvoid printArr(Arr_f64 arr) {\n    printf(\"[\");\n    for (size_t i = 0; i < arr.len; i++) {\n        printf(\"%.2f\", arr.data[i]);\n        if (i < arr.len - 1) {\n            printf(\";\");\n        }\n    }\n    printf(\"]\");\n}\n\nvoid freeArr(Arr_f64 arr) {\n    free(arr.data);\n}\n\nint main() {\n    double test1_data[] = {1.0, 2.0, 3.0, 4.0, 5.0};\n    Arr_f64 arr1 = {test1_data, 5};\n\n    double test2_data[] = {};\n    Arr_f64 arr2 = {test2_data, 0};\n\n    double test3_data[] = {7.5};\n    Arr_f64 arr3 = {test3_data, 1};\n\n    double test4_data[] = {0.0, -1.5, 2.2, -3.3};\n    Arr_f64 arr4 = {test4_data, 4};\n\n    double test5_data[] = {10.1, 20.2, 30.3, 40.4, 50.5, 60.6};\n    Arr_f64 arr5 = {test5_data, 6};\n\n    Arr_f64 result;\n\n    result = arrSlice(arr1, 1, 4);\n    printArr(result);\n    printf(\"\\n\");\n    freeArr(result);\n\n    result = arrSlice(arr2, 0, 2);\n    printArr(result);\n    printf(\"\\n\");\n    freeArr(result);\n\n    result = arrSlice(arr3, 0, 1);\n    printArr(result);\n    printf(\"\\n\");\n    freeArr(result);\n\n    result = arrSlice(arr4, -5, 10);\n    printArr(result);\n    printf(\"\\n\");\n    freeArr(result);\n\n    result = arrSlice(arr5, 3, 3);\n    printArr(result);\n    printf(\"\\n\");\n    freeArr(result);\n\n    return 0;\n}",
+    "c_tokens": 717,
+    "java_source": "import java.util.*;\n\npublic class Solution {\n    public static double[] arrSlice(double[] arr, long start, long end) {\n        long arrLen = arr.length;\n        if (arrLen == 0) {\n            return new double[0];\n        }\n        long left = start;\n        long right = end;\n        if (left < 0) {\n            left = 0;\n        } else {\n            if (left > arrLen) {\n                left = arrLen;\n            }\n        }\n        if (right < 0) {\n            right = 0;\n        } else {\n            if (right > arrLen) {\n                right = arrLen;\n            }\n        }\n        if (left > right) {\n            left = right;\n        }\n        long sliceLen = right - left;\n        double[] result = new double[(int) sliceLen];\n        for (int i = 0; i < sliceLen; i++) {\n            result[i] = arr[(int) (left + i)];\n        }\n        return result;\n    }\n\n    public static void main(String[] args) {\n        double[] arr1 = {1.1, 2.2, 3.3, 4.4, 5.5};\n        System.out.println(Arrays.toString(arrSlice(arr1, 1, 4)));\n\n        double[] arr2 = {};\n        System.out.println(Arrays.toString(arrSlice(arr2, 0, 3)));\n\n        double[] arr3 = {9.8, 7.6, 5.4};\n        System.out.println(Arrays.toString(arrSlice(arr3, -2, 10)));\n\n        double[] arr4 = {0.0, 0.0, 0.0};\n        System.out.println(Arrays.toString(arrSlice(arr4, 1, 1)));\n\n        double[] arr5 = {2.5, 3.5, 4.5, 5.5, 6.5, 7.5};\n        System.out.println(Arrays.toString(arrSlice(arr5, 3, 2)));\n    }\n}",
+    "java_tokens": 431
+  }
+}
