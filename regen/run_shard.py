@@ -60,11 +60,12 @@ def cmd_prepare(args):
     os.makedirs(os.path.join(args.workdir, "batches"), exist_ok=True)
     os.makedirs(os.path.join(args.workdir, "gen"), exist_ok=True)
     os.makedirs(os.path.join(args.workdir, "specs"), exist_ok=True)
+    card = CARD if args.embed_card else ""
     for s in todo:
         with open(os.path.join(args.workdir, "specs", s["task_id"] + ".json"), "w") as f:
             json.dump(s, f)
         with open(os.path.join(args.workdir, "prompts", s["task_id"] + ".txt"), "w") as f:
-            f.write(build(s, CARD))
+            f.write(build(s, card))
     for n, i in enumerate(range(0, len(todo), BATCH_SIZE)):
         batch = todo[i:i + BATCH_SIZE]
         with open(os.path.join(args.workdir, "batches", f"batch_{n:03d}.json"), "w") as f:
@@ -261,6 +262,8 @@ def main():
     ap.add_argument("--shard", required=True, help="shard jsonl of task specs")
     ap.add_argument("--workdir", required=True)
     ap.add_argument("--outdir", required=True)
+    ap.add_argument("--embed-card", action="store_true",
+                    help="embed the syntax card in every prompt (default: task-only; workers read the card once per batch)")
     args = ap.parse_args()
     {"prepare": cmd_prepare, "validate": cmd_validate, "stats": cmd_stats}[args.cmd](args)
 
