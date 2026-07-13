@@ -1,0 +1,12 @@
+m=greenwrap;
+i=io:std.io;
+f=wrapgreen(lhs:str):str{
+  let rhs=mut."[32m\(lhs)[0m";
+  <rhs
+};
+f=main():i64{
+  io.println(wrapgreen("ok"));
+  io.println(wrapgreen("pass"));
+  io.println(wrapgreen("x"));
+  <0
+};

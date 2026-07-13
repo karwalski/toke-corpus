@@ -1,0 +1,21 @@
+m=digitsum;
+i=io:std.io;
+f=digitsum(x:i64;y:i64):i64{
+  let n=mut.x;
+  if(n<0){n=0-n}el{n=n};
+  let helper=mut.0;
+  lp(let i=0;n>0;i=i+1){
+    helper=helper+n%10;
+    n=n/10;
+  };
+  <helper
+};
+f=main():i64{
+  io.println("\(digitsum(0;0))");
+  io.println("\(digitsum(5;0))");
+  io.println("\(digitsum(-5;0))");
+  io.println("\(digitsum(123;0))");
+  io.println("\(digitsum(-123;0))");
+  io.println("\(digitsum(9999;0))");
+  <0
+};

@@ -1,0 +1,6 @@
+f=firstword(s:str):str{
+  if(s.len==0){<""};
+  let parts=s.split(" ");
+  let first=parts.get(0);
+  <first
+};

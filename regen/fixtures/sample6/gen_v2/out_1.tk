@@ -1,0 +1,17 @@
+m=safeminprog;
+i=io:std.io;
+t=$lookuperr{$notfound:str;$emptycollection:bool};
+f=safemin(arr:@i64):i64!$lookuperr{
+  if(arr.len==0){<$lookuperr{$emptycollection:true}};
+  let m=mut.arr.get(0);
+  lp(let i=1;i<arr.len;i=i+1){
+    if(arr.get(i)<m){m=arr.get(i)}
+  };
+  <m
+};
+f=main():i64{
+  let vals=@(5;3;8;1;9);
+  let r=mt safemin(vals) {$ok:v v;$err:e 0-1};
+  io.println("\(r)");
+  <0
+};
