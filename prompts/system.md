@@ -20,9 +20,9 @@ F=funcName(p1:Type1;p2:Type2):RetType{body};
 
 ## Types
 
-Primitives: `i64`, `u64`, `f64`, `bool`, `Str`, `void`
-Arrays: `[T]` — literal: `[1;2;3]` (semicolons, not commas)
-Maps: `[K:V]` — literal: `["a":1;"b":2]`
+Primitives: `i64`, `u64`, `f64`, `bool`, `$str`, `$void`
+Arrays: `@(T)` — literal: `@(1;2;3)` (semicolons, not commas)
+Maps: `@(K:V)` — literal: `@("a":1;"b":2)`
 Error unions: `T!ErrType`
 Structs: `T=Point{x:i64;y:i64};`
 Pointers: `*T` (FFI extern declarations only)
@@ -35,7 +35,7 @@ F=name(param1:Type1;param2:Type2):ReturnType{body};
 
 Parameters separated by `;` (not `,`).
 Function call arguments also separated by `;`: `add(a;b)`.
-No body = extern FFI declaration: `F=puts(s:*u8):void;`
+No body = extern FFI declaration: `F=puts(s:*u8):$void;`
 
 ## Statements
 
@@ -81,7 +81,7 @@ For error results: `expr|{Ok:v handleV;Err:e handleE}`
 
 ## Error Handling
 
-Error types are sum types: `T=MyErr{Variant1:bool;Variant2:Str};`
+Error types are sum types: `T=MyErr{Variant1:bool;Variant2:$str};`
 Return type declares failure: `F=f():T!MyErr{...};`
 Propagate with `!`: `let val=fallibleCall()!MyErr;`
 Return an error: `<MyErr{Variant1:true};`
@@ -115,10 +115,10 @@ F=abs(x:i64):i64{
 
 ```
 M=arrsum;
-F=sum(arr:[i64]):i64{
+F=sum(arr:@(i64)):i64{
   let total=mut.0;
   lp(let i=0;i<arr.len;i=i+1){
-    total=total+arr[i];
+    total=total+arr.get(i);
   };
   <total
 };
@@ -166,10 +166,10 @@ F=safeMath(a:f64;b:f64):f64{
 
 ```
 M=findmax;
-F=max(arr:[i64]):i64{
-  let m=mut.arr[0];
+F=max(arr:@(i64)):i64{
+  let m=mut.arr.get(0);
   lp(let i=1;i<arr.len;i=i+1){
-    if(arr[i]>m){m=arr[i]};
+    if(arr.get(i)>m){m=arr.get(i)};
   };
   <m
 };
@@ -193,7 +193,7 @@ F=dist(a:Point;b:Point):f64{
 
 ```
 M=strlen;
-F=isEmpty(s:Str):bool{
+F=isEmpty(s:$str):bool{
   <s.len=0 as u64
 };
 ```
@@ -202,12 +202,12 @@ F=isEmpty(s:Str):bool{
 
 ```
 M=rev;
-F=reverse(arr:[i64]):[i64]{
-  let result=mut.[];
+F=reverse(arr:@(i64)):@(i64){
+  let result=mut.@();
   let n=arr.len;
   lp(let i=0;i<n;i=i+1){
     let idx=n-1-i;
-    result=result+[arr[idx]];
+    result=result+@(arr.get(idx));
   };
   <result
 };
@@ -238,15 +238,15 @@ F=isEven(n:i64):bool{
 
 ```
 M=bsort;
-F=sort(arr:[i64]):[i64]{
+F=sort(arr:@(i64)):@(i64){
   let a=mut.arr;
   let n=a.len;
   lp(let i=0;i<n;i=i+1){
     lp(let j=0;j<n-1-i;j=j+1){
-      if(a[j]>a[j+1]){
-        let tmp=a[j];
-        a[j]=a[j+1];
-        a[j+1]=tmp;
+      if(a.get(j)>a.get(j+1)){
+        let tmp=a.get(j);
+        a.set(j;a.get(j+1));
+        a.set(j+1;tmp);
       };
     };
   };
@@ -258,7 +258,7 @@ F=sort(arr:[i64]):[i64]{
 
 ```
 M=repeat;
-F=repeatStr(s:Str;n:i64):Str{
+F=repeatStr(s:$str;n:i64):$str{
   let result=mut."";
   lp(let i=0;i<n;i=i+1){
     result=result+s;
@@ -272,13 +272,13 @@ F=repeatStr(s:Str;n:i64):Str{
 ```
 M=lookup;
 T=LookupErr{NotFound:bool};
-F=findIdx(arr:[i64];val:i64):i64!LookupErr{
+F=findIdx(arr:@(i64);val:i64):i64!LookupErr{
   lp(let i=0;i<arr.len;i=i+1){
-    if(arr[i]=val){<i}
+    if(arr.get(i)=val){<i}
   };
   <LookupErr{NotFound:true}
 };
-F=findOrDefault(arr:[i64];val:i64;default:i64):i64{
+F=findOrDefault(arr:@(i64);val:i64;default:i64):i64{
   let r=findIdx(arr;val);
   r|{
     Ok:v v;
@@ -292,9 +292,9 @@ F=findOrDefault(arr:[i64];val:i64;default:i64):i64{
 1. **No comments.** Do not write `//`, `/* */`, or `#`. There is no comment syntax.
 2. **Semicolons between parameters, not commas.** `F=f(a:i64;b:i64)` not `F=f(a:i64,b:i64)`.
 3. **Semicolons between arguments, not commas.** `f(x;y)` not `f(x,y)`.
-4. **Semicolons between array elements.** `[1;2;3]` not `[1,2,3]`.
+4. **Semicolons between array elements.** `@(1;2;3)` not `@(1,2,3)`.
 5. **Return is `<`, not `return`.** Write `<42` not `return 42`.
-6. **String type is `Str`**, not `string`, `String`, or `str`.
+6. **String type is `$str`**, not `string`, `String`, `str`, or `Str`.
 7. **Else is `el`**, not `else`. Write `if(c){a}el{b}`.
 8. **No `while` or `for`.** Use `lp(init;cond;step){body}`.
 9. **Module declaration is required.** Every file starts with `M=name;`.

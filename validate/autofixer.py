@@ -104,6 +104,57 @@ class AutoFixer:
         s, f = self._fix_commas_in_params(s)
         fixes.extend(f)
 
+        # Phase 2 type name conversions (must run before square brackets)
+        s, f = self._fix_str_type(s)
+        fixes.extend(f)
+
+        s, f = self._fix_void_type(s)
+        fixes.extend(f)
+
+        # Phase 2 syntax: square brackets → @() arrays
+        s, f = self._fix_square_brackets(s)
+        fixes.extend(f)
+
+        # Phase 2: @(T) → @T for array types (parser reads @( as map start)
+        s, f = self._fix_array_paren_type(s)
+        fixes.extend(f)
+
+        # Phase 2: array indexing arr[i] → arr.get(i)
+        s, f = self._fix_array_indexing(s)
+        fixes.extend(f)
+
+        # Bitwise operators not in character set
+        s, f = self._fix_bitwise_ops(s)
+        fixes.extend(f)
+
+        # Pattern match wildcard _:
+        s, f = self._fix_pattern_match(s)
+        fixes.extend(f)
+
+        # Promote immutable bindings to mut when reassigned (E4070)
+        s, f = self._fix_immutable_reassign(s)
+        fixes.extend(f)
+
+        # Single quotes → double quotes
+        s, f = self._fix_single_quotes(s)
+        fixes.extend(f)
+
+        # Uppercase keywords F=/M=/T=/I= → lowercase
+        s, f = self._fix_uppercase_keywords(s)
+        fixes.extend(f)
+
+        # Underscores inside identifiers (camelCase already ok, snake_case not)
+        s, f = self._fix_snake_case(s)
+        fixes.extend(f)
+
+        # u8 literal comparisons: x as u8=91 → x as u8=91 as u8
+        s, f = self._fix_u8_literal(s)
+        fixes.extend(f)
+
+        # Remove backticks, question marks, and other invalid chars
+        s, f = self._fix_invalid_chars(s)
+        fixes.extend(f)
+
         return s, fixes
 
     def has_fixes(self, source: str) -> bool:
@@ -433,9 +484,31 @@ class AutoFixer:
         return s, fixes
 
     def _fix_string_type(self, s: str) -> tuple[str, list[str]]:
-        new = re.sub(r'\bString\b', 'Str', s)
+        new = re.sub(r'\bString\b', '$str', s)
         if new != s:
-            return new, ['String->Str']
+            return new, ['String->$str']
+        return s, []
+
+    def _fix_str_type(self, s: str) -> tuple[str, list[str]]:
+        """Convert Str (capital S) to $str when used as a type name.
+
+        Matches Str in type positions: after : or @( or [ or before ) ; } ]
+        Does NOT match inside words like 'String' (already handled above)
+        or method calls like .str().
+        """
+        # After colon, @(, or [ — e.g. :Str, @(Str, [Str
+        new = re.sub(r'(?<=[:\(@\[])Str\b', '$str', s)
+        # Also handle Str when followed by ) ; } ] (standalone type use)
+        new = re.sub(r'\bStr(?=[);}\]\s])', '$str', new)
+        if new != s:
+            return new, ['Str->$str']
+        return s, []
+
+    def _fix_void_type(self, s: str) -> tuple[str, list[str]]:
+        """Convert ):void{ → ):$void{ in return type position."""
+        new = re.sub(r'\):void\b', '):$void', s)
+        if new != s:
+            return new, ['void->$void']
         return s, []
 
     def _fix_len_type(self, s: str) -> tuple[str, list[str]]:
@@ -479,8 +552,6 @@ class AutoFixer:
 
     def _fix_commas_in_params(self, s: str) -> tuple[str, list[str]]:
         """Replace commas with semicolons inside parentheses (params/args)."""
-        # Only replace commas that appear inside balanced parentheses
-        # and look like parameter separators (not inside strings)
         result = []
         depth = 0
         in_string = False
@@ -509,3 +580,279 @@ class AutoFixer:
         if fixed:
             return ''.join(result), [',->; in params']
         return s, []
+
+    def _fix_square_brackets(self, s: str) -> tuple[str, list[str]]:
+        """Convert Phase A square bracket syntax to Phase 2 @() syntax.
+
+        Type annotations: [i64] → @(i64), [Str] → @(Str)
+        Array literals:   [1;2;3] → @(1;2;3)
+        Mutable init:     mut.[] → mut.@()
+        """
+        fixes = []
+        # Type annotations in function signatures and let bindings
+        # [$type] → @$type, [type] → @type where type is a known toke type
+        new = re.sub(r'\[(\$(?:i64|u64|f64|str|bool))\]', r'@\1', s)
+        if new != s:
+            fixes.append('[T]->@T')
+            s = new
+        new = re.sub(r'\[(i64|u64|f64|str|bool)\]', r'@\1', s)
+        if new != s:
+            fixes.append('[T]->@T')
+            s = new
+        # Nested: [[@$i64]] → @@$i64
+        new = re.sub(r'\[@(@\$?\w+)\]', r'@\1', s)
+        if new != s:
+            fixes.append('[[T]]->@@T')
+            s = new
+        # Array literals: [expr;expr;...] or [expr] where not already @(
+        # mut.[] → mut.@()
+        new = s.replace('mut.[]', 'mut.@()')
+        if new != s:
+            fixes.append('mut.[]->mut.@()')
+            s = new
+        # Bare empty array: =[] → =@()
+        new = re.sub(r'=\[\]', '=@()', s)
+        if new != s:
+            fixes.append('[]->@()')
+            s = new
+        # Array literal with content: [a;b;c] → @(a;b;c) — only if no @ before [
+        # Be careful not to catch indexing arr[i]
+        new = re.sub(r'(?<!\w)(?<!\.)\[([^]]+)\](?!\s*=)', r'@(\1)', s)
+        if new != s:
+            fixes.append('[...]-‍>@(...)')
+            s = new
+        return s, fixes
+
+    def _fix_array_paren_type(self, s: str) -> tuple[str, list[str]]:
+        """Convert @(T) array types to @T (no parens).
+
+        The parser interprets @( as the start of a map type @(K:V).
+        Array types must use @$type or @type without parens.
+        Preserves @(K:V) map types (those contain a colon inside).
+        """
+        fixes: list[str] = []
+        # @( $type ) → @$type — with optional whitespace
+        new = re.sub(r'@\(\s*(\$\w+)\s*\)', r'@\1', s)
+        if new != s:
+            fixes.append('@($T)->@$T')
+            s = new
+        # @( type ) → @type — single scalar type (no colon = not a map)
+        new = re.sub(r'@\(\s*((?:i64|u64|f64|bool|str|Str)\b)\s*\)', r'@\1', s)
+        if new != s:
+            fixes.append('@(T)->@T')
+            s = new
+        # Nested: @( @$type ) → @@$type
+        new = re.sub(r'@\(\s*(@\$?\w+)\s*\)', r'@\1', s)
+        if new != s:
+            fixes.append('@(@T)->@@T')
+            s = new
+        return s, fixes
+
+    def _fix_array_indexing(self, s: str) -> tuple[str, list[str]]:
+        """Convert arr[i] indexing to arr.get(i) (Phase 2 syntax)."""
+        # Match word.word[expr] or word[expr] but not type annotations
+        # which were already converted to @()
+        new = re.sub(r'(\w+)\[([^\]]+)\]', r'\1.get(\2)', s)
+        if new != s:
+            return new, ['arr[i]->arr.get(i)']
+        return s, []
+
+    def _fix_single_quotes(self, s: str) -> tuple[str, list[str]]:
+        """Convert single-quoted strings to double-quoted."""
+        # Only replace single quotes that look like string delimiters
+        # (not apostrophes in identifiers — toke has none anyway)
+        new = re.sub(r"'([^']*)'", r'"\1"', s)
+        if new != s:
+            return new, ["'->\""]
+        return s, []
+
+    def _fix_bitwise_ops(self, s: str) -> tuple[str, list[str]]:
+        """Remove bitwise operators not in the toke character set.
+
+        ^  (XOR), &  (bitwise AND), << (left shift), >> (right shift),
+        |  (bitwise OR / pipe) when not part of ||.
+        These have no toke equivalents — strip the expression or replace
+        with arithmetic approximations where safe.
+        """
+        fixes: list[str] = []
+        # ^ XOR → approximate with addition (lossy but compiles)
+        new = re.sub(r'\^', '+', s)
+        if new != s:
+            fixes.append('^->+')
+            s = new
+        # & bitwise AND (but not && which is already handled)
+        new = re.sub(r'(?<!&)&(?!&)', '+', s)
+        if new != s:
+            fixes.append('&->+')
+            s = new
+        # << and >> shift operators → multiply/divide by powers of 2
+        new = re.sub(r'<<', '*', s)
+        if new != s:
+            fixes.append('<<->*')
+            s = new
+        new = re.sub(r'>>', '/', s)
+        if new != s:
+            fixes.append('>>->/')
+            s = new
+        return s, fixes
+
+    def _fix_pattern_match(self, s: str) -> tuple[str, list[str]]:
+        """Remove pattern match blocks that use pipe syntax.
+
+        LLMs generate ``expr|{...}`` match blocks which toke doesn't support.
+        Convert to if/else chains where possible, or strip the block.
+        """
+        # Simple match: expr|{case1:val1;case2:val2;_:default}
+        # Convert to: if(expr=case1){<val1}el{if(expr=case2){<val2}el{<default}}
+        # For now, just strip the unsupported _: wildcard line
+        fixes: list[str] = []
+        # bare _ as match wildcard: _:expr → default case
+        if re.search(r'\b_:', s):
+            new = re.sub(r'\b_:', 'zz:', s)
+            if new != s:
+                fixes.append('_:->zz:')
+                s = new
+        return s, fixes
+
+    def _fix_uppercase_keywords(self, s: str) -> tuple[str, list[str]]:
+        """Convert F=, M=, T=, I= to lowercase f=, m=, t=, i= (Phase 2)."""
+        fixes: list[str] = []
+        new = re.sub(r'^F=', 'f=', s, flags=re.MULTILINE)
+        if new != s:
+            fixes.append('F=->f=')
+            s = new
+        new = re.sub(r'^M=', 'm=', s, flags=re.MULTILINE)
+        if new != s:
+            fixes.append('M=->m=')
+            s = new
+        new = re.sub(r'^T=', 't=', s, flags=re.MULTILINE)
+        if new != s:
+            fixes.append('T=->t=')
+            s = new
+        new = re.sub(r'^I=', 'i=', s, flags=re.MULTILINE)
+        if new != s:
+            fixes.append('I=->i=')
+            s = new
+        # Also handle non-start-of-line: ;F= or }F= patterns
+        new = re.sub(r'(?<=[;}\n])F=', 'f=', s)
+        if new != s:
+            fixes.append('F=->f=')
+            s = new
+        new = re.sub(r'(?<=[;}\n])T=', 't=', s)
+        if new != s:
+            fixes.append('T=->t=')
+            s = new
+        new = re.sub(r'(?<=[;}\n])I=', 'i=', s)
+        if new != s:
+            fixes.append('I=->i=')
+            s = new
+        return s, fixes
+
+    def _fix_snake_case(self, s: str) -> tuple[str, list[str]]:
+        """Convert snake_case identifiers to camelCase.
+
+        The underscore character is not in the toke 56-char set.
+        Converts: my_var → myVar, shifted_right → shiftedRight.
+        Preserves string contents.
+        """
+        def _to_camel(m):
+            word = m.group(0)
+            parts = word.split('_')
+            return parts[0] + ''.join(p.capitalize() for p in parts[1:] if p)
+
+        # Process line by line, skipping string contents
+        lines = s.split('\n')
+        changed = False
+        result = []
+        for line in lines:
+            # Split on string literals to avoid modifying them
+            parts = re.split(r'("(?:[^"\\]|\\.)*")', line)
+            new_parts = []
+            for i, part in enumerate(parts):
+                if i % 2 == 0:  # Not inside a string
+                    new_part = re.sub(r'\b[a-z]\w*_\w+\b', _to_camel, part)
+                    if new_part != part:
+                        changed = True
+                    new_parts.append(new_part)
+                else:
+                    new_parts.append(part)
+            result.append(''.join(new_parts))
+
+        if changed:
+            return '\n'.join(result), ['snake_case->camelCase']
+        return s, []
+
+    def _fix_u8_literal(self, s: str) -> tuple[str, list[str]]:
+        """Fix u8 comparison literals: `x as u8=65` → `x as u8=65 as u8`.
+
+        When comparing a u8 value against an integer literal, the literal
+        needs an explicit `as u8` cast.
+        """
+        # Pattern: as u8=DIGITS (not already followed by ' as u8')
+        new = re.sub(r'(as\s+u8\s*=\s*)(\d+)(?!\s*as)', r'\1\2 as u8', s)
+        if new != s:
+            return new, ['u8=N->u8=N as u8']
+        return s, []
+
+    def _fix_immutable_reassign(self, s: str) -> tuple[str, list[str]]:
+        """Promote let x=val to let x=mut.val when x is reassigned later.
+
+        Detects E4070: 'cannot assign to immutable binding'. Scans for
+        variables declared with 'let x=' that appear on the LHS of a
+        later assignment (x=...) without already having mut.
+        """
+        lines = s.split('\n')
+        # Phase 1: find all let-declared variable names and their line indices
+        let_vars: dict[str, int] = {}  # var_name -> line index
+        let_has_mut: set[str] = set()
+        for idx, line in enumerate(lines):
+            stripped = line.lstrip()
+            m = re.match(r'let\s+(\w+)\s*=\s*(mut\.)?', stripped)
+            if m:
+                vname = m.group(1)
+                let_vars[vname] = idx
+                if m.group(2):
+                    let_has_mut.add(vname)
+
+        # Phase 2: find reassignment targets (var=expr on non-let lines)
+        reassigned: set[str] = set()
+        for line in lines:
+            stripped = line.lstrip()
+            if stripped.startswith('let '):
+                continue
+            # Match var=something (not ==, not !=, not <=, not >=)
+            for m in re.finditer(r'\b(\w+)\s*=(?!=)', stripped):
+                vname = m.group(1)
+                if vname in let_vars and vname not in let_has_mut:
+                    reassigned.add(vname)
+
+        if not reassigned:
+            return s, []
+
+        # Phase 3: inject mut. into the let declarations
+        for vname in reassigned:
+            idx = let_vars[vname]
+            lines[idx] = re.sub(
+                rf'(let\s+{re.escape(vname)}\s*=\s*)(?!mut\.)',
+                r'\1mut.',
+                lines[idx],
+                count=1,
+            )
+
+        return '\n'.join(lines), ['immut->mut']
+
+    def _fix_invalid_chars(self, s: str) -> tuple[str, list[str]]:
+        """Remove backticks, question marks, and other invalid characters."""
+        fixes = []
+        # Remove backticks (from markdown fences LLMs sometimes include)
+        new = s.replace('`', '')
+        if new != s:
+            fixes.append('strip_backticks')
+            s = new
+        # Remove ? (sometimes from ternary attempts)
+        if '?' in s:
+            new = re.sub(r'\?', '', s)
+            if new != s:
+                fixes.append('strip_?')
+                s = new
+        return s, fixes

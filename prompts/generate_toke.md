@@ -10,7 +10,7 @@ Generate a toke program for the following task.
 - Output ONLY the toke source code. No explanations, no markdown fences, no comments.
 - The program must start with `M=` module declaration.
 - Parameters and arguments use `;` as separator, NOT `,`.
-- Array elements use `;` as separator: `[1;2;3]`.
+- Array elements use `;` as separator: `@(1;2;3)`.
 - Return with `<`, not `return`.
 - Conditionals: `if(cond){{...}}` / `if(cond){{...}}el{{...}}`
 - Mutable bindings: `let x=mut.0;` (NOT `let mut x=0` or `mut x:i64=0`)
@@ -19,7 +19,7 @@ Generate a toke program for the following task.
 - No `%` modulo operator. Compute modulo as `a-a/b*b`.
 - Equality comparison: `=` (not `==`). No `!=`, `<=`, `>=` operators. Use `!(a>b)` instead of `a<=b`. Use `!(a<b)` instead of `a>=b`. Use `!(a=b)` instead of `a!=b`.
 - No `&&` or `||` operators. For AND: nest ifs — `if(a){{if(b){{...}}}}`. For OR: use a flag — `let zor=mut.false;if(a){{zor=true}};if(b){{zor=true}};if(zor){{...}}`.
-- String type: `Str` (not `string` or `String`)
+- String type: `$str` (not `string`, `String`, or `Str`)
 - No comments of any kind (`//`, `#`, `/* */` are all illegal).
 - Loop: `lp` NOT `for` or `while`. There is no `for` or `while` keyword.
 - Else: `el` NOT `else`. For else-if chains: `if(a){{...}}el{{if(b){{...}}el{{...}}}}`

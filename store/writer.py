@@ -198,13 +198,15 @@ class CorpusWriter:
         python_src: str = "",
         c_src: str = "",
         java_src: str = "",
+        phase: str | None = None,
     ) -> CorpusEntry:
         """Assemble a CorpusEntry from component pipeline results.
 
         The entry ID is deterministic: ``{phase}-{task_id}-{short_hash}``.
         """
-        # Derive phase letter from the task_id prefix (e.g. "A" from "A-MTH-0001").
-        phase = task.task_id[0] if task.task_id else "A"
+        # Use explicit phase if provided, otherwise derive from task_id prefix.
+        if phase is None:
+            phase = task.task_id[0] if task.task_id else "A"
         short = _short_hash(toke_source)
         entry_id = f"{phase}-{task.task_id}-{short}"
 

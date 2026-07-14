@@ -33,6 +33,9 @@ class ModelMetrics:
     failed: int = 0
     acceptance_rate: float = 0.0
     cost: float = 0.0
+    input_tokens: int = 0
+    output_tokens: int = 0
+    api_calls: int = 0
 
 
 @dataclass
@@ -46,12 +49,22 @@ class CategoryMetrics:
 
 
 @dataclass
+class ProviderTokens:
+    """Per-provider token usage."""
+
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cost: float = 0.0
+
+
+@dataclass
 class CostSummary:
     """Aggregated cost information."""
 
     api_total: float = 0.0
     by_provider: dict[str, float] = field(default_factory=dict)
     compute_estimate: float = 0.0
+    provider_tokens: dict[str, ProviderTokens] = field(default_factory=dict)
 
 
 @dataclass
@@ -123,12 +136,14 @@ class MetricsCollector:
         total_tasks: int,
         metrics_dir: str,
         auto_save_interval: int = 100,
+        cost_tracker: object | None = None,
     ) -> None:
         self._total_tasks = total_tasks
         self._metrics_dir = Path(metrics_dir)
         self._metrics_dir.mkdir(parents=True, exist_ok=True)
         self._auto_save_interval = auto_save_interval
         self._records_since_save = 0
+        self._cost_tracker = cost_tracker
 
         now = datetime.now(timezone.utc).isoformat()
         self._started_at = now
@@ -145,6 +160,9 @@ class MetricsCollector:
         self._model_accepted: dict[str, int] = {}
         self._model_failed: dict[str, int] = {}
         self._model_cost: dict[str, float] = {}
+        self._model_input_tokens: dict[str, int] = {}
+        self._model_output_tokens: dict[str, int] = {}
+        self._model_api_calls: dict[str, int] = {}
 
         # Per-category tracking.
         self._cat_dispatched: dict[str, int] = {}
@@ -178,7 +196,13 @@ class MetricsCollector:
         self._maybe_auto_save()
 
     def record_accepted(
-        self, task_id: str, provider: str, category: str, cost: float
+        self,
+        task_id: str,
+        provider: str,
+        category: str,
+        cost: float,
+        input_tokens: int = 0,
+        output_tokens: int = 0,
     ) -> None:
         """Record that a task was accepted after validation."""
         self._accepted += 1
@@ -186,6 +210,15 @@ class MetricsCollector:
             self._model_accepted.get(provider, 0) + 1
         )
         self._model_cost[provider] = self._model_cost.get(provider, 0.0) + cost
+        self._model_input_tokens[provider] = (
+            self._model_input_tokens.get(provider, 0) + input_tokens
+        )
+        self._model_output_tokens[provider] = (
+            self._model_output_tokens.get(provider, 0) + output_tokens
+        )
+        self._model_api_calls[provider] = (
+            self._model_api_calls.get(provider, 0) + 1
+        )
         self._cat_accepted[category] = (
             self._cat_accepted.get(category, 0) + 1
         )
@@ -195,7 +228,13 @@ class MetricsCollector:
         self._maybe_auto_save()
 
     def record_failed(
-        self, task_id: str, provider: str, category: str, cost: float
+        self,
+        task_id: str,
+        provider: str,
+        category: str,
+        cost: float,
+        input_tokens: int = 0,
+        output_tokens: int = 0,
     ) -> None:
         """Record that a task failed validation."""
         self._failed += 1
@@ -203,6 +242,15 @@ class MetricsCollector:
             self._model_failed.get(provider, 0) + 1
         )
         self._model_cost[provider] = self._model_cost.get(provider, 0.0) + cost
+        self._model_input_tokens[provider] = (
+            self._model_input_tokens.get(provider, 0) + input_tokens
+        )
+        self._model_output_tokens[provider] = (
+            self._model_output_tokens.get(provider, 0) + output_tokens
+        )
+        self._model_api_calls[provider] = (
+            self._model_api_calls.get(provider, 0) + 1
+        )
         self._cat_failed[category] = self._cat_failed.get(category, 0) + 1
         self._cost_by_provider[provider] = (
             self._cost_by_provider.get(provider, 0.0) + cost
@@ -238,6 +286,9 @@ class MetricsCollector:
                 failed=failed,
                 acceptance_rate=round(rate, 4),
                 cost=round(self._model_cost.get(model, 0.0), 6),
+                input_tokens=self._model_input_tokens.get(model, 0),
+                output_tokens=self._model_output_tokens.get(model, 0),
+                api_calls=self._model_api_calls.get(model, 0),
             )
 
         # Build per-category metrics.
@@ -257,10 +308,19 @@ class MetricsCollector:
 
         # Cost summary.
         api_total = sum(self._cost_by_provider.values())
+        provider_tokens: dict[str, ProviderTokens] = {}
+        if self._cost_tracker is not None and hasattr(self._cost_tracker, "_input_tokens"):
+            for prov in set(self._cost_tracker._input_tokens) | set(self._cost_tracker._output_tokens):
+                provider_tokens[prov] = ProviderTokens(
+                    input_tokens=self._cost_tracker._input_tokens.get(prov, 0),
+                    output_tokens=self._cost_tracker._output_tokens.get(prov, 0),
+                    cost=round(self._cost_tracker._records.get(prov, 0.0), 6),
+                )
         cost = CostSummary(
             api_total=round(api_total, 6),
             by_provider={k: round(v, 6) for k, v in sorted(self._cost_by_provider.items())},
             compute_estimate=0.0,
+            provider_tokens={k: asdict(v) for k, v in provider_tokens.items()},
         )
 
         # Estimated remaining hours based on acceptance rate and elapsed time.
@@ -282,8 +342,28 @@ class MetricsCollector:
             estimated_remaining_hours=round(estimated_remaining, 2),
         )
 
+    def sync_token_counts(self, cost_tracker: object) -> None:
+        """Sync token counts from the CostTracker into per-model metrics.
+
+        Call before save() to include token/call data in the snapshot.
+        Accepts any object with _input_tokens, _output_tokens dicts.
+        """
+        if hasattr(cost_tracker, "_input_tokens"):
+            self._model_input_tokens = dict(cost_tracker._input_tokens)
+        if hasattr(cost_tracker, "_output_tokens"):
+            self._model_output_tokens = dict(cost_tracker._output_tokens)
+        # Count API calls: sum of input_tokens entries (one per call is approximate;
+        # actual call count = accepted + failed for that provider).
+        for provider in self._model_input_tokens:
+            self._model_api_calls[provider] = (
+                self._model_accepted.get(provider, 0)
+                + self._model_failed.get(provider, 0)
+            )
+
     def save(self) -> None:
         """Write current metrics to ``metrics_dir/progress.json``."""
+        if self._cost_tracker is not None:
+            self.sync_token_counts(self._cost_tracker)
         metrics = self.snapshot()
         out_path = self._metrics_dir / "progress.json"
 

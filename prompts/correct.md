@@ -28,7 +28,7 @@ The following toke program failed to compile. Fix the errors and return the corr
   - Parameters and arguments use `;` not `,`
   - Array elements use `;` not `,`
   - Return is `<` not `return`
-  - String type is `Str` not `string`/`String`
+  - String type is `$str` not `string`/`String`/`Str`
   - Else is `el` not `else`
   - Loop is `lp` not `for`/`while`
   - Loop init uses `let`: `lp(let i=0;i<n;i=i+1)` not `lp(mut i:i64=0;...)`

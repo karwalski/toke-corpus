@@ -21,9 +21,9 @@ from generator.curriculum import (
 _TASK_ID_RE = re.compile(r"^A-[A-Z]{3}-\d{4}(v\d+)?$")
 _SIG_RE = re.compile(r"^F=\w+\(.*\):.+$")
 
-# Valid toke primitive and composite type patterns
+# Valid toke primitive and composite type patterns (Phase 2 syntax)
 _TOKE_TYPES = {
-    "i64", "u64", "f64", "bool", "Str", "void",
+    "i64", "u64", "f64", "bool", "$str", "$void",
 }
 
 
@@ -279,16 +279,16 @@ class TestTokeTypes:
     """Type hints should reference valid toke types."""
 
     def _is_valid_toke_type(self, ty: str) -> bool:
-        """Check if a type string is a valid toke type expression."""
+        """Check if a type string is a valid toke type expression (Phase 2)."""
         # Primitives
         if ty in _TOKE_TYPES:
             return True
-        # Array type [T]
-        if ty.startswith("[") and ty.endswith("]") and ":" not in ty:
-            return self._is_valid_toke_type(ty[1:-1])
-        # Map type [K:V]
-        if ty.startswith("[") and ty.endswith("]") and ":" in ty:
-            inner = ty[1:-1]
+        # Phase 2 array type @(T) or @(@(T))
+        if ty.startswith("@(") and ty.endswith(")") and ":" not in ty:
+            return self._is_valid_toke_type(ty[2:-1])
+        # Phase 2 map type @(K:V)
+        if ty.startswith("@(") and ty.endswith(")") and ":" in ty:
+            inner = ty[2:-1]
             colon = inner.index(":")
             return (
                 self._is_valid_toke_type(inner[:colon])
@@ -298,9 +298,6 @@ class TestTokeTypes:
         if "!" in ty:
             parts = ty.split("!", 1)
             return self._is_valid_toke_type(parts[0])
-        # Nested arrays [[T]]
-        if ty.startswith("[[") and ty.endswith("]]"):
-            return self._is_valid_toke_type(ty[1:-1])
         return False
 
     def test_type_hints_valid(self) -> None:

@@ -26,7 +26,7 @@ TYPE_MAP = {
     "float": "f64",
     "bool": "bool",
     "_Bool": "bool",
-    "void": "void",
+    "void": "$void",
 }
 
 FAKE_TYPEDEFS = (
@@ -55,10 +55,10 @@ class CToTokeTranspiler:
 
         Args:
             c_source: Complete C source code (may include #include, main(), etc.)
-            module_name: Name for the M= declaration
+            module_name: Name for the m= declaration
 
         Returns:
-            Complete toke source code starting with M=module_name;
+            Complete toke source code starting with m=module_name;
 
         Raises:
             TranspileError: If C source can't be parsed or contains unsupported constructs
@@ -89,7 +89,7 @@ class CToTokeTranspiler:
         if not functions:
             raise TranspileError("No non-main functions found in C source")
 
-        output = f"M={module_name};\n" + "\n".join(functions) + "\n"
+        output = f"m={module_name};\n" + "\n".join(functions) + "\n"
         output = self._postprocess(output)
         return output
 
@@ -151,7 +151,7 @@ class CToTokeTranspiler:
         body = self._emit_body(func_def.body, ctx, indent=2)
 
         param_str = ";".join(f"{n}:{t}" for n, t in params)
-        return f"F={func_name}({param_str}):{ret_type}{{\n{body}}};\n"
+        return f"f={func_name}({param_str}):{ret_type}{{\n{body}}};\n"
 
     def _map_return_type(self, type_node: c_ast.Node) -> str:
         """Map a C return type to toke type."""
@@ -179,13 +179,13 @@ class CToTokeTranspiler:
             ):
                 inner_names = inner.type.names
                 if "char" in inner_names:
-                    return "Str"
+                    return "$str"
             inner_type = self._resolve_type(inner)
-            return f"[{inner_type}]"
+            return f"@({inner_type})"
 
         if isinstance(type_node, c_ast.ArrayDecl):
             inner_type = self._resolve_type(type_node.type)
-            return f"[{inner_type}]"
+            return f"@({inner_type})"
 
         if isinstance(type_node, c_ast.Struct):
             raise TranspileError("Struct types not supported")
@@ -223,7 +223,7 @@ class CToTokeTranspiler:
                 continue
 
             toke_type = self._resolve_type(param.type)
-            is_array = toke_type.startswith("[")
+            is_array = toke_type.startswith("@(")
             raw_params.append((name, toke_type, is_array))
 
         array_params = {}
@@ -340,7 +340,7 @@ class CToTokeTranspiler:
 
         if isinstance(node, c_ast.Return):
             if node.expr is None:
-                return f"{pad}<void"
+                return f"{pad}<$void"
             expr = self._emit_expr(node.expr, ctx)
             return f"{pad}<{expr}"
 
@@ -427,7 +427,7 @@ class CToTokeTranspiler:
             return "0.0"
         if toke_type == "bool":
             return "false"
-        if toke_type == "Str":
+        if toke_type == "$str":
             return '""'
         return "0"
 
@@ -778,7 +778,7 @@ class CToTokeTranspiler:
         if isinstance(node, c_ast.ArrayRef):
             arr = self._emit_expr(node.name, ctx)
             idx = self._emit_expr(node.subscript, ctx)
-            return f"{arr}[{idx}]"
+            return f"{arr}.get({idx})"
 
         if isinstance(node, c_ast.FuncCall):
             return self._emit_func_call(node, ctx)

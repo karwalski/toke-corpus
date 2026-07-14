@@ -36,6 +36,7 @@ from dispatch.openai import OpenAIClient
 from dispatch.xai import XAIClient
 from dispatch.pool import PoolConfig, PoolManager
 from generator.curriculum import CATEGORIES, CurriculumGenerator, TaskSpec
+from generator.curriculum_v2 import ALL_CATEGORIES, CurriculumGeneratorV2, TaskSpecV2
 from store.checkpoint import Checkpoint
 from store.metrics import MetricsCollector
 from store.writer import CorpusWriter, count_tokens
@@ -376,10 +377,12 @@ async def process_task(
     providers: dict[str, ProviderClient],
     config: dict[str, Any],
     completed_ids: set[str],
+    oneshot: bool = False,
 ) -> bool:
     """Process a single task through the full pipeline.
 
     Returns True if the task was accepted, False otherwise.
+    If oneshot=True, skip correction loops and escalations.
     """
     # Use category-specific system prompt for toke generation (smaller, focused).
     # Fall back to full system prompt if category-specific not available.
@@ -505,6 +508,15 @@ async def process_task(
     # Step 4b: If STILL failing, LLM correction + single escalation.
     # First attempt with original provider, then one tier-2 escalation.
     # If both fail, defer for batch pattern analysis.
+    # In oneshot mode, skip corrections entirely.
+    if not toke_compile.success and oneshot:
+        _log_deferred_failure(
+            task, toke_source, toke_compile, model_name, category,
+            config.get("log_dir", "logs"),
+        )
+        metrics.record_failed(task.task_id, model_name, category, task_cost)
+        return False
+
     if not toke_compile.success:
         try:
             corr_result = await correction_loop.correct(
@@ -630,6 +642,7 @@ async def process_task(
             python_src=python_src,
             c_src=c_src,
             java_src=java_src,
+            phase=config.get("phase", "A"),
         )
         writer.write(entry)
     except Exception:
@@ -717,6 +730,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Run trial and print scorecard, then exit.",
     )
     parser.add_argument(
+        "--oneshot",
+        action="store_true",
+        help="Oneshot mode: no correction loops or escalations. Accept or reject on first pass + autofix.",
+    )
+    parser.add_argument(
+        "--curriculum-file",
+        type=str,
+        default=None,
+        help="Path to pre-generated task_specs_v2.jsonl (Phase 2 curriculum).",
+    )
+    parser.add_argument(
         "--batch-size",
         type=int,
         default=1000,
@@ -800,8 +824,34 @@ async def run_pipeline(args: argparse.Namespace) -> None:
     prompts = load_prompts(prompts_dir)
 
     # ---- b) Generate curriculum -------------------------------------------
-    curriculum = CurriculumGenerator(seed=seed, total_tasks=total_tasks)
-    task_specs = curriculum.generate()
+    if args.curriculum_file:
+        # Phase 2: load pre-generated V2 task specs and convert to TaskSpec
+        logger.info("Loading V2 curriculum from %s", args.curriculum_file)
+        task_specs = []
+        with open(args.curriculum_file, encoding="utf-8") as cf:
+            for line in cf:
+                line = line.strip()
+                if not line:
+                    continue
+                rec = json.loads(line)
+                # Convert V2 format to Phase A TaskSpec for pipeline compat.
+                # The pipeline only needs task_id, category, description,
+                # expected_signature (built from input/output types).
+                in_types = rec.get("input_types", [])
+                out_type = rec.get("output_type", "Str")
+                sig = f"f=solve({';'.join(f'p{i}:{t}' for i,t in enumerate(in_types))}):{out_type}"
+                task_specs.append(TaskSpec(
+                    task_id=rec["task_id"],
+                    category=rec["category"],
+                    description=rec["description"],
+                    expected_signature=sig,
+                    difficulty=rec.get("difficulty", 1),
+                ))
+        if total_tasks and total_tasks < len(task_specs):
+            task_specs = task_specs[:total_tasks]
+    else:
+        curriculum = CurriculumGenerator(seed=seed, total_tasks=total_tasks)
+        task_specs = curriculum.generate()
     logger.info("Generated %d task specifications", len(task_specs))
 
     # ---- Dry-run mode: generate curriculum and print sample, then exit ----
@@ -938,6 +988,7 @@ async def run_pipeline(args: argparse.Namespace) -> None:
     metrics = MetricsCollector(
         total_tasks=total_tasks,
         metrics_dir=metrics_dir,
+        cost_tracker=cost_tracker,
     )
 
     # ---- Signal handlers for graceful shutdown ----------------------------
@@ -1008,6 +1059,7 @@ async def run_pipeline(args: argparse.Namespace) -> None:
                     providers=providers,
                     config=config,
                     completed_ids=completed_ids,
+                    oneshot=args.oneshot,
                 )
                 return task, result
 

@@ -1,23 +1,64 @@
-"""Corpus pipeline monitoring dashboard.
+"""Toke Phase 2 Corpus Dashboard.
 
-Lightweight HTTP dashboard served on port 8080.
-Reads progress.json, logs, and system stats to render real-time metrics.
+Single-file Python HTTPS server with embedded HTML/JS/CSS.
+Monitors Phase 2 corpus generation: JSONL datasets, prompt inventory,
+pipeline status, source registry, quality metrics, and sprint progress.
 No external dependencies — uses stdlib only + Chart.js via CDN.
 """
 
 import http.server
 import json
+import math
 import os
 import re
 import ssl
 import subprocess
 import threading
 import time
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
-import math
+PORT = 8443
+CERT_FILE = Path("/opt/toke-corpus/dashboard.crt")
+KEY_FILE = Path("/opt/toke-corpus/dashboard.key")
+BASE_DIR = Path("/opt/toke-corpus")
+DATA_DIR = BASE_DIR / "data"
+CORPUS_DIR = BASE_DIR / "corpus"
+METRICS_DIR = BASE_DIR / "metrics"
+LOGS_DIR = BASE_DIR / "logs"
+PROGRESS_FILE = METRICS_DIR / "progress.json"
+REGISTRY_DIR = BASE_DIR / "registry"
+TKC_BIN = BASE_DIR / "bin" / "tkc"
+
+# JSONL corpus files in data/
+JSONL_SOURCES = {
+    "Phase A (original)": DATA_DIR / "corpus_default.jsonl",
+    "Mutations": DATA_DIR / "corpus_mutations.jsonl",
+    "Error triples": DATA_DIR / "corpus_error_triples.jsonl",
+    "Grammar fuzz": DATA_DIR / "corpus_fuzzed.jsonl",
+    "Parallel corpus": DATA_DIR / "parallel_corpus_expanded.jsonl",
+    "API-generated": DATA_DIR / "corpus_api.jsonl",
+    "OSS ingest": DATA_DIR / "corpus_oss.jsonl",
+}
+
+# Prompt directories
+PROMPT_DIRS = {
+    "domain_prompts": DATA_DIR / "domain_prompts",
+    "prompts": DATA_DIR / "prompts",
+    "interfaces": DATA_DIR / "interfaces",
+    "body_prompts": DATA_DIR / "body_prompts",
+    "companions": DATA_DIR / "companions",
+    "companion_prompts": DATA_DIR / "companion_prompts",
+}
+
+# ── Caches ──────────────────────────────────────────────────────────────────
+
+_jsonl_cache = {"ts": 0, "data": {}}
+JSONL_CACHE_TTL = 300  # 5 minutes — JSONL files are multi-GB
+
+_metrics_cache = {"ts": 0, "data": None}
+METRICS_CACHE_TTL = 10  # seconds
 
 
 def _sanitize_for_json(obj):
@@ -33,28 +74,247 @@ def _sanitize_for_json(obj):
     return obj
 
 
-PORT = 443
-CERT_FILE = Path("/opt/toke-corpus/dashboard.crt")
-KEY_FILE = Path("/opt/toke-corpus/dashboard.key")
-CORPUS_DIR = Path("/opt/toke-corpus/corpus")
-METRICS_DIR = Path("/opt/toke-corpus/metrics")
-LOGS_DIR = Path("/opt/toke-corpus/logs")
-PROGRESS_FILE = METRICS_DIR / "progress.json"
-DEFERRED_FILE = LOGS_DIR / "deferred_failures.jsonl"
-TOTAL_TARGET = 25000
-PHASE_B_DIR = Path("/opt/toke-corpus/corpus/phase_b")
-PHASE_B_TARGET = 10000
-PHASE_C_DIR = Path("/opt/toke-corpus/corpus/phase_c")
-PHASE_C_TARGET = 5000
-PHASE_D_DIR = Path("/opt/toke-corpus/corpus/phase_d")
-PHASE_D_TARGET = 5000
-SCORECARD_FILE = METRICS_DIR / "scorecard.json"
-TRIAL_RESULTS_FILE = METRICS_DIR / "trial_results.json"
+# ── JSONL line counting (cached, background refresh) ───────────────────────
 
-# Cache for expensive computations
-_cache = {"ts": 0, "data": None}
-CACHE_TTL = 10  # seconds
+def _count_jsonl_lines(filepath):
+    """Count lines in a JSONL file efficiently using wc -l."""
+    if not filepath.exists():
+        return 0
+    try:
+        result = subprocess.run(
+            ["wc", "-l", str(filepath)],
+            capture_output=True, text=True, timeout=120
+        )
+        if result.returncode == 0:
+            return int(result.stdout.strip().split()[0])
+    except Exception:
+        pass
+    # Fallback: count in Python (slower but reliable)
+    try:
+        count = 0
+        with open(filepath, "rb") as f:
+            for _ in f:
+                count += 1
+        return count
+    except Exception:
+        return 0
 
+
+def _file_size_mb(filepath):
+    """Get file size in MB."""
+    try:
+        return round(filepath.stat().st_size / (1024 * 1024), 1)
+    except Exception:
+        return 0
+
+
+def get_phase2_corpus_stats():
+    """Count JSONL lines in data/ files. Cached for 5 minutes."""
+    now = time.time()
+    if _jsonl_cache["data"] and now - _jsonl_cache["ts"] < JSONL_CACHE_TTL:
+        return _jsonl_cache["data"]
+
+    sources = {}
+    total = 0
+    for name, path in JSONL_SOURCES.items():
+        count = _count_jsonl_lines(path)
+        size = _file_size_mb(path)
+        sources[name] = {"count": count, "size_mb": size, "path": str(path)}
+        total += count
+
+    data = {"total": total, "sources": sources}
+    _jsonl_cache["data"] = data
+    _jsonl_cache["ts"] = now
+    return data
+
+
+def _refresh_jsonl_cache():
+    """Background thread to refresh JSONL line counts."""
+    while True:
+        time.sleep(JSONL_CACHE_TTL)
+        try:
+            get_phase2_corpus_stats()
+        except Exception:
+            pass
+
+
+# ── Prompt inventory ────────────────────────────────────────────────────────
+
+def get_prompt_inventory():
+    """Count prompt files in each prompt directory."""
+    inventory = {}
+    total = 0
+    for name, path in PROMPT_DIRS.items():
+        if path.exists():
+            count = sum(1 for f in path.rglob("*") if f.is_file())
+        else:
+            count = 0
+        inventory[name] = count
+        total += count
+    return {"total": total, "by_directory": inventory}
+
+
+# ── Pipeline inventory ──────────────────────────────────────────────────────
+
+def get_pipeline_inventory():
+    """List available generation pipelines and their status."""
+    pipelines = {
+        "transpiler": {
+            "story": "9.2.2",
+            "description": "Transpile from other languages to toke",
+            "prompt_dir": "prompts",
+            "status": "available",
+        },
+        "interface_first": {
+            "story": "9.2.3",
+            "description": "Interface-first generation with body fill",
+            "prompt_dir": "interfaces",
+            "status": "available",
+        },
+        "companion": {
+            "story": "9.2.4",
+            "description": "Companion-driven generation",
+            "prompt_dir": "companion_prompts",
+            "status": "available",
+        },
+        "domain_stratified": {
+            "story": "9.3.2",
+            "description": "Domain-stratified prompt generation",
+            "prompt_dir": "domain_prompts",
+            "status": "available",
+        },
+    }
+    # Check which pipelines have prompts ready
+    for name, info in pipelines.items():
+        pdir = PROMPT_DIRS.get(info["prompt_dir"])
+        if pdir and pdir.exists():
+            count = sum(1 for f in pdir.iterdir() if f.is_file())
+            info["prompt_count"] = count
+        else:
+            info["prompt_count"] = 0
+            info["status"] = "no prompts"
+    return pipelines
+
+
+# ── API generation status ───────────────────────────────────────────────────
+
+def get_api_generation_status():
+    """Check API generation pipeline status from progress.json and logs."""
+    status = {
+        "running": False,
+        "entries_generated": 0,
+        "success_rate": 0,
+        "cost": {},
+    }
+    try:
+        with open(PROGRESS_FILE) as f:
+            progress = json.load(f)
+        status["entries_generated"] = progress.get("accepted", 0)
+        dispatched = progress.get("dispatched", 0)
+        if dispatched > 0:
+            status["success_rate"] = round(
+                progress.get("accepted", 0) / dispatched * 100, 1
+            )
+        status["cost"] = progress.get("cost", {})
+    except Exception:
+        pass
+
+    # Check if generation process is running
+    status["running"] = get_pipeline_status()
+    return status
+
+
+# ── Source registry ─────────────────────────────────────────────────────────
+
+def get_registry_stats():
+    """Read source registry stats."""
+    stats = {
+        "training_sources": 0,
+        "eval_sources": 0,
+        "split_training": 0,
+        "split_eval": 0,
+        "contamination_firewall": "unknown",
+    }
+    if not REGISTRY_DIR.exists():
+        return stats
+
+    # Count .json or .jsonl files in training/ and eval/
+    train_dir = REGISTRY_DIR / "training"
+    eval_dir = REGISTRY_DIR / "eval"
+
+    if train_dir.exists():
+        stats["training_sources"] = sum(
+            1 for f in train_dir.iterdir() if f.is_file()
+        )
+    if eval_dir.exists():
+        stats["eval_sources"] = sum(
+            1 for f in eval_dir.iterdir() if f.is_file()
+        )
+
+    # Check for split manifest
+    manifest = REGISTRY_DIR / "manifest.json"
+    if manifest.exists():
+        try:
+            with open(manifest) as f:
+                m = json.load(f)
+            stats["split_training"] = m.get("training_count", 0)
+            stats["split_eval"] = m.get("eval_count", 0)
+            stats["contamination_firewall"] = m.get("firewall_status", "unknown")
+        except Exception:
+            pass
+
+    # Check for contamination firewall config
+    firewall = REGISTRY_DIR / "firewall.json"
+    if firewall.exists():
+        stats["contamination_firewall"] = "active"
+    elif stats["contamination_firewall"] == "unknown":
+        stats["contamination_firewall"] = "not configured"
+
+    return stats
+
+
+# ── Quality metrics ─────────────────────────────────────────────────────────
+
+def get_quality_metrics():
+    """Get tkc validation pass rates and token stats."""
+    quality = {
+        "validation": {},
+        "token_distribution": {},
+        "phase_distribution": {},
+    }
+
+    # Check for quality report files
+    quality_dir = METRICS_DIR / "quality"
+    if quality_dir.exists():
+        for report_file in quality_dir.glob("*.json"):
+            try:
+                with open(report_file) as f:
+                    data = json.load(f)
+                name = report_file.stem
+                quality["validation"][name] = {
+                    "total": data.get("total", 0),
+                    "passed": data.get("passed", 0),
+                    "pass_rate": data.get("pass_rate", 0),
+                }
+            except Exception:
+                pass
+
+    # Try to read aggregate quality stats
+    quality_file = METRICS_DIR / "quality.json"
+    if quality_file.exists():
+        try:
+            with open(quality_file) as f:
+                data = json.load(f)
+            quality["validation"] = data.get("validation", quality["validation"])
+            quality["token_distribution"] = data.get("token_distribution", {})
+            quality["phase_distribution"] = data.get("phase_distribution", {})
+        except Exception:
+            pass
+
+    return quality
+
+
+# ── System stats ────────────────────────────────────────────────────────────
 
 def get_system_stats():
     """Get CPU, RAM, disk stats."""
@@ -82,7 +342,9 @@ def get_system_stats():
             avail = mem.get("MemAvailable", 0)
             stats["ram_total_gb"] = round(total / 1048576, 1)
             stats["ram_used_gb"] = round((total - avail) / 1048576, 1)
-            stats["ram_pct"] = round((total - avail) / total * 100, 1) if total else 0
+            stats["ram_pct"] = (
+                round((total - avail) / total * 100, 1) if total else 0
+            )
     except Exception:
         stats["ram_total_gb"] = 0
         stats["ram_used_gb"] = 0
@@ -104,389 +366,213 @@ def get_system_stats():
     return stats
 
 
-def get_corpus_count():
-    """Count corpus entries by category."""
-    counts = Counter()
-    total = 0
-    if CORPUS_DIR.exists():
-        for f in CORPUS_DIR.rglob("*.json"):
-            cat = f.parent.name
-            if cat in ("phase_b", "phase_c", "phase_d", "B-CMP", "C-EDG", "D-APP", "corpus"):
-                continue  # counted separately
-            counts[cat] += 1
-            total += 1
-    return total, dict(sorted(counts.items()))
-
-
-def get_phase_b_count():
-    """Count Phase B corpus entries."""
-    if not PHASE_B_DIR.exists():
-        return 0
-    return sum(1 for _ in PHASE_B_DIR.rglob("*.json"))
-
-
-def get_phase_c_count():
-    """Count Phase C corpus entries."""
-    if not PHASE_C_DIR.exists():
-        return 0
-    return sum(1 for _ in PHASE_C_DIR.rglob("*.json"))
-
-
-def get_phase_d_count():
-    """Count Phase D corpus entries."""
-    if not PHASE_D_DIR.exists():
-        return 0
-    return sum(1 for _ in PHASE_D_DIR.rglob("*.json"))
-
-
-def get_gate1_metrics():
-    """Read Gate 1 scorecard and trial results."""
-    gate1 = {"scorecard": None, "trial_summary": None}
-    try:
-        with open(SCORECARD_FILE) as f:
-            gate1["scorecard"] = json.load(f)
-    except Exception:
-        pass
-    try:
-        with open(TRIAL_RESULTS_FILE) as f:
-            data = json.load(f)
-            # Summarize trial results (file can be large)
-            if isinstance(data, list):
-                total = len(data)
-                passed = sum(1 for t in data if t.get("accepted", False))
-                gate1["trial_summary"] = {
-                    "total_trials": total,
-                    "passed": passed,
-                    "pass_rate": round(passed / total * 100, 1) if total else 0,
-                }
-            elif isinstance(data, dict):
-                gate1["trial_summary"] = data
-    except Exception:
-        pass
-    return gate1
-
-
-def get_progress():
-    """Read progress.json metrics."""
-    try:
-        with open(PROGRESS_FILE) as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-
-def get_deferred_stats():
-    """Analyze deferred failures."""
-    by_cat = Counter()
-    by_model = Counter()
-    total = 0
-    try:
-        with open(DEFERRED_FILE) as f:
-            for line in f:
-                try:
-                    d = json.loads(line)
-                    by_cat[d.get("category", "?")] += 1
-                    by_model[d.get("model", "?")] += 1
-                    total += 1
-                except json.JSONDecodeError:
-                    pass
-    except FileNotFoundError:
-        pass
-    return {"total": total, "by_category": dict(by_cat.most_common()), "by_model": dict(by_model.most_common())}
-
+# ── Pipeline status ─────────────────────────────────────────────────────────
 
 def get_pipeline_status():
     """Check if pipeline tmux session is running."""
     try:
-        # Check both root and ubuntu user tmux sessions
-        for cmd in [["tmux", "list-sessions"], ["su", "-c", "tmux list-sessions", "ubuntu"]]:
+        for cmd in [
+            ["tmux", "list-sessions"],
+            ["su", "-c", "tmux list-sessions", "ubuntu"],
+        ]:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
-            if "corpus" in result.stdout:
+            if "corpus" in result.stdout or "generate" in result.stdout:
                 return True
-        # Fallback: check if main.py process is running
         result = subprocess.run(
-            ["pgrep", "-f", "python.*main.py"], capture_output=True, text=True, timeout=5
+            ["pgrep", "-f", "python.*main.py"],
+            capture_output=True, text=True, timeout=5,
         )
         return bool(result.stdout.strip())
     except Exception:
         return False
 
 
-def parse_log_timeseries():
-    """Parse the current run log for time series data."""
-    log_file = _find_current_log()
-    if not log_file:
-        return {"minutes": [], "accepted": [], "failed": [], "autofixed": [],
-                "transpiled": [], "corrections": [], "errors": []}
+# ── Sprint progress ─────────────────────────────────────────────────────────
 
-    ts_pattern = re.compile(r"^(\d{4}-\d{2}-\d{2} \d{2}:\d{2})")
-    accepted_per_min = Counter()
-    failed_per_min = Counter()
-    rescued_per_min = Counter()
-    autofixed_per_min = Counter()
-    transpiled_per_min = Counter()
-    corrections_per_min = Counter()
-    errors_per_min = Counter()
-    first_ts = None
-    last_ts = None
-    batch_times = []  # Track time between batches for avg calculation
-    last_batch_ts = None
-
-    try:
-        with open(log_file) as f:
-            for line in f:
-                m = ts_pattern.match(line)
-                if not m:
-                    continue
-                minute = m.group(1)
-                if first_ts is None:
-                    first_ts = minute
-                last_ts = minute
-
-                if "rescued by" in line:
-                    rescued_per_min[minute] += 1
-                    if "autofixed" in line:
-                        autofixed_per_min[minute] += 1
-                    elif "transpiled" in line:
-                        transpiled_per_min[minute] += 1
-
-                if "Task " in line and "rejected:" in line:
-                    failed_per_min[minute] += 1
-                elif "Task " in line and "accepted" in line:
-                    accepted_per_min[minute] += 1
-
-                if "Correction attempt" in line:
-                    corrections_per_min[minute] += 1
-                if " ERROR " in line:
-                    errors_per_min[minute] += 1
-                if "correction attempts failed" in line:
-                    failed_per_min[minute] += 1
-
-                if "Processing batch" in line:
-                    # Extract full timestamp for batch timing
-                    full_ts = re.match(r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})", line)
-                    if full_ts and last_batch_ts:
-                        try:
-                            curr = datetime.strptime(full_ts.group(1), "%Y-%m-%d %H:%M:%S")
-                            prev = datetime.strptime(last_batch_ts, "%Y-%m-%d %H:%M:%S")
-                            batch_times.append((curr - prev).total_seconds())
-                        except ValueError:
-                            pass
-                    if full_ts:
-                        last_batch_ts = full_ts.group(1)
-
-    except Exception:
-        pass
-
-    all_minutes = sorted(
-        set(accepted_per_min) | set(failed_per_min) | set(rescued_per_min)
-        | set(autofixed_per_min) | set(transpiled_per_min)
-        | set(corrections_per_min) | set(errors_per_min)
-    )
-
-    avg_batch_time = round(sum(batch_times) / len(batch_times), 1) if batch_times else 0
-    last_batch_secs = round(batch_times[-1], 1) if batch_times else 0
-
+def get_sprint_progress():
+    """Sprint status for Phase 2 epics."""
     return {
-        "minutes": all_minutes,
-        "accepted": [accepted_per_min.get(m, 0) for m in all_minutes],
-        "failed": [failed_per_min.get(m, 0) for m in all_minutes],
-        "rescued": [rescued_per_min.get(m, 0) for m in all_minutes],
-        "autofixed": [autofixed_per_min.get(m, 0) for m in all_minutes],
-        "transpiled": [transpiled_per_min.get(m, 0) for m in all_minutes],
-        "corrections": [corrections_per_min.get(m, 0) for m in all_minutes],
-        "errors": [errors_per_min.get(m, 0) for m in all_minutes],
-        "first_ts": first_ts,
-        "last_ts": last_ts,
-        "avg_batch_secs": avg_batch_time,
-        "last_batch_secs": last_batch_secs,
+        "9.1": {
+            "name": "Sprint 1: Phase 2 Bootstrap",
+            "status": "done",
+            "stories": {
+                "9.1.1": {"name": "JSONL consolidation", "status": "done"},
+                "9.1.2": {"name": "Source registry", "status": "done"},
+                "9.1.3": {"name": "Dashboard rewrite", "status": "done"},
+            },
+        },
+        "9.2": {
+            "name": "Sprint 2: Generation Pipelines",
+            "status": "in_progress",
+            "stories": {
+                "9.2.1": {"name": "Mutation engine", "status": "done"},
+                "9.2.2": {"name": "Transpiler pipeline", "status": "done"},
+                "9.2.3": {"name": "Interface-first gen", "status": "done"},
+                "9.2.4": {"name": "Companion pipeline", "status": "done"},
+            },
+        },
+        "9.3": {
+            "name": "Sprint 3: Domain & Quality",
+            "status": "in_progress",
+            "stories": {
+                "9.3.1": {"name": "Quality validation", "status": "in_progress"},
+                "9.3.2": {"name": "Domain-stratified prompts", "status": "done"},
+                "9.3.3": {"name": "Token distribution", "status": "not_started"},
+            },
+        },
+        "9.4": {
+            "name": "Sprint 4: OSS Ingest",
+            "status": "not_started",
+            "stories": {
+                "9.4.1": {"name": "Exercism ingest", "status": "not_started"},
+                "9.4.2": {"name": "Rosetta Code ingest", "status": "not_started"},
+                "9.4.3": {"name": "Snippet library", "status": "not_started"},
+            },
+        },
     }
 
 
-def parse_log_recovery_stats():
-    """Count rescue method usage from logs."""
-    log_file = _find_current_log()
-    stats = {"direct": 0, "autofixed": 0, "transpiled": 0, "corrected": 0,
-             "autofix_fixes": Counter()}
-    if not log_file:
-        return stats
-    try:
-        with open(log_file) as f:
-            for line in f:
-                if "rescued by autofixed" in line:
-                    stats["autofixed"] += 1
-                elif "rescued by transpiled" in line:
-                    stats["transpiled"] += 1
-                elif "rescued by corrected" in line or ("Correction" in line and "succeeded" in line):
-                    stats["corrected"] += 1
+# ── Phase B (new corpus) counts ────────────────────────────────────────────
 
-                m = re.search(r"Auto-fixer applied \d+ fixes for \S+: (.+)", line)
-                if m:
-                    for fix in m.group(1).split(", "):
-                        stats["autofix_fixes"][fix.strip()] += 1
+_phase_b_cache = {"ts": 0, "data": {}}
+PHASE_B_CACHE_TTL = 15
+
+
+def get_phase_b_stats():
+    """Count Phase B corpus entries by category."""
+    now = time.time()
+    if _phase_b_cache["data"] and now - _phase_b_cache["ts"] < PHASE_B_CACHE_TTL:
+        return _phase_b_cache["data"]
+
+    phase_b_dir = CORPUS_DIR / "phase_b"
+    by_category: dict[str, int] = {}
+    total = 0
+
+    if phase_b_dir.exists():
+        for cat_dir in sorted(phase_b_dir.rglob("*")):
+            if cat_dir.is_dir():
+                count = sum(1 for f in cat_dir.iterdir() if f.is_file() and f.suffix == ".json")
+                if count > 0:
+                    by_category[cat_dir.name] = count
+                    total += count
+
+    data = {"total": total, "by_category": by_category}
+    _phase_b_cache["data"] = data
+    _phase_b_cache["ts"] = now
+    return data
+
+
+# ── Provider stats (from progress.json) ───────────────────────────────────
+
+def get_provider_stats():
+    """Extract per-provider API call counts, tokens, and costs."""
+    providers: dict[str, dict] = {}
+    try:
+        with open(PROGRESS_FILE) as f:
+            progress = json.load(f)
+
+        # Token data from cost.provider_tokens (keyed by provider name)
+        cost_data = progress.get("cost", {})
+        provider_tokens = cost_data.get("provider_tokens", {})
+
+        # Model data from per_model (keyed by model name)
+        for model_name, mm in progress.get("per_model", {}).items():
+            if model_name == "pool":
+                continue
+            # Derive short provider name from model
+            if "claude" in model_name or "haiku" in model_name:
+                provider = "anthropic"
+            elif "gpt" in model_name:
+                provider = "openai"
+            elif "deepseek" in model_name:
+                provider = "deepseek"
+            else:
+                provider = model_name.split("-")[0]
+
+            # Get token data from provider_tokens if available
+            pt = provider_tokens.get(provider, {})
+
+            providers[provider] = {
+                "model": model_name,
+                "api_calls": mm.get("accepted", 0) + mm.get("failed", 0),
+                "accepted": mm.get("accepted", 0),
+                "failed": mm.get("failed", 0),
+                "input_tokens": pt.get("input_tokens", 0),
+                "output_tokens": pt.get("output_tokens", 0),
+                "cost": mm.get("cost", 0),
+            }
     except Exception:
         pass
-    stats["autofix_fixes"] = dict(stats["autofix_fixes"].most_common(20))
-    return stats
+    return providers
 
 
-def parse_api_errors():
-    """Detect API rate limits and balance issues from logs."""
-    log_file = _find_current_log()
-    issues = []
-    rate_limits = Counter()
-    balance_errors = Counter()
-    if not log_file:
-        return {"issues": issues, "rate_limits": dict(rate_limits),
-                "balance_errors": dict(balance_errors)}
-    try:
-        with open(log_file) as f:
-            for line in f:
-                if "429" in line or "rate" in line.lower() and "limit" in line.lower():
-                    for provider in ["anthropic", "openai", "x.ai"]:
-                        if provider in line:
-                            rate_limits[provider] += 1
-                if "402" in line or "insufficient" in line.lower() or "balance" in line.lower() or "quota" in line.lower():
-                    for provider in ["anthropic", "openai", "x.ai"]:
-                        if provider in line:
-                            balance_errors[provider] += 1
-    except Exception:
-        pass
+# ── Legacy Phase 1 counts ──────────────────────────────────────────────────
 
-    for provider, count in rate_limits.items():
-        if count > 5:
-            issues.append(f"{provider}: {count} rate limit hits")
-    for provider, count in balance_errors.items():
-        if count > 0:
-            issues.append(f"{provider}: {count} balance/quota errors")
-
-    return {"issues": issues, "rate_limits": dict(rate_limits),
-            "balance_errors": dict(balance_errors)}
+def get_legacy_phase1_count():
+    """Count legacy Phase 1 individual JSON files."""
+    total = 0
+    by_phase = {}
+    for phase in ["phase_a", "phase_b", "phase_c", "phase_d"]:
+        d = CORPUS_DIR / phase
+        if d.exists():
+            count = sum(1 for _ in d.rglob("*.json"))
+        else:
+            count = 0
+        by_phase[phase] = count
+        total += count
+    return {"total": total, "by_phase": by_phase}
 
 
-def _find_current_log():
-    """Find the most recent full-run log."""
-    logs = sorted(LOGS_DIR.glob("full-run-*.log"), key=lambda p: p.stat().st_mtime)
-    return logs[-1] if logs else None
-
+# ── Aggregate all metrics ──────────────────────────────────────────────────
 
 def get_all_metrics():
     """Aggregate all metrics."""
     now = time.time()
-    if _cache["data"] and now - _cache["ts"] < CACHE_TTL:
-        return _cache["data"]
+    if _metrics_cache["data"] and now - _metrics_cache["ts"] < METRICS_CACHE_TTL:
+        return _metrics_cache["data"]
 
-    corpus_total, corpus_by_cat = get_corpus_count()
-    phase_b_count = get_phase_b_count()
-    phase_c_count = get_phase_c_count()
-    phase_d_count = get_phase_d_count()
-    gate1 = get_gate1_metrics()
-    progress = get_progress()
-    deferred = get_deferred_stats()
+    corpus = get_phase2_corpus_stats()
+    prompts = get_prompt_inventory()
+    pipelines = get_pipeline_inventory()
+    api_status = get_api_generation_status()
+    registry = get_registry_stats()
+    quality = get_quality_metrics()
     system = get_system_stats()
-    timeseries = parse_log_timeseries()
-    recovery = parse_log_recovery_stats()
-    api_issues = parse_api_errors()
     running = get_pipeline_status()
-
-    per_cat = progress.get("per_category", {})
-    held_categories = []
-    for cat, stats in per_cat.items():
-        dispatched = stats.get("dispatched", 0)
-        accepted = stats.get("accepted", 0)
-        if dispatched >= 50:
-            rejection_rate = 1 - (accepted / dispatched) if dispatched else 0
-            if rejection_rate > 0.80:
-                held_categories.append({
-                    "category": cat,
-                    "rejection_rate": round(rejection_rate * 100, 1),
-                    "dispatched": dispatched,
-                    "accepted": accepted,
-                })
-
-    # Pass@1 rate
-    total_dispatched = progress.get("dispatched", 0)
-    total_accepted = progress.get("accepted", 0)
-    pass_at_1 = round(total_accepted / total_dispatched * 100, 1) if total_dispatched else 0
-
-    # ETA
-    started_at = progress.get("started_at", "")
-    remaining = TOTAL_TARGET - corpus_total
-    eta_hours = progress.get("estimated_remaining_hours", 0)
-
-    # Rate calculation from progress timestamps
-    rate_per_hour = 0
-    if started_at:
-        try:
-            start = datetime.fromisoformat(started_at)
-            elapsed_hrs = (datetime.now(timezone.utc) - start).total_seconds() / 3600
-            if elapsed_hrs > 0.01:
-                run_accepted = progress.get("accepted", 0)
-                rate_per_hour = round(run_accepted / elapsed_hrs, 1)
-        except Exception:
-            pass
+    sprints = get_sprint_progress()
+    legacy = get_legacy_phase1_count()
+    phase_b = get_phase_b_stats()
+    provider_stats = get_provider_stats()
 
     data = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "pipeline_running": running,
+        "corpus": corpus,
+        "phase_b": phase_b,
+        "provider_stats": provider_stats,
+        "prompts": prompts,
+        "pipelines": pipelines,
+        "api_generation": api_status,
+        "registry": registry,
+        "quality": quality,
         "system": system,
-        "corpus": {
-            "total": corpus_total,
-            "target": TOTAL_TARGET,
-            "pct_complete": round(corpus_total / TOTAL_TARGET * 100, 2),
-            "remaining": remaining,
-            "by_category": corpus_by_cat,
-        },
-        "phase_b": {
-            "total": phase_b_count,
-            "target": PHASE_B_TARGET,
-            "pct_complete": round(phase_b_count / PHASE_B_TARGET * 100, 2) if PHASE_B_TARGET else 0,
-            "remaining": PHASE_B_TARGET - phase_b_count,
-        },
-        "phase_c": {
-            "total": phase_c_count,
-            "target": PHASE_C_TARGET,
-            "pct_complete": round(phase_c_count / PHASE_C_TARGET * 100, 2) if PHASE_C_TARGET else 0,
-            "remaining": max(0, PHASE_C_TARGET - phase_c_count),
-        },
-        "phase_d": {
-            "total": phase_d_count,
-            "target": PHASE_D_TARGET,
-            "pct_complete": round(phase_d_count / PHASE_D_TARGET * 100, 2) if PHASE_D_TARGET else 0,
-            "remaining": max(0, PHASE_D_TARGET - phase_d_count),
-        },
-        "combined_total": corpus_total + phase_b_count + phase_c_count + phase_d_count,
-        "combined_target": TOTAL_TARGET + PHASE_B_TARGET + PHASE_C_TARGET + PHASE_D_TARGET,
-        "gate1": gate1,
-        "progress": {
-            "dispatched": total_dispatched,
-            "accepted": total_accepted,
-            "failed": progress.get("failed", 0),
-            "pass_at_1_pct": pass_at_1,
-            "rate_per_hour": rate_per_hour,
-            "eta_hours": round(eta_hours, 1),
-            "per_category": per_cat,
-            "per_model": progress.get("per_model", {}),
-            "cost": progress.get("cost", {}),
-        },
-        "held_categories": held_categories,
-        "deferred": deferred,
-        "recovery": recovery,
-        "api_issues": api_issues,
-        "timeseries": timeseries,
+        "sprints": sprints,
+        "legacy_phase1": legacy,
     }
 
-    _cache["data"] = data
-    _cache["ts"] = now
+    _metrics_cache["data"] = data
+    _metrics_cache["ts"] = now
     return data
 
+
+# ── HTML Dashboard ──────────────────────────────────────────────────────────
 
 DASHBOARD_HTML = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Toke Corpus Pipeline</title>
+<title>Toke Phase 2 Corpus Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -497,7 +583,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   .status-dot.running { background: #3fb950; animation: pulse 2s infinite; }
   .status-dot.stopped { background: #f85149; }
   @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; padding: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; padding: 16px; }
   .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
   .card h2 { font-size: 13px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
   .metric { font-size: 32px; font-weight: 700; color: #f0f6fc; }
@@ -509,116 +595,177 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   .bar-fill.blue { background: #58a6ff; }
   .bar-fill.yellow { background: #d29922; }
   .bar-fill.red { background: #f85149; }
+  .bar-fill.purple { background: #a371f7; }
   .wide { grid-column: 1 / -1; }
-  .chart-container { position: relative; height: 250px; }
+  .chart-container { position: relative; height: 300px; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #21262d; }
   th { color: #8b949e; font-weight: 500; }
   td { color: #c9d1d9; }
   .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-  .tag.held { background: #f8514922; color: #f85149; }
+  .tag.done { background: #3fb95022; color: #3fb950; }
+  .tag.in_progress { background: #d2992222; color: #d29922; }
+  .tag.not_started { background: #484f5822; color: #484f58; }
+  .tag.active { background: #3fb95022; color: #3fb950; }
   .tag.ok { background: #3fb95022; color: #3fb950; }
   .tag.warn { background: #d2992222; color: #d29922; }
+  .tag.error { background: #f8514922; color: #f85149; }
   .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
   .mini-stat { text-align: center; }
   .mini-stat .val { font-size: 24px; font-weight: 700; color: #f0f6fc; }
   .mini-stat .label { font-size: 11px; color: #8b949e; }
-  .alert { background: #f8514915; border: 1px solid #f8514940; border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; color: #f85149; font-size: 13px; }
+  .section-title { font-size: 14px; font-weight: 600; color: #58a6ff; text-transform: uppercase; letter-spacing: 1px; padding: 16px 16px 0 16px; margin-top: 8px; }
+  .banner { background: linear-gradient(135deg, #161b22 0%, #1c2333 100%); border: 1px solid #30363d; border-radius: 8px; padding: 20px 24px; margin: 16px; }
+  .banner h2 { font-size: 13px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+  .banner .metric { font-size: 42px; }
+  .source-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #21262d; }
+  .source-row:last-child { border-bottom: none; }
+  .source-name { font-size: 13px; color: #c9d1d9; }
+  .source-count { font-size: 14px; font-weight: 600; color: #f0f6fc; }
+  .source-size { font-size: 11px; color: #484f58; margin-left: 8px; }
+  .sprint-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #21262d; }
+  .sprint-row:last-child { border-bottom: none; }
+  .story-list { padding-left: 16px; margin-top: 4px; }
+  .story-item { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 12px; }
   #last-update { font-size: 11px; color: #484f58; }
 </style>
 </head>
 <body>
 <div class="header">
   <span class="status-dot" id="pipeline-dot"></span>
-  <h1>Toke Corpus Pipeline Dashboard</h1>
+  <h1>Toke Phase 2 Corpus Dashboard</h1>
   <span id="last-update"></span>
 </div>
 
-<!-- Overall Corpus Timeline -->
-<div class="grid" style="padding-bottom:0">
-  <div class="card wide" style="padding:14px 20px">
-    <h2 style="margin-bottom:10px">Overall Corpus Timeline</h2>
-    <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
-      <div>
-        <span style="color:#8b949e;font-size:12px">Core (A):</span>
-        <strong id="tl-phase-a" style="color:#3fb950">--</strong>
-        <span style="color:#8b949e;font-size:12px">/ 25,000</span>
-        <span style="color:#484f58;font-size:12px">(<span id="tl-phase-a-pct">--</span>%)</span>
-      </div>
-      <div style="color:#30363d;font-size:16px">&#x2192;</div>
-      <div>
-        <span style="color:#8b949e;font-size:12px">Phase B:</span>
-        <strong id="tl-phase-b" style="color:#a371f7">--</strong>
-        <span style="color:#8b949e;font-size:12px">/ 10,000</span>
-        <span style="color:#484f58;font-size:12px">(<span id="tl-phase-b-pct">--</span>%)</span>
-      </div>
-      <div style="color:#30363d;font-size:16px">&#x2192;</div>
-      <div>
-        <span style="color:#8b949e;font-size:12px">Phase C:</span>
-        <strong id="tl-phase-c" style="color:#58a6ff">--</strong>
-        <span style="color:#8b949e;font-size:12px">/ 5,000</span>
-        <span style="color:#484f58;font-size:12px">(<span id="tl-phase-c-pct">--</span>%)</span>
-      </div>
-      <div style="color:#30363d;font-size:16px">&#x2192;</div>
-      <div>
-        <span style="color:#8b949e;font-size:12px">Phase D:</span>
-        <strong id="tl-phase-d" style="color:#d29922">--</strong>
-        <span style="color:#8b949e;font-size:12px">/ 5,000</span>
-        <span style="color:#484f58;font-size:12px">(<span id="tl-phase-d-pct">--</span>%)</span>
-      </div>
-      <div style="color:#30363d;font-size:16px">&#x2192;</div>
-      <div>
-        <span style="color:#8b949e;font-size:12px">Combined:</span>
-        <strong id="tl-combined" style="color:#f0f6fc">--</strong>
-        <span style="color:#8b949e;font-size:12px">/ 45,000</span>
-      </div>
+<!-- Section 0: New Corpus Accepted -->
+<div class="banner" style="border-left:4px solid #3fb950">
+  <h2>New Corpus (Phase B) — Live Generation</h2>
+  <div style="display:flex;gap:32px;align-items:baseline;flex-wrap:wrap">
+    <div>
+      <div class="metric" id="phase-b-total" style="color:#3fb950">--</div>
+      <div class="sub">accepted programs</div>
     </div>
-    <div class="bar" style="margin-top:10px;height:8px;display:flex;gap:2px;background:transparent">
-      <div style="flex:25000;background:#21262d;border-radius:3px;overflow:hidden"><div class="bar-fill green" id="tl-bar-a" style="height:100%"></div></div>
-      <div style="flex:5000;background:#21262d;border-radius:3px;overflow:hidden"><div class="bar-fill" id="tl-bar-b" style="height:100%;background:#a371f7"></div></div>
-      <div style="flex:5000;background:#21262d;border-radius:3px;overflow:hidden"><div class="bar-fill" id="tl-bar-c" style="height:100%;background:#58a6ff"></div></div>
-      <div style="flex:5000;background:#21262d;border-radius:3px;overflow:hidden"><div class="bar-fill" id="tl-bar-d" style="height:100%;background:#d29922"></div></div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap" id="phase-b-cats"></div>
+  </div>
+</div>
+
+<!-- Provider Stats -->
+<div class="section-title">API Provider Stats</div>
+<div class="grid">
+  <div class="card wide">
+    <h2>Per-Provider Usage</h2>
+    <table>
+      <thead><tr><th>Provider</th><th>Model</th><th>API Calls</th><th>Accepted</th><th>Failed</th><th>Input Tokens</th><th>Output Tokens</th><th>Cost</th></tr></thead>
+      <tbody id="provider-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Section 1: Phase 2 Corpus Overview -->
+<div class="banner">
+  <h2>Phase 2 Corpus Overview (All Sources)</h2>
+  <div style="display:flex;gap:32px;align-items:baseline;flex-wrap:wrap">
+    <div>
+      <div class="metric" id="total-entries">--</div>
+      <div class="sub">total entries across all sources</div>
+    </div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap">
+      <div class="mini-stat"><div class="val" id="src-count">--</div><div class="label">Sources</div></div>
+      <div class="mini-stat"><div class="val" id="total-size">--</div><div class="label">Total Size</div></div>
     </div>
   </div>
 </div>
 
+<div class="grid" style="padding-top:0">
+  <!-- Source Breakdown -->
+  <div class="card">
+    <h2>Corpus Sources</h2>
+    <div id="source-list"></div>
+  </div>
+
+  <!-- Corpus Chart -->
+  <div class="card">
+    <h2>Corpus Composition</h2>
+    <div class="chart-container"><canvas id="corpus-chart"></canvas></div>
+  </div>
+</div>
+
+<!-- Section 2: Generation Pipeline Status -->
+<div class="section-title">Generation Pipeline Status</div>
 <div class="grid">
-  <!-- Progress -->
+  <!-- Pipeline Inventory -->
   <div class="card">
-    <h2>Corpus Progress</h2>
-    <div class="metric" id="corpus-total">--</div>
-    <div class="sub" id="corpus-sub">of 25,000 target</div>
-    <div class="bar"><div class="bar-fill green" id="corpus-bar"></div></div>
-    <div class="sub" style="margin-top:8px"><span id="corpus-pct">--</span>% complete &bull; <span id="corpus-remaining">--</span> remaining</div>
+    <h2>Available Pipelines</h2>
+    <table id="pipeline-table">
+      <thead><tr><th>Pipeline</th><th>Story</th><th>Prompts</th><th>Status</th></tr></thead>
+      <tbody id="pipeline-tbody"></tbody>
+    </table>
   </div>
 
-  <!-- Rate -->
+  <!-- Prompt Inventory -->
   <div class="card">
-    <h2>Processing Rate</h2>
-    <div class="metric" id="rate-val">--</div>
-    <div class="sub">entries/hour (this run)</div>
+    <h2>Prompt Inventory</h2>
+    <div class="metric-sm" id="prompt-total">--</div>
+    <div class="sub">total prompt files ready</div>
+    <div style="margin-top:12px" id="prompt-breakdown"></div>
+  </div>
+
+  <!-- API Generation Status -->
+  <div class="card">
+    <h2>API Generation</h2>
+    <div style="margin-bottom:8px">
+      Status: <span id="api-status" class="tag">--</span>
+    </div>
+    <div class="cols">
+      <div class="mini-stat"><div class="val" id="api-generated">--</div><div class="label">Generated</div></div>
+      <div class="mini-stat"><div class="val" id="api-success">--</div><div class="label">Success %</div></div>
+    </div>
     <div style="margin-top:12px">
-      <div class="sub">Pass@1: <strong id="pass1-val" style="color:#f0f6fc">--</strong>%</div>
-      <div class="sub">Dispatched: <strong id="dispatched-val" style="color:#f0f6fc">--</strong> | Accepted: <strong id="accepted-val" style="color:#3fb950">--</strong> | Failed: <strong id="failed-val" style="color:#f85149">--</strong></div>
+      <div class="sub">Cost: <strong id="api-cost" style="color:#f0f6fc">$--</strong></div>
+      <div class="sub" id="api-cost-breakdown"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Section 3: Source Registry -->
+<div class="section-title">Source Registry</div>
+<div class="grid">
+  <div class="card">
+    <h2>Registry Overview</h2>
+    <div class="cols" style="margin-bottom:12px">
+      <div class="mini-stat"><div class="val" id="reg-train">--</div><div class="label">Training Sources</div></div>
+      <div class="mini-stat"><div class="val" id="reg-eval">--</div><div class="label">Eval Sources (Holdout)</div></div>
+    </div>
+    <div class="cols" style="margin-bottom:12px">
+      <div class="mini-stat"><div class="val" id="reg-split-train">--</div><div class="label">Split: Training</div></div>
+      <div class="mini-stat"><div class="val" id="reg-split-eval">--</div><div class="label">Split: Eval</div></div>
+    </div>
+    <div style="margin-top:8px">
+      Contamination Firewall: <span id="reg-firewall" class="tag">--</span>
     </div>
   </div>
 
-  <!-- ETA -->
+  <!-- Section 4: Quality Metrics -->
   <div class="card">
-    <h2>Estimated Completion</h2>
-    <div class="metric-sm" id="eta-val">--</div>
-    <div class="sub" id="eta-sub">at current rate</div>
+    <h2>Quality Metrics</h2>
+    <div id="quality-validation"></div>
     <div style="margin-top:12px">
-      <div class="sub">Last batch: <strong id="last-batch-time" style="color:#f0f6fc">--</strong>s</div>
-      <div class="sub">Avg batch: <strong id="avg-batch-time" style="color:#f0f6fc">--</strong>s</div>
-      <div class="sub">Run started: <span id="run-started">--</span></div>
+      <div class="sub"><strong style="color:#8b949e">Phase Distribution</strong></div>
+      <div id="quality-phases" style="margin-top:4px"></div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="sub"><strong style="color:#8b949e">Token Distribution</strong></div>
+      <div id="quality-tokens" style="margin-top:4px"></div>
     </div>
   </div>
+</div>
 
-  <!-- System -->
+<!-- Section 5: System Resources -->
+<div class="section-title">System Resources</div>
+<div class="grid">
   <div class="card">
-    <h2>System Resources</h2>
+    <h2>System</h2>
     <div class="cols3">
       <div class="mini-stat">
         <div class="val" id="cpu-val">--</div>
@@ -636,400 +783,244 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
         <div class="bar"><div class="bar-fill green" id="disk-bar"></div></div>
       </div>
     </div>
-  </div>
-
-  <!-- API Cost -->
-  <div class="card">
-    <h2>API Cost (This Run)</h2>
-    <div class="metric-sm" id="cost-total">$--</div>
-    <div class="sub" style="margin-top:8px" id="cost-breakdown"></div>
-  </div>
-
-  <!-- API Issues -->
-  <div class="card" id="api-issues-card">
-    <h2>API Health</h2>
-    <div id="api-issues-content"><span class="tag ok">All providers healthy</span></div>
-  </div>
-
-  <!-- Recovery Methods -->
-  <div class="card">
-    <h2>Recovery Methods</h2>
-    <div id="recovery-content">
-      <div class="cols">
-        <div class="mini-stat"><div class="val" id="r-autofix">0</div><div class="label">Auto-fixed</div></div>
-        <div class="mini-stat"><div class="val" id="r-transpile">0</div><div class="label">Transpiled</div></div>
-      </div>
-      <div style="margin-top:8px">
-        <div class="sub">Top auto-fix patterns:</div>
-        <div id="autofix-patterns" class="sub"></div>
-      </div>
+    <div class="sub" style="margin-top:12px">
+      <span id="sys-detail"></span>
     </div>
   </div>
 
-  <!-- Deferred -->
+  <!-- Legacy Phase 1 -->
   <div class="card">
-    <h2>Deferred Failures</h2>
-    <div class="metric-sm" id="deferred-total">--</div>
-    <div class="sub" style="margin-top:8px" id="deferred-breakdown"></div>
+    <h2>Legacy Phase 1 (Individual JSON)</h2>
+    <div class="metric-sm" id="legacy-total">--</div>
+    <div class="sub">individual .json files in corpus/</div>
+    <div style="margin-top:8px" id="legacy-breakdown"></div>
   </div>
+</div>
 
-  <!-- B-COMPOSE -->
-  <div class="card">
-    <h2>B-COMPOSE (Phase B)</h2>
-    <div class="metric" id="phase-b-total">--</div>
-    <div class="sub" id="phase-b-sub">of 10,000 target</div>
-    <div class="bar"><div class="bar-fill" id="phase-b-bar" style="background:#a371f7"></div></div>
-    <div class="sub" style="margin-top:8px">
-      <span id="phase-b-pct">--</span>% complete &bull; <span id="phase-b-remaining">--</span> remaining
-    </div>
-    <div class="sub" style="margin-top:4px">Status: <span id="phase-b-status" class="tag">--</span></div>
-  </div>
-
-  <!-- C-EDG (Phase C) -->
-  <div class="card">
-    <h2>C-EDG (Phase C)</h2>
-    <div class="metric" id="phase-c-total">--</div>
-    <div class="sub" id="phase-c-sub">of 5,000 target</div>
-    <div class="bar"><div class="bar-fill" id="phase-c-bar" style="background:#58a6ff"></div></div>
-    <div class="sub" style="margin-top:8px">
-      <span id="phase-c-pct">--</span>% complete &bull; <span id="phase-c-remaining">--</span> remaining
-    </div>
-    <div class="sub" style="margin-top:4px">Status: <span id="phase-c-status" class="tag">--</span></div>
-  </div>
-
-  <!-- D-APP (Phase D) -->
-  <div class="card">
-    <h2>D-APP (Phase D)</h2>
-    <div class="metric" id="phase-d-total">--</div>
-    <div class="sub" id="phase-d-sub">of 5,000 target</div>
-    <div class="bar"><div class="bar-fill" id="phase-d-bar" style="background:#d29922"></div></div>
-    <div class="sub" style="margin-top:8px">
-      <span id="phase-d-pct">--</span>% complete &bull; <span id="phase-d-remaining">--</span> remaining
-    </div>
-    <div class="sub" style="margin-top:4px">Status: <span id="phase-d-status" class="tag">--</span></div>
-  </div>
-
-  <!-- Gate 1 Readiness -->
-  <div class="card">
-    <h2>Gate 1 Readiness</h2>
-    <div id="gate1-content">
-      <div class="cols">
-        <div class="mini-stat">
-          <div class="val" id="g1-pass1">--</div>
-          <div class="label">Best Pass@1</div>
-          <div class="sub">target: >= 60%</div>
-        </div>
-        <div class="mini-stat">
-          <div class="val" id="g1-composite">--</div>
-          <div class="label">Best Composite</div>
-          <div class="sub">higher is better</div>
-        </div>
-      </div>
-      <div style="margin-top:12px">
-        <div class="sub">Providers passed: <strong id="g1-providers-passed" style="color:#f0f6fc">--</strong></div>
-        <div class="sub">Trial tasks: <strong id="g1-trial-count" style="color:#f0f6fc">--</strong></div>
-      </div>
-      <div style="margin-top:8px">
-        <span>Gate status: </span><span id="g1-status" class="tag">--</span>
-      </div>
-      <div style="margin-top:8px">
-        <table id="g1-provider-table" style="font-size:12px">
-          <thead><tr><th>Provider</th><th>Pass@1</th><th>Correction</th><th>Composite</th><th>Status</th></tr></thead>
-          <tbody id="g1-provider-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- Held Categories -->
-  <div class="card">
-    <h2>Category Status</h2>
-    <div id="held-content"></div>
-  </div>
-
-  <!-- Per-Model -->
-  <div class="card">
-    <h2>Model Performance</h2>
-    <table id="model-table">
-      <thead><tr><th>Model</th><th>Accepted</th><th>Failed</th><th>Rate</th><th>Cost</th></tr></thead>
-      <tbody id="model-tbody"></tbody>
-    </table>
-  </div>
-
-  <!-- Time Series Chart -->
+<!-- Section 6: Sprint Progress -->
+<div class="section-title">Sprint Progress</div>
+<div class="grid">
   <div class="card wide">
-    <h2>Processing Timeline</h2>
-    <div class="chart-container"><canvas id="timeline-chart"></canvas></div>
-  </div>
-
-  <!-- Category Breakdown -->
-  <div class="card wide">
-    <h2>Category Breakdown</h2>
-    <table id="cat-table">
-      <thead><tr><th>Category</th><th>Corpus</th><th>Dispatched</th><th>Accepted</th><th>Failed</th><th>Rate</th><th>Status</th></tr></thead>
-      <tbody id="cat-tbody"></tbody>
-    </table>
+    <h2>Phase 2 Epics</h2>
+    <div id="sprint-content"></div>
   </div>
 </div>
 
 <script>
-let chart = null;
+let corpusChart = null;
 
-function fmt(n) { return n.toLocaleString(); }
+function fmt(n) { return (n || 0).toLocaleString(); }
 
-function updateDashboard(d) {
-  // Pipeline status
-  const dot = document.getElementById('pipeline-dot');
-  dot.className = 'status-dot ' + (d.pipeline_running ? 'running' : 'stopped');
-
-  document.getElementById('last-update').textContent =
-    'Updated: ' + new Date(d.timestamp).toLocaleTimeString();
-
-  // Corpus
-  document.getElementById('corpus-total').textContent = fmt(d.corpus.total);
-  document.getElementById('corpus-pct').textContent = d.corpus.pct_complete;
-  document.getElementById('corpus-remaining').textContent = fmt(d.corpus.remaining);
-  document.getElementById('corpus-bar').style.width = d.corpus.pct_complete + '%';
-
-  // Rate
-  document.getElementById('rate-val').textContent = d.progress.rate_per_hour;
-  document.getElementById('pass1-val').textContent = d.progress.pass_at_1_pct;
-  document.getElementById('dispatched-val').textContent = fmt(d.progress.dispatched);
-  document.getElementById('accepted-val').textContent = fmt(d.progress.accepted);
-  document.getElementById('failed-val').textContent = fmt(d.progress.failed);
-
-  // ETA
-  const hrs = d.progress.eta_hours;
-  if (hrs > 24) {
-    document.getElementById('eta-val').textContent = (hrs/24).toFixed(1) + ' days';
-  } else {
-    document.getElementById('eta-val').textContent = hrs.toFixed(1) + ' hours';
-  }
-
-  // System
-  document.getElementById('cpu-val').textContent = d.system.cpu_pct + '%';
-  document.getElementById('cpu-bar').style.width = Math.min(d.system.cpu_pct, 100) + '%';
-  document.getElementById('ram-val').textContent = d.system.ram_pct + '%';
-  document.getElementById('ram-bar').style.width = d.system.ram_pct + '%';
-  document.getElementById('disk-val').textContent = d.system.disk_pct + '%';
-  document.getElementById('disk-bar').style.width = d.system.disk_pct + '%';
-
-  // Cost
-  const cost = d.progress.cost || {};
-  document.getElementById('cost-total').textContent = '$' + (cost.api_total || 0).toFixed(2);
-  const bp = cost.by_provider || {};
-  document.getElementById('cost-breakdown').innerHTML = Object.entries(bp)
-    .map(([k,v]) => k.split('-')[0] + ': $' + v.toFixed(3)).join(' &bull; ');
-
-  // API Issues
-  const issues = d.api_issues.issues || [];
-  const ic = document.getElementById('api-issues-content');
-  if (issues.length > 0) {
-    ic.innerHTML = issues.map(i => '<div class="alert">' + i + '</div>').join('');
-  } else {
-    ic.innerHTML = '<span class="tag ok">All providers healthy</span>';
-  }
-
-  // Recovery
-  document.getElementById('r-autofix').textContent = d.recovery.autofixed;
-  document.getElementById('r-transpile').textContent = d.recovery.transpiled;
-  const patterns = Object.entries(d.recovery.autofix_fixes || {}).slice(0, 8);
-  document.getElementById('autofix-patterns').innerHTML = patterns
-    .map(([k,v]) => '<span class="tag warn">' + k + ' (' + v + ')</span> ').join('');
-
-  // Deferred
-  document.getElementById('deferred-total').textContent = fmt(d.deferred.total);
-  const dbc = d.deferred.by_category || {};
-  document.getElementById('deferred-breakdown').innerHTML =
-    Object.entries(dbc).map(([k,v]) => k + ': ' + v).join(' &bull; ');
-
-  // Phase B / B-COMPOSE
-  const pb = d.phase_b || {};
-  document.getElementById('phase-b-total').textContent = fmt(pb.total || 0);
-  document.getElementById('phase-b-pct').textContent = pb.pct_complete || 0;
-  document.getElementById('phase-b-remaining').textContent = fmt(pb.remaining || 0);
-  document.getElementById('phase-b-bar').style.width = (pb.pct_complete || 0) + '%';
-  const pbStatus = document.getElementById('phase-b-status');
-  if (pb.total >= 5000) {
-    pbStatus.textContent = 'Complete'; pbStatus.className = 'tag ok';
-  } else if (pb.total > 0) {
-    pbStatus.textContent = 'Running'; pbStatus.className = 'tag warn';
-  } else {
-    pbStatus.textContent = 'Not started'; pbStatus.className = 'tag';
-  }
-
-  // Phase C / C-EDG
-  const pc = d.phase_c || {};
-  document.getElementById('phase-c-total').textContent = fmt(pc.total || 0);
-  document.getElementById('phase-c-pct').textContent = pc.pct_complete || 0;
-  document.getElementById('phase-c-remaining').textContent = fmt(pc.remaining || 0);
-  document.getElementById('phase-c-bar').style.width = (pc.pct_complete || 0) + '%';
-  const pcStatus = document.getElementById('phase-c-status');
-  if (pc.total >= 5000) {
-    pcStatus.textContent = 'Complete'; pcStatus.className = 'tag ok';
-  } else if (pc.total > 0) {
-    pcStatus.textContent = 'Running'; pcStatus.className = 'tag warn';
-  } else {
-    pcStatus.textContent = 'Not started'; pcStatus.className = 'tag';
-  }
-
-  // Phase D / D-APP
-  const pd = d.phase_d || {};
-  document.getElementById('phase-d-total').textContent = fmt(pd.total || 0);
-  document.getElementById('phase-d-pct').textContent = pd.pct_complete || 0;
-  document.getElementById('phase-d-remaining').textContent = fmt(pd.remaining || 0);
-  document.getElementById('phase-d-bar').style.width = (pd.pct_complete || 0) + '%';
-  const pdStatus = document.getElementById('phase-d-status');
-  if (pd.total >= 5000) {
-    pdStatus.textContent = 'Complete'; pdStatus.className = 'tag ok';
-  } else if (pd.total > 0) {
-    pdStatus.textContent = 'Running'; pdStatus.className = 'tag warn';
-  } else {
-    pdStatus.textContent = 'Not started'; pdStatus.className = 'tag';
-  }
-
-  // Gate 1
-  const g1 = d.gate1 || {};
-  const sc = g1.scorecard || {};
-  const scores = sc.scores || [];
-  if (scores.length > 0) {
-    const bestPass1 = Math.max(...scores.map(s => s.first_pass_compile_rate || 0));
-    const bestComposite = Math.max(...scores.map(s => s.composite_score || 0));
-    const providersPassed = scores.filter(s => s.passed).length;
-    document.getElementById('g1-pass1').textContent = (bestPass1 * 100).toFixed(1) + '%';
-    document.getElementById('g1-composite').textContent = bestComposite.toFixed(4);
-    document.getElementById('g1-providers-passed').textContent = providersPassed + '/' + scores.length;
-    document.getElementById('g1-trial-count').textContent = sc.trial_task_count || '--';
-    const g1Status = document.getElementById('g1-status');
-    if (bestPass1 >= 0.60 && providersPassed >= 1) {
-      g1Status.textContent = 'PASS'; g1Status.className = 'tag ok';
-    } else {
-      g1Status.textContent = 'NOT YET'; g1Status.className = 'tag held';
-    }
-    // Provider table
-    const g1Tbody = document.getElementById('g1-provider-tbody');
-    g1Tbody.innerHTML = '';
-    for (const s of scores) {
-      const pTag = s.passed ? '<span class="tag ok">PASS</span>' : '<span class="tag held">FAIL</span>';
-      g1Tbody.innerHTML += '<tr><td>' + s.provider_name + '</td><td>' +
-        (s.first_pass_compile_rate * 100).toFixed(1) + '%</td><td>' +
-        (s.correction_success_rate * 100).toFixed(1) + '%</td><td>' +
-        (s.composite_score || 0).toFixed(4) + '</td><td>' + pTag + '</td></tr>';
-    }
-  } else {
-    document.getElementById('g1-pass1').textContent = 'N/A';
-    document.getElementById('g1-composite').textContent = 'N/A';
-    document.getElementById('g1-providers-passed').textContent = 'N/A';
-    document.getElementById('g1-trial-count').textContent = 'N/A';
-    const g1Status = document.getElementById('g1-status');
-    g1Status.textContent = 'NO DATA'; g1Status.className = 'tag';
-  }
-
-  // Overall timeline
-  document.getElementById('tl-phase-a').textContent = fmt(d.corpus.total);
-  document.getElementById('tl-phase-a-pct').textContent = d.corpus.pct_complete;
-  document.getElementById('tl-phase-b').textContent = fmt(pb.total || 0);
-  document.getElementById('tl-phase-b-pct').textContent = pb.pct_complete || 0;
-  document.getElementById('tl-phase-c').textContent = fmt(pc.total || 0);
-  document.getElementById('tl-phase-c-pct').textContent = pc.pct_complete || 0;
-  document.getElementById('tl-phase-d').textContent = fmt(pd.total || 0);
-  document.getElementById('tl-phase-d-pct').textContent = pd.pct_complete || 0;
-  document.getElementById('tl-combined').textContent = fmt(d.combined_total || 0);
-  document.getElementById('tl-bar-a').style.width = d.corpus.pct_complete + '%';
-  document.getElementById('tl-bar-b').style.width = (pb.pct_complete || 0) + '%';
-  document.getElementById('tl-bar-c').style.width = (pc.pct_complete || 0) + '%';
-  document.getElementById('tl-bar-d').style.width = (pd.pct_complete || 0) + '%';
-
-  // Held categories
-  const hc = document.getElementById('held-content');
-  const allCats = d.progress.per_category || {};
-  const heldSet = new Set((d.held_categories || []).map(h => h.category));
-  let catHtml = '';
-  for (const [cat, s] of Object.entries(allCats).sort()) {
-    const rate = s.dispatched > 0 ? (s.accepted / s.dispatched * 100).toFixed(0) : 0;
-    const isHeld = heldSet.has(cat);
-    catHtml += '<div style="margin-bottom:4px">' +
-      '<span class="tag ' + (isHeld ? 'held' : 'ok') + '">' + cat +
-      (isHeld ? ' HELD' : '') + '</span> ' +
-      '<span class="sub">' + rate + '% (' + s.accepted + '/' + s.dispatched + ')</span></div>';
-  }
-  hc.innerHTML = catHtml || '<span class="sub">No categories tracked yet</span>';
-
-  // Model table
-  const mt = document.getElementById('model-tbody');
-  const models = d.progress.per_model || {};
-  mt.innerHTML = '';
-  for (const [name, s] of Object.entries(models)) {
-    if (name === 'pool') continue;
-    const short = name.replace(/-20\d{2}.*$/, '');
-    const rate = (s.accepted + s.failed) > 0
-      ? (s.accepted / (s.accepted + s.failed) * 100).toFixed(1) : '0.0';
-    const row = '<tr><td>' + short + '</td><td style="color:#3fb950">' + s.accepted +
-      '</td><td style="color:#f85149">' + s.failed + '</td><td>' + rate +
-      '%</td><td>$' + (s.cost || 0).toFixed(3) + '</td></tr>';
-    mt.innerHTML += row;
-  }
-
-  // Category table
-  const ct = document.getElementById('cat-tbody');
-  ct.innerHTML = '';
-  for (const [cat, s] of Object.entries(allCats).sort()) {
-    const corpus = (d.corpus.by_category || {})[cat] || 0;
-    const rate = s.dispatched > 0 ? (s.accepted / s.dispatched * 100).toFixed(1) : '0.0';
-    const isHeld = heldSet.has(cat);
-    const statusTag = isHeld ? '<span class="tag held">HELD</span>' : '<span class="tag ok">Active</span>';
-    ct.innerHTML += '<tr><td>' + cat + '</td><td>' + corpus + '</td><td>' + s.dispatched +
-      '</td><td style="color:#3fb950">' + s.accepted + '</td><td style="color:#f85149">' +
-      s.failed + '</td><td>' + rate + '%</td><td>' + statusTag + '</td></tr>';
-  }
-
-  // Batch timing
-  const ts = d.timeseries || {};
-  document.getElementById('last-batch-time').textContent = ts.last_batch_secs || '--';
-  document.getElementById('avg-batch-time').textContent = ts.avg_batch_secs || '--';
-  document.getElementById('run-started').textContent = ts.first_ts || '--';
-
-  // Timeline chart
-  updateChart(ts);
+function statusTag(status) {
+  const labels = { done: 'Done', in_progress: 'In Progress', not_started: 'Not Started', available: 'Available', 'no prompts': 'No Prompts', active: 'Active', 'not configured': 'Not Configured', unknown: 'Unknown' };
+  const cls = status === 'done' || status === 'available' || status === 'active' ? 'done' : status === 'in_progress' ? 'in_progress' : 'not_started';
+  return '<span class="tag ' + cls + '">' + (labels[status] || status) + '</span>';
 }
 
-function updateChart(ts) {
-  const ctx = document.getElementById('timeline-chart');
-  const labels = (ts.minutes || []).map(m => m.split(' ')[1] || m);
+function updateDashboard(d) {
+  // Pipeline status dot
+  const dot = document.getElementById('pipeline-dot');
+  dot.className = 'status-dot ' + (d.pipeline_running ? 'running' : 'stopped');
+  document.getElementById('last-update').textContent = 'Updated: ' + new Date(d.timestamp).toLocaleTimeString();
 
-  if (chart) {
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = ts.accepted || [];
-    chart.data.datasets[1].data = ts.failed || [];
-    chart.data.datasets[2].data = ts.rescued || [];
-    chart.data.datasets[3].data = ts.autofixed || [];
-    chart.data.datasets[4].data = ts.corrections || [];
-    chart.update('none');
-    return;
+  // ── Section 0: Phase B Live Corpus ──
+  const pb = d.phase_b || {};
+  document.getElementById('phase-b-total').textContent = fmt(pb.total);
+  let pbCatHtml = '';
+  for (const [cat, count] of Object.entries(pb.by_category || {})) {
+    pbCatHtml += '<div class="mini-stat"><div class="val">' + fmt(count) + '</div><div class="label">' + cat + '</div></div>';
+  }
+  document.getElementById('phase-b-cats').innerHTML = pbCatHtml;
+
+  // ── Provider Stats ──
+  const provStats = d.provider_stats || {};
+  const provTbody = document.getElementById('provider-tbody');
+  provTbody.innerHTML = '';
+  for (const [prov, info] of Object.entries(provStats)) {
+    const inTok = info.input_tokens || 0;
+    const outTok = info.output_tokens || 0;
+    const inStr = inTok > 1000000 ? (inTok / 1000000).toFixed(1) + 'M' : inTok > 1000 ? (inTok / 1000).toFixed(0) + 'K' : fmt(inTok);
+    const outStr = outTok > 1000000 ? (outTok / 1000000).toFixed(1) + 'M' : outTok > 1000 ? (outTok / 1000).toFixed(0) + 'K' : fmt(outTok);
+    provTbody.innerHTML += '<tr><td style="color:#58a6ff;font-weight:600">' + prov + '</td><td class="sub">' + (info.model || '') + '</td><td>' + fmt(info.api_calls) + '</td><td style="color:#3fb950">' + fmt(info.accepted) + '</td><td style="color:#f85149">' + fmt(info.failed) + '</td><td>' + inStr + '</td><td>' + outStr + '</td><td style="color:#d29922">$' + (info.cost || 0).toFixed(4) + '</td></tr>';
   }
 
-  chart = new Chart(ctx, {
-    type: 'line',
+  // ── Section 1: Corpus Overview ──
+  const corpus = d.corpus || {};
+  const sources = corpus.sources || {};
+  document.getElementById('total-entries').textContent = fmt(corpus.total);
+
+  let activeSources = 0;
+  let totalSizeMB = 0;
+  let sourceHtml = '';
+  const chartLabels = [];
+  const chartData = [];
+  const chartColors = ['#3fb950', '#a371f7', '#f85149', '#d29922', '#58a6ff', '#79c0ff', '#7ee787'];
+  let colorIdx = 0;
+
+  for (const [name, info] of Object.entries(sources)) {
+    if (info.count > 0) activeSources++;
+    totalSizeMB += info.size_mb || 0;
+    sourceHtml += '<div class="source-row"><span class="source-name">' + name + '</span><span><span class="source-count">' + fmt(info.count) + '</span><span class="source-size">' + (info.size_mb || 0) + ' MB</span></span></div>';
+    if (info.count > 0) {
+      chartLabels.push(name);
+      chartData.push(info.count);
+    }
+    colorIdx++;
+  }
+
+  document.getElementById('source-list').innerHTML = sourceHtml || '<span class="sub">No sources found</span>';
+  document.getElementById('src-count').textContent = activeSources;
+  let sizeStr = totalSizeMB > 1024 ? (totalSizeMB / 1024).toFixed(1) + ' GB' : totalSizeMB.toFixed(0) + ' MB';
+  document.getElementById('total-size').textContent = sizeStr;
+
+  // Corpus chart (doughnut)
+  updateCorpusChart(chartLabels, chartData, chartColors);
+
+  // ── Section 2: Pipeline Status ──
+  const pipelines = d.pipelines || {};
+  const ptbody = document.getElementById('pipeline-tbody');
+  ptbody.innerHTML = '';
+  for (const [name, info] of Object.entries(pipelines)) {
+    ptbody.innerHTML += '<tr><td>' + name.replace(/_/g, ' ') + '</td><td>' + (info.story || '') + '</td><td>' + fmt(info.prompt_count) + '</td><td>' + statusTag(info.status) + '</td></tr>';
+  }
+
+  // Prompt inventory
+  const prompts = d.prompts || {};
+  document.getElementById('prompt-total').textContent = fmt(prompts.total);
+  let promptHtml = '';
+  for (const [dir, count] of Object.entries(prompts.by_directory || {})) {
+    promptHtml += '<div class="source-row"><span class="source-name">' + dir + '</span><span class="source-count">' + fmt(count) + '</span></div>';
+  }
+  document.getElementById('prompt-breakdown').innerHTML = promptHtml;
+
+  // API generation
+  const api = d.api_generation || {};
+  const apiStatus = document.getElementById('api-status');
+  if (api.running) {
+    apiStatus.textContent = 'Running'; apiStatus.className = 'tag done';
+  } else {
+    apiStatus.textContent = 'Stopped'; apiStatus.className = 'tag not_started';
+  }
+  document.getElementById('api-generated').textContent = fmt(api.entries_generated);
+  document.getElementById('api-success').textContent = (api.success_rate || 0) + '%';
+  const cost = api.cost || {};
+  document.getElementById('api-cost').textContent = '$' + (cost.api_total || 0).toFixed(2);
+  const bp = cost.by_provider || {};
+  document.getElementById('api-cost-breakdown').innerHTML = Object.entries(bp)
+    .map(function(e) { return e[0].split('-')[0] + ': $' + e[1].toFixed(3); }).join(' &bull; ');
+
+  // ── Section 3: Source Registry ──
+  const reg = d.registry || {};
+  document.getElementById('reg-train').textContent = fmt(reg.training_sources);
+  document.getElementById('reg-eval').textContent = fmt(reg.eval_sources);
+  document.getElementById('reg-split-train').textContent = fmt(reg.split_training);
+  document.getElementById('reg-split-eval').textContent = fmt(reg.split_eval);
+  const fw = document.getElementById('reg-firewall');
+  fw.textContent = reg.contamination_firewall || 'unknown';
+  fw.className = 'tag ' + (reg.contamination_firewall === 'active' ? 'done' : 'warn');
+
+  // ── Section 4: Quality Metrics ──
+  const quality = d.quality || {};
+  const validation = quality.validation || {};
+  let valHtml = '';
+  if (Object.keys(validation).length > 0) {
+    for (const [name, stats] of Object.entries(validation)) {
+      const rate = stats.pass_rate || (stats.total > 0 ? (stats.passed / stats.total * 100).toFixed(1) : 0);
+      const rateClass = rate >= 90 ? 'green' : rate >= 70 ? 'yellow' : 'red';
+      valHtml += '<div style="margin-bottom:6px"><span class="sub">' + name + ':</span> <strong style="color:#f0f6fc">' + rate + '%</strong> <span class="sub">(' + fmt(stats.passed) + ' / ' + fmt(stats.total) + ')</span><div class="bar"><div class="bar-fill ' + rateClass + '" style="width:' + Math.min(rate, 100) + '%"></div></div></div>';
+    }
+  } else {
+    valHtml = '<span class="sub">No validation data yet. Run tkc validate to generate.</span>';
+  }
+  document.getElementById('quality-validation').innerHTML = valHtml;
+
+  const phases = quality.phase_distribution || {};
+  let phaseHtml = '';
+  for (const [p, count] of Object.entries(phases)) {
+    phaseHtml += '<span class="tag ok" style="margin-right:4px">' + p + ': ' + fmt(count) + '</span>';
+  }
+  document.getElementById('quality-phases').innerHTML = phaseHtml || '<span class="sub">--</span>';
+
+  const tokens = quality.token_distribution || {};
+  let tokenHtml = '';
+  for (const [bucket, count] of Object.entries(tokens)) {
+    tokenHtml += '<span class="tag warn" style="margin-right:4px">' + bucket + ': ' + fmt(count) + '</span>';
+  }
+  document.getElementById('quality-tokens').innerHTML = tokenHtml || '<span class="sub">--</span>';
+
+  // ── Section 5: System Resources ──
+  const sys = d.system || {};
+  document.getElementById('cpu-val').textContent = sys.cpu_pct + '%';
+  document.getElementById('cpu-bar').style.width = Math.min(sys.cpu_pct || 0, 100) + '%';
+  document.getElementById('ram-val').textContent = sys.ram_pct + '%';
+  document.getElementById('ram-bar').style.width = (sys.ram_pct || 0) + '%';
+  document.getElementById('disk-val').textContent = sys.disk_pct + '%';
+  document.getElementById('disk-bar').style.width = (sys.disk_pct || 0) + '%';
+  document.getElementById('sys-detail').textContent =
+    'CPU: ' + (sys.cpu_count || '?') + ' cores, load ' + (sys.cpu_load_1m || 0) +
+    ' | RAM: ' + (sys.ram_used_gb || 0) + '/' + (sys.ram_total_gb || 0) + ' GB' +
+    ' | Disk: ' + (sys.disk_used_gb || 0) + '/' + (sys.disk_total_gb || 0) + ' GB';
+
+  // Legacy Phase 1
+  const legacy = d.legacy_phase1 || {};
+  document.getElementById('legacy-total').textContent = fmt(legacy.total);
+  let legacyHtml = '';
+  for (const [phase, count] of Object.entries(legacy.by_phase || {})) {
+    legacyHtml += '<div class="source-row"><span class="source-name">' + phase + '</span><span class="source-count">' + fmt(count) + '</span></div>';
+  }
+  document.getElementById('legacy-breakdown').innerHTML = legacyHtml;
+
+  // ── Section 6: Sprint Progress ──
+  const sprints = d.sprints || {};
+  let sprintHtml = '';
+  for (const [epic, info] of Object.entries(sprints)) {
+    sprintHtml += '<div class="sprint-row"><div><strong style="color:#f0f6fc">Epic ' + epic + '</strong> <span class="sub">' + info.name + '</span></div>' + statusTag(info.status) + '</div>';
+    sprintHtml += '<div class="story-list">';
+    for (const [sid, story] of Object.entries(info.stories || {})) {
+      sprintHtml += '<div class="story-item"><span>' + sid + ': ' + story.name + '</span>' + statusTag(story.status) + '</div>';
+    }
+    sprintHtml += '</div>';
+  }
+  document.getElementById('sprint-content').innerHTML = sprintHtml;
+}
+
+function updateCorpusChart(labels, data, colors) {
+  const ctx = document.getElementById('corpus-chart');
+  if (corpusChart) {
+    corpusChart.data.labels = labels;
+    corpusChart.data.datasets[0].data = data;
+    corpusChart.data.datasets[0].backgroundColor = colors.slice(0, labels.length);
+    corpusChart.update('none');
+    return;
+  }
+  corpusChart = new Chart(ctx, {
+    type: 'doughnut',
     data: {
       labels: labels,
-      datasets: [
-        { label: 'Accepted', data: ts.accepted || [], borderColor: '#3fb950', backgroundColor: '#3fb95030', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
-        { label: 'Failed', data: ts.failed || [], borderColor: '#f85149', backgroundColor: '#f8514930', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
-        { label: 'Rescued', data: ts.rescued || [], borderColor: '#a371f7', backgroundColor: '#a371f730', fill: false, tension: 0.3, pointRadius: 0, borderWidth: 2 },
-        { label: 'Auto-fixed', data: ts.autofixed || [], borderColor: '#d29922', backgroundColor: '#d2992230', fill: false, tension: 0.3, pointRadius: 0, borderWidth: 1, borderDash: [2,2] },
-        { label: 'Corrections', data: ts.corrections || [], borderColor: '#58a6ff', backgroundColor: '#58a6ff30', fill: false, tension: 0.3, pointRadius: 0, borderWidth: 1, borderDash: [4,4] },
-      ]
+      datasets: [{
+        data: data,
+        backgroundColor: colors.slice(0, labels.length),
+        borderColor: '#161b22',
+        borderWidth: 2,
+      }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      scales: {
-        x: { ticks: { color: '#484f58', maxTicksLimit: 20 }, grid: { color: '#21262d' } },
-        y: { ticks: { color: '#484f58' }, grid: { color: '#21262d' }, beginAtZero: true }
-      },
       plugins: {
-        legend: { labels: { color: '#8b949e', usePointStyle: true, pointStyle: 'line' } }
+        legend: {
+          position: 'right',
+          labels: { color: '#8b949e', font: { size: 11 }, padding: 8, usePointStyle: true, pointStyle: 'circle' }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              const total = ctx.dataset.data.reduce(function(a, b) { return a + b; }, 0);
+              const pct = (ctx.parsed / total * 100).toFixed(1);
+              return ctx.label + ': ' + ctx.parsed.toLocaleString() + ' (' + pct + '%)';
+            }
+          }
+        }
       }
     }
   });
@@ -1053,6 +1044,8 @@ setInterval(refresh, 15000);
 """
 
 
+# ── HTTP Server ─────────────────────────────────────────────────────────────
+
 class DashboardHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/api/metrics":
@@ -1062,6 +1055,11 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(json.dumps(_sanitize_for_json(data)).encode())
+        elif self.path == "/api/health":
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps({"status": "ok"}).encode())
         elif self.path == "/" or self.path == "/index.html":
             self.send_response(200)
             self.send_header("Content-Type", "text/html")
@@ -1076,6 +1074,15 @@ class DashboardHandler(http.server.BaseHTTPRequestHandler):
 
 
 def main():
+    # Pre-warm the JSONL cache on startup
+    print("Pre-warming JSONL line count cache (this may take a moment)...")
+    get_phase2_corpus_stats()
+    print("JSONL cache warm.")
+
+    # Start background cache refresh thread
+    t = threading.Thread(target=_refresh_jsonl_cache, daemon=True)
+    t.start()
+
     server = http.server.HTTPServer(("0.0.0.0", PORT), DashboardHandler)
     ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ctx.load_cert_chain(str(CERT_FILE), str(KEY_FILE))
