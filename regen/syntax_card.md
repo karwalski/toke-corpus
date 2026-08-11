@@ -93,11 +93,13 @@ f=main():i64{
 ```
 let s="count is \(n)";                     interpolation "\(expr)" — PREFERRED for all
                                            templating and multi-part strings
-let w=text.split(" ");                     method-style calls work on any str value,
-let n2=text.len;                           no import needed: len slice split upper lower
-let c=a.concat(b);                         trim contains replace starts ends concat
-```
-GOTCHA: method-style takes the receiver as first operand — `a.concat(b)` is a+b.
+let w=s.split(text;" ");                   ALWAYS use the s. alias for str operations
+let n2=s.len(text);                        (i=s:std.str;) — method-style str calls are
+let c=s.concat(a;b);                       BROKEN in 2.8.0: upper/lower/ends/replace
+```                                        fail the build; .len returns WRONG values;
+GOTCHA: NEVER call str methods on a value (`text.len`, `x.trim()`, `x.upper()`):
+`text.len` silently returns a WRONG number — always `s.len(text)`. Interpolating a
+method-call result prints a raw pointer. Arrays keep `.len`/`.get`/`.set` as normal.
 NEVER pass two args to method concat (`a.concat(x;y)` silently drops y). Never nest
 concat; interpolate instead: `"\(a)\(b)\(c)"`.
 With `i=s:std.str;`: `s.join("-";parts)` — separator FIRST, then the @str (the swapped
