@@ -27,10 +27,12 @@ def main():
     specs = load_specs(CORPUS)
     bases = {}
     for tid, s in specs.items():
-        m = _BASE.match(tid)
-        if not m or s.get("test_cases"):
+        if s.get("test_cases") or not s["category"].startswith("A-"):
             continue
-        b = m.group(1)
+        if s.get("task_type") == "migrate_fix":
+            continue  # behaviour-equivalence tasks; compile-only (129.8 note)
+        m = _BASE.match(tid)
+        b = m.group(1) if m else tid  # non-variant ids are their own base
         # prefer a representative whose description names the full signature
         named = bool(re.search(r"f=[a-z0-9]+\([^)]*\):\S+", s.get("description", "")))
         cur = bases.get(b)

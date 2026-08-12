@@ -62,7 +62,7 @@ def load_specs(corpus_dir):
             if s.get("test_cases") or s.get("task_type") != "single_function":
                 continue
             m = _BASE.match(tid)
-            t = banked.get(m.group(1)) if m else None
+            t = banked.get(m.group(1) if m else tid)
             if t and (s.get("input_types_v03") or s.get("input_types")) == t["input_types"]:
                 s["test_cases"] = t["test_cases"]
                 s["_tests_from"] = "a_tests"
