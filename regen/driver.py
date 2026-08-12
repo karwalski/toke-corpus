@@ -101,12 +101,15 @@ def render_out(v):
 
 def expected_lines(spec):
     """Flat list of expected stdout lines for the driver module (array-return
-    expectations contribute one line per element)."""
+    expectations contribute one line per element; a str expected containing
+    embedded newlines prints as — and must match — that many stdout lines)."""
     lines = []
     for tc in spec.get("test_cases") or []:
         exp = tc.get("expected")
         if isinstance(exp, list):
             lines.extend(render_out(x) for x in exp)
+        elif isinstance(exp, str) and "\n" in exp:
+            lines.extend(exp.split("\n"))
         else:
             lines.append(render_out(exp))
     return lines
