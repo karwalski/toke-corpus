@@ -20,14 +20,15 @@ single_function records execute via a synthesized driver `main()`
 probe-verified) + one printed line per expected value. Records whose spec has
 no test cases are gated on compile+build+structure only.
 
-## Structural thresholds (provisional — finalised from the 129.2 sweep distributions)
+## Structural thresholds (LOCKED 2026-08-12 from the 129.2 sweep distributions;
+corpus-wide: depth p50/90/99 = 1/3/4, func-bytes p99 = 622, min-bytes p99 = 715)
 
-| Metric | Source | Provisional threshold |
-|--------|--------|----------------------|
-| max control nesting depth | AST (`tkc --dump-ast`), IF/LOOP/MATCH ancestors; el-if chains count once | ≤ 3 (flag), ≤ 4 (hard) |
-| function length | AST subtree extent, bytes | ≤ 600 (flag) |
+| Metric | Source | Threshold |
+|--------|--------|-----------|
+| max control nesting depth | AST (`tkc --dump-ast`), IF/LOOP/MATCH ancestors; el-if chains count once | > 3 flag (compaction queue), > 4 hard fail |
+| function length | AST subtree extent, bytes | > 600 flag |
 | functions per program | AST FUNC_DECL count | ≥ 2 for difficulty-3 full programs (flag) — complex items built from small sub-functions |
-| minified size | `tkc --min` bytes | reported; ceiling per category set from distributions |
+| minified size | `tkc --min` bytes | reported; > 750 flag (≈ p99) |
 | lint | `tkc --lint` | 0 warnings (hints allowed) |
 
 Flags are advisory in the sweep; the compaction pass (129.4) rewrites flagged
