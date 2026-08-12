@@ -89,7 +89,11 @@ def run_test_cases(binpath, spec):
     if not tcs:
         return None
     try:
-        r = subprocess.run([binpath], capture_output=True, text=True, timeout=15)
+        # errors="replace": a generated program may emit non-UTF-8 bytes on stdout;
+        # decode defensively so one bad program fails its output-match (reject) instead
+        # of aborting the whole validate pass with UnicodeDecodeError.
+        r = subprocess.run([binpath], capture_output=True, text=True,
+                           errors="replace", timeout=15)
     except subprocess.TimeoutExpired:
         return {"ran": True, "exit": None, "match": False, "reason": "timeout"}
     got = [l for l in r.stdout.splitlines()]
