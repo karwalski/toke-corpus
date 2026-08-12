@@ -38,12 +38,34 @@ def style_mandate(spec):
     return m.group(1).strip() if m else None
 
 
+_BASE = re.compile(r"^(A-[A-Z]+-\d+)v\d+$")
+
+
 def load_specs(corpus_dir):
     specs = {}
     for sh in sorted(glob.glob(os.path.join(corpus_dir, "shards", "shard_*.jsonl"))):
         for line in open(sh):
             s = json.loads(line)
             specs[s["task_id"]] = s
+    # 129.7: inject execution-verified A-category test cases (audit/a_tests/,
+    # authored per base task) into variants whose input types match the base's
+    a_dir = os.path.join(corpus_dir, "audit", "a_tests")
+    if os.path.isdir(a_dir):
+        banked = {}
+        for fn in os.listdir(a_dir):
+            if fn.endswith(".json"):
+                banked[fn[:-5]] = json.load(open(os.path.join(a_dir, fn)))
+        for tid, s in specs.items():
+            # single_function only: the driver synthesizes their main; existing
+            # A full_program mains never exercised these inputs (regeneration
+            # scope — 129.8), so injecting tests there would just mass-fail
+            if s.get("test_cases") or s.get("task_type") != "single_function":
+                continue
+            m = _BASE.match(tid)
+            t = banked.get(m.group(1)) if m else None
+            if t and (s.get("input_types_v03") or s.get("input_types")) == t["input_types"]:
+                s["test_cases"] = t["test_cases"]
+                s["_tests_from"] = "a_tests"
     return specs
 
 
