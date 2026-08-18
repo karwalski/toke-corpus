@@ -204,9 +204,12 @@ def cmd_run(args):
     os.makedirs(tmpdir, exist_ok=True)
     ledger_path = os.path.join(audit_dir, "audit_corpus.jsonl")
     done = set()
+    latest = {}
     if os.path.exists(ledger_path):
         for line in open(ledger_path):
-            done.add(json.loads(line)["task_id"])
+            r = json.loads(line)
+            done.add(r["task_id"])
+            latest[r["task_id"]] = r
     specs = load_specs(corpus)
     jobs = []
     for line in open(os.path.join(corpus, "MANIFEST.jsonl")):
@@ -214,7 +217,8 @@ def cmd_run(args):
         tid = e["task_id"]
         if tid not in specs:
             continue
-        if tid in done and not (args.redo_injected and specs[tid].get("_tests_from")):
+        if tid in done and not (args.redo_injected and specs[tid].get("_tests_from")
+                                and not latest.get(tid, {}).get("executed")):
             continue
         if args.category and e.get("category") != args.category:
             continue
