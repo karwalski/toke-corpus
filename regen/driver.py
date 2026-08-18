@@ -69,6 +69,46 @@ def real_stub(sig):
     return f"f={name}({plist}):{ret}{{{body}}};"
 
 
+
+_DESC_SIG = re.compile(r"f=[a-z0-9]+\(([^)]*(?:\([^)]*\)[^)]*)*)\):(\S+)")
+
+
+def _norm_type(t):
+    t = t.strip()
+    return "@" + t[2:-1] if t.startswith("@(") and t.endswith(")") else t
+
+
+def sig_input_types(spec):
+    """Input types parsed from the description's f=sig — authoritative when the
+    spec's input_types field is corrupted (the @(T);U sampler split bug that
+    mangled 3,976 A-side specs, found 129.7)."""
+    m = _DESC_SIG.search(spec.get("description", "") or "")
+    if not m:
+        return None
+    params = m.group(1)
+    types, depth, cur = [], 0, ""
+    for ch in params:
+        if ch == ";" and depth == 0:
+            types.append(cur); cur = ""
+        else:
+            depth += (ch == "(") - (ch == ")")
+            cur += ch
+    types.append(cur)
+    out = []
+    for p in types:
+        if ":" not in p:
+            return None
+        out.append(_norm_type(p.split(":", 1)[1]))
+    return out
+
+
+def effective_input_types(spec):
+    spec_types = spec.get("input_types_v03") or spec.get("input_types") or []
+    if any(("(" in t) != (")" in t) for t in spec_types):
+        return sig_input_types(spec) or spec_types
+    return spec_types
+
+
 def _esc(s):
     return (s.replace("\\", "\\\\").replace('"', '\\"')
              .replace("\n", "\\n").replace("\t", "\\t"))
@@ -125,7 +165,7 @@ def find_target(spec, assembled_src):
     """The worker's target function in an assembled module: last declared
     function that is not a context stub and whose arity matches the spec input
     count (falls back to the last non-stub declaration)."""
-    n_inputs = len(spec.get("input_types_v03") or spec.get("input_types") or [])
+    n_inputs = len(effective_input_types(spec))
     stubs = _stub_names(spec)
     decls = [(m.group(1), [p for p in m.group(2).split(";") if p.strip()])
              for m in _FN.finditer(assembled_src)]
@@ -161,7 +201,7 @@ def _swap_real_stubs(spec, assembled_src):
 def append_main(spec, assembled_src):
     """Assembled single_function module + real-bodied stubs + generated main().
     Returns (source, error) — error is set when synthesis isn't possible."""
-    in_types = spec.get("input_types_v03") or spec.get("input_types") or []
+    in_types = effective_input_types(spec)
     ret = spec.get("output_type_v03") or spec.get("output_type") or ""
     tcs = spec.get("test_cases") or []
     if not tcs:

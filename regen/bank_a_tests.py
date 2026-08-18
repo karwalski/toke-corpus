@@ -8,7 +8,8 @@ import json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from verify_a_tests import verify, WD, CORPUS     # noqa: E402
+from verify_a_tests import verify, WD, CORPUS
+from driver import effective_input_types     # noqa: E402
 
 
 def main():
@@ -39,7 +40,7 @@ def main():
             with open(os.path.join(outdir, base + ".json"), "w") as f:
                 json.dump({"base": base, "python_ref": doc.get("python_ref"),
                            "test_cases": doc["test_cases"],
-                           "input_types": spec.get("input_types_v03") or spec.get("input_types"),
+                           "input_types": effective_input_types(spec),
                            "output_type": spec.get("output_type_v03") or spec.get("output_type"),
                            "provenance": "129.7-agent+ref-verified"}, f)
             banked += 1

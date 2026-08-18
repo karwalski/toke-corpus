@@ -12,6 +12,8 @@ Checks: schema, 3-5 cases, inputs arity/type vs the spec, ref executes, and
 ref(inputs) == expected for every case (this is the ground truth).
 """
 import json, os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from driver import effective_input_types
 
 CORPUS = "/Users/matthew.watt/tk/toke-corpus/corpus/regen_v04"
 WD = os.path.join(CORPUS, "work", "a_tests_129")
@@ -30,7 +32,7 @@ def verify(base, doc, spec):
         errs.append("python_ref must define a function")
     if errs:
         return errs
-    in_types = spec.get("input_types_v03") or spec.get("input_types") or []
+    in_types = effective_input_types(spec)
     ns = {}
     try:
         exec(ref, {"__builtins__": __builtins__}, ns)  # trusted-local audit tooling

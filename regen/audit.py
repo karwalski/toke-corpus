@@ -24,6 +24,7 @@ import argparse, glob, json, multiprocessing, os, re, subprocess, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import driver as drv                              # noqa: E402
+from driver import effective_input_types      # noqa: E402
 import idiom_judge                                # noqa: E402
 import metrics                                    # noqa: E402
 from run_shard import render_expected             # noqa: E402
@@ -63,7 +64,7 @@ def load_specs(corpus_dir):
                 continue
             m = _BASE.match(tid)
             t = banked.get(m.group(1) if m else tid)
-            if t and (s.get("input_types_v03") or s.get("input_types")) == t["input_types"]:
+            if t and effective_input_types(s) == t["input_types"]:
                 s["test_cases"] = t["test_cases"]
                 s["_tests_from"] = "a_tests"
     return specs
