@@ -167,7 +167,12 @@ def audit_one(job):
         if not row["compile"]:
             row["executed"] = False
         elif ttype == "full_program" and tcs:
-            want = [render_expected(tc.get("expected")) for tc in tcs]
+            # multi-line str expecteds print as several stdout lines; match
+            # each embedded line (same rule as driver.expected_lines)
+            want = []
+            for tc in tcs:
+                r = render_expected(tc.get("expected"))
+                want.extend(r.split("\n"))
             row.update(_exec_tests(src, want, tmpdir, task_id + ".fp"))
             row["executed"] = True
             row["executed_via"] = "main"
@@ -207,7 +212,9 @@ def cmd_run(args):
     for line in open(os.path.join(corpus, "MANIFEST.jsonl")):
         e = json.loads(line)
         tid = e["task_id"]
-        if tid in done or tid not in specs:
+        if tid not in specs:
+            continue
+        if tid in done and not (args.redo_injected and specs[tid].get("_tests_from")):
             continue
         if args.category and e.get("category") != args.category:
             continue
@@ -299,6 +306,8 @@ def main():
     ap.add_argument("--workers", type=int, default=10)
     ap.add_argument("--limit", type=int)
     ap.add_argument("--category")
+    ap.add_argument("--redo-injected", action="store_true",
+                    help="re-audit records whose specs received injected a_tests")
     args = ap.parse_args()
     {"run": cmd_run, "report": cmd_report}[args.cmd](args)
 

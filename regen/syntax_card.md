@@ -99,7 +99,10 @@ let c=s.concat(a;b);                       BROKEN in 2.8.0: upper/lower/ends/rep
 ```                                        fail the build; .len returns WRONG values;
 GOTCHA: NEVER call str methods on a value (`text.len`, `x.trim()`, `x.upper()`):
 `text.len` silently returns a WRONG number — always `s.len(text)`. Interpolating a
-method-call result prints a raw pointer. Arrays keep `.len`/`.get`/`.set` as normal.
+method-call result prints a raw pointer — and so does interpolating an `s.fields()`
+result (use `s.split(x;" ")`). Strings built BY interpolation then stored with
+`arr.append` in a loop DANGLE when read back — build stored strings with
+`s.concat` or the builder. Arrays keep `.len`/`.get`/`.set` as normal.
 NEVER pass two args to method concat (`a.concat(x;y)` silently drops y). Never nest
 concat; interpolate instead: `"\(a)\(b)\(c)"`.
 With `i=s:std.str;`: `s.join("-";parts)` — separator FIRST, then the @str (the swapped
