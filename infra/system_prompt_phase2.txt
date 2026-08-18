@@ -1,0 +1,13 @@
+## CANONICAL COPY IS IN toke-model
+
+The canonical version of this file lives at:
+
+    toke-model/corpus/system_prompt_phase2.txt
+
+To update this copy, run:
+
+    ./sync_prompt.sh
+
+Or copy manually:
+
+    cp ~/tk/toke-model/corpus/system_prompt_phase2.txt ~/tk/toke-corpus/infra/system_prompt_phase2.txt

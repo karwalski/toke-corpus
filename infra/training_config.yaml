@@ -1,0 +1,161 @@
+# training_config.yaml — Source weighting and multi-epoch training configuration
+# Stories 10.6.1 and 10.6.3
+#
+# Revised 2026-04-10 per Phase 2 Corpus review:
+#   - Dropped DOC-EXP oversampling (was 7x → now 1x)
+#   - Revised weights: hand_written 20%, llm_generated 40%, transpiled 25%, mutation 15%
+#   - Added new seed-generated categories (STDLIB-*, APP-MULTI, etc.)
+#   - Research basis: when hand-written data is <20% of corpus, forcing 45% via
+#     repetition is worse than an honest weight split (DOC-EXP repetition risk)
+
+# ---------------------------------------------------------------------------
+# Source type mapping
+# ---------------------------------------------------------------------------
+source_types:
+  hand_written:
+    weight: 0.20
+    categories:
+      - DOC-EXP
+      - ERR-GOLD
+      # Future hand-written entries go here
+
+  llm_generated:
+    weight: 0.40
+    categories:
+      - A-ARR
+      - A-CND
+      - A-ERR
+      - A-MTH
+      - A-SRT
+      - A-STR
+      - EC2-D-CFG
+      - EC2-D-CLI
+      - EC2-D-CRY
+      - EC2-D-DAT
+      - EC2-D-FIO
+      - EC2-D-NET
+      - EC2-D-TST
+      - EC2-D-WEB
+      - B-CMP
+      - COMPOSE-C
+      - COMPOSE-D
+      - COMPOSE-NEW
+      - OSS-INST
+      - ERR-HANDLE
+      - MED-CMPLX
+      - STDLIB
+      - STDLIB-MULTI
+      # Seed-generated categories
+      - STD-STR
+      - STD-FILE
+      - STD-JSON
+      - STD-CRYPTO
+      - STD-TIME
+      - STD-ENV
+      - STD-LOG
+      - STD-TEST
+      - STD-PROC
+      - STD-HTTP
+      - STD-DB
+      - STD-I18N
+      - STD-YAML
+      - STD-TOON
+      - APP-MULTI
+      - ERR-PATTERN
+      - SIMPLE-ALG
+      - COMP-MULTI
+
+  transpiled:
+    weight: 0.25
+    categories: []
+    # Future transpiled entries go here — weight redistributed to others when empty
+
+  mutation:
+    weight: 0.15
+    categories:
+      - MUT-constant_variation
+      - MUT-expression_extraction
+      - MUT-let_to_mut
+      - MUT-type_widening
+      - MUT-variable_rename
+      - BIFI-*
+      - ERR-TRIPLE-immutable_reassignment
+      - ERR-TRIPLE-missing_semicolon
+      - ERR-TRIPLE-type_mismatch
+      - ERR-TRIPLE-undefined_variable
+      - ERR-TRIPLE-wrong_argument_count
+      - ERR-TRIPLE-wrong_operator
+
+# ---------------------------------------------------------------------------
+# Curriculum stages
+# ---------------------------------------------------------------------------
+curriculum:
+  stage1:
+    description: "Broad training on all source types"
+    sources:
+      - hand_written
+      - llm_generated
+      - transpiled
+      - mutation
+    epochs: 2
+    learning_rate: 2.0e-4
+
+  stage2:
+    description: "High-quality refinement (exclude mutations and transpiled)"
+    sources:
+      - hand_written
+      - llm_generated
+    epochs: 1
+    learning_rate: 5.0e-5
+
+# ---------------------------------------------------------------------------
+# Training hyperparameters
+# ---------------------------------------------------------------------------
+training:
+  base_model: "Qwen/Qwen2.5-Coder-7B"
+  method: qlora
+  lora_rank: 64
+  lora_alpha: 128
+  epochs: 3                          # total across both curriculum stages
+  batch_size: 4
+  gradient_accumulation_steps: 8
+  eval_split: 0.05
+  warmup_ratio: 0.03
+  max_seq_length: 2048
+  # Story 10.4.5: ensure each stdlib function has at least this many
+  # occurrences in the training set (top-up via extra sampling from the
+  # eligible pool after source weighting). Functions whose entire corpus
+  # has fewer than the floor are reported but not filled.
+  stdlib_floor_per_fn: 20
+
+# ---------------------------------------------------------------------------
+# Quality gates — applied during data preparation
+# ---------------------------------------------------------------------------
+quality_gate:
+  min_composite_score: 0.35
+  exclude_fuzzed: true
+  max_mutations_per_seed: 2
+  require_compile_pass: true
+  # Story 10.8.8: strict v2 gate — checks enriched fields from Epic 10.8
+  require_syntax_conformant: true   # syntax_audit.phase2_conformant
+  require_v2_compile_pass: true     # compile_check.passed (true tkc --check on tk_source)
+  require_runtime_pass: false       # runtime_check.ran — off until toke Epic 57.12 lands
+  runtime_skip_sources:             # source types where runtime verification is semantically irrelevant
+    - mutation
+
+# ---------------------------------------------------------------------------
+# Complexity targets (resampling guidance for prepare_training_data.py)
+# ---------------------------------------------------------------------------
+complexity_targets:
+  simple: 0.275          # 25-30%
+  medium: 0.425          # 40-45%
+  complex_multifunction: 0.225  # 20-25% (complex + application tiers)
+  # Remaining ~7.5% unclassified/flexible
+
+# ---------------------------------------------------------------------------
+# Stratified resampling — applied after source-weighted sampling
+# ---------------------------------------------------------------------------
+stratified_resampling:
+  simple_floor: 0.20          # Ensure simple tier >= 20% of training set
+  application_cap: 0.25       # Cap application tier at 25%
+  bifi_cap: 0.12              # Cap BIFI-* repair examples at 12% (Gate 2 tests generation, not repair)

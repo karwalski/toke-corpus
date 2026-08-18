@@ -34,7 +34,7 @@ def main():
             os.rename(path, path + ".done")
             continue
         src = open(path, errors="replace").read()
-        tmp = path + ".rec.json"
+        tmp = path + ".bank.rec.json"
         with open(tmp, "w") as f:
             json.dump({"tk_source": src, "regen": {}}, f)
         try:

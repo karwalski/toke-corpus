@@ -1,0 +1,1247 @@
+{
+  "meta": {
+    "total_corpus_files": 197856,
+    "files_with_stdlib": 4848,
+    "min_examples_target": 20
+  },
+  "modules": {
+    "std.crypto": {
+      "functions": [
+        {
+          "name": "sha256",
+          "qualified_name": "std.crypto.sha256",
+          "params": [
+            {
+              "name": "data",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 56,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "hmac",
+          "qualified_name": "std.crypto.hmac",
+          "params": [
+            {
+              "name": "key",
+              "type": "$str"
+            },
+            {
+              "name": "data",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "hex",
+          "qualified_name": "std.crypto.hex",
+          "params": [
+            {
+              "name": "data",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        }
+      ]
+    },
+    "std.db": {
+      "functions": [
+        {
+          "name": "open",
+          "qualified_name": "std.db.open",
+          "params": [
+            {
+              "name": "path",
+              "type": "$str"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "exec",
+          "qualified_name": "std.db.exec",
+          "params": [
+            {
+              "name": "db",
+              "type": "i64"
+            },
+            {
+              "name": "sql",
+              "type": "$str"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 53,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "query",
+          "qualified_name": "std.db.query",
+          "params": [
+            {
+              "name": "db",
+              "type": "i64"
+            },
+            {
+              "name": "sql",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "close",
+          "qualified_name": "std.db.close",
+          "params": [
+            {
+              "name": "db",
+              "type": "i64"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        }
+      ]
+    },
+    "std.env": {
+      "functions": [
+        {
+          "name": "get",
+          "qualified_name": "std.env.get",
+          "params": [
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 434,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "set",
+          "qualified_name": "std.env.set",
+          "params": [
+            {
+              "name": "key",
+              "type": "$str"
+            },
+            {
+              "name": "val",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 13,
+          "gap_to_minimum": 7,
+          "status": "below_minimum"
+        }
+      ]
+    },
+    "std.file": {
+      "functions": [
+        {
+          "name": "read",
+          "qualified_name": "std.file.read",
+          "params": [
+            {
+              "name": "path",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 692,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "write",
+          "qualified_name": "std.file.write",
+          "params": [
+            {
+              "name": "path",
+              "type": "$str"
+            },
+            {
+              "name": "data",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 197,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "append",
+          "qualified_name": "std.file.append",
+          "params": [
+            {
+              "name": "path",
+              "type": "$str"
+            },
+            {
+              "name": "data",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 10,
+          "gap_to_minimum": 10,
+          "status": "below_minimum"
+        },
+        {
+          "name": "list",
+          "qualified_name": "std.file.list",
+          "params": [
+            {
+              "name": "dir",
+              "type": "$str"
+            }
+          ],
+          "return_type": "@$str",
+          "corpus_occurrences": 95,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "delete",
+          "qualified_name": "std.file.delete",
+          "params": [
+            {
+              "name": "path",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 9,
+          "gap_to_minimum": 11,
+          "status": "below_minimum"
+        }
+      ]
+    },
+    "std.http": {
+      "functions": [
+        {
+          "name": "get",
+          "qualified_name": "std.http.get",
+          "params": [
+            {
+              "name": "url",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 30,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "post",
+          "qualified_name": "std.http.post",
+          "params": [
+            {
+              "name": "url",
+              "type": "$str"
+            },
+            {
+              "name": "body",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 14,
+          "gap_to_minimum": 6,
+          "status": "below_minimum"
+        },
+        {
+          "name": "listen",
+          "qualified_name": "std.http.listen",
+          "params": [
+            {
+              "name": "addr",
+              "type": "$str"
+            },
+            {
+              "name": "handler",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        }
+      ]
+    },
+    "std.i18n": {
+      "functions": [
+        {
+          "name": "load",
+          "qualified_name": "std.i18n.load",
+          "params": [
+            {
+              "name": "path",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 57,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "get",
+          "qualified_name": "std.i18n.get",
+          "params": [
+            {
+              "name": "bundle",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "fmt",
+          "qualified_name": "std.i18n.fmt",
+          "params": [
+            {
+              "name": "bundle",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            },
+            {
+              "name": "args",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 33,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "locale",
+          "qualified_name": "std.i18n.locale",
+          "params": [],
+          "return_type": "$str",
+          "corpus_occurrences": 28,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        }
+      ]
+    },
+    "std.json": {
+      "functions": [
+        {
+          "name": "enc",
+          "qualified_name": "std.json.enc",
+          "params": [
+            {
+              "name": "val",
+              "type": "i64"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 85,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "dec",
+          "qualified_name": "std.json.dec",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 675,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "str",
+          "qualified_name": "std.json.str",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 81,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "i64",
+          "qualified_name": "std.json.i64",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 46,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "f64",
+          "qualified_name": "std.json.f64",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "f64",
+          "corpus_occurrences": 48,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "bool",
+          "qualified_name": "std.json.bool",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "bool",
+          "corpus_occurrences": 48,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "arr",
+          "qualified_name": "std.json.arr",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "@$str",
+          "corpus_occurrences": 24,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "parse",
+          "qualified_name": "std.json.parse",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "print",
+          "qualified_name": "std.json.print",
+          "params": [
+            {
+              "name": "val",
+              "type": "i64"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        }
+      ]
+    },
+    "std.log": {
+      "functions": [
+        {
+          "name": "info",
+          "qualified_name": "std.log.info",
+          "params": [
+            {
+              "name": "msg",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 1223,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "warn",
+          "qualified_name": "std.log.warn",
+          "params": [
+            {
+              "name": "msg",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 256,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "error",
+          "qualified_name": "std.log.error",
+          "params": [
+            {
+              "name": "msg",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 86,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "debug",
+          "qualified_name": "std.log.debug",
+          "params": [
+            {
+              "name": "msg",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 59,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        }
+      ]
+    },
+    "std.process": {
+      "functions": [
+        {
+          "name": "exec",
+          "qualified_name": "std.process.exec",
+          "params": [
+            {
+              "name": "cmd",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "spawn",
+          "qualified_name": "std.process.spawn",
+          "params": [
+            {
+              "name": "cmd",
+              "type": "$str"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 114,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "wait",
+          "qualified_name": "std.process.wait",
+          "params": [
+            {
+              "name": "pid",
+              "type": "i64"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 80,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "kill",
+          "qualified_name": "std.process.kill",
+          "params": [
+            {
+              "name": "pid",
+              "type": "i64"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 42,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        }
+      ]
+    },
+    "std.str": {
+      "functions": [
+        {
+          "name": "len",
+          "qualified_name": "std.str.len",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 110,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "concat",
+          "qualified_name": "std.str.concat",
+          "params": [
+            {
+              "name": "a",
+              "type": "$str"
+            },
+            {
+              "name": "b",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 1610,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "slice",
+          "qualified_name": "std.str.slice",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "start",
+              "type": "i64"
+            },
+            {
+              "name": "end",
+              "type": "i64"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 114,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "split",
+          "qualified_name": "std.str.split",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "sep",
+              "type": "$str"
+            }
+          ],
+          "return_type": "@$str",
+          "corpus_occurrences": 331,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "upper",
+          "qualified_name": "std.str.upper",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 80,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "lower",
+          "qualified_name": "std.str.lower",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 13,
+          "gap_to_minimum": 7,
+          "status": "below_minimum"
+        },
+        {
+          "name": "trim",
+          "qualified_name": "std.str.trim",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 175,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "contains",
+          "qualified_name": "std.str.contains",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "sub",
+              "type": "$str"
+            }
+          ],
+          "return_type": "bool",
+          "corpus_occurrences": 62,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "replace",
+          "qualified_name": "std.str.replace",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "old",
+              "type": "$str"
+            },
+            {
+              "name": "new",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "starts",
+          "qualified_name": "std.str.starts",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "prefix",
+              "type": "$str"
+            }
+          ],
+          "return_type": "bool",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "ends",
+          "qualified_name": "std.str.ends",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "suffix",
+              "type": "$str"
+            }
+          ],
+          "return_type": "bool",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        }
+      ]
+    },
+    "std.test": {
+      "functions": [
+        {
+          "name": "eq",
+          "qualified_name": "std.test.eq",
+          "params": [
+            {
+              "name": "a",
+              "type": "i64"
+            },
+            {
+              "name": "b",
+              "type": "i64"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "neq",
+          "qualified_name": "std.test.neq",
+          "params": [
+            {
+              "name": "a",
+              "type": "i64"
+            },
+            {
+              "name": "b",
+              "type": "i64"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "ok",
+          "qualified_name": "std.test.ok",
+          "params": [
+            {
+              "name": "cond",
+              "type": "bool"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "fail",
+          "qualified_name": "std.test.fail",
+          "params": [
+            {
+              "name": "msg",
+              "type": "$str"
+            }
+          ],
+          "return_type": "void",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        }
+      ]
+    },
+    "std.time": {
+      "functions": [
+        {
+          "name": "now",
+          "qualified_name": "std.time.now",
+          "params": [],
+          "return_type": "i64",
+          "corpus_occurrences": 143,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "fmt",
+          "qualified_name": "std.time.fmt",
+          "params": [
+            {
+              "name": "ts",
+              "type": "i64"
+            },
+            {
+              "name": "layout",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "since",
+          "qualified_name": "std.time.since",
+          "params": [
+            {
+              "name": "ts",
+              "type": "i64"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 67,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        }
+      ]
+    },
+    "std.toon": {
+      "functions": [
+        {
+          "name": "enc",
+          "qualified_name": "std.toon.enc",
+          "params": [
+            {
+              "name": "data",
+              "type": "$str"
+            },
+            {
+              "name": "schema",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 9,
+          "gap_to_minimum": 11,
+          "status": "below_minimum"
+        },
+        {
+          "name": "dec",
+          "qualified_name": "std.toon.dec",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 41,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "str",
+          "qualified_name": "std.toon.str",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 41,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "i64",
+          "qualified_name": "std.toon.i64",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 41,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "f64",
+          "qualified_name": "std.toon.f64",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "f64",
+          "corpus_occurrences": 17,
+          "gap_to_minimum": 3,
+          "status": "below_minimum"
+        },
+        {
+          "name": "bool",
+          "qualified_name": "std.toon.bool",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "bool",
+          "corpus_occurrences": 17,
+          "gap_to_minimum": 3,
+          "status": "below_minimum"
+        },
+        {
+          "name": "arr",
+          "qualified_name": "std.toon.arr",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "@$str",
+          "corpus_occurrences": 17,
+          "gap_to_minimum": 3,
+          "status": "below_minimum"
+        },
+        {
+          "name": "from_json",
+          "qualified_name": "std.toon.from_json",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "name",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "to_json",
+          "qualified_name": "std.toon.to_json",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        }
+      ]
+    },
+    "std.yaml": {
+      "functions": [
+        {
+          "name": "enc",
+          "qualified_name": "std.yaml.enc",
+          "params": [
+            {
+              "name": "data",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 40,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "dec",
+          "qualified_name": "std.yaml.dec",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 42,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "str",
+          "qualified_name": "std.yaml.str",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 42,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "i64",
+          "qualified_name": "std.yaml.i64",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "i64",
+          "corpus_occurrences": 42,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "f64",
+          "qualified_name": "std.yaml.f64",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "f64",
+          "corpus_occurrences": 17,
+          "gap_to_minimum": 3,
+          "status": "below_minimum"
+        },
+        {
+          "name": "bool",
+          "qualified_name": "std.yaml.bool",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "bool",
+          "corpus_occurrences": 42,
+          "gap_to_minimum": 0,
+          "status": "adequate"
+        },
+        {
+          "name": "arr",
+          "qualified_name": "std.yaml.arr",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            },
+            {
+              "name": "key",
+              "type": "$str"
+            }
+          ],
+          "return_type": "@$str",
+          "corpus_occurrences": 17,
+          "gap_to_minimum": 3,
+          "status": "below_minimum"
+        },
+        {
+          "name": "from_json",
+          "qualified_name": "std.yaml.from_json",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        },
+        {
+          "name": "to_json",
+          "qualified_name": "std.yaml.to_json",
+          "params": [
+            {
+              "name": "s",
+              "type": "$str"
+            }
+          ],
+          "return_type": "$str",
+          "corpus_occurrences": 0,
+          "gap_to_minimum": 20,
+          "status": "zero"
+        }
+      ]
+    }
+  }
+}

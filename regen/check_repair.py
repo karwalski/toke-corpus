@@ -26,7 +26,7 @@ def main():
         print("FAIL no candidate at " + fix)
         sys.exit(1)
     # audit_one reads a record JSON; wrap the candidate source as one
-    tmp = fix + ".rec.json"
+    tmp = fix + ".check.rec.json"
     with open(tmp, "w") as f:
         json.dump({"tk_source": open(fix, errors="replace").read(), "regen": {}}, f)
     try:
