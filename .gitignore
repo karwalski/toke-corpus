@@ -24,3 +24,7 @@ models/
 .DS_Store
 .vscode/
 .idea/
+
+# Compile scratch artifacts
+*.ll
+probe
