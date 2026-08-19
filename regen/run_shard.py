@@ -27,6 +27,8 @@ sys.path.insert(0, HERE)
 from assemble import assemble, sanitize          # noqa: E402
 from build_prompt import build                   # noqa: E402
 from validate import tkc_check, signature_conforms  # noqa: E402
+import idiom_judge                                   # noqa: E402
+import metrics                                       # noqa: E402
 
 TKC = "/Users/matthew.watt/tk/toke/tkc"
 BATCH_SIZE = 20
@@ -97,7 +99,12 @@ def run_test_cases(binpath, spec):
     except subprocess.TimeoutExpired:
         return {"ran": True, "exit": None, "match": False, "reason": "timeout"}
     got = [l for l in r.stdout.splitlines()]
-    want = [render_expected(tc.get("expected")) for tc in tcs]
+    # 129.6: a str expected containing embedded newlines matches one stdout
+    # line per embedded line
+    want = []
+    for tc in tcs:
+        w = render_expected(tc.get("expected"))
+        want.extend(w.split("\n"))
     if len(got) < len(want):
         return {"ran": True, "exit": r.returncode, "match": False,
                 "reason": f"expected {len(want)} lines, got {len(got)}", "stdout": r.stdout[:500]}
@@ -112,8 +119,17 @@ def run_test_cases(binpath, spec):
             pass
         match = False
         break
+    # 129.6 tightened gates: non-zero exit and extra stdout lines now reject
+    if match and r.returncode != 0:
+        match = False
+        reason = f"exit code {r.returncode}"
+    elif match and len(got) > len(want):
+        match = False
+        reason = f"{len(got) - len(want)} extra stdout lines"
+    else:
+        reason = None if match else "output mismatch"
     return {"ran": True, "exit": r.returncode, "match": match,
-            "reason": None if match else "output mismatch",
+            "reason": reason,
             "stdout": r.stdout[:500] if not match else None}
 
 
@@ -138,7 +154,17 @@ def validate_one(spec, raw_src, workdir):
                     os.unlink(binpath)
             else:
                 runtime = {"ran": False, "reason": "build failed"}
-        ok = rc == 0 and sig_ok and (runtime is None or runtime.get("match", True))
+        # 129.6 rubric gates (quality_rubric.md): idiom floor + structural hard limits
+        idiom_score, idiom_notes = idiom_judge.score(src)
+        struct = metrics.analyse(tkpath) if rc == 0 else None
+        struct_fail = None
+        if struct:
+            if struct["max_depth"] > 4:
+                struct_fail = f"nesting depth {struct['max_depth']} > 4"
+            elif struct["max_func_bytes"] > 600:
+                struct_fail = f"function {struct['max_func_bytes']} bytes > 600"
+        ok = (rc == 0 and sig_ok and (runtime is None or runtime.get("match", True))
+              and idiom_score >= idiom_judge.IDIOM_FLOOR and not struct_fail)
         reason = None
         if rc != 0:
             reason = "compile: " + ",".join(codes[:3])
@@ -146,6 +172,10 @@ def validate_one(spec, raw_src, workdir):
             reason = "signature: " + sig_detail
         elif runtime and not runtime.get("match", True):
             reason = "runtime: " + str(runtime.get("reason"))
+        elif idiom_score < idiom_judge.IDIOM_FLOOR:
+            reason = f"idiom: {idiom_score:.2f} < {idiom_judge.IDIOM_FLOOR} ({'; '.join(idiom_notes)})"
+        elif struct_fail:
+            reason = "structure: " + struct_fail
         record = {
             "id": "P3-" + spec["task_id"],
             "version": 2,
@@ -157,7 +187,7 @@ def validate_one(spec, raw_src, workdir):
             "model": "claude-fable-5",
             "validation": {"compiler_exit_code": rc, "error_codes": codes},
             "differential": {"languages_agreed": [], "majority_output": ""},
-            "judge": {"accepted": ok, "score": 1.0 if ok else 0.0},
+            "judge": {"accepted": ok, "score": round(idiom_score, 2)},
             "regen": {
                 "syntax_version": "v0.4-2.8.0",
                 "card_sha": CARD_SHA,
@@ -167,6 +197,8 @@ def validate_one(spec, raw_src, workdir):
                 "signature_ok": sig_ok,
                 "runtime": runtime,
                 "source_sha256": hashlib.sha256(src.encode()).hexdigest(),
+                "min_bytes": struct.get("min_bytes") if struct else None,
+                "max_depth": struct.get("max_depth") if struct else None,
             },
         }
         return record, ok, reason
