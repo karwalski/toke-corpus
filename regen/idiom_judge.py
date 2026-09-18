@@ -24,8 +24,10 @@ import re
 import subprocess
 import tempfile
 
+import tkc_pin  # noqa: E402  (131.39)
+
 IDIOM_FLOOR: float = 0.6
-TKC = os.environ.get("TKC", "/Users/matthew.watt/tk/toke/tkc")
+TKC = tkc_pin.default_tkc()   # 131.39: pinned copy when a harness set $TOKE_TKC_PIN
 
 # rule id -> (penalty per occurrence, severity as emitted by tkc). Penalties are
 # the 129 weights (nested-concat -> string-concat-chain); the three rules the

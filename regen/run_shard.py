@@ -34,8 +34,15 @@ from validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402  (131.18)
 import idiom_judge                                   # noqa: E402
 import metrics                                       # noqa: E402
 import manifest_tool                                 # noqa: E402  (131.35)
+import validate                                      # noqa: E402  (131.39: rebind its TKC)
+import tkc_pin                                       # noqa: E402  (131.39)
 
-TKC = "/Users/matthew.watt/tk/toke/tkc"
+# 131.39: exec a pinned private copy of tkc, never the ~/tk/toke/tkc symlink a
+# concurrent `make` relinks. main() pins once (PIN) and installs it into every
+# module that execs tkc; pool workers re-import and pick the copy up from
+# $TOKE_TKC_PIN via tkc_pin.default_tkc(). Records/MANIFEST carry tkc_bin_sha.
+TKC = tkc_pin.default_tkc()
+PIN = None
 BATCH_SIZE = 20
 CARD = open(os.path.join(HERE, "syntax_card.md")).read()
 CARD_SHA = hashlib.sha256(CARD.encode()).hexdigest()[:12]
@@ -79,7 +86,8 @@ def cmd_prepare(args):
             json.dump({"batch": n, "task_ids": [s["task_id"] for s in batch]}, f)
     print(json.dumps({"shard": shard_name, "total": len(specs), "already_done": len(specs) - len(todo),
                       "prepared": len(todo), "batches": (len(todo) + BATCH_SIZE - 1) // BATCH_SIZE,
-                      "card_sha": CARD_SHA}))
+                      "card_sha": CARD_SHA,
+                      "tkc_bin_sha": PIN.sha256 if PIN else tkc_pin.bin_sha(TKC)}))   # 131.39
 
 
 def render_expected(val):
@@ -254,6 +262,7 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
             "regen": {
                 "syntax_version": "v0.4-2.8.0",
                 "card_sha": CARD_SHA,
+                "tkc_bin_sha": tkc_pin.bin_sha(TKC),   # 131.39: sha256 of the binary that judged this record
                 "task_type": spec.get("task_type", "full_program"),
                 "category": spec.get("category"),
                 "difficulty": spec.get("difficulty"),
@@ -315,7 +324,8 @@ def cmd_validate(args):
             manifest.stamp(task_id, rec_path,
                            extra={"id": record["id"], "category": spec.get("category"),
                                   "task_type": spec.get("task_type"),
-                                  "difficulty": spec.get("difficulty"), "shard": shard_name})
+                                  "difficulty": spec.get("difficulty"), "shard": shard_name,
+                                  "tkc_bin_sha": record["regen"].get("tkc_bin_sha")})   # 131.39
             append_ledger(args.outdir, shard_name,
                           {"task_id": task_id, "status": "accepted", "reason": None,
                            "attempts": spec.get("_attempts", 1), "ts": int(time.time())})
@@ -338,7 +348,8 @@ def cmd_validate(args):
         # processed outputs are archived so a re-run doesn't double-count
         os.rename(os.path.join(gen_dir, fn), os.path.join(gen_dir, fn + ".done"))
     print(json.dumps({"shard": shard_name, "accepted": accepted, "rejected": rejected,
-                      "skipped_already_accepted": skipped}))
+                      "skipped_already_accepted": skipped,
+                      "tkc_bin_sha": PIN.sha256 if PIN else tkc_pin.bin_sha(TKC)}))
 
 
 def cmd_stats(args):
@@ -377,7 +388,15 @@ def main():
     ap.add_argument("--embed-card", action="store_true",
                     help="embed the syntax card in every prompt (default: task-only; workers read the card once per batch)")
     args = ap.parse_args()
-    {"prepare": cmd_prepare, "validate": cmd_validate, "stats": cmd_stats}[args.cmd](args)
+    global PIN
+    if args.cmd != "stats":
+        # 131.39: one private copy for the whole run; stats never execs tkc
+        PIN = tkc_pin.pin().install(sys.modules[__name__], validate, metrics, idiom_judge)
+    try:
+        {"prepare": cmd_prepare, "validate": cmd_validate, "stats": cmd_stats}[args.cmd](args)
+    finally:
+        if PIN:
+            PIN.close()
 
 
 if __name__ == "__main__":

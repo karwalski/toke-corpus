@@ -18,8 +18,11 @@ process; `proxy_tokens` is None when the tokenizer cannot be loaded.
 import json, os, subprocess, sys
 
 import idiom_judge
+import tkc_pin  # (131.39)
 
-TKC = os.environ.get("TKC", "/Users/matthew.watt/tk/toke/tkc")
+# 131.39: the pinned private copy when a harness set $TOKE_TKC_PIN, else $TKC,
+# else the symlink. Every tkc-running function also takes an explicit `tkc=`.
+TKC = tkc_pin.default_tkc()
 CONTROL = {"IF_STMT", "LOOP_STMT", "MATCH_STMT"}
 PATTERNS_DIR = os.environ.get("TOKE_PATTERNS_DIR",
                               os.path.expanduser("~/tk/toke/scripts/patterns"))
@@ -32,16 +35,17 @@ BUDGET_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "freeze",
 _budget = None
 
 
-def _run(args, timeout=30):
+def _run(args, timeout=30, tkc=None):
+    """`tkc`: binary to exec (default: module TKC = the pinned copy when set)."""
     try:
-        return subprocess.run([TKC] + args, capture_output=True, text=True,
+        return subprocess.run([str(tkc or TKC)] + args, capture_output=True, text=True,
                               errors="replace", timeout=timeout)
     except subprocess.TimeoutExpired:
         return None
 
 
-def dump_ast(path):
-    r = _run([path, "--dump-ast"])
+def dump_ast(path, tkc=None):
+    r = _run([path, "--dump-ast"], tkc=tkc)
     if not r or r.returncode != 0:
         return None
     try:
@@ -50,18 +54,18 @@ def dump_ast(path):
         return None
 
 
-def min_form(path):
-    r = _run([path, "--min"])
+def min_form(path, tkc=None):
+    r = _run([path, "--min"], tkc=tkc)
     return r.stdout.strip() if r and r.returncode == 0 else None
 
 
-def lint(path, src=None):
+def lint(path, src=None, tkc=None):
     """Diagnostics from --lint --diag-json as dicts {rule, severity, message,
     line, span, fix} (empty = clean). Diagnostics inside a single_function
     harness stub prefix (`m=harness;` + stub imports/context stubs) are dropped:
     the stub imports `io`/`s` unconditionally, so their `unused-import` says
     nothing about the record (131.9 found it on 74/200 records)."""
-    r = _run([path, "--lint", "--diag-json"])
+    r = _run([path, "--lint", "--diag-json"], tkc=tkc)
     if not r:
         return []
     diags = idiom_judge.parse_diag_lines(r.stdout)
@@ -196,11 +200,12 @@ def _func_name(fn_node):
     return None
 
 
-def analyse(path, src=None):
+def analyse(path, src=None, tkc=None):
     """Per-file structural metrics. Returns None when the AST is unavailable
     (caller should have compile-checked first). `src`: the file's text, if the
-    caller already has it (saves a read for the stub-prefix check)."""
-    ast = dump_ast(path)
+    caller already has it (saves a read for the stub-prefix check). `tkc`: binary
+    to exec (131.39; default the module TKC, i.e. the pinned copy when set)."""
+    ast = dump_ast(path, tkc=tkc)
     if ast is None:
         return None
     funcs = []
@@ -215,8 +220,8 @@ def analyse(path, src=None):
             walk(c)
 
     walk(ast)
-    mn = min_form(path)
-    li = lint(path, src)
+    mn = min_form(path, tkc=tkc)
+    li = lint(path, src, tkc=tkc)
     return {
         "func_count": len(funcs),
         "functions": funcs,
@@ -231,5 +236,9 @@ def analyse(path, src=None):
 
 
 if __name__ == "__main__":
-    for p in sys.argv[1:]:
-        print(p, json.dumps(analyse(p), indent=1))
+    with tkc_pin.pin() as pinned:                       # 131.39
+        for p in sys.argv[1:]:
+            m = analyse(p, tkc=pinned.argv0)
+            if m is not None:
+                m["tkc_bin_sha"] = pinned.sha256
+            print(p, json.dumps(m, indent=1))

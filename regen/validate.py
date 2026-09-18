@@ -11,7 +11,11 @@ Steps:
 """
 import argparse, json, re, subprocess, sys, os, tempfile
 
-TKC = "/Users/matthew.watt/tk/toke/tkc"
+import tkc_pin  # noqa: E402  (131.39)
+
+# 131.39: the pinned private copy when TOKE_TKC_PIN is set (a parent harness
+# pinned once), else $TKC, else the ~/tk/toke/tkc symlink. Entry points pin.
+TKC = tkc_pin.default_tkc()
 
 
 def signature_conforms(spec, src):
@@ -163,6 +167,7 @@ def main():
     spec = json.load(open(args.task_json))
     src = open(args.source).read()
 
+    pinned = tkc_pin.pin().install(sys.modules[__name__])   # 131.39
     rc, codes, diag_excerpt = tkc_check(args.source)
     sig_ok, sig_detail = signature_conforms(spec, src)
     record = {
@@ -185,6 +190,7 @@ def main():
             "signature_ok": sig_ok,
             "signature_detail": sig_detail,
             "runtime": None,
+            "tkc_bin_sha": pinned.sha256,   # 131.39
         },
     }
 
@@ -202,6 +208,7 @@ def main():
 
     json.dump(record, sys.stdout)
     print()
+    pinned.close()
 
 
 if __name__ == "__main__":

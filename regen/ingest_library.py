@@ -39,11 +39,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import run_shard                                  # noqa: E402
 import manifest_tool                              # noqa: E402  (131.35)
+import validate                                   # noqa: E402  (131.39)
+import idiom_judge                                # noqa: E402  (131.39)
+import metrics                                    # noqa: E402  (131.39)
+import tkc_pin                                    # noqa: E402  (131.39)
 
 CORPUS = os.path.expanduser("~/tk/toke-corpus/corpus/regen_v04")
 TOKE_REPO = os.path.expanduser("~/tk/toke")
 CATALOGUE = os.path.join(TOKE_REPO, "patterns", "catalogue.json")
 GATE_ORDER = ["compile", "build", "tests", "idiom", "structure", "pattern", "lint"]  # pattern: 131.10
+PIN = None   # 131.39: set by cmd_run; bank() stamps its sha (bank_*.py callers may pass none)
 
 
 def _sha_file(path, n=None):
@@ -111,6 +116,8 @@ def bank(row, spec, outdir, shas, shard_name, manifest=None):
         "wave": "library", "story": "131.18", "ts": now,
         "prev_sha256": row["_src_sha256"],
         "card_sha": run_shard.CARD_SHA, "catalogue_sha": cat_sha, "tkc_sha": tkc_sha,
+        # 131.39: sha256 of the pinned binary that ran the gates (tkc_sha = git HEAD, kept)
+        "tkc_bin_sha": PIN.sha256 if PIN else rg.get("tkc_bin_sha"),
         "patterns_fixed": [], "lint_violations": rg.get("lint_warnings") or 0,
         "lint_exempt": list(rg.get("lint_exempt") or []),
         "proxy_tokens_before": None, "proxy_tokens_after": rg.get("proxy_tokens"),
@@ -159,28 +166,33 @@ def cmd_run(args):
     workdir = os.path.join(args.outdir, "work", "library_131")
     os.makedirs(workdir, exist_ok=True)
     shas = tool_shas()
+    global PIN
+    # 131.39: pin before the pool starts; workers reuse the copy via $TOKE_TKC_PIN
+    PIN = tkc_pin.pin().install(sys.modules[__name__], run_shard, validate, metrics, idiom_judge)
     mode = "BANK" if args.bank else "dry-run"
     print(f"{mode}: {len(specs)} programs, {args.workers} workers, ledger {ledger_path}, "
-          f"tkc_sha={shas[0]} catalogue_sha={shas[1]}", file=sys.stderr)
+          f"tkc_sha={shas[0]} catalogue_sha={shas[1]} tkc_bin_sha={PIN.sha256[:12]}", file=sys.stderr)
     t0 = time.time()
     n = ok = 0
     jobs = [(s, workdir, args.timeout) for s in specs]
     by_id = {s["task_id"]: s for s in specs}
     manifest = manifest_tool.Manifest(os.path.join(args.outdir, "MANIFEST.jsonl")) if args.bank else None
-    with multiprocessing.Pool(args.workers) as pool, open(ledger_path, "a") as led:
+    with PIN, multiprocessing.Pool(args.workers) as pool, open(ledger_path, "a") as led:
         for row in pool.imap_unordered(ingest_one, jobs, chunksize=4):
             n += 1
+            row["tkc_bin_sha"] = PIN.sha256   # 131.39
             ok += bool(row["ok"])
             spec = by_id[row["task_id"]]
             if args.bank:
                 if row["ok"]:
                     rec_sha = bank(row, spec, args.outdir, shas, shard_name, manifest)
                     entry = {"task_id": row["task_id"], "status": "accepted", "reason": None,
-                             "attempts": 1, "record_sha256": rec_sha, "ts": int(time.time())}
+                             "attempts": 1, "record_sha256": rec_sha, "ts": int(time.time()),
+                             "tkc_bin_sha": PIN.sha256}
                 else:
                     entry = {"task_id": row["task_id"], "status": "rejected",
                              "reason": row["reason"], "gates": row.get("gates"),
-                             "attempts": 1, "ts": int(time.time())}
+                             "attempts": 1, "ts": int(time.time()), "tkc_bin_sha": PIN.sha256}
                 led.write(json.dumps(entry) + "\n")
             else:
                 row.pop("_record", None)
@@ -190,7 +202,8 @@ def cmd_run(args):
             if n % 200 == 0:
                 print(f"  {n}/{len(specs)} ({ok} pass) {time.time() - t0:.0f}s", file=sys.stderr)
     print(json.dumps({"mode": mode, "processed": n, "pass": ok, "fail": n - ok,
-                      "runtime_s": round(time.time() - t0, 1), "ledger": ledger_path}))
+                      "runtime_s": round(time.time() - t0, 1), "ledger": ledger_path,
+                      "tkc_bin_sha": PIN.sha256, "tkc_version": PIN.version}))
 
 
 def cmd_report(args):

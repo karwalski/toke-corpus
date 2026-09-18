@@ -17,7 +17,9 @@ from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-TKC = "/Users/matthew.watt/tk/toke/tkc"
+import tkc_pin  # noqa: E402  (131.39)
+
+TKC = tkc_pin.default_tkc()   # 131.39: pinned copy in workers via $TOKE_TKC_PIN
 CORPUS = os.path.expanduser("~/tk/toke-corpus/corpus/regen_v04")
 
 
@@ -92,10 +94,12 @@ def main():
     print(f"minifying regen={len(regen_items)} (cached {len(regen_meta) - len(regen_items)}) "
           f"library={len(lib_items)}", file=sys.stderr)
     unminified = []
-    with multiprocessing.Pool(args.workers) as pool, open(cache_path, "a") as cf:
+    pinned = tkc_pin.pin().install(sys.modules[__name__])   # 131.39: before the pool forks/spawns
+    with pinned, multiprocessing.Pool(args.workers) as pool, open(cache_path, "a") as cf:
         for tid, src_sha, msha in pool.imap_unordered(_job, regen_items, chunksize=16):
             regen_meta[tid]["min_sha"] = msha
-            cf.write(json.dumps({"task_id": tid, "src_sha": src_sha, "min_sha": msha}) + "\n")
+            cf.write(json.dumps({"task_id": tid, "src_sha": src_sha, "min_sha": msha,
+                                 "tkc_bin_sha": pinned.sha256}) + "\n")
             if msha is None:
                 unminified.append(tid)
         for tid, _, msha in pool.imap_unordered(_job, lib_items, chunksize=16):
@@ -123,6 +127,7 @@ def main():
         "regen_internal_dup_groups": regen_dups,
         "regen_internal_dup_records": sum(len(g) - 1 for g in regen_dups),
         "runtime_s": round(time.time() - t0, 1),
+        "tkc_bin_sha": pinned.sha256, "tkc_version": pinned.version,   # 131.39
     }
     path = os.path.join(audit_dir, "library_dedup_131.json")
     with open(path, "w") as f:

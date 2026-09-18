@@ -26,6 +26,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import idiom_judge                                # noqa: E402
 import metrics                                    # noqa: E402
+import tkc_pin                                    # noqa: E402  (131.39)
 
 CORPUS = os.path.expanduser("~/tk/toke-corpus/corpus/regen_v04")
 BUDGET_PATH = os.path.join(HERE, "freeze", "proxy_budget_v04.json")
@@ -132,27 +133,32 @@ def cmd_run(args):
     if args.limit:
         jobs = jobs[:args.limit]
     t0 = time.time()
-    tkc_sha = _sha_file(idiom_judge.TKC)
+    # 131.39: every worker execs one private copy of tkc (was: the symlink, which
+    # a concurrent `make` swapped under the 131.10 sweep -> three build shas)
+    pinned = tkc_pin.pin().install(sys.modules[__name__], idiom_judge, metrics)
+    tkc_sha = pinned.sha256
     print(f"rescoring {len(jobs)} records ({len(done)} already done), {args.workers} workers, "
-          f"tkc sha256 {tkc_sha[:12]}", file=sys.stderr)
+          f"tkc {pinned.version} sha256 {tkc_sha[:12]} (pinned copy {pinned.path})", file=sys.stderr)
     n = fail = 0
-    with multiprocessing.Pool(args.workers, initializer=_init_worker) as pool, \
+    with pinned, multiprocessing.Pool(args.workers, initializer=_init_worker) as pool, \
             open(ledger_path, "a") as led:
         for row in pool.imap_unordered(rescore_one, jobs, chunksize=16):
-            row["tkc_sha256"] = tkc_sha
+            row["tkc_sha256"] = tkc_sha       # kept: pre-131.39 column name
+            row["tkc_bin_sha"] = tkc_sha      # 131.39: sha256 of the pinned binary
             led.write(json.dumps(row) + "\n")
             led.flush()
             n += 1
             fail += bool(row.get("hard_fail_net"))
             if n % 1000 == 0:
                 print(f"  {n}/{len(jobs)} ({fail} hard-fail) {time.time() - t0:.0f}s", file=sys.stderr)
-    tkc_sha_end = _sha_file(idiom_judge.TKC) if os.path.exists(idiom_judge.TKC) else None
+    # the SOURCE binary may have been rebuilt meanwhile; every row was scored on the pinned copy
+    tkc_sha_end = tkc_pin.bin_sha(pinned.source)
     if tkc_sha_end != tkc_sha:
-        # a concurrent `make` in ~/tk/toke swaps the binary; rows carry the start sha
-        print(f"WARNING: tkc changed during the sweep ({tkc_sha[:12]} -> {(tkc_sha_end or 'missing')[:12]}); "
-              f"re-run to score everything on one binary", file=sys.stderr)
+        print(f"note: {pinned.source} changed during the sweep ({tkc_sha[:12]} -> {(tkc_sha_end or 'missing')[:12]}); "
+              f"all rows were scored on the pinned copy {tkc_sha[:12]}", file=sys.stderr)
     print(json.dumps({"rescored": n, "hard_fail_net": fail, "elapsed_s": round(time.time() - t0, 1),
-                      "ledger": ledger_path, "tkc_sha256": tkc_sha, "tkc_sha256_end": tkc_sha_end}))
+                      "ledger": ledger_path, "tkc_sha256": tkc_sha, "tkc_sha256_end": tkc_sha_end,
+                      "tkc_bin_sha": tkc_sha, "tkc_version": pinned.version}))
 
 
 # ---------------------------------------------------------------- report ---
@@ -297,6 +303,8 @@ def cmd_report(args):
         "generated": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "ledger": ledger_path,
         "tkc_sha256": sorted({r.get("tkc_sha256") for r in rows if r.get("tkc_sha256")}),
+        # 131.39: pinned-binary shas the rows carry (pre-131.39 rows have none)
+        "tkc_bin_sha": sorted({r.get("tkc_bin_sha") for r in rows if r.get("tkc_bin_sha")}),
         "idiom_floor": floor,
         "factor": budget.get("factor"),
         "budget_file": BUDGET_PATH,

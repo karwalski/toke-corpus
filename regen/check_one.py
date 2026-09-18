@@ -15,7 +15,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from assemble import assemble                      # noqa: E402
 from validate import tkc_check, signature_conforms  # noqa: E402
-from run_shard import run_test_cases, TKC          # noqa: E402
+from run_shard import run_test_cases               # noqa: E402
+import validate                                    # noqa: E402  (131.39)
+import tkc_pin                                     # noqa: E402  (131.39)
 
 
 def main():
@@ -28,6 +30,9 @@ def main():
     raw = open(os.path.join(args.workdir, "gen", "out_" + args.task_id + ".tk")).read()
     src = assemble(spec, raw)
 
+    # 131.39: exec a private copy of tkc so a `make` mid-check cannot swap the compiler
+    pinned = tkc_pin.pin().install(validate)
+    TKC = pinned.argv0
     with tempfile.NamedTemporaryFile("w", suffix=".tk", delete=False) as f:
         f.write(src)
         tkpath = f.name
@@ -64,6 +69,7 @@ def main():
     finally:
         if os.path.exists(tkpath):
             os.unlink(tkpath)
+        pinned.close()
 
 
 if __name__ == "__main__":
