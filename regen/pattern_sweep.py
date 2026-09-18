@@ -347,8 +347,7 @@ def sweep_one(job):
             if os.path.exists(tkpath):
                 os.unlink(tkpath)
         stub_n = idiom_judge.stub_prefix_len(src)
-        stripped = idiom_judge.strip_stub_diags(raw, src)
-        diags = idiom_judge.suppress_linter_fps(stripped, src)
+        diags = idiom_judge.strip_stub_diags(raw, src)
         # exemption rule sets
         mandate = idiom_judge.style_mandate(spec) if spec else None
         row["style_mandate"] = mandate
@@ -364,10 +363,6 @@ def sweep_one(job):
             if rule not in idiom_judge.PATTERN_RULES:
                 continue
             pid, form = choose_pattern(rule, d, src)
-            if d.get("suppressed"):
-                exemptions.append({"rule": rule, "reason": "127.33-expr-if-branch-value",
-                                   "span": d.get("span"), "pattern_id": pid})
-                continue
             if rule == "discarded-value-result" and vec_handle_receiver(d, src):
                 exemptions.append({"rule": rule, "reason": "suspect-fp-vec-handle-receiver",
                                    "span": d.get("span"), "pattern_id": pid})

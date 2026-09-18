@@ -189,43 +189,42 @@ def test_validate_one_gates_rejects_pattern_warning_and_records_fields(tmp_path)
         assert isinstance(rec3["regen"]["proxy_tokens"], int) and rec3["regen"]["proxy_tokens"] > 0
 
 
-# ------------------------------------------ linter false-positive guard ---
-def test_expr_if_branch_value_is_not_a_discarded_result():
+# ----------------------- 127.33: expression-if branch value is a value ---
+# tkc < 127.33 reported `discarded-value-result` on the tail call of an
+# expression-if / mt-arm branch (48 hits / 31 records in the 131.10 rescore) and
+# the judge carried a text-scanning suppressor (`suppress_linter_fps`). lint.c
+# is fixed and the suppressor is gone; these pin the compiler behaviour the
+# corpus hard gate relies on.
+@pytest.mark.skipif(not HAVE_TKC, reason="tkc not built")
+def test_tkc_expr_if_branch_value_is_not_a_discarded_result(tmp_path):
     src = ('m=demo;\nf=g(out:@i64;v:i64):@i64{\n  let o=mut.out;\n'
            '  o=if(v>2){o.append(v)}el{o};\n'
            '  let y=if(v>1){o.push(9)}el if(v>0){o}el{o.append(1)};\n'
            '  if(v>5){o.append(v)};\n'
-           '  <if(v>0){y.append(v)}el{y}\n};\n')
-    def off(needle):
-        return src.index(needle)
-    assert ij.is_expr_if_branch_value(src, off("o.append(v)}el{o}"))
-    assert ij.is_expr_if_branch_value(src, off("o.push(9)"))
-    assert ij.is_expr_if_branch_value(src, off("o.append(1)"))          # `el{` after `el if(`
-    assert ij.is_expr_if_branch_value(src, off("y.append(v)"))          # `<if(`
-    assert not ij.is_expr_if_branch_value(src, off("o.append(v)};"))    # statement-if: discarded
-    # multi-statement branch: the call is the block's LAST expression -> value
-    m = ('m=x;f=h(a:@i64;i:i64):@i64{\n  let m=mut.@();\n  let k=mut.i;\n'
-         '  m=if(k<2){let v=a.get(k);k=k+1;m.append(v)}el{m.append(0);m};\n  <m\n};\n')
-    assert ij.is_expr_if_branch_value(m, m.index("m.append(v)"))
-    assert not ij.is_expr_if_branch_value(m, m.index("m.append(0)"))    # followed by `;` -> discarded
-    diags = [diag("discarded-value-result", "error", start=off("o.append(v)}el{o}")),
-             diag("discarded-value-result", "error", start=off("o.append(v)};"))]
-    tagged = ij.suppress_linter_fps(diags, src)
-    assert [bool(d.get("suppressed")) for d in tagged] == [True, False]
-    assert ij.hard_gate(tagged) == [tagged[1]]
-    assert ij.score(src, diags)[0] == pytest.approx(0.80)
-
-
-@pytest.mark.skipif(not HAVE_TKC, reason="tkc not built")
-def test_tkc_expr_if_false_positive_is_suppressed_end_to_end(tmp_path):
-    src = ('m=demo;\ni=io:std.io;\nf=main():i64{\n  let out=mut.@(1;2);\n  let v=3;\n'
-           '  out=if(v>2){out.append(v)}el{out};\n  io.println("\\(out.len)");\n  <0\n};\n')
-    p = tmp_path / "fp.tk"
+           '  <if(v>0){y.append(v)}el{y}\n};\n'
+           'f=h(a:@i64;i:i64):@i64{\n  let m=mut.@(0);\n  let k=mut.i;\n'
+           '  m=if(k<2){let v=a.get(k);k=k+1;m.append(v)}el{m.append(0);m};\n  <m\n};\n')
+    p = tmp_path / "expr_if.tk"
     p.write_text(src)
     li = metrics.lint(str(p))
     dv = [d for d in li if d["rule"] == "discarded-value-result"]
-    if not dv:
-        pytest.skip("lint.c fixed: rule no longer fires on expression-if branch values — remove the guard")
-    assert all(d.get("suppressed") for d in dv)
-    assert metrics.pattern_violations(li)[0].get("suppressed")
+    # bind / assign / return / `el if` chain / multi-statement tail are values;
+    # only the statement-form if (line 6) and the non-tail call (line 12) fire
+    assert sorted(d["line"] for d in dv) == [6, 12]
+    assert not any(d.get("suppressed") for d in li)
+    gate = ij.hard_gate(li)
+    assert sorted((d["rule"], d["line"]) for d in gate) == \
+        [("discarded-value-result", 6), ("discarded-value-result", 12)]
+
+
+@pytest.mark.skipif(not HAVE_TKC, reason="tkc not built")
+def test_tkc_expr_if_branch_value_passes_hard_gate_end_to_end(tmp_path):
+    src = ('m=demo;\ni=io:std.io;\nf=main():i64{\n  let out=mut.@(1;2);\n'
+           '  out=if(out.len>1){out.append(3)}el{out};\n  io.println("\\(out.len)");\n  <0\n};\n')
+    p = tmp_path / "fp.tk"
+    p.write_text(src)
+    li = metrics.lint(str(p))
+    assert [d for d in li if d["rule"] == "discarded-value-result"] == []
+    assert metrics.pattern_violations(li) == []
     assert ij.hard_gate(li) == []
+    assert ij.score(src, li)[0] == pytest.approx(1.0)

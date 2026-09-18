@@ -71,7 +71,7 @@ def rescore_one(job):
             if os.path.exists(tkpath):
                 os.unlink(tkpath)
         stub_n = idiom_judge.stub_prefix_len(src)
-        diags = idiom_judge.suppress_linter_fps(idiom_judge.strip_stub_diags(raw, src), src)
+        diags = idiom_judge.strip_stub_diags(raw, src)
         row["stub_diags_dropped"] = len(raw) - len(diags)
         row["stub_unused_import"] = sum(1 for d in raw if d.get("rule") == "unused-import"
                                         and idiom_judge.is_stub_import(d, src, stub_n))
@@ -374,8 +374,8 @@ def write_md(summary, budget, rows):
              "`out=if(c){out.append(v)}el{out}`, `let y=if(c){x.push(9)}el{x}`, `<if(c){r.append(v)}el{r}`, "
              "`m=if(t){let v=a.get(k);k=k+1;m.append(v)}el{m}` — "
              "where the value is the branch's value, not discarded (the programs run correctly). "
-             "`idiom_judge.suppress_linter_fps` tags those hits `suppressed` (not scored, not gated) until "
-             "`src/lint.c` is fixed; the counts above are the suppressed hits. Needs a 127/131 story.\n")
+             "fixed in tkc by 127.33 (`src/lint.c`: a tail call of an expression-if/mt branch is the branch value); "
+             "the counts above are the hits the pre-fix judge suppressed (0 on a post-fix re-run).\n")
 
     L.append("## Hard-gate failures by rule (records)\n")
     L.append("| rule | severity | penalty | records hit | total hits | fixable hits | hard-fail gross | "

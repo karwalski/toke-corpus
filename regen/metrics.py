@@ -75,28 +75,23 @@ def lint(path, src=None, tkc=None):
         except OSError:
             src = ""
     out = []
-    diags = idiom_judge.suppress_linter_fps(idiom_judge.strip_stub_diags(diags, src), src)
+    diags = idiom_judge.strip_stub_diags(diags, src)
     for d in diags:
         e = {"rule": d.get("rule") or d.get("code"),
              "severity": d.get("severity"), "message": d.get("message"),
              "line": (d.get("pos") or {}).get("line"),
              "span": d.get("span"), "fix": d.get("fix")}
-        if d.get("suppressed"):
-            e["suppressed"] = d["suppressed"]     # linter FP: not scored, not gated
         out.append(e)
     return out
 
 
 def pattern_violations(diags):
-    """[{rule, severity, line[, suppressed]}] for the 131.9 pattern rules
-    (suppressed linter false positives included, tagged)."""
+    """[{rule, severity, line}] for the 131.9 pattern rules."""
     out = []
     for d in diags:
         if d.get("rule") not in idiom_judge.PATTERN_RULES:
             continue
         v = {"rule": d["rule"], "severity": d.get("severity"), "line": d.get("line")}
-        if d.get("suppressed"):
-            v["suppressed"] = d["suppressed"]
         out.append(v)
     return out
 

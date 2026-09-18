@@ -141,22 +141,14 @@ def strip_stub_diags(diags: list[dict], src: str) -> list[dict]:
 
 
 def pattern_hits(diags: list[dict]) -> list[dict]:
-    """The subset of diags that are 131.9 pattern rules (suppressed linter
-    false positives excluded — see suppress_linter_fps)."""
-    return [d for d in diags if d.get("rule") in PATTERN_RULES and not d.get("suppressed")]
+    """The subset of diags that are 131.9 pattern rules."""
+    return [d for d in diags if d.get("rule") in PATTERN_RULES]
 
 
-# ---------------------------------------------- linter false positives ---
-# tkc 2.8.0 @ 131.9 reports `discarded-value-result` on a value-returning call
-# that is the sole expression of an expression-`if` branch:
-#     out=if(c){out.append(v)}el{out};   let y=if(c){x.push(9)}el{x};   <if(c){r.append(v)}el{r}
-# The value is the branch's value, not discarded (the program runs correctly).
-# Until src/lint.c is fixed the judge tags those hits `suppressed` (kept in
-# the diag list, excluded from the score and the hard gate, counted by
-# RESCORE_131). Remove this block when the lint rule is fixed.
-EXPR_IF_FP_TAG = "expr-if-branch-value (131.9 lint false positive)"
-
-
+# ------------------------------------------------ source text helpers ---
+# String-literal-aware scanning used by pattern_sweep's span analysis.
+# (127.33: the expression-if linter-FP suppressor that lived here is gone —
+# tkc's discarded-value-result no longer fires on a branch-value tail call.)
 def _string_mask(src: str) -> list[bool]:
     """mask[i] True when src[i] is inside a string literal (incl. quotes)."""
     mask = [False] * len(src)
@@ -197,120 +189,6 @@ def _match_back(src: str, mask: list[bool], close_i: int) -> int:
             if depth == 0:
                 return i
     return -1
-
-
-def _enclosing_block(src: str, mask: list[bool], offset: int) -> int:
-    """Index of the `{` opening the block that directly contains offset (the
-    statement at offset must start the block or follow a `;`), or -1."""
-    p = _prev_code(src, mask, offset)
-    if p < 0 or src[p] not in "{;":
-        return -1
-    depth = 0
-    for i in range(offset - 1, -1, -1):
-        if mask[i]:
-            continue
-        c = src[i]
-        if c in ")}]":
-            depth += 1
-        elif c in "({[":
-            if depth == 0:
-                return i if c == "{" else -1
-            depth -= 1
-    return -1
-
-
-def _is_last_expr_in_block(src: str, mask: list[bool], open_i: int, offset: int) -> bool:
-    """The expression starting at offset runs to the block's closing `}` with
-    no further top-level `;` — i.e. it is the block's value."""
-    depth = 0
-    for i in range(offset, len(src)):
-        if mask[i]:
-            continue
-        c = src[i]
-        if c in "({[":
-            depth += 1
-        elif c in ")}]":
-            if depth == 0:
-                return c == "}" and _match_back(src, mask, i) == open_i
-            depth -= 1
-        elif c == ";" and depth == 0:
-            return False
-    return False
-
-
-def _if_chain_head(src: str, mask: list[bool], open_i: int) -> int | None:
-    """open_i is the `{` of an if/el-if/el branch: return the index of the
-    head `if` keyword of the chain, or None if this is not an if branch."""
-    i = open_i
-    for _ in range(64):
-        p = _prev_code(src, mask, i)
-        if p < 0:
-            return None
-        if src[p] == ")":                       # `if(cond){` or `el if(cond){`
-            lp = _match_back(src, mask, p)
-            if lp < 0:
-                return None
-            k = _prev_code(src, mask, lp)
-            if k < 1 or src[k - 1:k + 1] != "if" or (k >= 2 and (src[k - 2].isalnum() or src[k - 2] == "_")):
-                return None
-            q = _prev_code(src, mask, k - 1)
-            if q >= 1 and src[q - 1:q + 1] == "el" and not (q >= 2 and (src[q - 2].isalnum() or src[q - 2] == "_")):
-                # `el if(...)`: the preceding `}` closes the previous branch
-                r = _prev_code(src, mask, q - 1)
-                if r < 0 or src[r] != "}":
-                    return None
-                i = _match_back(src, mask, r)
-                if i < 0:
-                    return None
-                continue
-            return k - 1
-        if p >= 1 and src[p - 1:p + 1] == "el" and not (p >= 2 and (src[p - 2].isalnum() or src[p - 2] == "_")):
-            r = _prev_code(src, mask, p - 1)     # `el{`: previous branch's `}`
-            if r < 0 or src[r] != "}":
-                return None
-            i = _match_back(src, mask, r)
-            if i < 0:
-                return None
-            continue
-        return None
-    return None
-
-
-def is_expr_if_branch_value(src: str, offset: int) -> bool:
-    """True when the statement starting at byte `offset` is the LAST
-    expression (the value) of a branch of an `if` that sits in expression
-    position — after `=`, `<`, `(` or `,`: `x=if`, `let y=if`, `<if`, `f(if`.
-    Earlier statements in the branch (`{let v=…;i=i+1;merged.append(v)}`) are
-    allowed; a `;` after the call means it really is discarded."""
-    b = src.encode("utf-8")
-    try:
-        offset = len(b[:offset].decode("utf-8"))   # byte -> char offset
-    except UnicodeDecodeError:
-        return False
-    mask = _string_mask(src)
-    open_i = _enclosing_block(src, mask, offset)
-    if open_i < 0 or not _is_last_expr_in_block(src, mask, open_i, offset):
-        return False
-    head = _if_chain_head(src, mask, open_i)
-    if head is None:
-        return False
-    q = _prev_code(src, mask, head)
-    return q >= 0 and src[q] in "=<(,"
-
-
-def suppress_linter_fps(diags: list[dict], src: str) -> list[dict]:
-    """Tag known linter false positives with `suppressed` (kept in the list).
-    Currently: discarded-value-result on an expression-if branch value."""
-    out = []
-    for d in diags:
-        if d.get("rule") == "discarded-value-result" and not d.get("suppressed"):
-            start = (d.get("span") or {}).get("start")
-            if start is None:
-                start = (d.get("pos") or {}).get("offset")
-            if start is not None and is_expr_if_branch_value(src, start):
-                d = dict(d, suppressed=EXPR_IF_FP_TAG)
-        out.append(d)
-    return out
 
 
 def style_mandate(spec: dict) -> str | None:
@@ -369,7 +247,7 @@ def score(toke_src: str, diags: list[dict] | None = None) -> tuple[float, list[s
     in a harness stub prefix are ignored either way."""
     if diags is None:
         diags = lint_diags(src=toke_src)
-    diags = suppress_linter_fps(strip_stub_diags(diags, toke_src), toke_src)
+    diags = strip_stub_diags(diags, toke_src)
     counts: dict[str, int] = {}
     for d in pattern_hits(diags):
         counts[d["rule"]] = counts.get(d["rule"], 0) + 1
@@ -451,6 +329,6 @@ if __name__ == "__main__":
         src = open(path, encoding="utf-8", errors="replace").read()
         s, notes = score(src)
         o, onotes = legacy_score(src)
-        gate = hard_gate(suppress_linter_fps(strip_stub_diags(lint_diags(path=path), src), src))
+        gate = hard_gate(strip_stub_diags(lint_diags(path=path), src))
         print(f"{path}: idiom={s:.2f} {'PASS' if s >= IDIOM_FLOOR else 'FAIL'} {notes} "
               f"| legacy={o:.2f} {onotes} | gate={'FAIL ' + violation_summary(gate) if gate else 'pass'}")
