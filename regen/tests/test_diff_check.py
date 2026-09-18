@@ -8,6 +8,7 @@ import pytest
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 import diff_check as dc  # noqa: E402
+import tkc_pin           # noqa: E402  (131.39)
 
 HAVE_TKC = os.path.exists(dc.TKC)
 
@@ -191,6 +192,7 @@ def test_end_to_end_identical_and_divergent():
     with tempfile.TemporaryDirectory(prefix="dc_e2e_") as td:
         r = dc.diff_check(ORIG, SAME, SF_SPEC, SF_SPEC["task_id"], td, A_TEST)
         assert r["verdict"] == "identical", json.dumps(r, indent=1)
+        assert r["tkc_bin_sha"] == tkc_pin.bin_sha(dc.TKC) and len(r["tkc_bin_sha"]) == 64   # 131.39
         assert r["checks"]["spec_cases"]["identical"] and r["checks"]["spec_cases"]["mode"] == "driver"
         gen = r["checks"]["generated"]
         assert gen["identical"] and gen["reached"] == dc.N_GENERATED and gen["cand_exit"] == 0

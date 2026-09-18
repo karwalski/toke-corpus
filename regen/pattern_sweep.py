@@ -59,6 +59,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import idiom_judge                                # noqa: E402
 import metrics                                    # noqa: E402
+import tkc_pin                                    # noqa: E402  (131.39)
 
 CORPUS = os.path.expanduser("~/tk/toke-corpus/corpus/regen_v04")
 TOKE_ROOT = os.environ.get("TOKE_ROOT", os.path.expanduser("~/tk/toke"))
@@ -544,19 +545,24 @@ def cmd_run(args):
     jobs = build_jobs(args, done)
     if args.limit:
         jobs = jobs[:args.limit]
-    tkc_sha = _sha_file(idiom_judge.TKC)
+    # 131.39: every worker execs one private copy of tkc (was: the symlink,
+    # which a concurrent `make` swapped under the 131.10 sweep -> three build shas)
+    pinned = tkc_pin.pin().install(sys.modules[__name__], idiom_judge, metrics)
+    tkc_sha = pinned.sha256
     cat = load_catalogue(args.catalogue)
     opts = {"tmpdir": tmpdir, "catalogue": args.catalogue, "thresholds": thresholds_of(args),
             "concat_fix_armed": bool(args.concat_fix_armed), "preform_exempt": bool(args.preform_exempt)}
     print(f"sweeping {len(jobs)} ({len(done)} already done), {args.workers} workers, "
-          f"tkc sha256 {tkc_sha[:12]}, catalogue {cat['sha']} ({cat['n']} entries)", file=sys.stderr)
+          f"tkc {pinned.version} sha256 {tkc_sha[:12]} (pinned copy {pinned.path}), "
+          f"catalogue {cat['sha']} ({cat['n']} entries)", file=sys.stderr)
     t0 = time.time()
     n = 0
     counts = collections.Counter()
-    with multiprocessing.Pool(args.workers, initializer=_init_worker, initargs=(opts,)) as pool, \
+    with pinned, multiprocessing.Pool(args.workers, initializer=_init_worker, initargs=(opts,)) as pool, \
             open(ledger_path, "a") as led:
         for row in pool.imap_unordered(sweep_one, jobs, chunksize=16):
-            row["tkc_sha256"] = tkc_sha
+            row["tkc_sha256"] = tkc_sha       # kept: pre-131.39 column name
+            row["tkc_bin_sha"] = tkc_sha      # 131.39: sha256 of the pinned binary
             row["catalogue_sha"] = cat["sha"]
             led.write(json.dumps(row) + "\n")
             led.flush()
@@ -564,12 +570,14 @@ def cmd_run(args):
             counts[row["bucket"]] += 1
             if n % 1000 == 0:
                 print(f"  {n}/{len(jobs)} {dict(counts)} {time.time() - t0:.0f}s", file=sys.stderr)
-    tkc_end = _sha_file(idiom_judge.TKC) if os.path.exists(idiom_judge.TKC) else None
+    # the SOURCE binary may have been rebuilt meanwhile; every row was linted on the pinned copy
+    tkc_end = tkc_pin.bin_sha(pinned.source)
     if tkc_end != tkc_sha:
-        print(f"WARNING: tkc changed during the sweep ({tkc_sha[:12]} -> {(tkc_end or 'missing')[:12]})",
-              file=sys.stderr)
+        print(f"note: {pinned.source} changed during the sweep ({tkc_sha[:12]} -> {(tkc_end or 'missing')[:12]}); "
+              f"all rows were linted on the pinned copy {tkc_sha[:12]}", file=sys.stderr)
     print(json.dumps({"swept": n, "buckets": dict(counts), "elapsed_s": round(time.time() - t0, 1),
-                      "ledger": ledger_path, "tkc_sha256": tkc_sha, "tkc_sha256_end": tkc_end}))
+                      "ledger": ledger_path, "tkc_sha256": tkc_sha, "tkc_sha256_end": tkc_end,
+                      "tkc_bin_sha": tkc_sha, "tkc_version": pinned.version}))
 
 
 # ---------------------------------------------------------------- report ---
@@ -774,6 +782,8 @@ def cmd_report(args):
         "ledger": ledger_path,
         "bucket_file": final_path,
         "tkc_sha256": sorted({r.get("tkc_sha256") for r in rows if r.get("tkc_sha256")}),
+        # 131.39: pinned-binary shas the rows carry (one entry = one clean sweep; pre-131.39 rows have none)
+        "tkc_bin_sha": sorted({r.get("tkc_bin_sha") for r in rows if r.get("tkc_bin_sha")}),
         "catalogue_sha": cat["sha"],
         "catalogue_entries": cat["n"],
         "thresholds": thresholds,
@@ -840,7 +850,8 @@ def write_md(S, rows):
     L.append("# PATTERN_SWEEP_131 — corpus + library conformance sweep (story 131.13)\n")
     L.append(f"Generated {S['generated']} · {T['records']:,} rows ({R['records']:,} regen records + "
              f"{Lb['records']:,} library programs) · tkc sha256 "
-             f"{', '.join(s[:12] for s in S['tkc_sha256'])} · catalogue `{S['catalogue_sha']}` "
+             f"{', '.join(s[:12] for s in S['tkc_sha256'])} · pinned tkc_bin_sha "
+             f"{', '.join(s[:12] for s in S.get('tkc_bin_sha') or []) or 'n/a'} · catalogue `{S['catalogue_sha']}` "
              f"({S['catalogue_entries']} entries) · sweep errors {T['errors']}\n")
     L.append("**What this is.** Every frozen record and every library program linted with the real "
              "`tkc --lint --diag-json` pattern rules, each hit mapped to a `patterns/catalogue.json` "

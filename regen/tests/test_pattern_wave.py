@@ -86,8 +86,23 @@ def _row(k):
             "perf_sensitive": k in PERF_SENSITIVE, "bucket": "AGENT"}
 
 
+# 131.39: the modules pin_tkc() rebinds; the fixture restores them after the wave
+_PIN_MODS = tuple(m for m in (pc, pc.validate, pc.metrics, pc.idiom_judge, pc.run_shard, pc.audit,
+                              pc.diff_check, pc._autofix_mod) if m is not None)
+
+
 @pytest.fixture(scope="module")
 def corpus(tmp_path_factory):
+    saved = {m: m.TKC for m in _PIN_MODS}
+    # 131.39: one pinned binary for the whole wave, as every script's main()
+    # does -- a `make` in ~/tk/toke while this runs must not change the judge
+    with pc.pin_tkc() as pinned:
+        yield _build_corpus(tmp_path_factory, pinned)
+    for m, v in saved.items():
+        m.TKC = v
+
+
+def _build_corpus(tmp_path_factory, pinned):
     root = tmp_path_factory.mktemp("wave")
     c = root / "regen_v04"
     (c / "A-CND").mkdir(parents=True)
@@ -109,7 +124,8 @@ def corpus(tmp_path_factory):
     bucket = root / "pattern_sweep.jsonl"
     bucket.write_text("".join(json.dumps(r) + "\n" for r in rows))
     paths = pc.Paths(corpus=str(c), workdir=str(root / "work" / "pattern_131"))
-    return {"root": root, "dir": str(c), "bucket": str(bucket), "paths": paths}
+    assert paths.tkc == pinned.path
+    return {"root": root, "dir": str(c), "bucket": str(bucket), "paths": paths, "pin": pinned}
 
 
 def _write_candidate(paths, k, form):
@@ -170,6 +186,8 @@ def test_wave_end_to_end(corpus):
     assert m["card_sha"] == pc.short(pc.sha256_file(paths.card))
     assert m["catalogue_sha"] == pc.short(pc.sha256_file(paths.catalogue))
     assert m["tkc_sha"] == pc.short(pc.sha256_file(paths.tkc))
+    assert m["tkc_bin_sha"] == corpus["pin"].sha256 == m["tkc_sha256"]         # 131.39, beside tkc_sha
+    bin_sha = m["tkc_bin_sha"]
     disk = json.load(open(paths.sub("manifest.json")))
     assert disk["card_sha"] == m["card_sha"] and disk["unbanked_candidates"] == 0
     # prompt: only the named catalogue entry, the card, the test lock, the source
@@ -188,6 +206,7 @@ def test_wave_end_to_end(corpus):
     assert meta0["rules_must"] == ["mut-flag-if"] and meta0["patterns"] == ["cond-bind-if"]
     assert meta0["before"]["min_bytes"] and meta0["before"]["proxy_tokens"]
     assert meta0["before"]["file_sha256"] == pc.sha256_file(paths.record("A-CND", _tid(0)))
+    assert meta0["tkc_bin_sha"] == bin_sha
     assert json.load(open(paths.sub("meta", _tid(5) + ".json")))["perf_sensitive"] is True
 
     # ---- worker candidates
@@ -208,6 +227,7 @@ def test_wave_end_to_end(corpus):
     ok, lines = check_pattern.check(paths, _tid(0))
     assert ok and lines[0].startswith("PASS"), lines
     assert "pattern=ok" in lines[1] and "min_bytes=ok" in lines[1]
+    assert lines[-1] == "tkc_bin_sha=" + bin_sha                            # 131.39
     ok, lines = check_pattern.check(paths, _tid(21))
     assert ok, lines
     ok, lines = check_pattern.check(paths, _tid(2))
@@ -224,6 +244,7 @@ def test_wave_end_to_end(corpus):
     before_shas = {k: pc.sha256_file(paths.record("A-CND", _tid(k))) for k in range(N)}
     s = bank_pattern.run(paths, bank=False, shas={"tkc_sha": "t", "card_sha": "c", "catalogue_sha": "k"})
     assert s["mode"] == "dry-run" and s["candidates"] == 8
+    assert s["tkc_bin_sha"] == bin_sha and s["tkc_sha"] == "t"               # 131.39: pinned sha beside tkc_sha
     assert (s["rewritten"], s["unchanged"], s["failed"], s["skipped"]) == (3, 1, 3, 1)
     assert s["tier2_flagged"] == 1 and s["tier1_regressions"] == 0 and s["lint_net"] == 0
     assert s["proxy_tokens_after"] < s["proxy_tokens_before"]
@@ -233,6 +254,7 @@ def test_wave_end_to_end(corpus):
     assert {pc.sha256_file(paths.record("A-CND", _tid(k))) for k in range(N)} == set(before_shas.values())
     d0 = json.load(open(paths.sub("dryrun", _tid(0) + ".json")))
     assert d0["verdict"] == "rewritten" and d0["gates"]["diff"] is True and d0["gates"]["perf"] is True
+    assert d0["tkc_bin_sha"] == bin_sha and d0["diff"]["checks"] is not None
     assert d0["diff"]["via"] and d0["perf"]["via"]
     assert d0["rules_fixed"] == ["mut-flag-if"] and d0["patterns_fixed"] == ["cond-bind-if"]
     d21 = json.load(open(paths.sub("dryrun", _tid(21) + ".json")))
@@ -254,6 +276,7 @@ def test_wave_end_to_end(corpus):
     assert len(gen) == 8 and all(f.endswith(".tk.done") for f in gen)
     led = _ledger(paths)
     assert len(led) == 8 and all(e["wave"] == "agent" for e in led)
+    assert all(e["tkc_bin_sha"] == bin_sha for e in led)                     # 131.39
     by = {e["task_id"]: e for e in led}
     assert by[_tid(0)]["status"] == "rewritten" and by[_tid(0)]["new_sha256"]
     assert by[_tid(0)]["prev_sha256"] == before_shas[0]
@@ -268,6 +291,7 @@ def test_wave_end_to_end(corpus):
         assert r131["wave"] == "agent" and r131["story"] == "131.15"
         assert r131["card_sha"] == m["card_sha"] and r131["catalogue_sha"] == m["catalogue_sha"]
         assert r131["tkc_sha"] == "tkcsha" and r131["prev_sha256"] == before_shas[k]
+        assert r131["tkc_bin_sha"] == bin_sha
         assert r131["patterns_fixed"] == ["cond-bind-if"] and r131["lint_violations"] == 0
         assert r131["proxy_tokens_after"] < r131["proxy_tokens_before"]
         assert r131["perf"]["verdict"] == "pass" and r131["diff_check"] is True

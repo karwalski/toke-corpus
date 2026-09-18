@@ -47,6 +47,7 @@ def run_worker_gates(paths, tid, tmp):
             before.pop("struct", None)
     res = pc.static_and_test_gates(spec, cand, tmp)
     res["candidate"] = cand
+    res["tkc_bin_sha"] = pc.tkc_bin_sha(paths.tkc)    # 131.39: the binary that judged this candidate
     if res["record"] is not None:
         pc.apply_exemptions(res, meta.get("exempt") or [])
         pc.lint_other_gate(res, before)
@@ -97,6 +98,8 @@ def report_lines(res, before):
         out.append(f"size: --min {res.get('min_bytes')} vs before {b.get('min_bytes')}; "
                    f"proxy {res.get('proxy_tokens')} vs before {b.get('proxy_tokens')} "
                    "— the rewrite must not grow")
+    if res.get("tkc_bin_sha"):
+        out.append(f"tkc_bin_sha={res['tkc_bin_sha']}")
     return ok, out
 
 
@@ -115,8 +118,11 @@ def main(argv=None):
     ap.add_argument("--workdir", default=None)
     ap.add_argument("--corpus", default=pc.CORPUS)
     args = ap.parse_args(argv)
-    paths = pc.Paths(corpus=args.corpus, workdir=args.workdir)
-    ok, lines = check(paths, args.task_id)
+    with pc.pin_tkc(sys.modules[__name__]) as pinned:  # 131.39: one binary for every gate of this check
+        print(f"check_pattern: tkc {pinned.version} sha256 {pinned.sha256[:12]} (pinned copy {pinned.path})",
+              file=sys.stderr)
+        paths = pc.Paths(corpus=args.corpus, workdir=args.workdir)
+        ok, lines = check(paths, args.task_id)
     print("\n".join(lines))
     sys.exit(0 if ok else 1)
 

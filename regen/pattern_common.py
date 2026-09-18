@@ -31,8 +31,18 @@ import metrics                                        # noqa: E402
 import driver as drv                                  # noqa: E402
 from assemble import sanitize                         # noqa: E402
 from audit import _exec_tests, style_mandate          # noqa: E402
-from run_shard import validate_one_gates, TKC         # noqa: E402
+import audit                                          # noqa: E402  (131.39: rebind its TKC)
+import run_shard                                      # noqa: E402  (131.39: rebind its TKC)
+import validate                                       # noqa: E402  (131.39: rebind its TKC)
+import tkc_pin                                        # noqa: E402  (131.39)
+from run_shard import validate_one_gates              # noqa: E402
 from validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402
+
+# 131.39: the compiler every gate execs. A harness main() calls pin_tkc() once
+# (before any loop / pool) which rebinds this and every sibling module's TKC
+# to a private copy; until then it is $TOKE_TKC_PIN (a parent's pin), $TKC,
+# or ~/tk/toke/tkc.
+TKC = tkc_pin.default_tkc()
 
 # ---------------------------------------------------------------- guarded ---
 try:                                                  # 131.14 differential check
@@ -52,6 +62,7 @@ try:                                                  # 131.14 Tier-1 perf over 
 except Exception:                                     # noqa: BLE001
     _autofix_perf_compare = None
 HAVE_AUTOFIX_PERF = _autofix_perf_compare is not None
+_autofix_mod = sys.modules.get("pattern_autofix")     # 131.39: pin_tkc rebinds its TKC too
 
 _proxy_tokens = getattr(metrics, "proxy_tokens", None)   # 131.10 (guarded)
 
@@ -81,7 +92,7 @@ class Paths:
 
     def __init__(self, corpus=CORPUS, workdir=None, ledger=None, replaced=None,
                  manifest=None, catalogue=CATALOGUE_PATH, card=CARD_PATH,
-                 toke_root=TOKE_ROOT, tkc=TKC):
+                 toke_root=TOKE_ROOT, tkc=None):
         self.corpus = corpus
         self.workdir = workdir or os.path.join(corpus, "work", "pattern_131")
         self.ledger = ledger or os.path.join(corpus, "ledger", "rewrite_131.jsonl")
@@ -90,7 +101,7 @@ class Paths:
         self.catalogue = catalogue
         self.card = card
         self.toke_root = toke_root
-        self.tkc = tkc
+        self.tkc = tkc or TKC             # resolved at construction: the pinned copy once pin_tkc() ran
 
     def sub(self, *parts):
         return os.path.join(self.workdir, *parts)
@@ -117,13 +128,41 @@ def short(sha):
     return sha[:12] if sha else None
 
 
-def tkc_stamp(tkc=TKC, toke_root=TOKE_ROOT):
+def tkc_bin_sha(tkc=None):
+    """131.39: full sha256 of the compiler binary the gates exec (the pinned
+    copy once pin_tkc() ran). Every emitted row / manifest / result carries it
+    as `tkc_bin_sha`; None only when the binary is missing."""
+    return tkc_pin.bin_sha(tkc or TKC)
+
+
+def pin_tkc(*modules):
+    """131.39: pin the compiler once per harness run, BEFORE any loop or pool.
+    Copies the resolved binary to a private temp dir, exports $TOKE_TKC_PIN
+    for child processes and rebinds `TKC` here and in every sibling module
+    that execs it (validate, metrics, idiom_judge, run_shard, audit,
+    diff_check, pattern_autofix) plus the `modules` given. Keep the returned
+    Pinned alive for the run (`with pc.pin_tkc(...) as PIN:`); its .sha256
+    is the `tkc_bin_sha` to stamp."""
+    mods = [sys.modules[__name__], validate, metrics, idiom_judge, run_shard, audit]
+    for m in (diff_check, _autofix_mod):
+        if m is not None:
+            mods.append(m)
+    for m in modules:
+        if m is not None and m not in mods:
+            mods.append(m)
+    return tkc_pin.pin().install(*mods)
+
+
+def tkc_stamp(tkc=None, toke_root=TOKE_ROOT):
     """{tkc_sha (short sha256 of the binary — the rescore_131 convention),
-    tkc_sha256, tkc_version, toke_git}. Never raises."""
-    out = {"tkc_sha": None, "tkc_sha256": None, "tkc_version": None, "toke_git": None}
+    tkc_sha256, tkc_bin_sha (131.39: full sha256 of the binary actually
+    exec'd — the pinned copy), tkc_version, toke_git}. Never raises."""
+    tkc = tkc or TKC
+    out = {"tkc_sha": None, "tkc_sha256": None, "tkc_bin_sha": None, "tkc_version": None, "toke_git": None}
     try:
         out["tkc_sha256"] = sha256_file(tkc)
         out["tkc_sha"] = short(out["tkc_sha256"])
+        out["tkc_bin_sha"] = out["tkc_sha256"]
     except OSError:
         pass
     try:

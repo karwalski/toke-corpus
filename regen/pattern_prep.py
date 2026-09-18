@@ -9,7 +9,8 @@ check/bank scripts share one contract):
   prompts/<tid>.txt    worker prompt (task, current source, ONLY the catalogue
                        entries for the flagged rules, expected output, card)
   batches/batch_NNN.json  {"batch": N, "task_ids": [...]}   (20 per batch)
-  manifest.json        card_sha, catalogue_sha, tkc sha, counts, batch list
+  manifest.json        card_sha, catalogue_sha, tkc sha + tkc_bin_sha (131.39:
+                       the pinned binary), counts, batch list
 Idempotent: tasks already rewritten/unchanged in ledger/rewrite_131.jsonl
 (wave agent) are skipped, as are tasks that exhausted their retry. Stale
 higher-numbered batch files from a previous prep are removed (bank BEFORE
@@ -147,6 +148,7 @@ def prepare(paths, bucket_path, bucket_name="AGENT", max_batches=pc.MAX_BATCHES,
     ledger = pc.read_ledger(paths.ledger)
     card = open(paths.card, encoding="utf-8").read()
     card_sha = pc.short(pc.sha256_text(card))
+    tkc = pc.tkc_stamp(paths.tkc, paths.toke_root)   # 131.39: one stamp for every meta row + the manifest
     for d in ("specs", "meta", "prompts", "batches", "gen"):
         os.makedirs(paths.sub(d), exist_ok=True)
     retry = read_retry_queue(paths.sub("retry_queue.jsonl"))
@@ -207,6 +209,7 @@ def prepare(paths, bucket_path, bucket_name="AGENT", max_batches=pc.MAX_BATCHES,
                     "violations": row.get("violations") or [], "attempts": attempts,
                     "prev_reason": prev_reason, "card_sha": card_sha,
                     "catalogue_sha": cat["sha"], "lint_before": struct.get("lint") if struct else None,
+                    "tkc_bin_sha": tkc["tkc_bin_sha"],        # 131.39: the binary `before` was measured on
                     "prepared_at": pc.now_iso()}
             with open(paths.sub("meta", tid + ".json"), "w") as f:
                 json.dump(meta, f)
@@ -228,7 +231,7 @@ def prepare(paths, bucket_path, bucket_name="AGENT", max_batches=pc.MAX_BATCHES,
                 "bucket_rows": len(rows), "card": os.path.abspath(paths.card),
                 "card_sha": card_sha, "card_embedded": bool(embed_card),
                 "catalogue": os.path.abspath(paths.catalogue), "catalogue_sha": cat["sha"],
-                **pc.tkc_stamp(paths.tkc, paths.toke_root),
+                **tkc,
                 "prepared": len(batched), "deferred": len(deferred),
                 "deferred_task_ids": deferred, "skipped": skipped,
                 "batches": len(batches), "batch_size": pc.BATCH_SIZE,
@@ -255,10 +258,15 @@ def main(argv=None):
     ap.add_argument("--no-embed-card", action="store_true",
                     help="omit the syntax card from prompts (workers read it once per batch)")
     args = ap.parse_args(argv)
-    paths = pc.Paths(corpus=args.corpus, workdir=args.workdir, ledger=args.ledger,
-                     catalogue=args.catalogue, card=args.card)
-    m = prepare(paths, args.bucket, args.bucket_name, args.max_batches, args.limit,
-                not args.no_embed_card, only=args.only)
+    # 131.39: pin the compiler before Paths (paths.tkc) and the prep loop; the
+    # `before` metrics of every task are measured on one binary
+    with pc.pin_tkc(sys.modules[__name__]) as pinned:
+        paths = pc.Paths(corpus=args.corpus, workdir=args.workdir, ledger=args.ledger,
+                         catalogue=args.catalogue, card=args.card)
+        print(f"pattern_prep: tkc {pinned.version} sha256 {pinned.sha256[:12]} (pinned copy {pinned.path})",
+              file=sys.stderr)
+        m = prepare(paths, args.bucket, args.bucket_name, args.max_batches, args.limit,
+                    not args.no_embed_card, only=args.only)
     print(json.dumps({k: v for k, v in m.items() if k not in ("deferred_task_ids", "unbanked_task_ids")}))
     if m["unbanked_candidates"]:
         print(f"WARNING: {m['unbanked_candidates']} gen/pat_*.tk candidates were already on disk "

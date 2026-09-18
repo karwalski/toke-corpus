@@ -24,7 +24,8 @@ work/pattern_131/dryrun/<task_id>.json + a summary; --bank performs the bank:
   record: tk_source, regen.{source_sha256,min_bytes,proxy_tokens,max_depth,
           lint_pattern_violations=[],lint_exempt,over_budget,rewrite131{...}}
   ledger/rewrite_131.jsonl  {task_id, wave:"agent", status, reason,
-          attempts, prev_sha256, new_sha256, ts}   (freeze/README schema)
+          attempts, prev_sha256, new_sha256, ts, tkc_bin_sha}   (freeze/README
+          schema + the 131.39 pinned-binary sha)
   manifest_tool.Manifest.stamp(task_id, rec_path)  (131.35)
   gen/pat_<tid>.tk -> .done
 Per-wave acceptance printed: banked rate (>= 95%), test regressions (0 by
@@ -149,6 +150,7 @@ def bank_one(paths, ev, meta, manifest, shas, now):
         "card_sha": meta.get("card_sha") or shas.get("card_sha"),
         "catalogue_sha": meta.get("catalogue_sha") or shas.get("catalogue_sha"),
         "tkc_sha": shas.get("tkc_sha"),
+        "tkc_bin_sha": shas.get("tkc_bin_sha") or ev.get("tkc_bin_sha"),   # 131.39: the binary that judged it
         "patterns_fixed": ev.get("patterns_fixed") or [],
         "rules_fixed": ev.get("rules_fixed") or [],
         "lint_violations": 0, "lint_exempt": ev.get("lint_exempt") or [],
@@ -167,7 +169,7 @@ def bank_one(paths, ev, meta, manifest, shas, now):
     manifest.stamp(tid, rec_path)                     # 131.35: never replace without re-stamping
     entry = {"task_id": tid, "wave": pc.WAVE, "status": "rewritten", "reason": ev["reason"],
              "attempts": ev.get("attempts", 1), "prev_sha256": ev["prev_sha256"],
-             "new_sha256": pc.sha256_file(rec_path), "ts": now}
+             "new_sha256": pc.sha256_file(rec_path), "ts": now, "tkc_bin_sha": ev.get("tkc_bin_sha")}
     pc.append_ledger(paths.ledger, entry)
     return entry
 
@@ -175,7 +177,8 @@ def bank_one(paths, ev, meta, manifest, shas, now):
 def _ledger_entry(ev, now, status=None):
     return {"task_id": ev["task_id"], "wave": pc.WAVE, "status": status or ev["verdict"],
             "reason": ev.get("reason"), "attempts": ev.get("attempts", 1),
-            "prev_sha256": ev.get("prev_sha256"), "new_sha256": None, "ts": now}
+            "prev_sha256": ev.get("prev_sha256"), "new_sha256": None, "ts": now,
+            "tkc_bin_sha": ev.get("tkc_bin_sha")}
 
 
 def _public(ev):
@@ -192,7 +195,11 @@ def run(paths, bank=False, only=None, limit=None, shas=None):
         tids = [t for t in tids if t in keep]
     if limit is not None:
         tids = tids[:limit]
-    shas = shas or {}
+    shas = dict(shas or {})
+    # 131.39: every evaluation, ledger line, record stamp and the summary carry
+    # the sha256 of the binary the gates exec'd (the pinned copy when main()
+    # pinned; else whatever pc.TKC is right now)
+    shas.setdefault("tkc_bin_sha", pc.tkc_bin_sha(paths.tkc))
     manifest = manifest_tool.Manifest(paths.manifest) if bank else None
     now = pc.now_iso()
     counts = {"rewritten": 0, "unchanged": 0, "failed": 0, "skipped": 0}
@@ -208,6 +215,7 @@ def run(paths, bank=False, only=None, limit=None, shas=None):
             meta_path = paths.sub("meta", tid + ".json")
             meta = json.load(open(meta_path)) if os.path.exists(meta_path) else {}
             ev = evaluate(paths, tid, tmp, meta)
+            ev["tkc_bin_sha"] = shas["tkc_bin_sha"]
             v = ev["verdict"]
             counts[v] += 1
             if (ev.get("perf") or {}).get("verdict") == "fail":
@@ -290,13 +298,19 @@ def main(argv=None):
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--limit", type=int, default=None)
     args = ap.parse_args(argv)
-    paths = pc.Paths(corpus=args.corpus, workdir=args.workdir, ledger=args.ledger,
-                     catalogue=args.catalogue, card=args.card)
-    shas = {"card_sha": pc.short(pc.sha256_file(paths.card)),
-            "catalogue_sha": pc.short(pc.sha256_file(paths.catalogue)),
-            **{k: v for k, v in pc.tkc_stamp(paths.tkc, paths.toke_root).items()
-               if k in ("tkc_sha", "tkc_version")}}
-    s = run(paths, bank=args.bank, only=args.only, limit=args.limit, shas=shas)
+    # 131.39: pin the compiler before Paths (paths.tkc) and before the loop;
+    # a `make` relinking ~/tk/toke/tkc mid-bank cannot change the judge
+    with pc.pin_tkc(sys.modules[__name__]) as pinned:
+        paths = pc.Paths(corpus=args.corpus, workdir=args.workdir, ledger=args.ledger,
+                         catalogue=args.catalogue, card=args.card)
+        shas = {"card_sha": pc.short(pc.sha256_file(paths.card)),
+                "catalogue_sha": pc.short(pc.sha256_file(paths.catalogue)),
+                **{k: v for k, v in pc.tkc_stamp(paths.tkc, paths.toke_root).items()
+                   if k in ("tkc_sha", "tkc_version", "tkc_bin_sha")}}
+        assert shas["tkc_bin_sha"] == pinned.sha256
+        print(f"bank_pattern: tkc {pinned.version} sha256 {pinned.sha256[:12]} (pinned copy {pinned.path})",
+              file=sys.stderr)
+        s = run(paths, bank=args.bank, only=args.only, limit=args.limit, shas=shas)
     print(json.dumps(s))
     return 0
 

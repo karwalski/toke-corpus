@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 import diff_check as dc          # noqa: E402
 import manifest_tool             # noqa: E402
 import pattern_autofix as pa     # noqa: E402
+import tkc_pin                   # noqa: E402  (131.39)
 
 HAVE_TKC = os.path.exists(pa.TKC)
 
@@ -141,6 +142,7 @@ def test_bank_one_archives_stamps_ledger_and_skips_stale(tmp_path):
     rw = new["regen"]["rewrite131"]
     assert rw["wave"] == "auto" and rw["story"] == "131.14" and rw["prev_sha256"] == prev_sha
     assert rw["tkc_sha"] == "tkcsha" and rw["catalogue_sha"] == "catsha" and rw["toke_git"] == "gitsha"
+    assert rw["tkc_bin_sha"] == tkc_pin.bin_sha(pa.TKC)     # 131.39: 3-tuple shas -> the live binary's sha
     assert rw["rules_fixed"] == ["unused-import", "single-use-let"]
     assert "fn-chain-vs-let" in rw["patterns_fixed"] or "single-use-let" in rw["patterns_fixed"]
     assert rw["proxy_tokens_before"] == 50 and rw["proxy_tokens_after"] == 45
@@ -204,6 +206,7 @@ def test_autofix_one_full_program_banks_unused_import():
     src = 'm=t;\ni=io:std.io;\ni=s:std.str;\nf=main():i64{\n  io.println("\\(1+2)");\n  <0\n};\n'
     res = _run_one(tempfile.mkdtemp(prefix="pa_e2e_"), "D-TST-0001v1", "D-TST", spec, src)
     assert res["decision"] == "bank", json.dumps(res, indent=1)
+    assert res["diff"]["tkc_bin_sha"] == tkc_pin.bin_sha(pa.TKC)     # 131.39: diff_check stamps the binary
     assert res["reason"] == "fixed:unused-import" and res["changed"]
     assert res["min_bytes"]["after"] < res["min_bytes"]["before"]
     assert res["diff"]["verdict"] == "identical" and res["diff"]["checks"]["spec_cases"]["mode"] == "main"

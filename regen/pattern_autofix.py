@@ -47,6 +47,10 @@ from collections import Counter
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import diff_check as dc                                   # noqa: E402
+import audit                                              # noqa: E402  (131.39: rebind its TKC)
+import run_shard                                          # noqa: E402  (131.39: rebind its TKC)
+import validate                                           # noqa: E402  (131.39: rebind its TKC)
+import tkc_pin                                            # noqa: E402  (131.39)
 import driver as drv                                      # noqa: E402
 import idiom_judge                                        # noqa: E402
 import manifest_tool                                      # noqa: E402  (131.35)
@@ -55,8 +59,12 @@ from audit import load_specs, _BASE, _compare             # noqa: E402
 from run_shard import validate_one_gates, CARD_SHA        # noqa: E402
 
 CORPUS = os.environ.get("TOKE_CORPUS", "/Users/matthew.watt/tk/toke-corpus/corpus/regen_v04")
-TKC = os.environ.get("TKC", "/Users/matthew.watt/tk/toke/tkc")
-TOKE_REPO = os.path.dirname(os.path.realpath(TKC)) if os.path.exists(TKC) else os.path.expanduser("~/tk/toke")
+# 131.39: main() pins a private copy of the compiler once (before the pool) and
+# rebinds TKC here + in every sibling module; workers see it via $TOKE_TKC_PIN.
+TKC = tkc_pin.default_tkc()
+_TKC_SOURCE = os.environ.get("TKC", str(tkc_pin.DEFAULT_TKC))      # the symlink, never the pinned copy
+TOKE_REPO = (os.path.dirname(os.path.realpath(_TKC_SOURCE)) if os.path.exists(_TKC_SOURCE)
+             else str(tkc_pin.DEFAULT_TOKE))
 CATALOGUE = os.path.join(TOKE_REPO, "patterns", "catalogue.json")
 STORY = "131.14"
 WAVE = "auto"
@@ -76,17 +84,26 @@ def sha256_file(path):
 
 
 def tool_shas():
-    """(tkc_sha, catalogue_sha, toke_git): tkc_sha = short sha256 of the tkc
-    binary (the rescore_131 / pattern_common.tkc_stamp convention — the
-    provenance block's "tkc build sha used to verify"); toke_git = toke HEAD."""
-    tkc_sha = sha256_file(TKC)[:12] if os.path.exists(TKC) else None
+    """(tkc_sha, catalogue_sha, toke_git, tkc_bin_sha): tkc_sha = short sha256
+    of the tkc binary (the rescore_131 / pattern_common.tkc_stamp convention —
+    the provenance block's "tkc build sha used to verify"); toke_git = toke
+    HEAD; tkc_bin_sha (131.39) = the full sha256 of the binary actually
+    exec'd (the pinned copy once main() pinned)."""
+    tkc_bin_sha = tkc_pin.bin_sha(TKC)
+    tkc_sha = tkc_bin_sha[:12] if tkc_bin_sha else None
     try:
         toke_git = subprocess.run(["git", "-C", TOKE_REPO, "rev-parse", "--short", "HEAD"],
                                   capture_output=True, text=True, timeout=10).stdout.strip() or None
     except Exception:
         toke_git = None
     cat_sha = sha256_file(CATALOGUE)[:12] if os.path.exists(CATALOGUE) else None
-    return tkc_sha or "unknown", cat_sha or "none", toke_git
+    return tkc_sha or "unknown", cat_sha or "none", toke_git, tkc_bin_sha
+
+
+def _bin_sha_of(shas):
+    """131.39: the pinned-binary sha from a tool_shas() tuple (older 3-tuples
+    fall back to the binary TKC names right now)."""
+    return shas[3] if len(shas) > 3 and shas[3] else tkc_pin.bin_sha(TKC)
 
 
 _catalogue_by_rule = None
@@ -457,6 +474,7 @@ def bank_one(res, corpus, manifest, ledger_path, shas, now=None):
     tid = res["task_id"]
     tkc_sha, cat_sha = shas[0], shas[1]
     toke_git = shas[2] if len(shas) > 2 else None
+    tkc_bin_sha = _bin_sha_of(shas)
     ts = now or manifest_tool.now_iso()
     rec_path = os.path.join(corpus, res["category"], tid + ".json")
     attempts = 1
@@ -502,6 +520,7 @@ def bank_one(res, corpus, manifest, ledger_path, shas, now=None):
         rg["rewrite131"] = {
             "wave": WAVE, "story": STORY, "ts": ts, "prev_sha256": res.get("prev_sha256"),
             "card_sha": CARD_SHA, "catalogue_sha": cat_sha, "tkc_sha": tkc_sha, "toke_git": toke_git,
+            "tkc_bin_sha": tkc_bin_sha,               # 131.39: the binary that verified this rewrite
             "patterns_fixed": rules_to_patterns(rules_fixed), "rules_fixed": rules_fixed,
             "lint_violations": 0, "lint_exempt": res.get("lint_exempt") or [],
             "proxy_tokens_before": (res.get("proxy_tokens") or {}).get("before"),
@@ -590,6 +609,7 @@ def summarise(results, opts):
     return {"story": STORY, "wave": WAVE, "ts": manifest_tool.now_iso(),
             "tkc_sha": opts["shas"][0], "catalogue_sha": opts["shas"][1],
             "toke_git": opts["shas"][2] if len(opts["shas"]) > 2 else None,
+            "tkc_bin_sha": _bin_sha_of(opts["shas"]),     # 131.39
             "unknown_task_ids": opts.get("unknown") or [],
             "concat_fix_armed": bool(os.environ.get("TKC_LINT_CONCAT_FIX") not in (None, "", "0")),
             "records": len(results), "changed": len(changed),
@@ -650,7 +670,11 @@ def main(argv=None):
     if args.limit:
         ids = ids[:args.limit]
     a_dir = os.path.join(corpus, "audit", "a_tests")
+    # 131.39: pin the compiler before tool_shas() and before the pool; every
+    # result and the summary carry its sha256 (`tkc_bin_sha`)
+    pinned = tkc_pin.pin().install(sys.modules[__name__], dc, validate, metrics, idiom_judge, run_shard, audit)
     shas = tool_shas()
+    assert shas[3] == pinned.sha256
     jobs, results, skipped, unknown = [], [], 0, []
     opts = {"tmpdir": os.path.join(wd, "tmp"), "cand_dir": os.path.join(wd, "cand"),
             "perf_runs": args.perf_runs, "n_generated": args.n_generated,
@@ -669,13 +693,14 @@ def main(argv=None):
         rec_path = os.path.join(corpus, e["path"])
         jobs.append((tid, rec_path, specs[tid], a_test_for(tid, a_dir), opts))
     print(f"autofix {len(jobs)} records ({skipped} already done, {len(unknown)} unknown ids), "
-          f"{args.workers} workers, tkc {shas[0]} (toke {shas[2]}) catalogue {shas[1]} "
-          f"mode={'bank' if args.bank else 'dry-run'}", file=sys.stderr)
+          f"{args.workers} workers, tkc {pinned.version} {shas[0]} (toke {shas[2]}, pinned copy {pinned.path}) "
+          f"catalogue {shas[1]} mode={'bank' if args.bank else 'dry-run'}", file=sys.stderr)
     t0 = time.time()
     n = 0
     if jobs:
-        with multiprocessing.Pool(args.workers) as pool:
+        with pinned, multiprocessing.Pool(args.workers) as pool:
             for r in pool.imap_unordered(autofix_one, jobs, chunksize=1):
+                r["tkc_bin_sha"] = pinned.sha256      # 131.39 (results reloaded from disk keep their own)
                 with open(os.path.join(wd, "results", r["task_id"] + ".json"), "w") as f:
                     json.dump(r, f, indent=1)
                 results.append(r)
@@ -696,6 +721,7 @@ def main(argv=None):
     with open(os.path.join(wd, "summary.json"), "w") as f:
         json.dump(summary, f, indent=1)
     print(json.dumps(summary, indent=1))
+    pinned.close()
     return 0
 
 
