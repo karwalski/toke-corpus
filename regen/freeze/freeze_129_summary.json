@@ -1,0 +1,31 @@
+{
+  "story": "131.12",
+  "freeze": "129-freeze-2026-08-19",
+  "date": "2026-09-18",
+  "total": 23382,
+  "per_category": {
+    "A-ARR": 1714,
+    "A-CND": 1714,
+    "A-ERR": 1546,
+    "A-MTH": 1714,
+    "A-SRT": 1714,
+    "A-STR": 1714,
+    "D-CFG": 1596,
+    "D-CLI": 1636,
+    "D-CRY": 1714,
+    "D-DAT": 1686,
+    "D-FIO": 1546,
+    "D-NET": 1714,
+    "D-TST": 1713,
+    "D-WEB": 1661
+  },
+  "audit_stamps": {
+    "129-freeze-2026-08-19": 23382
+  },
+  "tarball": "/Users/matthew.watt/tk/archive/toke-corpus-regen_v04-freeze129-20260819/regen_v04-freeze129.tar.zst",
+  "tarball_sha256": "a00dc0a1fe85046f6f62cccd3165f24f79e87170b99556beb02dfc22f985cde9",
+  "tarball_bytes": 6539530,
+  "tkc_version": "toke 2.8.0",
+  "toke_corpus_head": "d2f9fd4ce3fad828a5e36943447d0daeda110210",
+  "manifest_sha256": "13272718794b63356ff5c8cf26da068c6b134c87cb34c16c82243265d2740d93"
+}

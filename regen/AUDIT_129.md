@@ -1,5 +1,7 @@
 # Epic 129 — Training-asset quality audit: final report & TRAINING-DATA FREEZE
 
+> **REOPENED by Epic 131 on 2026-09-18.** The frozen state is preserved byte-for-byte at `~/tk/archive/toke-corpus-regen_v04-freeze129-20260819/` (tag `freeze-129-20260819`); successor freeze: `AUDIT_131.md`. Records may be rewritten under `regen.rewrite131` provenance from this date; originals go to `audit/replaced/131/`.
+
 _Frozen: 2026-08-19 • audits in `corpus/regen_v04/audit/` • rubric: `regen/quality_rubric.md`_
 
 ## Freeze declaration
