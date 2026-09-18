@@ -7,7 +7,8 @@ AFTER the 131.17 library rewrite).
 Gates (run_shard.validate_one_gates with lint_gate=True): compile (tkc --check),
 build (tkc -o), tests (one execution per case, input on stdin, whole stdout ==
 expected_output after trailing-ws norm, exit 0, fixtures materialised),
-idiom >= 0.6, depth <= 4, fn <= 600 B, lint warnings == 0.
+idiom >= 0.6, depth <= 4, fn <= 600 B, no pattern-rule error/warning (131.10),
+lint warnings == 0.
 
 Dry-run  : ledger/library_131_dryrun.jsonl — one row per program with the
            per-gate verdicts + metrics; nothing banked. Truncated on each run
@@ -42,7 +43,7 @@ import manifest_tool                              # noqa: E402  (131.35)
 CORPUS = os.path.expanduser("~/tk/toke-corpus/corpus/regen_v04")
 TOKE_REPO = os.path.expanduser("~/tk/toke")
 CATALOGUE = os.path.join(TOKE_REPO, "patterns", "catalogue.json")
-GATE_ORDER = ["compile", "build", "tests", "idiom", "structure", "lint"]
+GATE_ORDER = ["compile", "build", "tests", "idiom", "structure", "pattern", "lint"]  # pattern: 131.10
 
 
 def _sha_file(path, n=None):
@@ -79,6 +80,9 @@ def ingest_one(job):
             rt = rg.get("runtime") or {}
             row.update({"idiom": record["judge"]["score"], "min_bytes": rg.get("min_bytes"),
                         "max_depth": rg.get("max_depth"), "lint_warnings": rg.get("lint_warnings"),
+                        "proxy_tokens": rg.get("proxy_tokens"), "over_budget": rg.get("over_budget"),
+                        "pattern_violations": rg.get("lint_pattern_violations"),
+                        "lint_exempt": rg.get("lint_exempt"),
                         "cases_total": rt.get("cases_total"), "cases_passed": rt.get("cases_passed"),
                         "error_codes": record["validation"]["error_codes"]})
         row["_record"] = record if ok else None
@@ -108,7 +112,8 @@ def bank(row, spec, outdir, shas, shard_name, manifest=None):
         "prev_sha256": row["_src_sha256"],
         "card_sha": run_shard.CARD_SHA, "catalogue_sha": cat_sha, "tkc_sha": tkc_sha,
         "patterns_fixed": [], "lint_violations": rg.get("lint_warnings") or 0,
-        "lint_exempt": [], "proxy_tokens_before": None, "proxy_tokens_after": None,
+        "lint_exempt": list(rg.get("lint_exempt") or []),
+        "proxy_tokens_before": None, "proxy_tokens_after": rg.get("proxy_tokens"),
         "perf": {"tier": None, "ratio": None, "verdict": "n/a"},
     }
     cat_dir = os.path.join(outdir, spec["category"])
@@ -249,7 +254,7 @@ def cmd_report(args):
     print("\ntop failure reasons (first failing gate, bucketed):")
     for k, v in reasons.most_common(args.top):
         print(f"  {v:5d}  {k}")
-    for k in ("idiom", "max_depth", "min_bytes", "lint_warnings"):
+    for k in ("idiom", "max_depth", "min_bytes", "lint_warnings", "proxy_tokens"):
         vals = sorted(r[k] for r in rows if r.get(k) is not None)
         if vals:
             pct = {p: vals[min(len(vals) - 1, int(p / 100 * len(vals)))] for p in (50, 90, 99)}

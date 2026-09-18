@@ -146,17 +146,18 @@ def validate_one(spec, raw_src, workdir):
 
 def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=None):
     """validate_one plus a per-gate verdict dict (131.18). Gate keys:
-    compile, signature, build, tests, idiom, structure, lint — each
-    True/False/None (None = not applicable). `lint_gate=True` additionally
-    rejects on lint warnings > 0 (library ingest; NOT applied by validate_one so
-    the 129-era shard path is unchanged). task_type stdin_program: source is
+    compile, signature, build, tests, idiom, structure, pattern, lint — each
+    True/False/None (None = not applicable). `pattern` (131.10) is a hard gate
+    on every path: any 131.9 pattern-rule error/warning rejects (hints pass),
+    net of the spec's style mandate. `lint_gate=True` additionally rejects on
+    any other lint warning > 0 (library ingest; NOT applied by validate_one). task_type stdin_program: source is
     taken verbatim (no assemble/sanitize), no target-signature check, one
     execution per test case with stdin fed (validate.run_stdin_cases)."""
     ttype = spec.get("task_type", "full_program")
     is_stdin = ttype == "stdin_program"
     src = raw_src if is_stdin else assemble(spec, raw_src)
     gates = {"compile": None, "signature": None, "build": None, "tests": None,
-             "idiom": None, "structure": None, "lint": None}
+             "idiom": None, "structure": None, "pattern": None, "lint": None}
     if re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1a\x1c-\x1f]", src.replace("\x1b", "")) or "\x00" in src:
         gates["compile"] = False
         return None, False, "control bytes in source", gates
@@ -192,10 +193,17 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
                 runtime = {"ran": False, "reason": "build failed"}
                 gates["tests"] = False
         # 129.6 rubric gates (quality_rubric.md): idiom floor + structural hard limits
-        idiom_score, idiom_notes = idiom_judge.score(src)
+        struct = metrics.analyse(tkpath, src) if rc == 0 else None
+        # 131.10: the idiom judge scores from the --lint --diag-json run
+        # metrics.analyse already made (no second tkc call); the regex is kept
+        # only for hand-rolled-parser. Stub-prefix diagnostics are dropped in
+        # metrics.lint (the m=harness;i=io:std.io; stubs import unconditionally).
+        idiom_score, idiom_notes = idiom_judge.score(src, struct["lint"] if struct else None)
         gates["idiom"] = idiom_score >= idiom_judge.IDIOM_FLOOR
-        struct = metrics.analyse(tkpath) if rc == 0 else None
         struct_fail = None
+        pattern_fail = []
+        exempt = idiom_judge.mandate_exempt_rules(idiom_judge.style_mandate(spec))
+        lint_exempt = []
         if struct:
             if struct["max_depth"] > 4:
                 struct_fail = f"nesting depth {struct['max_depth']} > 4"
@@ -203,9 +211,17 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
                 struct_fail = f"function {struct['max_func_bytes']} bytes > 600"
             gates["structure"] = not struct_fail
             gates["lint"] = struct.get("lint_warnings", 0) == 0
+            # 131.10 hard gate: any pattern-rule error/warning fails (hints
+            # pass), net of the spec's style mandate (quality_rubric.md
+            # "Exemptions"); discarded-value-result is never exempt.
+            pattern_fail = idiom_judge.hard_gate(struct["lint"], exempt)
+            gates["pattern"] = not pattern_fail
+            hit_rules = {d["rule"] for d in idiom_judge.pattern_hits(struct["lint"])}
+            lint_exempt = [r for r in exempt if r in hit_rules]
         lint_fail = lint_gate and struct is not None and struct.get("lint_warnings", 0) > 0
         ok = (rc == 0 and sig_ok and (runtime is None or runtime.get("match", True))
-              and idiom_score >= idiom_judge.IDIOM_FLOOR and not struct_fail and not lint_fail)
+              and idiom_score >= idiom_judge.IDIOM_FLOOR and not struct_fail
+              and not pattern_fail and not lint_fail)
         reason = None
         if rc != 0:
             reason = "compile: " + ",".join(codes[:3])
@@ -217,6 +233,8 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
             reason = f"idiom: {idiom_score:.2f} < {idiom_judge.IDIOM_FLOOR} ({'; '.join(idiom_notes)})"
         elif struct_fail:
             reason = "structure: " + struct_fail
+        elif pattern_fail:
+            reason = "pattern: " + idiom_judge.violation_summary(pattern_fail)
         elif lint_fail:
             rules = sorted({d.get("rule") for d in struct.get("lint", []) if d.get("severity") == "warning"})
             reason = f"lint: {struct['lint_warnings']} warnings ({','.join(r for r in rules if r)})"
@@ -226,7 +244,8 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
             "phase": "C",
             "task_id": spec["task_id"],
             "tk_source": src,
-            "tk_tokens": None,
+            # 131.10: proxy8k count of the masked --min source (was always None)
+            "tk_tokens": struct.get("proxy_tokens") if struct else None,
             "attempts": spec.get("_attempts", 1),
             "model": "claude-fable-5",
             "validation": {"compiler_exit_code": rc, "error_codes": codes},
@@ -243,6 +262,13 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
                 "source_sha256": hashlib.sha256(src.encode()).hexdigest(),
                 "min_bytes": struct.get("min_bytes") if struct else None,
                 "max_depth": struct.get("max_depth") if struct else None,
+                # 131.10 pattern gate + proxy budget (soft flag; 131.13 decides
+                # whether over_budget becomes hard). Budget: regen/freeze/proxy_budget_v04.json
+                "proxy_tokens": struct.get("proxy_tokens") if struct else None,
+                "lint_pattern_violations": struct.get("lint_pattern_violations") if struct else None,
+                "lint_exempt": lint_exempt,
+                "over_budget": metrics.over_budget(spec.get("category"), ttype,
+                                                   struct.get("proxy_tokens") if struct else None),
             },
         }
         if lint_gate:
