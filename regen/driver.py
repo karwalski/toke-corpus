@@ -74,8 +74,12 @@ _DESC_SIG = re.compile(r"f=[a-z0-9]+\(([^)]*(?:\([^)]*\)[^)]*)*)\):(\S+)")
 
 
 def _norm_type(t):
+    """`@(T)` -> `@T` at every level (`@(@(i64))` -> `@@i64`); other spellings
+    are returned stripped."""
     t = t.strip()
-    return "@" + t[2:-1] if t.startswith("@(") and t.endswith(")") else t
+    if t.startswith("@(") and t.endswith(")"):
+        return "@" + _norm_type(t[2:-1])
+    return t
 
 
 def sig_input_types(spec):
@@ -114,20 +118,42 @@ def _esc(s):
              .replace("\n", "\\n").replace("\t", "\\t"))
 
 
+# Numeric scalar types whose bare literal does NOT type-check as the parameter
+# type: an integer literal is i64 and a float literal is f64 (probe-verified on
+# tkc 2.8.0: `g(6)` for `g(a:u64)` is E4031, `g((6 as u64))` passes; the cast
+# raises only W1001 "lossy cast", a warning). 131.40 — ported from
+# diff_check.lit (131.14), which fixed it locally.
+_CAST_INT = ("u64", "u32", "u16", "u8", "i32", "i16", "i8", "byte")
+_CAST_FLT = ("f32",)
+_UNSIGNED = ("u64", "u32", "u16", "u8", "byte")
+
+
 def lit(v, t):
-    """Render a spec test-case input as a toke literal of (v03) type t."""
+    """Render a spec test-case input as a toke literal of (v03) type t.
+    Non-default numeric scalars are wrapped as `(N as T)` (see _CAST_INT);
+    array element types recurse, so `@u64` renders `@((1 as u64);(2 as u64))`
+    and `@@u64` nests. Empty arrays render `@()` for every element type."""
+    t = _norm_type(t)
     if t.startswith("@"):
         if not isinstance(v, list):
             raise ValueError(f"array type {t} but non-list input {v!r}")
         return "@(" + ";".join(lit(x, t[1:]) for x in v) + ")"
-    if t == "str":
+    if t in ("str", "$str"):
         return '"' + _esc(str(v)) + '"'
     if t == "bool":
         return "true" if v else "false"
-    if t in ("f64", "f32"):
+    if t in ("f64",) + _CAST_FLT:
         s = repr(float(v))
-        return s if "." in s or "e" in s else s + ".0"
-    return str(int(v))
+        s = s if "." in s or "e" in s else s + ".0"
+        return f"({s} as {t})" if t in _CAST_FLT else s
+    if isinstance(v, bool):
+        raise ValueError(f"bool input {v!r} for integer type {t}")
+    n = int(v)
+    if t in _UNSIGNED and n < 0:
+        raise ValueError(f"negative input {n} for unsigned type {t}")
+    if t in _CAST_INT:
+        return f"({n} as {t})"
+    return str(n)
 
 
 def render_out(v):
@@ -174,6 +200,42 @@ def find_target(spec, assembled_src):
         return None
     matches = [name for name, params in decls if len(params) == n_inputs]
     return matches[-1] if matches else decls[-1][0]
+
+
+def declared_input_types(assembled_src, target):
+    """Parameter types as the target function DECLARES them in the assembled
+    module (normalised, `@(T)` -> `@T`), or None when the declaration cannot
+    be parsed. 131.40: literals must type-check against the callee, not the
+    spec — 250 frozen records declare `i64` where the spec says `u64`
+    (signature drift the arity-only signature gate accepts), and a `u64`
+    cast on those is E4031 exactly like a bare int on a real `u64` param."""
+    m = re.search(rf"f={re.escape(target)}\(", assembled_src)
+    if not m:
+        return None
+    depth, cur, types = 0, "", []
+    for ch in assembled_src[m.end():]:
+        if ch == ")" and depth == 0:
+            break
+        if ch == ";" and depth == 0:
+            types.append(cur); cur = ""
+            continue
+        depth += (ch == "(") - (ch == ")")
+        cur += ch
+    else:
+        return None
+    types.append(cur)
+    types = [t for t in types if t.strip()]
+    if any(":" not in t for t in types):
+        return None
+    return [_norm_type(t.split(":", 1)[1]) for t in types]
+
+
+def literal_types(spec, assembled_src, target):
+    """Types the driver renders each test input with: the target's declared
+    parameter types when they parse at the spec's arity, else the spec's."""
+    in_types = effective_input_types(spec)
+    decl = declared_input_types(assembled_src, target)
+    return decl if decl is not None and len(decl) == len(in_types) else in_types
 
 
 def _swap_real_stubs(spec, assembled_src):
@@ -229,13 +291,14 @@ def append_main(spec, assembled_src):
     target = find_target(spec, assembled_src)
     if not target:
         return None, "no target function found"
+    lit_types = literal_types(spec, assembled_src, target)
     calls = []
     for k, tc in enumerate(tcs):
         ins = tc.get("inputs") or []
         if len(ins) != len(in_types):
             return None, f"test case {k}: {len(ins)} inputs vs {len(in_types)} types"
         try:
-            args = ";".join(lit(v, t) for v, t in zip(ins, in_types))
+            args = ";".join(lit(v, t) for v, t in zip(ins, lit_types))
         except (ValueError, TypeError) as e:
             return None, f"test case {k}: {e}"
         call = f"{target}({args})"
