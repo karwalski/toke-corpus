@@ -70,34 +70,72 @@ def real_stub(sig):
 
 
 
-_DESC_SIG = re.compile(r"f=[a-z0-9]+\(([^)]*(?:\([^)]*\)[^)]*)*)\):(\S+)")
+_FSTART = re.compile(r"f=([a-z][a-z0-9]*)\(")
+
+
+def _scan_params(src, start):
+    """Parameter list starting just after the `(` at `start`, paren-aware
+    (`a:@(@u64);b:i64` -> ['a:@(@u64)', 'b:i64']). Returns (params, index of
+    the closing `)`) or (None, -1) when unterminated."""
+    depth, cur, params = 0, "", []
+    for i in range(start, len(src)):
+        ch = src[i]
+        if ch == ")" and depth == 0:
+            params.append(cur)
+            return [p for p in params if p.strip()], i
+        if ch == ";" and depth == 0:
+            params.append(cur); cur = ""
+            continue
+        depth += (ch == "(") - (ch == ")")
+        cur += ch
+    return None, -1
+
+
 
 
 def _norm_type(t):
     """`@(T)` -> `@T` at every level (`@(@(i64))` -> `@@i64`); other spellings
-    are returned stripped."""
+    are returned stripped. 131.44: the sampler-mangled UNTERMINATED spelling
+    the 129.7 a_tests bank carries (`@(u64`, `@(@(u64`, `@(str:i64`) is
+    normalised the same way (`@u64`, `@@u64`, `@str:i64`) so a_tests
+    input_types compare equal to effective_input_types(spec)."""
     t = t.strip()
-    if t.startswith("@(") and t.endswith(")"):
-        return "@" + _norm_type(t[2:-1])
+    if t.startswith("@("):
+        inner = t[2:]
+        if inner.endswith(")") and _balanced(inner[:-1]):
+            return "@" + _norm_type(inner[:-1])
+        if inner.count("(") >= inner.count(")"):
+            return "@" + _norm_type(inner)
     return t
+
+
+def _balanced(t):
+    depth = 0
+    for ch in t:
+        depth += (ch == "(") - (ch == ")")
+        if depth < 0:
+            return False
+    return depth == 0
+
+
+def norm_types(types):
+    """_norm_type over a list (a_tests `input_types`, spec input types)."""
+    return [_norm_type(t) for t in (types or [])]
 
 
 def sig_input_types(spec):
     """Input types parsed from the description's f=sig — authoritative when the
     spec's input_types field is corrupted (the @(T);U sampler split bug that
     mangled 3,976 A-side specs, found 129.7)."""
-    m = _DESC_SIG.search(spec.get("description", "") or "")
+    desc = spec.get("description", "") or ""
+    m = _FSTART.search(desc)
     if not m:
         return None
-    params = m.group(1)
-    types, depth, cur = [], 0, ""
-    for ch in params:
-        if ch == ";" and depth == 0:
-            types.append(cur); cur = ""
-        else:
-            depth += (ch == "(") - (ch == ")")
-            cur += ch
-    types.append(cur)
+    # 131.44: paren-aware at any depth (the old regex handled one level, so
+    # `f=flatten(arrs:@(@(u64))):@(u64)` specs kept their mangled types)
+    types, close = _scan_params(desc, m.end())
+    if types is None or not desc[close + 1:].startswith(":"):
+        return None
     out = []
     for p in types:
         if ":" not in p:
@@ -172,7 +210,9 @@ def expected_lines(spec):
     lines = []
     for tc in spec.get("test_cases") or []:
         exp = tc.get("expected")
-        if isinstance(exp, list):
+        if err_name(exp) is not None:
+            lines.append(render_err(err_name(exp)))   # 131.44 (d)
+        elif isinstance(exp, list):
             lines.extend(render_out(x) for x in exp)
         elif isinstance(exp, str) and "\n" in exp:
             lines.extend(exp.split("\n"))
@@ -187,19 +227,43 @@ def _stub_names(spec):
            {m.group(1) for m in re.finditer(r"f=([a-z0-9]+)\(", ctx)}
 
 
+def function_decls(src):
+    """Every `f=name(params):ret{` declaration in src, paren-aware in the
+    parameter list (131.44: the old `[^)]*` regex could not see
+    `f=flatten(p:@(@u64)):@u64` and mis-reported 6 A-ARR-0077 records as
+    function-less). Returns [{name, params, ret, pos}] in source order; `ret`
+    is the raw return type text (None when no `:ret{` follows)."""
+    out = []
+    for m in _FSTART.finditer(src):
+        params, close = _scan_params(src, m.end())
+        if params is None:
+            continue
+        ret = None
+        rest = src[close + 1:]
+        r = re.match(r":([^{\s]+)\s*\{", rest)
+        if r:
+            ret = r.group(1)
+        out.append({"name": m.group(1), "params": params, "ret": ret, "pos": m.start()})
+    return out
+
+
 def find_target(spec, assembled_src):
     """The worker's target function in an assembled module: last declared
     function that is not a context stub and whose arity matches the spec input
     count (falls back to the last non-stub declaration)."""
     n_inputs = len(effective_input_types(spec))
     stubs = _stub_names(spec)
-    decls = [(m.group(1), [p for p in m.group(2).split(";") if p.strip()])
-             for m in _FN.finditer(assembled_src)]
-    decls = [(n, p) for n, p in decls if n not in stubs and n != "main"]
+    decls = [(d["name"], d["params"]) for d in function_decls(assembled_src)
+             if d["name"] not in stubs and d["name"] != "main"]
     if not decls:
         return None
     matches = [name for name, params in decls if len(params) == n_inputs]
     return matches[-1] if matches else decls[-1][0]
+
+
+def _last_decl(assembled_src, target):
+    ds = [d for d in function_decls(assembled_src) if d["name"] == target]
+    return ds[-1] if ds else None
 
 
 def declared_input_types(assembled_src, target):
@@ -209,25 +273,80 @@ def declared_input_types(assembled_src, target):
     spec — 250 frozen records declare `i64` where the spec says `u64`
     (signature drift the arity-only signature gate accepts), and a `u64`
     cast on those is E4031 exactly like a bare int on a real `u64` param."""
-    m = re.search(rf"f={re.escape(target)}\(", assembled_src)
+    d = _last_decl(assembled_src, target)
+    if d is None or any(":" not in t for t in d["params"]):
+        return None
+    return [_norm_type(t.split(":", 1)[1]) for t in d["params"]]
+
+
+def declared_return_type(assembled_src, target):
+    """Raw return type text of the target's declaration (e.g. `u64!$lookuperr`,
+    `@(u64)`), or None."""
+    d = _last_decl(assembled_src, target)
+    return d["ret"] if d else None
+
+
+# ---------------------------------------------------------------------------
+# 131.44 (d): `T!Err` err-case expectations.
+#
+# Printed form for an err result: `err:<variant>` where <variant> is the tag
+# of the error-type variant the record returns, without its `$` (Profile-1
+# lowercase, no underscore — e.g. `err:notfound`, `err:emptycollection`).
+# The a_tests side spells the name in the reference's Python (`{'err':
+# 'NotFound'}`, `{'error': 'DivByZero'}`, `{'err': 'Overflow', 'msg': …}`):
+# render_err lowercases and strips non-alphanumerics, so the spec-mandated
+# `t=$lookuperr{NotFound:str;...}` and the record's `$notfound` agree.
+#
+# Probe-verified on tkc 2.8.0 (131.44): interpolating a `T!Err` value prints
+# the ok payload (an err prints `0`), `"\(e)"` on the err binding prints a
+# pointer, but a nested match on the err binding —
+#   mt g(0) {$ok:v "\(v)";$err:q mt q {$notfound:w "err:notfound";$emptycollection:w "err:emptycollection"}}
+# — yields the variant name; arms are single expressions, so array results
+# are printed by a second call guarded by the err string (see append_main).
+# ---------------------------------------------------------------------------
+_ERR_KEYS = ("err", "error")
+
+
+def err_name(expected):
+    """The err marker name of an a_tests expectation (`{'err': 'NotFound'}` ->
+    'NotFound'), or None when the expectation is not an err marker."""
+    if not isinstance(expected, dict):
+        return None
+    for k in _ERR_KEYS:
+        v = expected.get(k)
+        if isinstance(v, str) and v:
+            return v
+    return None
+
+
+def render_err(name):
+    """Expected stdout line for an err marker: `err:` + name lowercased with
+    non-alphanumerics dropped (`NotFound` -> `err:notfound`)."""
+    return "err:" + re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+def declared_err_variants(src, errtype):
+    """Variant tags (without `$`) of `t=$name{$a:T;$b:T}` declared in src for
+    the error type `$name` (as spelt in a `T!$name` return type), or None."""
+    name = errtype.lstrip("$")
+    m = re.search(rf"t=\${re.escape(name)}\{{([^}}]*)\}}", src)
     if not m:
         return None
-    depth, cur, types = 0, "", []
-    for ch in assembled_src[m.end():]:
-        if ch == ")" and depth == 0:
-            break
-        if ch == ";" and depth == 0:
-            types.append(cur); cur = ""
-            continue
-        depth += (ch == "(") - (ch == ")")
-        cur += ch
-    else:
-        return None
-    types.append(cur)
-    types = [t for t in types if t.strip()]
-    if any(":" not in t for t in types):
-        return None
-    return [_norm_type(t.split(":", 1)[1]) for t in types]
+    tags = re.findall(r"\$([a-z0-9]+)\s*:", m.group(1))
+    return tags or None
+
+
+def err_arm(src, ret, k):
+    """The `$err` arm expression that prints `err:<variant>` for the declared
+    return type `T!$name` (binding `q{k}`), or (None, error)."""
+    errtype = ret.split("!", 1)[1]
+    if not errtype.startswith("$"):
+        return None, f"return type {ret}: error type {errtype} is not a declared $type"
+    tags = declared_err_variants(src, errtype)
+    if not tags:
+        return None, f"return type {ret}: no t={errtype}{{...}} declaration in the module"
+    arms = ";".join(f'${t}:w{k} "{render_err(t)}"' for t in tags)
+    return f"mt q{k} {{{arms}}}", None
 
 
 def literal_types(spec, assembled_src, target):
@@ -292,6 +411,11 @@ def append_main(spec, assembled_src):
     if not target:
         return None, "no target function found"
     lit_types = literal_types(spec, assembled_src, target)
+    # 131.44 (d): the PRINTING form follows the target's DECLARED return type
+    # (an err union is matched with mt; a record that drifted to `str` prints
+    # its string and fails the `err:<variant>` expectation — 131.42)
+    decl_ret = declared_return_type(assembled_src, target)
+    is_err = bool(decl_ret and "!" in decl_ret)
     calls = []
     for k, tc in enumerate(tcs):
         ins = tc.get("inputs") or []
@@ -302,6 +426,12 @@ def append_main(spec, assembled_src):
         except (ValueError, TypeError) as e:
             return None, f"test case {k}: {e}"
         call = f"{target}({args})"
+        if is_err:
+            c, err = _err_call(assembled_src, decl_ret, call, k)
+            if err:
+                return None, err
+            calls.append(c)
+            continue
         # str results are printed DIRECTLY (io.println(v)) — interpolating a
         # method-call-derived str prints a pointer (compiler bug 127.7), and the
         # driver must not amplify that into false failures
@@ -316,6 +446,24 @@ def append_main(spec, assembled_src):
         else:
             calls.append(f'io.println("\\({call})")')
     return assembled_src.rstrip() + "\nf=main():i64{" + ";".join(calls) + ";<0};\n", None
+
+
+def _err_call(src, decl_ret, call, k):
+    """One test case against a `T!$err` target: prints the ok value in the
+    same form as the non-union path (str direct, arrays one line per element,
+    else interpolated) or `err:<variant>`. Returns (statement, error)."""
+    arm, err = err_arm(src, decl_ret, k)
+    if err:
+        return None, err
+    okt = _norm_type(decl_ret.split("!", 1)[0])
+    if okt.startswith("@"):
+        elem = f"r{k}.get(x{k})" if okt == "@str" else f'"\\(r{k}.get(x{k}))"'
+        return (f'let e{k}=mt {call} {{$ok:v{k} "";$err:q{k} {arm}}};'
+                f"if(e{k}==\"\"){{let r{k}=mt {call} {{$ok:v{k} v{k};$err:q{k} @()}};"
+                f"lp(let x{k}=0;x{k}<r{k}.len;x{k}=x{k}+1){{io.println({elem})}}}}"
+                f"el{{io.println(e{k})}}"), None
+    okv = f"v{k}" if okt in ("str", "$str") else f'"\\(v{k})"'
+    return f"let r{k}=mt {call} {{$ok:v{k} {okv};$err:q{k} {arm}}};io.println(r{k})", None
 
 
 def build_module(spec, raw):

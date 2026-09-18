@@ -16,6 +16,7 @@ import json, os, re, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from audit import load_specs                      # noqa: E402
+from driver import effective_input_types          # noqa: E402  (131.44)
 
 CORPUS = "/Users/matthew.watt/tk/toke-corpus/corpus/regen_v04"
 WD = os.path.join(CORPUS, "work", "a_tests_129")
@@ -23,8 +24,10 @@ BATCH_SIZE = 20
 _BASE = re.compile(r"^(A-[A-Z]+-\d+)v\d+$")
 
 
-def main():
-    specs = load_specs(CORPUS)
+def representative_bases(specs):
+    """base -> (spec, named) for every A-category base with no source
+    test_cases (129.7 rule); prefers a variant whose description names the
+    full signature."""
     bases = {}
     for tid, s in specs.items():
         if s.get("test_cases") or not s["category"].startswith("A-"):
@@ -38,39 +41,102 @@ def main():
         cur = bases.get(b)
         if cur is None or (named and not cur[1]):
             bases[b] = (s, named)
+    return bases
+
+
+def prompt_for(base, s, reauthor_reason=None):
+    # 131.44 (c): show the NORMALISED input types (`@u64;u64`), never the
+    # sampler-mangled field (`['@(u64']`) that made the 129.7 workers author
+    # 52 bases at arity 1 with the real arguments packed into one list
+    types = effective_input_types(s)
+    lines = [
+        f"BASE TASK {base} ({s['category']}, difficulty {s.get('difficulty')}):",
+        "",
+        s.get("description", ""),
+        "",
+        f"input_types: {json.dumps(types)}   ({len(types)} parameter{'s' if len(types) != 1 else ''}, "
+        "in signature order — each test case's `inputs` is a list of exactly that many values; "
+        "never pack several arguments into one list)",
+        f"output_type: {json.dumps(s.get('output_type_v03') or s.get('output_type'))}",
+        "",
+        "Author 3-5 test cases that pin the function's semantics (include one "
+        "edge case: empty/zero/negative/boundary as applicable). Derive a Python "
+        "reference implementation of EXACTLY the described behaviour, run it on "
+        "your chosen inputs, and record the actual outputs as expected values.",
+    ]
+    if reauthor_reason:
+        lines[1:1] = ["RE-AUTHOR (131.44): the banked test file for this base was rejected — "
+                      + reauthor_reason + ". Author it afresh against the signature below.", ""]
+    return "\n".join(lines)
+
+
+def flagged_banked(bases, bank_dir):
+    """131.44 (c): banked a_tests that verify_a_tests.verify rejects against
+    the base's representative spec (wrong arity / type / ref mismatch).
+    Returns {base: reason}."""
+    from verify_a_tests import verify
+    out = {}
+    for fn in sorted(os.listdir(bank_dir)):
+        if not fn.endswith(".json"):
+            continue
+        base = fn[:-5]
+        if base not in bases:
+            continue
+        doc = json.load(open(os.path.join(bank_dir, fn)))
+        errs = verify(base, doc, bases[base][0])
+        if errs:
+            out[base] = "; ".join(errs[:2])
+    return out
+
+
+def prepare(bases, todo, wd, batch_size=BATCH_SIZE, reasons=None, mode="author"):
+    reasons = reasons or {}
     for d in ("specs", "prompts", "batches", "gen"):
-        os.makedirs(os.path.join(WD, d), exist_ok=True)
-    done = set()
-    bank_dir = os.path.join(CORPUS, "audit", "a_tests")
-    if os.path.isdir(bank_dir):
-        done = {os.path.splitext(f)[0] for f in os.listdir(bank_dir)}
-    todo = sorted(b for b in bases if b not in done)
+        os.makedirs(os.path.join(wd, d), exist_ok=True)
     for b in todo:
         s, _ = bases[b]
-        with open(os.path.join(WD, "specs", b + ".json"), "w") as f:
+        with open(os.path.join(wd, "specs", b + ".json"), "w") as f:
             json.dump(s, f)
-        prompt = "\n".join([
-            f"BASE TASK {b} ({s['category']}, difficulty {s.get('difficulty')}):",
-            "",
-            s.get("description", ""),
-            "",
-            f"input_types: {json.dumps(s.get('input_types_v03') or s.get('input_types'))}",
-            f"output_type: {json.dumps(s.get('output_type_v03') or s.get('output_type'))}",
-            "",
-            "Author 3-5 test cases that pin the function's semantics (include one "
-            "edge case: empty/zero/negative/boundary as applicable). Derive a Python "
-            "reference implementation of EXACTLY the described behaviour, run it on "
-            "your chosen inputs, and record the actual outputs as expected values.",
-        ])
-        with open(os.path.join(WD, "prompts", b + ".txt"), "w") as f:
-            f.write(prompt)
-    for n, i in enumerate(range(0, len(todo), BATCH_SIZE)):
-        with open(os.path.join(WD, "batches", f"batch_{n:03d}.json"), "w") as f:
-            json.dump({"batch": n, "base_ids": todo[i:i + BATCH_SIZE]}, f)
+        with open(os.path.join(wd, "prompts", b + ".txt"), "w") as f:
+            f.write(prompt_for(b, s, reasons.get(b)))
+    for n, i in enumerate(range(0, len(todo), batch_size)):
+        ids = todo[i:i + batch_size]
+        doc = {"batch": n, "base_ids": ids, "mode": mode}
+        if reasons:
+            doc["reasons"] = {b: reasons[b] for b in ids if b in reasons}
+        with open(os.path.join(wd, "batches", f"batch_{n:03d}.json"), "w") as f:
+            json.dump(doc, f, indent=1)
+    return (len(todo) + batch_size - 1) // batch_size
+
+
+def main():
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--workdir", default=WD)
+    ap.add_argument("--batch-size", type=int, default=BATCH_SIZE)
+    ap.add_argument("--reauthor", action="store_true",
+                    help="131.44 (c): prepare the bases whose BANKED a_tests fail "
+                         "verify_a_tests.verify (wrong arity etc.) for re-authoring; "
+                         "prep only — nothing is launched or banked")
+    args = ap.parse_args()
+    specs = load_specs(CORPUS)
+    bases = representative_bases(specs)
+    bank_dir = os.path.join(CORPUS, "audit", "a_tests")
+    done = set()
+    if os.path.isdir(bank_dir):
+        done = {os.path.splitext(f)[0] for f in os.listdir(bank_dir)}
+    if args.reauthor:
+        reasons = flagged_banked(bases, bank_dir)
+        todo = sorted(reasons)
+        nb = prepare(bases, todo, args.workdir, args.batch_size, reasons, mode="reauthor")
+        print(json.dumps({"bases": len(bases), "banked": len(done), "flagged": len(todo),
+                          "prepared": len(todo), "batches": nb, "workdir": args.workdir,
+                          "base_ids": todo}))
+        return
+    todo = sorted(b for b in bases if b not in done)
+    nb = prepare(bases, todo, args.workdir, args.batch_size)
     print(json.dumps({"bases": len(bases), "already_banked": len(done),
-                      "prepared": len(todo),
-                      "batches": (len(todo) + BATCH_SIZE - 1) // BATCH_SIZE,
-                      "workdir": WD}))
+                      "prepared": len(todo), "batches": nb, "workdir": args.workdir}))
 
 
 if __name__ == "__main__":

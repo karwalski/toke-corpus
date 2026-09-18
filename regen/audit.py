@@ -29,7 +29,7 @@ import driver as drv                              # noqa: E402
 from driver import effective_input_types      # noqa: E402
 import idiom_judge                                # noqa: E402
 import metrics                                    # noqa: E402
-from run_shard import render_expected             # noqa: E402
+from validate import render_expected             # noqa: E402  (131.44: err-aware)
 from validate import tkc_check, run_stdin_cases   # noqa: E402
 import validate                                   # noqa: E402  (131.39: rebind its TKC)
 import tkc_pin                                    # noqa: E402  (131.39)
@@ -73,7 +73,9 @@ def load_specs(corpus_dir):
                 continue
             m = _BASE.match(tid)
             t = banked.get(m.group(1) if m else tid)
-            if t and effective_input_types(s) == t["input_types"]:
+            # 131.44 (a): the bank carries the sampler-mangled `@(u64` spelling
+            # (76 records never got their tests); compare normalised
+            if t and effective_input_types(s) == drv.norm_types(t["input_types"]):
                 s["test_cases"] = t["test_cases"]
                 s["_tests_from"] = "a_tests"
     return specs

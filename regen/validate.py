@@ -12,10 +12,65 @@ Steps:
 import argparse, json, re, subprocess, sys, os, tempfile
 
 import tkc_pin  # noqa: E402  (131.39)
+import driver as drv  # noqa: E402  (131.44: err rendering + paren-aware decls)
 
 # 131.39: the pinned private copy when TOKE_TKC_PIN is set (a parent harness
 # pinned once), else $TKC, else the ~/tk/toke/tkc symlink. Entry points pin.
 TKC = tkc_pin.default_tkc()
+
+
+def render_expected(val):
+    """One expected stdout line for a full_program / run_test_cases test case
+    (bool -> true/false, integral float -> int). 131.44 (d): an a_tests err
+    marker (`{'err': 'NotFound'}` / `{'error': ...}`) renders as
+    `err:<name>` (driver.render_err — `err:notfound`), the line the driver's
+    `$err` arm prints; multi-line strs are split by the callers.
+    run_shard.run_test_cases keeps a local copy of the pre-131.44 rule — the
+    one-line hook is `from validate import render_expected` there."""
+    name = drv.err_name(val)
+    if name is not None:
+        return drv.render_err(name)
+    if isinstance(val, bool):
+        return "true" if val else "false"
+    if isinstance(val, float) and val == int(val):
+        return str(int(val))
+    return str(val)
+
+
+_TARGET = re.compile(r"f=([a-z][a-z0-9]*)\(")
+
+
+def target_name(spec):
+    """Function name the spec's description mandates (`f=name(`), or None."""
+    m = _TARGET.search(spec.get("description_v03", "") or spec.get("description", "") or "")
+    return m.group(1) if m else None
+
+
+def has_target_function(src, spec):
+    """131.44 (b): a single_function record must DECLARE the target function.
+    Returns (ok, detail). Paren-aware (driver.function_decls), so
+    `f=flatten(p:@(@u64)):@u64` counts — the `[^)]*` regexes cannot see it.
+    When the description names `f=name(`, that name must be declared; else at
+    least one declaration that is neither main nor a domain-context stub.
+    Not applicable (True) for other task types. Hook for run_shard.
+    validate_one_gates (131.42 owns that file): after signature_conforms,
+        if sig_ok and ttype == "single_function": sig_ok, sig_detail = has_target_function(src, spec)
+    """
+    if spec.get("task_type", "full_program") != "single_function":
+        return True, "n/a: " + spec.get("task_type", "full_program")
+    decls = drv.function_decls(src)
+    names = [d["name"] for d in decls]
+    want = target_name(spec)
+    if want:
+        if want in names:
+            return True, "ok"
+        return False, f"target function {want} not declared" + \
+            (f" (declared: {','.join(n for n in names if n != 'main')})" if names else " (no functions)")
+    stubs = drv._stub_names(spec)
+    real = [n for n in names if n != "main" and n not in stubs]
+    if real:
+        return True, "ok (unnamed target: " + real[-1] + ")"
+    return False, "no target function declared (no f= besides main/stubs)"
 
 
 def signature_conforms(spec, src):

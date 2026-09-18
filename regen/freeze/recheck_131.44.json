@@ -1,0 +1,61 @@
+{
+ "story": "131.44",
+ "date": "2026-09-19",
+ "tkc": {
+  "tkc_bin_sha": "a633a83dd363e094fa88237ff8c21e7e31e579388493cdebe21a2891f7d912ff",
+  "tkc_version": "toke 2.8.0",
+  "tkc_path": "/Users/matthew.watt/tk/toke/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/toke/toke",
+  "tkc_pinned_copy": "/var/folders/gf/4ylkzm4d3bg50537kywj3pph0000gp/T/tkc_pin_wp474zdw/tkc",
+  "toke_head": "b4f7c237b659d55af585029590431b67203df16a",
+  "toke_src_dirty": true
+ },
+ "records": 86,
+ "groups": {
+  "a_norm76": {
+   "records": 76,
+   "executed": 76,
+   "pass": 76,
+   "fail": 0,
+   "driver_fail": 0,
+   "compile_fail": 0,
+   "fail_reasons": {},
+   "failing_task_ids": [],
+   "tests_source": {
+    "a_tests": 76
+   }
+  },
+  "b_no_target6": {
+   "records": 6,
+   "executed": 6,
+   "pass": 6,
+   "fail": 0,
+   "driver_fail": 0,
+   "compile_fail": 0,
+   "fail_reasons": {},
+   "failing_task_ids": [],
+   "tests_source": {
+    "a_tests": 6
+   }
+  },
+  "d_err15": {
+   "records": 15,
+   "executed": 15,
+   "pass": 14,
+   "fail": 1,
+   "driver_fail": 0,
+   "compile_fail": 0,
+   "fail_reasons": {
+    "output mismatch": 1
+   },
+   "failing_task_ids": [
+    "A-ERR-0005v24"
+   ],
+   "tests_source": {
+    "a_tests_unpacked": 4,
+    "a_tests": 11
+   }
+  }
+ },
+ "jsonl": "corpus/regen_v04/audit/recheck_131.44.jsonl"
+}
