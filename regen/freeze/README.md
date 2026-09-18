@@ -12,6 +12,7 @@ ledger + provenance schemas every Epic 131 rewrite wave must follow.
 | `freeze_129_manifest.jsonl` | One line per frozen record (23,382): `task_id, category, path, sha256, min_bytes, audit`. `sha256` is over the record file bytes. Copy of `corpus/regen_v04/audit/freeze_129_manifest.jsonl`. |
 | `freeze_129_summary.json` | Counts per category, total, tarball sha256, tkc version, toke-corpus HEAD, date. |
 | `freeze_manifest.py` | Regenerates both (run from anywhere; paths are repo-relative). |
+| `manifest_check_131.35.json` | 131.35: `corpus/regen_v04/MANIFEST.jsonl` integrity before/after the rebuild (2,618 stale lines from the 129.4/129.5 repair wave → 0). `MANIFEST.jsonl` `sha256` is now the record **file-bytes** sha256 (same meaning as this freeze manifest and the rewrite ledger); `source_sha256` carries the old tk_source sha. Tool: `regen/manifest_tool.py check|rebuild|stamp`; every bank path stamps on write. |
 
 Byte snapshot: `~/tk/archive/toke-corpus-regen_v04-freeze129-20260819/` (local
 archive, see its `MANIFEST.md`). Git tag: `freeze-129-20260819`.

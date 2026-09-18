@@ -14,7 +14,8 @@ Dry-run  : ledger/library_131_dryrun.jsonl — one row per program with the
            unless --resume.
 --bank   : corpus/regen_v04/L-<CODE>/<task_id>.json (corpus schema v2 +
            regen.source="library" + regen.library + regen.rewrite131 provenance
-           block per regen/freeze/README.md), MANIFEST.jsonl append,
+           block per regen/freeze/README.md), MANIFEST.jsonl stamp
+           (manifest_tool, 131.35: sha256 = record file bytes),
            ledger/library_131.jsonl (accepted/rejected, resumable, idempotent)
            and ledger/rewrite_131.jsonl (wave=library). Records that fail any
            gate are NOT banked (ledger row only).
@@ -36,6 +37,7 @@ from collections import Counter, defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import run_shard                                  # noqa: E402
+import manifest_tool                              # noqa: E402  (131.35)
 
 CORPUS = os.path.expanduser("~/tk/toke-corpus/corpus/regen_v04")
 TOKE_REPO = os.path.expanduser("~/tk/toke")
@@ -88,8 +90,10 @@ def ingest_one(job):
     return row
 
 
-def bank(row, spec, outdir, shas, shard_name):
-    """Write the accepted record + MANIFEST/ledger rows. Returns record sha."""
+def bank(row, spec, outdir, shas, shard_name, manifest=None):
+    """Write the accepted record + MANIFEST/ledger rows. Returns record sha.
+    `manifest`: a manifest_tool.Manifest held open by the caller (loads once);
+    None falls back to the one-shot manifest_tool.stamp()."""
     record = row["_record"]
     tkc_sha, cat_sha = shas
     now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -111,13 +115,15 @@ def bank(row, spec, outdir, shas, shard_name):
     os.makedirs(cat_dir, exist_ok=True)
     data = json.dumps(record)
     rec_sha = hashlib.sha256(data.encode()).hexdigest()
-    with open(os.path.join(cat_dir, spec["task_id"] + ".json"), "w") as f:
+    rec_path = os.path.join(cat_dir, spec["task_id"] + ".json")
+    with open(rec_path, "w") as f:
         f.write(data)
-    with open(os.path.join(outdir, "MANIFEST.jsonl"), "a") as f:
-        f.write(json.dumps({"id": record["id"], "task_id": spec["task_id"],
-                            "category": spec["category"], "task_type": "stdin_program",
-                            "difficulty": spec.get("difficulty"),
-                            "sha256": rg["source_sha256"], "shard": shard_name}) + "\n")
+    extra = {"id": record["id"], "category": spec["category"], "task_type": "stdin_program",
+             "difficulty": spec.get("difficulty"), "shard": shard_name}
+    if manifest is not None:                    # 131.35: stamp, never blind-append
+        manifest.stamp(spec["task_id"], rec_path, extra=extra)
+    else:
+        manifest_tool.stamp(os.path.join(outdir, "MANIFEST.jsonl"), spec["task_id"], rec_path, extra)
     run_shard.append_ledger(outdir, "rewrite_131",
                             {"task_id": spec["task_id"], "wave": "library", "status": "rewritten",
                              "reason": "131.18 library ingest (new record from "
@@ -155,6 +161,7 @@ def cmd_run(args):
     n = ok = 0
     jobs = [(s, workdir, args.timeout) for s in specs]
     by_id = {s["task_id"]: s for s in specs}
+    manifest = manifest_tool.Manifest(os.path.join(args.outdir, "MANIFEST.jsonl")) if args.bank else None
     with multiprocessing.Pool(args.workers) as pool, open(ledger_path, "a") as led:
         for row in pool.imap_unordered(ingest_one, jobs, chunksize=4):
             n += 1
@@ -162,7 +169,7 @@ def cmd_run(args):
             spec = by_id[row["task_id"]]
             if args.bank:
                 if row["ok"]:
-                    rec_sha = bank(row, spec, args.outdir, shas, shard_name)
+                    rec_sha = bank(row, spec, args.outdir, shas, shard_name, manifest)
                     entry = {"task_id": row["task_id"], "status": "accepted", "reason": None,
                              "attempts": 1, "record_sha256": rec_sha, "ts": int(time.time())}
                 else:

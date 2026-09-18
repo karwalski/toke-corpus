@@ -2,8 +2,9 @@
 """Main-thread acceptance for the 129.4/129.5 repair wave (workers are never
 trusted). For each gen/fix_<task_id>.tk: re-run the full audit gates; on pass,
 replace the corpus record's tk_source (original archived to audit/replaced/,
-provenance stamped regen.repaired), refresh the audit ledger row, mark the
-bank ledger; on fail, mark rejected (worker gets one retry via re-prep).
+provenance stamped regen.repaired), re-stamp its MANIFEST.jsonl line
+(131.35: manifest_tool.Manifest.stamp — file-bytes sha256), refresh the audit
+ledger row, mark the bank ledger; on fail, mark rejected (worker gets one retry via re-prep).
 Processed candidates are archived .done (idempotent, resumable).
 """
 import hashlib, json, os, sys, time
@@ -11,6 +12,7 @@ import hashlib, json, os, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from audit import audit_one, load_specs           # noqa: E402
+import manifest_tool                              # noqa: E402  (131.35)
 
 CORPUS = "/Users/matthew.watt/tk/toke-corpus/corpus/regen_v04"
 WD = os.path.join(CORPUS, "work", "repair_129")
@@ -23,6 +25,7 @@ def main():
     os.makedirs(replaced_dir, exist_ok=True)
     bank_ledger = os.path.join(WD, "bank_ledger.jsonl")
     audit_ledger = os.path.join(CORPUS, "audit", "audit_corpus.jsonl")
+    manifest = manifest_tool.Manifest(os.path.join(CORPUS, "MANIFEST.jsonl"))  # 131.35
     banked = rejected = 0
     for fn in sorted(os.listdir(gen)):
         if not fn.startswith("fix_") or not fn.endswith(".tk"):
@@ -58,6 +61,7 @@ def main():
             rec["regen"]["repaired_ts"] = int(time.time())
             with open(rec_path, "w") as f:
                 json.dump(rec, f)
+            manifest.stamp(tid, rec_path)   # 131.35: never replace without re-stamping
             row["sha256"] = rec["regen"]["source_sha256"]
             row["repaired"] = True
             with open(audit_ledger, "a") as f:      # last-write-wins in report

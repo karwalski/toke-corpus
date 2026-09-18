@@ -3,7 +3,13 @@
 file (re-executes the Python reference — verify_a_tests.verify) and, on pass,
 install it as audit/a_tests/<base>.json. Variant propagation happens at audit
 time (audit.py injects a base's cases into variants with matching input
-types). Processed files archived .done."""
+types). Processed files archived .done.
+
+131.35 note: this path writes audit/a_tests/<base>.json only — it never
+rewrites a corpus record file, so there is nothing to re-stamp in
+MANIFEST.jsonl. If it ever starts touching <CATEGORY>/<task_id>.json, call
+manifest_tool.Manifest(...).stamp(task_id, rec_path) right after the write
+(see bank_repairs.py / run_shard.cmd_validate)."""
 import json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))

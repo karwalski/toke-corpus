@@ -33,6 +33,7 @@ from validate import tkc_check, signature_conforms  # noqa: E402
 from validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402  (131.18)
 import idiom_judge                                   # noqa: E402
 import metrics                                       # noqa: E402
+import manifest_tool                                 # noqa: E402  (131.35)
 
 TKC = "/Users/matthew.watt/tk/toke/tkc"
 BATCH_SIZE = 20
@@ -259,6 +260,7 @@ def cmd_validate(args):
     spec_dir = os.path.join(args.workdir, "specs")
     accepted = rejected = skipped = 0
     retry_path = os.path.join(args.workdir, "retry_queue.jsonl")
+    manifest = manifest_tool.Manifest(os.path.join(args.outdir, "MANIFEST.jsonl"))  # 131.35
     for fn in sorted(os.listdir(gen_dir)):
         m = re.match(r"out_(.+)\.tk$", fn)
         if not m:
@@ -276,15 +278,18 @@ def cmd_validate(args):
         if ok:
             cat_dir = os.path.join(args.outdir, spec.get("category", "MISC"))
             os.makedirs(cat_dir, exist_ok=True)
-            with open(os.path.join(cat_dir, task_id + ".json"), "w") as f:
+            rec_path = os.path.join(cat_dir, task_id + ".json")
+            with open(rec_path, "w") as f:
                 json.dump(record, f)
-            with open(os.path.join(args.outdir, "MANIFEST.jsonl"), "a") as f:
-                f.write(json.dumps({"id": record["id"], "task_id": task_id,
-                                    "category": spec.get("category"),
-                                    "task_type": spec.get("task_type"),
-                                    "difficulty": spec.get("difficulty"),
-                                    "sha256": record["regen"]["source_sha256"],
-                                    "shard": shard_name}) + "\n")
+            # 131.35: MANIFEST line is stamped from the file just written
+            # (sha256 = file bytes, source_sha256 = tk_source). stamp() replaces
+            # any existing line for task_id, so the 131.16 `validate --replace`
+            # mode needs no extra manifest work — keep the record write and
+            # this stamp adjacent when adding it.
+            manifest.stamp(task_id, rec_path,
+                           extra={"id": record["id"], "category": spec.get("category"),
+                                  "task_type": spec.get("task_type"),
+                                  "difficulty": spec.get("difficulty"), "shard": shard_name})
             append_ledger(args.outdir, shard_name,
                           {"task_id": task_id, "status": "accepted", "reason": None,
                            "attempts": spec.get("_attempts", 1), "ts": int(time.time())})
