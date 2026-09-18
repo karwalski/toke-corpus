@@ -57,6 +57,100 @@ def tkc_run(src_path, workdir):
     return r.returncode, r.stdout, None
 
 
+# ---------------------------------------------------------------------------
+# 131.18: stdin_program execution core (shared by run_shard.validate_one,
+# audit.audit_one and ingest_library). Library manifests (toke-test-programs
+# results/library/*.json) drive a program by stdin and compare the WHOLE stdout
+# against expected_output, one execution per test case. Comparison is exact
+# modulo trailing whitespace per line and leading/trailing blank lines (the
+# verify-one.py / audit_library.py `norm` rule, so the 129.3 1,583/1,583 result
+# stays comparable). Tightened 129.6 gates apply per case: exit 0, no extra
+# lines (implied by whole-output comparison), multi-line expecteds whole.
+# ---------------------------------------------------------------------------
+STDIN_CASE_TIMEOUT = 10
+FIXTURE_ROOT = "/tmp"
+
+
+def norm_stdout(s):
+    return "\n".join(l.rstrip() for l in (s or "").strip().splitlines())
+
+
+def materialise_fixtures(fixtures, cwd):
+    """Create the dirs/files a library test case needs (126.8 fixtures).
+    Paths are absolute in the manifests (all under /tmp); relative paths are
+    resolved against cwd. Refuses any absolute path outside FIXTURE_ROOT."""
+    fx = fixtures or {}
+    for d in fx.get("dirs") or []:
+        os.makedirs(_fixture_path(d, cwd), exist_ok=True)
+    for fpath, content in (fx.get("files") or {}).items():
+        ap = _fixture_path(fpath, cwd)
+        os.makedirs(os.path.dirname(ap), exist_ok=True)
+        with open(ap, "wb") as f:
+            f.write(content.encode("latin-1"))
+
+
+def _fixture_path(p, cwd):
+    if os.path.isabs(p):
+        real = os.path.realpath(p)
+        if not real.startswith(os.path.realpath(FIXTURE_ROOT) + os.sep):
+            raise ValueError(f"fixture path outside {FIXTURE_ROOT}: {p}")
+        return p
+    return os.path.join(cwd, p)
+
+
+def run_stdin_case(binpath, tc, cwd, timeout=STDIN_CASE_TIMEOUT):
+    """Run the binary once with tc['input'] on stdin. Returns a per-case
+    result: {match, exit, reason, stdout} — match requires exact normalised
+    stdout equality AND exit 0; a crash (signal) or timeout is a mismatch."""
+    try:
+        materialise_fixtures(tc.get("fixtures"), cwd)
+    except (ValueError, OSError) as e:
+        return {"match": False, "exit": None, "reason": f"fixture: {e}"}
+    try:
+        r = subprocess.run([binpath], input=tc.get("input", "") or "",
+                           capture_output=True, text=True, errors="replace",
+                           timeout=timeout, cwd=cwd)
+    except subprocess.TimeoutExpired:
+        return {"match": False, "exit": None, "reason": "timeout"}
+    got, want = norm_stdout(r.stdout), norm_stdout(tc.get("expected_output", ""))
+    if r.returncode < 0 or r.returncode >= 128:
+        return {"match": False, "exit": r.returncode,
+                "reason": f"crash sig {abs(r.returncode) % 128}", "stdout": r.stdout[:500]}
+    if got != want:
+        gl, wl = got.split("\n"), want.split("\n")
+        why = ("output mismatch" if len(gl) == len(wl)
+               else f"expected {len(wl)} lines, got {len(gl)}")
+        return {"match": False, "exit": r.returncode, "reason": why, "stdout": r.stdout[:500]}
+    if r.returncode != 0:
+        return {"match": False, "exit": r.returncode, "reason": f"exit code {r.returncode}"}
+    return {"match": True, "exit": 0, "reason": None}
+
+
+def run_stdin_cases(binpath, spec, workdir, timeout=STDIN_CASE_TIMEOUT):
+    """All test cases of a stdin_program spec, one execution each, fresh cwd per
+    case. Returns the runtime dict recorded under regen.runtime (same top-level
+    keys as run_shard.run_test_cases: ran/exit/match/reason, plus cases[])."""
+    tcs = spec.get("test_cases") or []
+    if not tcs:
+        return None
+    cases = []
+    with tempfile.TemporaryDirectory(dir=workdir) as td:
+        for i, tc in enumerate(tcs):
+            cwd = os.path.join(td, f"t{i}")
+            os.makedirs(cwd, exist_ok=True)
+            res = run_stdin_case(binpath, tc, cwd, timeout)
+            res["case"] = i
+            cases.append(res)
+    failed = [c for c in cases if not c["match"]]
+    first = failed[0] if failed else None
+    return {"ran": True, "mode": "stdin", "cases_total": len(cases),
+            "cases_passed": len(cases) - len(failed),
+            "exit": first["exit"] if first else 0,
+            "match": not failed,
+            "reason": f"{first['reason']} (case {first['case']})" if first else None,
+            "cases": cases}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--task-json", required=True)

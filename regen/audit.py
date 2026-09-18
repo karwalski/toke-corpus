@@ -14,6 +14,8 @@ Gates recorded per record (both old and tightened verdicts, nothing dropped):
   build     tkc -o rc==0 (when tests will run)
   tests_old the original run_shard.py gate (line match only)
   tests_new tightened: line match AND exit==0 AND no extra stdout lines
+  (131.18: task_type stdin_program runs one execution per test case with the
+  case input on stdin; tests_old = no crash + exact output, tests_new adds exit 0)
 Structural/idiom flags are advisory here; thresholds live in quality_rubric.md
 and are finalised from this sweep's distributions. Specs whose description
 mandates a style (e.g. "Use nested if/el blocks") carry style_mandate so the
@@ -28,7 +30,7 @@ from driver import effective_input_types      # noqa: E402
 import idiom_judge                                # noqa: E402
 import metrics                                    # noqa: E402
 from run_shard import render_expected             # noqa: E402
-from validate import tkc_check                    # noqa: E402
+from validate import tkc_check, run_stdin_cases   # noqa: E402
 
 TKC = "/Users/matthew.watt/tk/toke/tkc"
 _MANDATE = re.compile(r"Variant \d+:\s*(.+)$")
@@ -44,7 +46,11 @@ _BASE = re.compile(r"^(A-[A-Z]+-\d+)v\d+$")
 
 def load_specs(corpus_dir):
     specs = {}
-    for sh in sorted(glob.glob(os.path.join(corpus_dir, "shards", "shard_*.jsonl"))):
+    # 131.18: shards/library_*.jsonl hold the back-generated stdin_program specs
+    # for the library ingest (L-<CAT>-NNN); harmless until those are banked
+    shard_files = sorted(glob.glob(os.path.join(corpus_dir, "shards", "shard_*.jsonl"))) + \
+        sorted(glob.glob(os.path.join(corpus_dir, "shards", "library_*.jsonl")))
+    for sh in shard_files:
         for line in open(sh):
             s = json.loads(line)
             specs[s["task_id"]] = s
@@ -131,6 +137,37 @@ def _exec_tests(src, want_lines, tmpdir, tag):
                 os.unlink(p)
 
 
+def _exec_stdin_tests(src, spec, tmpdir, tag):
+    """131.18 stdin_program: build once, run every test case with its input on
+    stdin (validate.run_stdin_cases). tests_old = verify-one.py semantics
+    (no crash, exact normalised output); tests_new = tests_old AND exit 0."""
+    tkpath = os.path.join(tmpdir, tag + ".tk")
+    binpath = tkpath + ".bin"
+    with open(tkpath, "w") as f:
+        f.write(src)
+    try:
+        b = subprocess.run([TKC, tkpath, "-o", binpath], capture_output=True,
+                           text=True, errors="replace", timeout=90)
+        if b.returncode != 0:
+            return {"build": False, "tests_old": False, "tests_new": False,
+                    "reason": "build failed"}
+        rt = run_stdin_cases(binpath, spec, tmpdir)
+        cases = rt["cases"]
+        old_fail = [c for c in cases if not c["match"] and
+                    not (c.get("reason") or "").startswith("exit code")]
+        old_ok = not old_fail
+        return {"build": True, "tests_old": old_ok, "tests_new": rt["match"],
+                "exit": rt["exit"], "cases_total": rt["cases_total"],
+                "cases_passed": rt["cases_passed"], "reason": rt["reason"]}
+    except subprocess.TimeoutExpired:
+        return {"build": False, "tests_old": False, "tests_new": False,
+                "reason": "build timeout"}
+    finally:
+        for p in (tkpath, binpath):
+            if os.path.exists(p):
+                os.unlink(p)
+
+
 def audit_one(job):
     """One record end-to-end. Returns the audit row (never raises)."""
     task_id, rec_path, spec, tmpdir = job
@@ -176,6 +213,11 @@ def audit_one(job):
             row.update(_exec_tests(src, want, tmpdir, task_id + ".fp"))
             row["executed"] = True
             row["executed_via"] = "main"
+        elif ttype == "stdin_program" and tcs:
+            # 131.18: one execution per case, input on stdin, whole stdout
+            row.update(_exec_stdin_tests(src, spec, tmpdir, task_id + ".sp"))
+            row["executed"] = True
+            row["executed_via"] = "stdin"
         elif ttype == "single_function" and tcs:
             dsrc, err = drv.append_main(spec, src)
             if err:

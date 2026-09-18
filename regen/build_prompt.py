@@ -10,6 +10,8 @@ Emits the full prompt on stdout. Three task types:
                     harness wraps it with a main() for validation
   migrate_fix     - given legacy toke source + current tkc diagnostics, produce
                     an equivalent program in current syntax
+  stdin_program   - (131.18) complete program driven by stdin; each test case is
+                    one run whose whole stdout must equal expected_output
 """
 import json, sys, os
 
@@ -57,6 +59,30 @@ def build(spec, card):
         parts.append("Write ONLY the single target function declaration (f=...{...};) plus any "
                       "t=$... type declarations it needs. No module line, no imports, no main. "
                       "The harness will assemble the full module around your function.")
+    elif ttype == "stdin_program":
+        # 131.18: library-style task — the program reads its input from stdin
+        # and its WHOLE stdout is compared against expected_output per case
+        parts.append(f"TASK ({spec.get('category','?')}): {desc}")
+        lib = spec.get("library") or {}
+        if lib.get("input_format"):
+            parts.append(f"Input format (stdin): {lib['input_format']}")
+        if lib.get("output_format"):
+            parts.append(f"Output format (stdout): {lib['output_format']}")
+        if lib.get("stdlib_modules"):
+            parts.append(f"Stdlib modules used by the reference: {', '.join(lib['stdlib_modules'])}")
+        tcs = spec.get("test_cases") or []
+        if tcs:
+            parts.append("")
+            parts.append("Test cases (each is a separate run: stdin -> exact expected stdout, exit 0):")
+            for i, tc in enumerate(tcs):
+                parts.append(f"  case {i}: stdin={json.dumps(tc.get('input', ''))}")
+                parts.append(f"          stdout={json.dumps(tc.get('expected_output', ''))}")
+                if tc.get("fixtures"):
+                    parts.append(f"          fixtures={json.dumps(tc['fixtures'])[:400]}")
+        parts.append("")
+        parts.append("Write a COMPLETE toke program: module declaration, imports, the "
+                      "function(s), and f=main():i64 that reads stdin, prints exactly the "
+                      "expected output with io.println, and returns 0.")
     elif ttype == "migrate_fix":
         parts.append("TASK: migrate legacy toke source to current v0.3 syntax (tkc 2.8.0).")
         parts.append("")

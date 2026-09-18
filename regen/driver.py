@@ -198,9 +198,24 @@ def _swap_real_stubs(spec, assembled_src):
     return src, None
 
 
+def stdin_cases(spec):
+    """131.18 stdin_program specs: normalised list of {input, expected_output,
+    fixtures} — the per-execution unit (one binary run per case, input on
+    stdin, whole stdout compared). Mirrors expected_lines() for the
+    single_function/full_program one-line-per-case convention."""
+    out = []
+    for tc in spec.get("test_cases") or []:
+        out.append({"input": tc.get("input", "") or "",
+                    "expected_output": tc.get("expected_output", "") or "",
+                    "fixtures": tc.get("fixtures") or None})
+    return out
+
+
 def append_main(spec, assembled_src):
     """Assembled single_function module + real-bodied stubs + generated main().
     Returns (source, error) — error is set when synthesis isn't possible."""
+    if spec.get("task_type") == "stdin_program":
+        return None, "stdin_program: has its own main; run via validate.run_stdin_cases"
     in_types = effective_input_types(spec)
     ret = spec.get("output_type_v03") or spec.get("output_type") or ""
     tcs = spec.get("test_cases") or []

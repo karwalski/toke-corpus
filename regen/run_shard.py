@@ -7,6 +7,9 @@ Subcommands:
   validate  - assemble + independently re-check worker outputs, run test
               cases where the spec has them, emit corpus records, append
               MANIFEST + ledger, queue rejects for one retry
+              task_type full_program: binary run once, one line per case;
+              task_type stdin_program (131.18): one run per case, input on
+              stdin, whole stdout vs expected_output (validate.run_stdin_cases)
   stats     - pass-rate summary per category / task_type for a shard
 
 Layout (all under --workdir, one workdir per shard):
@@ -27,6 +30,7 @@ sys.path.insert(0, HERE)
 from assemble import assemble, sanitize          # noqa: E402
 from build_prompt import build                   # noqa: E402
 from validate import tkc_check, signature_conforms  # noqa: E402
+from validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402  (131.18)
 import idiom_judge                                   # noqa: E402
 import metrics                                       # noqa: E402
 
@@ -135,27 +139,60 @@ def run_test_cases(binpath, spec):
 
 def validate_one(spec, raw_src, workdir):
     """Full acceptance pipeline for one worker output. Returns (record, ok, reason)."""
-    src = assemble(spec, raw_src)
+    record, ok, reason, _gates = validate_one_gates(spec, raw_src, workdir)
+    return record, ok, reason
+
+
+def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=None):
+    """validate_one plus a per-gate verdict dict (131.18). Gate keys:
+    compile, signature, build, tests, idiom, structure, lint — each
+    True/False/None (None = not applicable). `lint_gate=True` additionally
+    rejects on lint warnings > 0 (library ingest; NOT applied by validate_one so
+    the 129-era shard path is unchanged). task_type stdin_program: source is
+    taken verbatim (no assemble/sanitize), no target-signature check, one
+    execution per test case with stdin fed (validate.run_stdin_cases)."""
+    ttype = spec.get("task_type", "full_program")
+    is_stdin = ttype == "stdin_program"
+    src = raw_src if is_stdin else assemble(spec, raw_src)
+    gates = {"compile": None, "signature": None, "build": None, "tests": None,
+             "idiom": None, "structure": None, "lint": None}
     if re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1a\x1c-\x1f]", src.replace("\x1b", "")) or "\x00" in src:
-        return None, False, "control bytes in source"
+        gates["compile"] = False
+        return None, False, "control bytes in source", gates
     with tempfile.NamedTemporaryFile("w", suffix=".tk", dir=workdir, delete=False) as f:
         f.write(src)
         tkpath = f.name
     try:
         rc, codes, diag = tkc_check(tkpath)
-        sig_ok, sig_detail = signature_conforms(spec, src)
+        gates["compile"] = rc == 0
+        if is_stdin:
+            sig_ok, sig_detail = True, "stdin_program: no target signature"
+        else:
+            sig_ok, sig_detail = signature_conforms(spec, src)
+            gates["signature"] = sig_ok
         runtime = None
-        if rc == 0 and spec.get("task_type") == "full_program" and spec.get("test_cases"):
+        if rc == 0 and ttype in ("full_program", "stdin_program") and spec.get("test_cases"):
             binpath = tkpath + ".bin"
-            b = subprocess.run([TKC, tkpath, "-o", binpath], capture_output=True, text=True, timeout=90)
+            # stdin_program specs may carry build_flags (library: --allow-all for
+            # fs/env/net capabilities); the full_program build line is unchanged
+            flags = list(spec.get("build_flags") or []) if is_stdin else []
+            b = subprocess.run([TKC, tkpath, "-o", binpath] + flags, capture_output=True, text=True, timeout=90)
+            gates["build"] = b.returncode == 0
             if b.returncode == 0:
-                runtime = run_test_cases(binpath, spec)
+                if is_stdin:
+                    runtime = run_stdin_cases(binpath, spec, workdir,
+                                              case_timeout or STDIN_CASE_TIMEOUT)
+                else:
+                    runtime = run_test_cases(binpath, spec)
+                gates["tests"] = bool(runtime.get("match", True))
                 if os.path.exists(binpath):
                     os.unlink(binpath)
             else:
                 runtime = {"ran": False, "reason": "build failed"}
+                gates["tests"] = False
         # 129.6 rubric gates (quality_rubric.md): idiom floor + structural hard limits
         idiom_score, idiom_notes = idiom_judge.score(src)
+        gates["idiom"] = idiom_score >= idiom_judge.IDIOM_FLOOR
         struct = metrics.analyse(tkpath) if rc == 0 else None
         struct_fail = None
         if struct:
@@ -163,8 +200,11 @@ def validate_one(spec, raw_src, workdir):
                 struct_fail = f"nesting depth {struct['max_depth']} > 4"
             elif struct["max_func_bytes"] > 600:
                 struct_fail = f"function {struct['max_func_bytes']} bytes > 600"
+            gates["structure"] = not struct_fail
+            gates["lint"] = struct.get("lint_warnings", 0) == 0
+        lint_fail = lint_gate and struct is not None and struct.get("lint_warnings", 0) > 0
         ok = (rc == 0 and sig_ok and (runtime is None or runtime.get("match", True))
-              and idiom_score >= idiom_judge.IDIOM_FLOOR and not struct_fail)
+              and idiom_score >= idiom_judge.IDIOM_FLOOR and not struct_fail and not lint_fail)
         reason = None
         if rc != 0:
             reason = "compile: " + ",".join(codes[:3])
@@ -176,6 +216,9 @@ def validate_one(spec, raw_src, workdir):
             reason = f"idiom: {idiom_score:.2f} < {idiom_judge.IDIOM_FLOOR} ({'; '.join(idiom_notes)})"
         elif struct_fail:
             reason = "structure: " + struct_fail
+        elif lint_fail:
+            rules = sorted({d.get("rule") for d in struct.get("lint", []) if d.get("severity") == "warning"})
+            reason = f"lint: {struct['lint_warnings']} warnings ({','.join(r for r in rules if r)})"
         record = {
             "id": "P3-" + spec["task_id"],
             "version": 2,
@@ -201,7 +244,9 @@ def validate_one(spec, raw_src, workdir):
                 "max_depth": struct.get("max_depth") if struct else None,
             },
         }
-        return record, ok, reason
+        if lint_gate:
+            record["regen"]["lint_warnings"] = struct.get("lint_warnings") if struct else None
+        return record, ok, reason, gates
     finally:
         if os.path.exists(tkpath):
             os.unlink(tkpath)
