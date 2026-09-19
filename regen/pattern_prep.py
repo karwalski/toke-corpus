@@ -30,6 +30,16 @@ sys.path.insert(0, HERE)
 import pattern_common as pc                       # noqa: E402
 from audit import load_specs                      # noqa: E402
 
+# 131.42: the 429 gamed A-ERR records. Their prompt must carry this verbatim —
+# they are the one cohort whose BEHAVIOUR must change (the marker string is the
+# bug), so the rewrite is a correctness fix, not a form-only rewrite.
+GAMED_ERR_RULE = "gamed-err-marker"
+GAMED_ERR_INSTRUCTION = (
+    "This record fakes its error case by returning the test harness's `{'err': \u2026}` "
+    "marker as a `str` \u2014 rewrite it to declare the spec's `T!Err` return and raise a "
+    "real `$err` variant (`err-propagate`/`err-default`), and do not reintroduce a "
+    "marker string anywhere, including helpers or a trailing wrapper.")
+
 INSTRUCTION = ("REWRITE RULES: behaviour identical (same printed output for every "
                "input, same signature, same module shape); least tokens — every "
                "byte of the --min form counts; no pattern-lint violations "
@@ -62,6 +72,18 @@ def build_prompt(spec, src, ctx):
                      "keep main() and its build flags.")
     else:
         lines.append("Module shape: full_program — keep main() and its printed lines.")
+    row_rules = pc.bucket_rules(row)
+    if GAMED_ERR_RULE in row_rules:
+        lines += ["", "CORRECTNESS FIX (131.42) — read this before anything else:",
+                  GAMED_ERR_INSTRUCTION,
+                  "",
+                  "Because of that, this record is the ONE case where the printed output "
+                  "MUST change: the error input currently prints the marker text and after "
+                  "the rewrite it must print the driver's `$err` line. Every non-error input "
+                  "must still print exactly what it prints today."]
+    elif row.get("bucket_reason") and str(row.get("story")) not in ("131.13", "None"):
+        lines += ["", f"Why this record was routed here ({row.get('story')}): "
+                      f"{row['bucket_reason']}"]
     mandate = pc.style_mandate(spec)
     if mandate:
         lines += ["", f"NOTE the task description mandates: \"{mandate}\" — honour it. "
