@@ -49,13 +49,13 @@ m=sum;f=sum(arr:@i64):i64{let total=mut.0;lp(let i=0;i<arr.len;i=i+1){total=tota
 
 ### 3.1 Where We Are
 
-The project follows a gated milestone structure. **Gate 1 PASSED on 2026-04-03**, demonstrating that the compiler, tokenizer, and a baseline fine-tuned model could produce compilable toke programs. Gate 2 is the next milestone.
+The project follows a gated milestone structure. **Gate 1 was recorded as PASSED on 2026-04-03**, demonstrating that the compiler, tokenizer, and a baseline fine-tuned model could produce compilable toke programs. **That verdict was re-opened on 2026-09-19 (story 128.19):** the Pass@1 it rested on was 588/**923**, which dropped non-compiling solutions from the denominator; corrected to 588/1,000 = **58.8%**, it is below the gate's own 60% minimum. The verdict has not been re-decided. Gate 2 is the next milestone.
 
 ### 3.2 Gate 2 Criteria
 
 | Criterion | Threshold | Gate 1 Baseline |
 |---|---|---|
-| Pass@1 accuracy | >= 75% | 63.7% |
+| Pass@1 accuracy | >= 75% | **58.8%** (588/1,000; quoted as 63.7% until the denominator was corrected on 2026-09-19, story 128.19) |
 | Token reduction vs natural language | >= 15% | 12.5% (8K) / 13.1% (32K) |
 | Compile rate on generated programs | >= 95% | TBD |
 | Corpus size | >= 100,000 programs | ~47K at Gate 1 |

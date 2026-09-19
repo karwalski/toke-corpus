@@ -220,7 +220,7 @@ Optional fields include `references` (Python, C, Java equivalent sources and tok
 
 ## 8. Staleness Note
 
-This document is a **point-in-time snapshot** as of 2026-04-04, reflecting the corpus state at Gate 1 (Pass@1 = 63.7%, 2026-04-03). The corpus may grow in subsequent phases. For current statistics, re-run generation scripts or inspect `corpus/manifest.json` directly.
+This document is a **point-in-time snapshot** as of 2026-04-04, reflecting the corpus state at Gate 1 (Pass@1 = 58.8%, 2026-04-03; published as 63.7% until 2026-09-19, when the denominator was corrected from the 923 compiled solutions to the 1,000 generated — story 128.19). The corpus may grow in subsequent phases. For current statistics, re-run generation scripts or inspect `corpus/manifest.json` directly.
 
 ---
 
