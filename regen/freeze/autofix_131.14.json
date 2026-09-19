@@ -1,0 +1,206 @@
+{
+ "story": "131.14",
+ "wave": "auto",
+ "ts": "2026-09-19T02:31:25Z",
+ "bucket": {
+  "file": "corpus/regen_v04/audit/buckets/auto.txt",
+  "rows": 643,
+  "excluded_131_42": [
+   "A-ERR-0016v25",
+   "A-ERR-0092v71"
+  ],
+  "excluded_reason": "131.42 re-routed these two AUTO rows to AGENT (gamed_err_marker); pattern_sweep.131.42.patch.jsonl is authoritative",
+  "processed": 641
+ },
+ "dry_run": {
+  "tkc_bin_sha": "9f7e3e4efa29d8797570d844679c1709b9d6b5d698862dd1b6ab9d0078ff2f77",
+  "toke_git": "e561e1a",
+  "decisions": {
+   "reject": 217,
+   "bank": 424
+  },
+  "reasons": {
+   "bank:fixed": 424,
+   "reject:gate": 1,
+   "reject:preexisting": 13,
+   "reject:unverifiable": 203
+  },
+  "diff_verdicts": {
+   "unverifiable": 203,
+   "identical": 424,
+   "not_run": 14
+  },
+  "perf_flags": [],
+  "bank_rate_of_changed": 0.6615
+ },
+ "bank_run": {
+  "tkc_bin_sha": "bb443fbf43709b38f758202a09a8ab7db85930f55d366cf40649c219b1dd5371",
+  "tkc_sha": "bb443fbf4370",
+  "toke_git": "4e7ebd5",
+  "catalogue_sha": "874f0fd4985a",
+  "concat_fix_armed": false,
+  "decisions": {
+   "reject": 217,
+   "bank": 424
+  },
+  "banked": {
+   "rewritten": 424
+  },
+  "reasons": {
+   "bank:fixed": 424,
+   "reject:gate": 1,
+   "reject:preexisting": 13,
+   "reject:unverifiable": 203
+  },
+  "diff_verdicts": {
+   "unverifiable": 203,
+   "identical": 424,
+   "not_run": 14
+  },
+  "fix_rules": {
+   "single-use-let": 641,
+   "mutable-never-mutated": 2,
+   "unused-import": 4,
+   "unused-let": 1
+  },
+  "perf_flags": [],
+  "by_task_type": {
+   "full_program": {
+    "bank": 249,
+    "reject": 3
+   },
+   "migrate_fix": {
+    "reject": 210,
+    "bank": 1
+   },
+   "single_function": {
+    "reject": 4,
+    "bank": 174
+   }
+  },
+  "thresholds": {
+   "perf_ratio": 1.5,
+   "perf_wall_ms": 5.0,
+   "perf_rss_kb": 1024.0,
+   "perf_runs": 3,
+   "n_generated": 20,
+   "idiom_floor": 0.6,
+   "max_depth": 4,
+   "max_func_bytes": 600
+  },
+  "note": "dry run and bank run were separate invocations across a compiler relink; the bank run re-verified all 641 under ONE pin so every rewrite131.tkc_bin_sha is the binary that verified it. Decisions were identical across the two binaries."
+ },
+ "bank_rate": {
+  "all": 0.6615,
+  "excluding_migrate_fix": 0.9837,
+  "migrate_fix_banked": 1,
+  "migrate_fix_total": 211,
+  "note": "the 80% shakedown figure was a random-manifest sample; the AUTO bucket is 33% migrate_fix, which has no main() and so can never reach an `identical` diff_check verdict. Among records with an executable lock the rate is 98.4%."
+ },
+ "rejects": {
+  "total": 217,
+  "by_task_type": {
+   "migrate_fix": 210,
+   "full_program": 3,
+   "single_function": 4
+  },
+  "by_reason": {
+   "unverifiable:no main() \u2014 not executable": 201,
+   "preexisting:compile": 10,
+   "preexisting:pattern": 3,
+   "gate:compile": 1,
+   "unverifiable:timeout on both sides (generated)": 1,
+   "unverifiable:driver build failed": 1
+  },
+  "unverifiable_no_main": 201,
+  "preexisting_compile_E4031": [
+   "A-SRT-0090v38",
+   "D-DAT-0004v5",
+   "MIG-B-D-CRY-0013v269-8404a1b0",
+   "MIG-B-D-NET-0019v277-7e351731",
+   "MIG-P2-A-A-STR-0003v18-c4b3f15a",
+   "MIG-P2-B-D-CRY-0011v261-0ef0fb1b",
+   "MIG-P2-B-D-FIO-0001v373-66cb0b87",
+   "MIG-P2-B-D-FIO-0007v346-4f13cb1f",
+   "MIG-P2-B-D-FIO-0009v354-65425ad5",
+   "MIG-P2-B-D-FIO-0017v339-a39e1537"
+  ],
+  "fix_defect": {
+   "task_id": "D-WEB-0006v87",
+   "reason": "gate:compile: E4031",
+   "detail": "`--fix` inlined `let count=segs.len` into an i64 comparison; the let was the u64->i64 coercion point, so `right>=segs.len` is E4031 (expected i64, got u64). Caught by the compile gate, never banked. Needs a compiler story."
+  }
+ },
+ "consistency": {
+  "ledger_lines": 424,
+  "ledger_unique_task_ids": 424,
+  "ledger_status": {
+   "rewritten": 424
+  },
+  "archived_originals": 424,
+  "manifest_check": {
+   "stale": 0,
+   "ok": 23382,
+   "clean": true,
+   "freeze_diverged": 424,
+   "note": "freeze_diverged == banked count, as expected for rewritten records"
+  },
+  "rewrite131_stamped": 424,
+  "rewrite131_single_tkc_bin_sha": "bb443fbf43709b38f758202a09a8ab7db85930f55d366cf40649c219b1dd5371",
+  "rewrite131_diff_check": {
+   "identical": 424
+  },
+  "archive_dir_note": "audit/replaced/131 holds 424 *.tk plus the pre-existing .keep placeholder",
+  "cross_check": "for all 424: record file sha == ledger.new_sha256 == MANIFEST.sha256; rewrite131.prev_sha256 == ledger.prev_sha256; archived original != banked source. 0 problems."
+ },
+ "resweep_of_banked": {
+  "tool": "regen/pattern_sweep.py sweep_one over the 424 banked ids only (shared ledger/bucket files untouched)",
+  "records": 424,
+  "records_with_violations": 4,
+  "buckets": {
+   "LEAVE": 420,
+   "EXEMPT": 1,
+   "AGENT": 3
+  },
+  "other_lint": 0,
+  "residual": [
+   {
+    "task_id": "D-DAT-0012v34",
+    "rule": "loop-rebuilds-array",
+    "severity": "hint",
+    "pattern": "iter-map",
+    "bucket": "AGENT"
+   },
+   {
+    "task_id": "D-DAT-0013v69",
+    "rule": "loop-rebuilds-array",
+    "severity": "hint",
+    "pattern": "iter-map",
+    "bucket": "AGENT"
+   },
+   {
+    "task_id": "D-FIO-0018v206",
+    "rule": "loop-rebuilds-array",
+    "severity": "hint",
+    "pattern": "iter-map",
+    "bucket": "AGENT"
+   },
+   {
+    "task_id": "D-FIO-0010v117",
+    "rule": "single-use-let",
+    "severity": "hint",
+    "pattern": "fn-chain-vs-let",
+    "bucket": "LEAVE",
+    "note": "had 2 single-use-let hits with a fix; --fix inlined one, the survivor now reports fix:false \u2014 a --fix coverage gap, not a regression"
+   }
+  ],
+  "note": "420/424 are 0-violation. The 3 loop-rebuilds-array hints are newly VISIBLE: inlining the single-use let exposed the loop shape to the iter-map matcher. All four residuals are hint severity, so the bank gate (0 error/warning) held. The 3 AGENT rows should join the 131.15 wave."
+ },
+ "library": {
+  "bucket": "corpus/regen_v04/audit/buckets/library_auto.txt",
+  "rows": 53,
+  "processed": 0,
+  "supported": false,
+  "reason": "pattern_autofix.py resolves task ids through corpus/regen_v04/MANIFEST.jsonl + load_specs(); all 53 L-* ids report as unknown_task_ids and are skipped. It also has no verify-one.py / audit_library.py gate path. Left for 131.17."
+ }
+}
