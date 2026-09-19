@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Transform Phase 1 (legacy 80-char) toke source to default (56-char) syntax.
+"""Transform Phase 1 (legacy 86-char) toke source to default (59-char) syntax.
 
 Story 11.6.1 — Regenerate corpus in default syntax.
 
@@ -178,7 +178,7 @@ def tokenize(source: str) -> list[Token]:
 
 
 class ToDefaultSyntaxTransformer:
-    """Mechanically transforms legacy toke source to default (56-char) syntax."""
+    """Mechanically transforms legacy toke source to default (59-char) syntax."""
 
     def __init__(self):
         self.stats = {
@@ -1219,7 +1219,7 @@ def _find_tkc() -> Optional[str]:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Transform legacy toke corpus to default (56-char) syntax"
+        description="Transform legacy toke corpus to default (59-char) syntax"
     )
     parser.add_argument("--corpus-dir",
                         default=os.path.expanduser("~/tk/toke-corpus/corpus"),

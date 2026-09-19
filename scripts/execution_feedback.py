@@ -38,7 +38,7 @@ Toke syntax reference (Profile 1):
 - `lp(init;cond;step){body}` for loops
 - `[a;b;c]` for arrays, `arr[i]` for indexing
 - `;` as statement separator (not terminator)
-- 56-character set, no underscores in identifiers
+- 59-character set, no underscores in identifiers
 """
 
 # ---------------------------------------------------------------------------
@@ -200,7 +200,7 @@ for _fn in KEYWORD_MUTATORS:
 # ---------------------------------------------------------------------------
 
 ERROR_DESCRIPTIONS = {
-    "E1003": "invalid character or keyword not in toke 56-char set",
+    "E1003": "invalid character or keyword not in toke 59-char set",
     "E2001": "syntax error: unexpected token or missing delimiter",
     "E3011": "name resolution error: undefined or duplicate identifier",
     "E4010": "type error: incompatible types in expression or declaration",

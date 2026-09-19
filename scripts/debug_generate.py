@@ -21,7 +21,7 @@ Rules:
 - Return: <expr
 - Loop: lp(init;cond;step){body}
 - If: if(cond){...}el{...}
-- No underscores (use camelCase), 56-char lowercase set, no uppercase letters
+- No underscores (use camelCase), 59-char lowercase set, no uppercase letters
 Output ONLY a ```toke code block.""",
 
     """Write a toke program with a single function that finds the second largest element in an array.
@@ -36,7 +36,7 @@ Rules:
 - Loop: lp(let i=0;i<n;i=i+1){body}
 - If: if(cond){...}el{...}
 - Equality: single = not ==
-- No underscores, 56-char lowercase set, no uppercase
+- No underscores, 59-char lowercase set, no uppercase
 Output ONLY a ```toke code block.""",
 ]
 

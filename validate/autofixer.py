@@ -751,7 +751,7 @@ class AutoFixer:
     def _fix_snake_case(self, s: str) -> tuple[str, list[str]]:
         """Convert snake_case identifiers to camelCase.
 
-        The underscore character is not in the toke 56-char set.
+        The underscore character is not in the toke 59-char set.
         Converts: my_var → myVar, shifted_right → shiftedRight.
         Preserves string contents.
         """

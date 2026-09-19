@@ -8,7 +8,7 @@
 
 ## 1. What Are We Training?
 
-A **QLoRA adapter** on top of **Qwen/Qwen2.5-Coder-7B** to generate programs in toke — a small structural programming language with a 56-character alphabet. The model will receive a natural-language task description and emit compilable toke source.
+A **QLoRA adapter** on top of **Qwen/Qwen2.5-Coder-7B** to generate programs in toke — a small structural programming language with a 59-character alphabet. The model will receive a natural-language task description and emit compilable toke source.
 
 **Base model:** Qwen2.5-Coder-7B
 **Method:** QLoRA (rank 64, alpha 128)
@@ -61,7 +61,7 @@ Every row is a three-message chat exchange:
 ```
 
 The **system prompt** is identical across all 20,156 rows. It defines:
-- The 56-character alphabet and file skeleton (`m=` / `i=` / `t=$name{...}` / `f=name()`)
+- The 59-character alphabet and file skeleton (`m=` / `i=` / `t=$name{...}` / `f=name()`)
 - Type sigils (`$str`, `$ok`, `$err`, `@(...)` arrays/maps, `!$err` error returns)
 - Statement forms (`let`/`mut`, `if`/`el`, `lp`/`br`, match `|{Variant:bind body}`)
 - Standard library idioms (`str.len(s)`, `log.info("msg")`, `file.read(...)`)

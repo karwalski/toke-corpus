@@ -24,14 +24,14 @@ toke is a statically typed, machine-native programming language designed primari
 **Key design goals:**
 - Minimise token overhead in source representation
 - One canonical form per construct (no equivalent alternatives)
-- Deterministic LL(1) parsing and type checking
+- Deterministic backtrack-free parsing (bounded lookahead of up to 3 tokens) and type checking
 - Machine-readable structured compiler diagnostics (stable error codes)
 - Generate-compile-inspect-repair workflows without human interpretation
 - Native binaries via LLVM, no runtime dependency
 - Arena memory discipline (no GC)
 
 **Phase 2 syntax profile** (normative default, frozen 2026-04-05):
-- 56-character set: lowercase letters, digits, 18 symbols (`$@(){}:;=<>!+-*/.,"`)
+- 59-character set: lowercase letters, digits, 18 symbols (`$@(){}:;=<>!+-*/.,"`)
 - No uppercase letters, no square brackets, no underscore
 - 12 keywords: `m`, `f`, `i`, `t`, `if`, `el`, `lp`, `br`, `let`, `mut`, `as`, `rt`
 - Type sigil: `$` prefix for types (`$str`, `$int`, `$point`)
@@ -68,7 +68,7 @@ The project follows a gated milestone structure. **Gate 1 PASSED on 2026-04-03**
 
 The Gate 2 pipeline runs in four stages:
 
-1. **Tokenizer retrain** -- SentencePiece BPE with 8K vocabulary, trained on the merged corpus JSONL. A dedicated tokenizer is essential because toke's 56-character set and compact syntax are poorly served by general-purpose tokenizers trained on natural language or conventional programming languages.
+1. **Tokenizer retrain** -- SentencePiece BPE with 8K vocabulary, trained on the merged corpus JSONL. A dedicated tokenizer is essential because toke's 59-character set and compact syntax are poorly served by general-purpose tokenizers trained on natural language or conventional programming languages.
 
 2. **Training data preparation** -- Corpus entries are converted to instruction-tuning format with 95/5 train/eval split. Each entry becomes a prompt-completion pair where the prompt describes the task and the completion is the toke source.
 

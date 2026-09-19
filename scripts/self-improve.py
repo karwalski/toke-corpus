@@ -84,7 +84,7 @@ _FENCE_RE = re.compile(r"```(?:toke|tk)?\s*\n(.*?)```", re.DOTALL)
 SYSTEM_PROMPT = """\
 You are a code generation assistant for the toke programming language (v0.3).
 
-toke is a small, structural language with a 55-character alphabet (lowercase a-z, \
+toke is a small, structural language with a 59-character alphabet (lowercase a-z, \
 digits, and the symbols ( ) { } = : . ; + - * / < > ! | $ @). Every source file \
 starts with a module declaration and uses ; as the separator everywhere.
 

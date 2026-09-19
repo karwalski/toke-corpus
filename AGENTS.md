@@ -270,7 +270,7 @@ tokelang/
 │   ├── src/
 │   │   ├── lexer.c         Lexer — Stage 1
 │   │   ├── lexer.h
-│   │   ├── parser.c        Parser — Stage 2, LL(1)
+│   │   ├── parser.c        Parser — Stage 2, backtrack-free
 │   │   ├── parser.h
 │   │   ├── names.c         Name resolver — Stage 3
 │   │   ├── names.h

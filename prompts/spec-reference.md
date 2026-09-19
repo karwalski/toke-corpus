@@ -2,11 +2,11 @@
 
 toke is a statically typed, compiled language. File extension: `.tk`. No comments. No implicit coercions. One canonical form per construct.
 
-## Character Set (56 chars)
+## Character Set (59 chars)
 
-Lowercase `a-z` (26), digits `0-9` (10), symbols `( ) { } = : . ; + - * / < > ! | $ @` (18), reserved `^ ~` (2). No uppercase letters in source. No `_` in identifiers. Whitespace is non-structural.
+Lowercase `a-z` (26), digits `0-9` (10), symbols `! " $ % & ( ) * + - . / : ; < = > @ ^ { | } ~` (23). No uppercase letters in source. No `_` in identifiers. Whitespace is non-structural. `^` and `~` are live operators (bitwise XOR and NOT, story 114.8), not reserved; `%` is modulo and `&`/`&&` are bitwise-and and short-circuit-and. The eight printable ASCII characters rejected in structural position (E1003) are the apostrophe, comma, question mark, square brackets, backslash, underscore and backtick. Derived from `src/lexer.c` — see `toke/docs/metrics-baseline.md`.
 
-## Keywords (12)
+## Keywords (14)
 
 | Keyword | Role |
 |---------|------|
@@ -22,6 +22,8 @@ Lowercase `a-z` (26), digits `0-9` (10), symbols `( ) { } = : . ; + - * / < > ! 
 | `mut` | mutable qualifier |
 | `as` | type cast |
 | `rt` | return (long form; `<` is short form) |
+| `mt` | match |
+| `sc` | scope |
 
 `true` and `false` are predefined identifiers, not keywords.
 

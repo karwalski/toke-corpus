@@ -34,7 +34,7 @@ Toke syntax reference (Profile 1):
 - `lp(init;cond;step){body}` for loops
 - `[a;b;c]` for arrays, `arr[i]` for indexing
 - `;` as statement separator (not terminator)
-- 56-character set, no underscores in identifiers
+- 59-character set, no underscores in identifiers
 """
 
 # ---------------------------------------------------------------------------

@@ -276,7 +276,7 @@ def build_instruction(entry: dict) -> str:
 # ---------------------------------------------------------------------------
 # Story 10.9.4: tk_source surface guard
 #
-# Phase 2 uses a 56-char alphabet with no uppercase letters. We enforce a
+# Phase 2 uses a 59-char alphabet with no uppercase letters. We enforce a
 # hard surface rule: no uppercase letters outside string literals, no `==`,
 # `!=`, or square-bracket indexing.
 # ---------------------------------------------------------------------------
