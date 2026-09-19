@@ -1,0 +1,295 @@
+{
+ "story": "131.67",
+ "date": "2026-09-19",
+ "fix_commit": "f55354c",
+ "tkc_new": {
+  "tkc_bin_sha": "f99326281622543aa7b6415c8de4988a39cff10a2393aa4c01ad53686ce0033c",
+  "tkc_version": "toke 2.8.0",
+  "tkc_path": "/Users/matthew.watt/tk/toke/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/toke/toke",
+  "tkc_pinned_copy": "/var/folders/gf/4ylkzm4d3bg50537kywj3pph0000gp/T/tkc_pin_8lht0m92/tkc",
+  "toke_head": "b3da3d3429417c18805d006db054b4cbc8223fa8",
+  "toke_src_dirty": false
+ },
+ "tkc_old": {
+  "tkc_bin_sha": "1e14c76b7598860f4e9e71186c5b02e1c75e93ce5e478fa274e549f61f1c32e7",
+  "tkc_version": "toke 2.8.0",
+  "tkc_path": "/tmp/toke_prefix_131_67/tkc",
+  "tkc_resolved": "/private/tmp/toke_prefix_131_67/toke",
+  "tkc_pinned_copy": "/var/folders/gf/4ylkzm4d3bg50537kywj3pph0000gp/T/tkc_pin_enks_lkr/tkc",
+  "toke_head": "a455a5b2c38f49487cacbd446be0e5fc1541708c",
+  "toke_src_dirty": false
+ },
+ "scope": "every A-ERR record + any record whose spec return is an error union",
+ "records": 1546,
+ "all": {
+  "records": 1546,
+  "verdicts": {
+   "fail_stable": 456,
+   "unverified_behaviour_same": 894,
+   "pass_err_verified": 61,
+   "unverified_nondeterministic": 87,
+   "pass_never_reached_err": 19,
+   "driver_fail": 29
+  },
+  "err_style": {
+   "variant": 1521,
+   "none": 23,
+   "struct": 2
+  },
+  "err_return_forms": {
+   "literal+propagate": 1225,
+   "none": 320,
+   "propagate": 1
+  },
+  "task_type": {
+   "single_function": 576,
+   "full_program": 967,
+   "migrate_fix": 3
+  },
+  "with_tests": 565,
+  "expects_err_case": 545,
+  "output_changed": 86,
+  "nondeterministic": 87,
+  "old_pass": 80,
+  "new_pass": 80,
+  "banked_pass": 450,
+  "banked_not_executed": 1096,
+  "return_type_gate_fail": 487,
+  "fail_reasons": {
+   "output mismatch": 456
+  }
+ },
+ "non_gamed": {
+  "records": 1117,
+  "verdicts": {
+   "unverified_behaviour_same": 894,
+   "fail_stable": 27,
+   "pass_err_verified": 61,
+   "unverified_nondeterministic": 87,
+   "pass_never_reached_err": 19,
+   "driver_fail": 29
+  },
+  "err_style": {
+   "variant": 1102,
+   "none": 13,
+   "struct": 2
+  },
+  "err_return_forms": {
+   "literal+propagate": 1102,
+   "none": 14,
+   "propagate": 1
+  },
+  "task_type": {
+   "full_program": 967,
+   "single_function": 147,
+   "migrate_fix": 3
+  },
+  "with_tests": 136,
+  "expects_err_case": 116,
+  "output_changed": 86,
+  "nondeterministic": 87,
+  "old_pass": 80,
+  "new_pass": 80,
+  "banked_pass": 21,
+  "banked_not_executed": 1096,
+  "return_type_gate_fail": 58,
+  "fail_reasons": {
+   "output mismatch": 27
+  }
+ },
+ "gamed": {
+  "records": 429,
+  "verdicts": {
+   "fail_stable": 429
+  },
+  "err_style": {
+   "variant": 419,
+   "none": 10
+  },
+  "err_return_forms": {
+   "literal+propagate": 123,
+   "none": 306
+  },
+  "task_type": {
+   "single_function": 429
+  },
+  "with_tests": 429,
+  "expects_err_case": 429,
+  "output_changed": 0,
+  "nondeterministic": 0,
+  "old_pass": 0,
+  "new_pass": 0,
+  "banked_pass": 429,
+  "banked_not_executed": 0,
+  "return_type_gate_fail": 429,
+  "fail_reasons": {
+   "output mismatch": 429
+  }
+ },
+ "non_gamed_by_base": {
+  "A-ERR-0004": {
+   "unverified_behaviour_same": 6,
+   "fail_stable": 5,
+   "pass_err_verified": 1
+  },
+  "A-ERR-0005": {
+   "unverified_behaviour_same": 9,
+   "fail_stable": 1,
+   "pass_err_verified": 3
+  },
+  "A-ERR-0006": {
+   "unverified_behaviour_same": 7,
+   "fail_stable": 3,
+   "pass_err_verified": 2
+  },
+  "A-ERR-0007": {
+   "unverified_nondeterministic": 3,
+   "pass_err_verified": 1,
+   "unverified_behaviour_same": 11,
+   "fail_stable": 1
+  },
+  "A-ERR-0011": {
+   "unverified_behaviour_same": 17,
+   "unverified_nondeterministic": 8
+  },
+  "A-ERR-0015": {
+   "unverified_behaviour_same": 8,
+   "unverified_nondeterministic": 2
+  },
+  "A-ERR-0021": {
+   "unverified_behaviour_same": 19,
+   "unverified_nondeterministic": 3
+  },
+  "A-ERR-0022": {
+   "driver_fail": 8,
+   "unverified_behaviour_same": 12
+  },
+  "A-ERR-0023": {
+   "unverified_behaviour_same": 12,
+   "driver_fail": 11
+  },
+  "A-ERR-0026": {
+   "pass_err_verified": 5,
+   "unverified_behaviour_same": 7,
+   "fail_stable": 1
+  },
+  "A-ERR-0029": {
+   "unverified_behaviour_same": 6,
+   "unverified_nondeterministic": 1
+  },
+  "A-ERR-0030": {
+   "unverified_behaviour_same": 12,
+   "unverified_nondeterministic": 1,
+   "driver_fail": 1
+  },
+  "A-ERR-0041": {
+   "unverified_behaviour_same": 14,
+   "unverified_nondeterministic": 4
+  },
+  "A-ERR-0044": {
+   "unverified_behaviour_same": 14,
+   "pass_err_verified": 1,
+   "fail_stable": 8
+  },
+  "A-ERR-0045": {
+   "pass_err_verified": 2,
+   "fail_stable": 6,
+   "unverified_behaviour_same": 13
+  },
+  "A-ERR-0046": {
+   "unverified_behaviour_same": 9,
+   "unverified_nondeterministic": 1
+  },
+  "A-ERR-0047": {
+   "unverified_behaviour_same": 7,
+   "unverified_nondeterministic": 8
+  },
+  "A-ERR-0048": {
+   "unverified_nondeterministic": 4,
+   "unverified_behaviour_same": 6
+  },
+  "A-ERR-0053": {
+   "unverified_nondeterministic": 5,
+   "unverified_behaviour_same": 4
+  },
+  "A-ERR-0054": {
+   "unverified_nondeterministic": 3,
+   "unverified_behaviour_same": 1
+  },
+  "A-ERR-0055": {
+   "unverified_nondeterministic": 3,
+   "unverified_behaviour_same": 2
+  },
+  "A-ERR-0071": {
+   "unverified_behaviour_same": 7,
+   "unverified_nondeterministic": 2
+  },
+  "A-ERR-0072": {
+   "unverified_behaviour_same": 8,
+   "unverified_nondeterministic": 3
+  },
+  "A-ERR-0074": {
+   "unverified_nondeterministic": 5,
+   "unverified_behaviour_same": 4
+  },
+  "A-ERR-0075": {
+   "unverified_behaviour_same": 13,
+   "unverified_nondeterministic": 2
+  },
+  "A-ERR-0076": {
+   "unverified_behaviour_same": 7,
+   "unverified_nondeterministic": 4
+  },
+  "A-ERR-0077": {
+   "unverified_behaviour_same": 13,
+   "fail_stable": 1,
+   "unverified_nondeterministic": 6
+  },
+  "A-ERR-0078": {
+   "unverified_behaviour_same": 14,
+   "unverified_nondeterministic": 1
+  },
+  "A-ERR-0079": {
+   "unverified_behaviour_same": 13,
+   "unverified_nondeterministic": 4
+  },
+  "A-ERR-0080": {
+   "unverified_behaviour_same": 10,
+   "unverified_nondeterministic": 1
+  },
+  "A-ERR-0081": {
+   "unverified_behaviour_same": 12,
+   "driver_fail": 9
+  },
+  "A-ERR-0088": {
+   "unverified_nondeterministic": 3,
+   "unverified_behaviour_same": 7
+  },
+  "A-ERR-0089": {
+   "unverified_behaviour_same": 2,
+   "unverified_nondeterministic": 3
+  },
+  "A-ERR-0090": {
+   "unverified_behaviour_same": 3,
+   "unverified_nondeterministic": 1,
+   "fail_stable": 1
+  },
+  "A-ERR-0091": {
+   "unverified_behaviour_same": 4,
+   "unverified_nondeterministic": 3
+  },
+  "A-ERR-0093": {
+   "unverified_behaviour_same": 6,
+   "unverified_nondeterministic": 3
+  }
+ },
+ "patch": {
+  "path": "corpus/regen_v04/audit/pattern_sweep.131.67.patch.jsonl",
+  "rows": 56,
+  "rule": "err-arm-unverified",
+  "with_sweep_row": 56
+ },
+ "jsonl": "corpus/regen_v04/audit/err_recheck_131.67.jsonl",
+ "banks_nothing": true
+}
