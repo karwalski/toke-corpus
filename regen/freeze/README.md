@@ -13,6 +13,7 @@ ledger + provenance schemas every Epic 131 rewrite wave must follow.
 | `freeze_129_summary.json` | Counts per category, total, tarball sha256, tkc version, toke-corpus HEAD, date. |
 | `freeze_manifest.py` | Regenerates both (run from anywhere; paths are repo-relative). |
 | `manifest_check_131.35.json` | 131.35: `corpus/regen_v04/MANIFEST.jsonl` integrity before/after the rebuild (2,618 stale lines from the 129.4/129.5 repair wave → 0). `MANIFEST.jsonl` `sha256` is now the record **file-bytes** sha256 (same meaning as this freeze manifest and the rewrite ledger); `source_sha256` carries the old tk_source sha. Tool: `regen/manifest_tool.py check|rebuild|stamp`; every bank path stamps on write. |
+| `err_union_check_131.42.json` | 131.42: per-base counts of `T!Err` single_function records whose target DECLARES a non-union return (`gamed_err_marker` = prints the a_tests err marker as a `str`; `wrong_return_type`; `correct`), the 20+5 before/after proof of the `return_type` validate gate (`run_shard.validate_one_gates`), and the routing written to `audit/buckets/agent.txt` + `agent_reasons.jsonl` + `audit/pattern_sweep.131.42.patch.jsonl` (apply: `cat` sweep + patch → merged bucket; `load_bucket` takes the later line per task_id). Tool: `regen/err_union_check.py [--route] [--all-task-types]`; rows in `corpus/regen_v04/audit/err_union_check.jsonl`. |
 
 Byte snapshot: `~/tk/archive/toke-corpus-regen_v04-freeze129-20260819/` (local
 archive, see its `MANIFEST.md`). Git tag: `freeze-129-20260819`.

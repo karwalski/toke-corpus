@@ -91,6 +91,132 @@ def signature_conforms(spec, src):
     return True, "ok"
 
 
+# ------------------------------------------------ 131.42: return-type gate ---
+# 131.40 found 254 A-ERR records that "pass" by returning the a_tests err
+# marker as a hard-coded `str` (`<"{'err': 'EmptyCollection'}"`) instead of
+# the spec's `T!Err` union: the arity-only signature gate above never looked
+# at the return type. `return_type_conforms` is the gate: an error-union spec
+# return MUST be declared as an error union (hard); any other spec/declared
+# difference is a SOFT flag (`return_type_mismatch`) until 131.43 decides the
+# type-aware signature gate + its widening allowlist.
+
+# 131.43 fills this: normalised spec return -> set of normalised declared
+# returns accepted as equal (e.g. widening). Empty = exact match only.
+RETURN_TYPE_ALLOWLIST = {}
+
+def _scan_params(text, start):
+    """Index just past the `)` that closes the parameter list opened at
+    text[start] == '(' (depth-aware: `@(i64)` params), or -1."""
+    depth = 0
+    for i in range(start, len(text)):
+        ch = text[i]
+        if ch == "(":
+            depth += 1
+        elif ch == ")":
+            depth -= 1
+            if depth == 0:
+                return i + 1
+    return -1
+
+
+def _scan_type(text, start, stop_at_space):
+    """Type text from text[start] up to the first depth-0 `{` (or whitespace
+    when stop_at_space — the spec description continues in prose)."""
+    depth, out = 0, []
+    for ch in text[start:]:
+        if depth == 0 and (ch == "{" or (stop_at_space and ch.isspace())):
+            break
+        depth += (ch == "(") - (ch == ")")
+        out.append(ch)
+    return "".join(out).strip().rstrip(".,;")
+
+
+def _sig_return(text, name, stop_at_space):
+    m = re.search(rf"f={re.escape(name)}\(", text)
+    if not m:
+        return None
+    end = _scan_params(text, m.end() - 1)
+    if end < 0 or end >= len(text) or text[end] != ":":
+        return None
+    t = _scan_type(text, end + 1, stop_at_space)
+    return t or None
+
+
+def spec_return_type(spec):
+    """The spec's return type: the f=sig in the description (v03 spelling
+    first — authoritative like driver.sig_input_types), else the
+    output_type_v03 / output_type field. None when the spec has neither.
+    (`target_name` above is 131.44's — one definition, shared.)"""
+    for key in ("description_v03", "description"):
+        name = target_name({key: spec.get(key, "")})
+        if name:
+            t = _sig_return(spec.get(key, ""), name, stop_at_space=True)
+            if t:
+                return t
+    return spec.get("output_type_v03") or spec.get("output_type") or None
+
+
+def declared_return_type(src, name):
+    """Return type the function `name` DECLARES in src (raw text, e.g.
+    `i64!$parseerr`, `@(i64)!$lookuperr`), or None when not found/unparsed."""
+    return _sig_return(src, name, stop_at_space=False)
+
+
+def _norm_arr(t):
+    if t.startswith("@(") and t.endswith(")") and _scan_params(t, 1) == len(t):
+        return "@" + _norm_arr(t[2:-1])
+    return t
+
+
+def norm_return_type(t):
+    """Comparison form: whitespace/`$` dropped, lower-cased, `@(T)` -> `@T` at
+    every level on both sides of `!` (spec `@(i64)!LookupErr` and declared
+    `@(i64)!$lookuperr` both -> `@i64!lookuperr`)."""
+    if t is None:
+        return None
+    t = re.sub(r"\s+", "", t).replace("$", "").lower()
+    parts = t.split("!", 1)
+    parts = [_norm_arr(p) for p in parts]
+    return "!".join(parts)
+
+
+def is_error_union(t):
+    return bool(t) and "!" in t
+
+
+def return_type_conforms(spec, src):
+    """131.42 gate. Returns (hard_ok, detail, soft_mismatch, declared).
+    hard_ok False only when the spec return is an error union and the
+    declared one is not. soft_mismatch is a string when declared != spec
+    (normalised, modulo RETURN_TYPE_ALLOWLIST) and the hard case does not
+    apply — recorded, not enforced (131.43). declared is None when the spec
+    names no target / the function is absent (gate not applicable)."""
+    name = target_name(spec)
+    if not name:
+        return True, "no target signature in spec", None, None
+    want = spec_return_type(spec)
+    if not want:
+        return True, "no spec return type", None, None
+    got = declared_return_type(src, name)
+    if got is None:
+        return True, f"function {name} not found / return type unparsed", None, None
+    if is_error_union(want) and not is_error_union(got):
+        return False, f"{name} declared `{got}`, spec `{want}` requires an error union", None, got
+    # second gaming shape (131.42): the named target is a correct union but a
+    # trailing same-arity wrapper (`showvalidate`) returning the marker `str`
+    # is what driver.find_target (last matching decl) actually executes
+    callee = drv.find_target(spec, src)
+    if is_error_union(want) and callee and callee != name:
+        cgot = declared_return_type(src, callee)
+        if cgot is not None and not is_error_union(cgot):
+            return (False, f"driver callee `{callee}` declared `{cgot}` (target {name} is `{got}`), "
+                           f"spec `{want}` requires an error union", None, got)
+    nw, ng = norm_return_type(want), norm_return_type(got)
+    if nw != ng and ng not in RETURN_TYPE_ALLOWLIST.get(nw, ()):
+        return True, "ok (soft mismatch)", f"{name} declared `{got}`, spec `{want}`", got
+    return True, "ok", None, got
+
+
 def tkc_check(src_path):
     p = subprocess.run([TKC, "--check", src_path], capture_output=True, text=True, timeout=30)
     codes = []

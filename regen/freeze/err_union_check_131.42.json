@@ -1,0 +1,2113 @@
+{
+ "story": "131.42",
+ "date": "2026-09-19",
+ "tkc": {
+  "tkc_bin_sha": "fe380d8d660d5eebe2dca050d11cd2f2683864fe2cef1cab5ec0d99726c38e45",
+  "tkc_version": "toke 2.8.0",
+  "tkc_path": "/Users/matthew.watt/tk/toke/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/toke/toke",
+  "tkc_pinned_copy": "/var/folders/gf/4ylkzm4d3bg50537kywj3pph0000gp/T/tkc_pin_yh9trt34/tkc",
+  "toke_head": "c22edaa000d9373bced523417f306b4c97ff3576",
+  "toke_src_dirty": true
+ },
+ "a_tests": {
+  "bases": 631,
+  "provenance": {
+   "129.7-agent+ref-verified": 577,
+   "131.47-agent+ref-verified": 54
+  },
+  "newest_mtime": "2026-09-18T17:00:29Z"
+ },
+ "scope": "single_function specs: category A-ERR or error-union return",
+ "records_checked": 576,
+ "single_function": {
+  "records": 576,
+  "verdicts": {
+   "gamed_err_marker": 429,
+   "correct": 147
+  },
+  "flags": {
+   "gamed_err_marker": 429,
+   "marker_literal": 2
+  },
+  "gamed_evidence": {
+   "printed": 5,
+   "literal+printed": 424
+  },
+  "gamed_shapes": {
+   "target_returns_str": 389,
+   "wrapper_returns_str": 40
+  },
+  "by_task_type": {
+   "single_function": {
+    "gamed_err_marker": 429,
+    "correct": 147
+   }
+  },
+  "by_base": {
+   "A-ERR-0001": {
+    "records": 4,
+    "gamed_err_marker": 4
+   },
+   "A-ERR-0002": {
+    "records": 1,
+    "gamed_err_marker": 1
+   },
+   "A-ERR-0003": {
+    "records": 6,
+    "gamed_err_marker": 6
+   },
+   "A-ERR-0004": {
+    "records": 6,
+    "correct": 6
+   },
+   "A-ERR-0005": {
+    "records": 4,
+    "correct": 4
+   },
+   "A-ERR-0006": {
+    "records": 5,
+    "correct": 5
+   },
+   "A-ERR-0007": {
+    "records": 2,
+    "correct": 2
+   },
+   "A-ERR-0008": {
+    "records": 3,
+    "correct": 3
+   },
+   "A-ERR-0009": {
+    "records": 6,
+    "correct": 6
+   },
+   "A-ERR-0010": {
+    "records": 5,
+    "correct": 5
+   },
+   "A-ERR-0011": {
+    "records": 10,
+    "correct": 10
+   },
+   "A-ERR-0012": {
+    "records": 6,
+    "correct": 6
+   },
+   "A-ERR-0013": {
+    "records": 5,
+    "correct": 5
+   },
+   "A-ERR-0014": {
+    "records": 4,
+    "correct": 4
+   },
+   "A-ERR-0015": {
+    "records": 1,
+    "correct": 1
+   },
+   "A-ERR-0016": {
+    "records": 4,
+    "gamed_err_marker": 4
+   },
+   "A-ERR-0017": {
+    "records": 3,
+    "gamed_err_marker": 3
+   },
+   "A-ERR-0018": {
+    "records": 10,
+    "gamed_err_marker": 10
+   },
+   "A-ERR-0019": {
+    "records": 6,
+    "gamed_err_marker": 6
+   },
+   "A-ERR-0020": {
+    "records": 8,
+    "correct": 8
+   },
+   "A-ERR-0021": {
+    "records": 9,
+    "gamed_err_marker": 9
+   },
+   "A-ERR-0022": {
+    "records": 8,
+    "correct": 8
+   },
+   "A-ERR-0023": {
+    "records": 11,
+    "correct": 11
+   },
+   "A-ERR-0024": {
+    "records": 5,
+    "gamed_err_marker": 5
+   },
+   "A-ERR-0025": {
+    "records": 5,
+    "gamed_err_marker": 5
+   },
+   "A-ERR-0026": {
+    "records": 6,
+    "correct": 6
+   },
+   "A-ERR-0027": {
+    "records": 4,
+    "correct": 4
+   },
+   "A-ERR-0028": {
+    "records": 5,
+    "gamed_err_marker": 5
+   },
+   "A-ERR-0029": {
+    "records": 4,
+    "gamed_err_marker": 4
+   },
+   "A-ERR-0030": {
+    "records": 1,
+    "correct": 1
+   },
+   "A-ERR-0031": {
+    "records": 8,
+    "gamed_err_marker": 8
+   },
+   "A-ERR-0032": {
+    "records": 2,
+    "gamed_err_marker": 2
+   },
+   "A-ERR-0033": {
+    "records": 6,
+    "gamed_err_marker": 6
+   },
+   "A-ERR-0034": {
+    "records": 2,
+    "gamed_err_marker": 2
+   },
+   "A-ERR-0035": {
+    "records": 2,
+    "gamed_err_marker": 2
+   },
+   "A-ERR-0036": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0037": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0038": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0039": {
+    "records": 11,
+    "gamed_err_marker": 11
+   },
+   "A-ERR-0040": {
+    "records": 8,
+    "gamed_err_marker": 8
+   },
+   "A-ERR-0041": {
+    "records": 16,
+    "gamed_err_marker": 16
+   },
+   "A-ERR-0042": {
+    "records": 4,
+    "gamed_err_marker": 4
+   },
+   "A-ERR-0043": {
+    "records": 5,
+    "gamed_err_marker": 5
+   },
+   "A-ERR-0044": {
+    "records": 9,
+    "correct": 9
+   },
+   "A-ERR-0045": {
+    "records": 8,
+    "correct": 8
+   },
+   "A-ERR-0046": {
+    "records": 3,
+    "gamed_err_marker": 3
+   },
+   "A-ERR-0047": {
+    "records": 9,
+    "gamed_err_marker": 9
+   },
+   "A-ERR-0048": {
+    "records": 10,
+    "gamed_err_marker": 10
+   },
+   "A-ERR-0049": {
+    "records": 12,
+    "gamed_err_marker": 12
+   },
+   "A-ERR-0050": {
+    "records": 4,
+    "gamed_err_marker": 4
+   },
+   "A-ERR-0051": {
+    "records": 5,
+    "gamed_err_marker": 5
+   },
+   "A-ERR-0052": {
+    "records": 5,
+    "gamed_err_marker": 5
+   },
+   "A-ERR-0053": {
+    "records": 5,
+    "gamed_err_marker": 5
+   },
+   "A-ERR-0054": {
+    "records": 4,
+    "gamed_err_marker": 4
+   },
+   "A-ERR-0055": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0056": {
+    "records": 3,
+    "gamed_err_marker": 3
+   },
+   "A-ERR-0057": {
+    "records": 6,
+    "gamed_err_marker": 6
+   },
+   "A-ERR-0058": {
+    "records": 6,
+    "gamed_err_marker": 6
+   },
+   "A-ERR-0059": {
+    "records": 9,
+    "gamed_err_marker": 9
+   },
+   "A-ERR-0060": {
+    "records": 3,
+    "gamed_err_marker": 3
+   },
+   "A-ERR-0061": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0062": {
+    "records": 6,
+    "gamed_err_marker": 6
+   },
+   "A-ERR-0063": {
+    "records": 5,
+    "gamed_err_marker": 5
+   },
+   "A-ERR-0064": {
+    "records": 6,
+    "correct": 6
+   },
+   "A-ERR-0065": {
+    "records": 3,
+    "correct": 3
+   },
+   "A-ERR-0066": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0067": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0068": {
+    "records": 3,
+    "gamed_err_marker": 3
+   },
+   "A-ERR-0069": {
+    "records": 12,
+    "gamed_err_marker": 12
+   },
+   "A-ERR-0070": {
+    "records": 8,
+    "gamed_err_marker": 8
+   },
+   "A-ERR-0071": {
+    "records": 3,
+    "gamed_err_marker": 3
+   },
+   "A-ERR-0072": {
+    "records": 10,
+    "gamed_err_marker": 10
+   },
+   "A-ERR-0073": {
+    "records": 6,
+    "gamed_err_marker": 6
+   },
+   "A-ERR-0074": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0075": {
+    "records": 9,
+    "gamed_err_marker": 9
+   },
+   "A-ERR-0076": {
+    "records": 6,
+    "gamed_err_marker": 6
+   },
+   "A-ERR-0077": {
+    "records": 9,
+    "gamed_err_marker": 8,
+    "correct": 1
+   },
+   "A-ERR-0078": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0079": {
+    "records": 4,
+    "gamed_err_marker": 4
+   },
+   "A-ERR-0080": {
+    "records": 11,
+    "gamed_err_marker": 11
+   },
+   "A-ERR-0081": {
+    "records": 9,
+    "correct": 9
+   },
+   "A-ERR-0082": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0083": {
+    "records": 5,
+    "gamed_err_marker": 5
+   },
+   "A-ERR-0084": {
+    "records": 2,
+    "correct": 2
+   },
+   "A-ERR-0085": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0086": {
+    "records": 10,
+    "gamed_err_marker": 10
+   },
+   "A-ERR-0087": {
+    "records": 7,
+    "correct": 7
+   },
+   "A-ERR-0088": {
+    "records": 4,
+    "gamed_err_marker": 4
+   },
+   "A-ERR-0089": {
+    "records": 3,
+    "gamed_err_marker": 3
+   },
+   "A-ERR-0090": {
+    "records": 6,
+    "gamed_err_marker": 5,
+    "correct": 1
+   },
+   "A-ERR-0091": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0092": {
+    "records": 6,
+    "gamed_err_marker": 6
+   },
+   "A-ERR-0093": {
+    "records": 4,
+    "gamed_err_marker": 4
+   },
+   "A-ERR-0094": {
+    "records": 7,
+    "gamed_err_marker": 7
+   },
+   "A-ERR-0095": {
+    "records": 6,
+    "correct": 6
+   }
+  }
+ },
+ "verdicts": {
+  "gamed_err_marker": 429,
+  "correct": 147
+ },
+ "flags": {
+  "gamed_err_marker": 429,
+  "marker_literal": 2
+ },
+ "gamed_evidence": {
+  "printed": 5,
+  "literal+printed": 424
+ },
+ "gamed_shapes": {
+  "target_returns_str": 389,
+  "wrapper_returns_str": 40
+ },
+ "by_task_type": {
+  "single_function": {
+   "gamed_err_marker": 429,
+   "correct": 147
+  }
+ },
+ "by_base": {
+  "A-ERR-0001": {
+   "records": 4,
+   "gamed_err_marker": 4
+  },
+  "A-ERR-0002": {
+   "records": 1,
+   "gamed_err_marker": 1
+  },
+  "A-ERR-0003": {
+   "records": 6,
+   "gamed_err_marker": 6
+  },
+  "A-ERR-0004": {
+   "records": 6,
+   "correct": 6
+  },
+  "A-ERR-0005": {
+   "records": 4,
+   "correct": 4
+  },
+  "A-ERR-0006": {
+   "records": 5,
+   "correct": 5
+  },
+  "A-ERR-0007": {
+   "records": 2,
+   "correct": 2
+  },
+  "A-ERR-0008": {
+   "records": 3,
+   "correct": 3
+  },
+  "A-ERR-0009": {
+   "records": 6,
+   "correct": 6
+  },
+  "A-ERR-0010": {
+   "records": 5,
+   "correct": 5
+  },
+  "A-ERR-0011": {
+   "records": 10,
+   "correct": 10
+  },
+  "A-ERR-0012": {
+   "records": 6,
+   "correct": 6
+  },
+  "A-ERR-0013": {
+   "records": 5,
+   "correct": 5
+  },
+  "A-ERR-0014": {
+   "records": 4,
+   "correct": 4
+  },
+  "A-ERR-0015": {
+   "records": 1,
+   "correct": 1
+  },
+  "A-ERR-0016": {
+   "records": 4,
+   "gamed_err_marker": 4
+  },
+  "A-ERR-0017": {
+   "records": 3,
+   "gamed_err_marker": 3
+  },
+  "A-ERR-0018": {
+   "records": 10,
+   "gamed_err_marker": 10
+  },
+  "A-ERR-0019": {
+   "records": 6,
+   "gamed_err_marker": 6
+  },
+  "A-ERR-0020": {
+   "records": 8,
+   "correct": 8
+  },
+  "A-ERR-0021": {
+   "records": 9,
+   "gamed_err_marker": 9
+  },
+  "A-ERR-0022": {
+   "records": 8,
+   "correct": 8
+  },
+  "A-ERR-0023": {
+   "records": 11,
+   "correct": 11
+  },
+  "A-ERR-0024": {
+   "records": 5,
+   "gamed_err_marker": 5
+  },
+  "A-ERR-0025": {
+   "records": 5,
+   "gamed_err_marker": 5
+  },
+  "A-ERR-0026": {
+   "records": 6,
+   "correct": 6
+  },
+  "A-ERR-0027": {
+   "records": 4,
+   "correct": 4
+  },
+  "A-ERR-0028": {
+   "records": 5,
+   "gamed_err_marker": 5
+  },
+  "A-ERR-0029": {
+   "records": 4,
+   "gamed_err_marker": 4
+  },
+  "A-ERR-0030": {
+   "records": 1,
+   "correct": 1
+  },
+  "A-ERR-0031": {
+   "records": 8,
+   "gamed_err_marker": 8
+  },
+  "A-ERR-0032": {
+   "records": 2,
+   "gamed_err_marker": 2
+  },
+  "A-ERR-0033": {
+   "records": 6,
+   "gamed_err_marker": 6
+  },
+  "A-ERR-0034": {
+   "records": 2,
+   "gamed_err_marker": 2
+  },
+  "A-ERR-0035": {
+   "records": 2,
+   "gamed_err_marker": 2
+  },
+  "A-ERR-0036": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0037": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0038": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0039": {
+   "records": 11,
+   "gamed_err_marker": 11
+  },
+  "A-ERR-0040": {
+   "records": 8,
+   "gamed_err_marker": 8
+  },
+  "A-ERR-0041": {
+   "records": 16,
+   "gamed_err_marker": 16
+  },
+  "A-ERR-0042": {
+   "records": 4,
+   "gamed_err_marker": 4
+  },
+  "A-ERR-0043": {
+   "records": 5,
+   "gamed_err_marker": 5
+  },
+  "A-ERR-0044": {
+   "records": 9,
+   "correct": 9
+  },
+  "A-ERR-0045": {
+   "records": 8,
+   "correct": 8
+  },
+  "A-ERR-0046": {
+   "records": 3,
+   "gamed_err_marker": 3
+  },
+  "A-ERR-0047": {
+   "records": 9,
+   "gamed_err_marker": 9
+  },
+  "A-ERR-0048": {
+   "records": 10,
+   "gamed_err_marker": 10
+  },
+  "A-ERR-0049": {
+   "records": 12,
+   "gamed_err_marker": 12
+  },
+  "A-ERR-0050": {
+   "records": 4,
+   "gamed_err_marker": 4
+  },
+  "A-ERR-0051": {
+   "records": 5,
+   "gamed_err_marker": 5
+  },
+  "A-ERR-0052": {
+   "records": 5,
+   "gamed_err_marker": 5
+  },
+  "A-ERR-0053": {
+   "records": 5,
+   "gamed_err_marker": 5
+  },
+  "A-ERR-0054": {
+   "records": 4,
+   "gamed_err_marker": 4
+  },
+  "A-ERR-0055": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0056": {
+   "records": 3,
+   "gamed_err_marker": 3
+  },
+  "A-ERR-0057": {
+   "records": 6,
+   "gamed_err_marker": 6
+  },
+  "A-ERR-0058": {
+   "records": 6,
+   "gamed_err_marker": 6
+  },
+  "A-ERR-0059": {
+   "records": 9,
+   "gamed_err_marker": 9
+  },
+  "A-ERR-0060": {
+   "records": 3,
+   "gamed_err_marker": 3
+  },
+  "A-ERR-0061": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0062": {
+   "records": 6,
+   "gamed_err_marker": 6
+  },
+  "A-ERR-0063": {
+   "records": 5,
+   "gamed_err_marker": 5
+  },
+  "A-ERR-0064": {
+   "records": 6,
+   "correct": 6
+  },
+  "A-ERR-0065": {
+   "records": 3,
+   "correct": 3
+  },
+  "A-ERR-0066": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0067": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0068": {
+   "records": 3,
+   "gamed_err_marker": 3
+  },
+  "A-ERR-0069": {
+   "records": 12,
+   "gamed_err_marker": 12
+  },
+  "A-ERR-0070": {
+   "records": 8,
+   "gamed_err_marker": 8
+  },
+  "A-ERR-0071": {
+   "records": 3,
+   "gamed_err_marker": 3
+  },
+  "A-ERR-0072": {
+   "records": 10,
+   "gamed_err_marker": 10
+  },
+  "A-ERR-0073": {
+   "records": 6,
+   "gamed_err_marker": 6
+  },
+  "A-ERR-0074": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0075": {
+   "records": 9,
+   "gamed_err_marker": 9
+  },
+  "A-ERR-0076": {
+   "records": 6,
+   "gamed_err_marker": 6
+  },
+  "A-ERR-0077": {
+   "records": 9,
+   "gamed_err_marker": 8,
+   "correct": 1
+  },
+  "A-ERR-0078": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0079": {
+   "records": 4,
+   "gamed_err_marker": 4
+  },
+  "A-ERR-0080": {
+   "records": 11,
+   "gamed_err_marker": 11
+  },
+  "A-ERR-0081": {
+   "records": 9,
+   "correct": 9
+  },
+  "A-ERR-0082": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0083": {
+   "records": 5,
+   "gamed_err_marker": 5
+  },
+  "A-ERR-0084": {
+   "records": 2,
+   "correct": 2
+  },
+  "A-ERR-0085": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0086": {
+   "records": 10,
+   "gamed_err_marker": 10
+  },
+  "A-ERR-0087": {
+   "records": 7,
+   "correct": 7
+  },
+  "A-ERR-0088": {
+   "records": 4,
+   "gamed_err_marker": 4
+  },
+  "A-ERR-0089": {
+   "records": 3,
+   "gamed_err_marker": 3
+  },
+  "A-ERR-0090": {
+   "records": 6,
+   "gamed_err_marker": 5,
+   "correct": 1
+  },
+  "A-ERR-0091": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0092": {
+   "records": 6,
+   "gamed_err_marker": 6
+  },
+  "A-ERR-0093": {
+   "records": 4,
+   "gamed_err_marker": 4
+  },
+  "A-ERR-0094": {
+   "records": 7,
+   "gamed_err_marker": 7
+  },
+  "A-ERR-0095": {
+   "records": 6,
+   "correct": 6
+  }
+ },
+ "gamed_single_function": 429,
+ "gamed_bases": 69,
+ "gamed_task_ids": [
+  "A-ERR-0001v11",
+  "A-ERR-0001v37",
+  "A-ERR-0001v44",
+  "A-ERR-0001v55",
+  "A-ERR-0002v39",
+  "A-ERR-0003v29",
+  "A-ERR-0003v55",
+  "A-ERR-0003v58",
+  "A-ERR-0003v69",
+  "A-ERR-0003v85",
+  "A-ERR-0003v9",
+  "A-ERR-0016v22",
+  "A-ERR-0016v25",
+  "A-ERR-0016v65",
+  "A-ERR-0016v69",
+  "A-ERR-0017v16",
+  "A-ERR-0017v58",
+  "A-ERR-0017v8",
+  "A-ERR-0018v10",
+  "A-ERR-0018v22",
+  "A-ERR-0018v3",
+  "A-ERR-0018v40",
+  "A-ERR-0018v46",
+  "A-ERR-0018v59",
+  "A-ERR-0018v6",
+  "A-ERR-0018v7",
+  "A-ERR-0018v77",
+  "A-ERR-0018v78",
+  "A-ERR-0019v13",
+  "A-ERR-0019v2",
+  "A-ERR-0019v43",
+  "A-ERR-0019v61",
+  "A-ERR-0019v72",
+  "A-ERR-0019v77",
+  "A-ERR-0021v25",
+  "A-ERR-0021v27",
+  "A-ERR-0021v3",
+  "A-ERR-0021v40",
+  "A-ERR-0021v45",
+  "A-ERR-0021v48",
+  "A-ERR-0021v53",
+  "A-ERR-0021v8",
+  "A-ERR-0021v81",
+  "A-ERR-0024v3",
+  "A-ERR-0024v30",
+  "A-ERR-0024v46",
+  "A-ERR-0024v64",
+  "A-ERR-0024v8",
+  "A-ERR-0025v27",
+  "A-ERR-0025v4",
+  "A-ERR-0025v50",
+  "A-ERR-0025v59",
+  "A-ERR-0025v74",
+  "A-ERR-0028v20",
+  "A-ERR-0028v58",
+  "A-ERR-0028v73",
+  "A-ERR-0028v74",
+  "A-ERR-0028v84",
+  "A-ERR-0029v19",
+  "A-ERR-0029v43",
+  "A-ERR-0029v57",
+  "A-ERR-0029v85",
+  "A-ERR-0031v1",
+  "A-ERR-0031v15",
+  "A-ERR-0031v25",
+  "A-ERR-0031v28",
+  "A-ERR-0031v30",
+  "A-ERR-0031v36",
+  "A-ERR-0031v69",
+  "A-ERR-0031v79",
+  "A-ERR-0032v39",
+  "A-ERR-0032v66",
+  "A-ERR-0033v16",
+  "A-ERR-0033v30",
+  "A-ERR-0033v43",
+  "A-ERR-0033v53",
+  "A-ERR-0033v61",
+  "A-ERR-0033v73",
+  "A-ERR-0034v15",
+  "A-ERR-0034v41",
+  "A-ERR-0035v4",
+  "A-ERR-0035v53",
+  "A-ERR-0036v25",
+  "A-ERR-0036v37",
+  "A-ERR-0036v41",
+  "A-ERR-0036v42",
+  "A-ERR-0036v44",
+  "A-ERR-0036v52",
+  "A-ERR-0036v62",
+  "A-ERR-0037v16",
+  "A-ERR-0037v33",
+  "A-ERR-0037v42",
+  "A-ERR-0037v54",
+  "A-ERR-0037v56",
+  "A-ERR-0037v66",
+  "A-ERR-0037v73",
+  "A-ERR-0038v12",
+  "A-ERR-0038v13",
+  "A-ERR-0038v66",
+  "A-ERR-0038v71",
+  "A-ERR-0038v72",
+  "A-ERR-0038v8",
+  "A-ERR-0038v84",
+  "A-ERR-0039v22",
+  "A-ERR-0039v26",
+  "A-ERR-0039v34",
+  "A-ERR-0039v41",
+  "A-ERR-0039v42",
+  "A-ERR-0039v46",
+  "A-ERR-0039v47",
+  "A-ERR-0039v62",
+  "A-ERR-0039v71",
+  "A-ERR-0039v80",
+  "A-ERR-0039v86",
+  "A-ERR-0040v16",
+  "A-ERR-0040v43",
+  "A-ERR-0040v52",
+  "A-ERR-0040v56",
+  "A-ERR-0040v57",
+  "A-ERR-0040v58",
+  "A-ERR-0040v71",
+  "A-ERR-0040v87",
+  "A-ERR-0041v12",
+  "A-ERR-0041v13",
+  "A-ERR-0041v28",
+  "A-ERR-0041v30",
+  "A-ERR-0041v36",
+  "A-ERR-0041v4",
+  "A-ERR-0041v41",
+  "A-ERR-0041v54",
+  "A-ERR-0041v56",
+  "A-ERR-0041v6",
+  "A-ERR-0041v62",
+  "A-ERR-0041v64",
+  "A-ERR-0041v78",
+  "A-ERR-0041v80",
+  "A-ERR-0041v81",
+  "A-ERR-0041v85",
+  "A-ERR-0042v30",
+  "A-ERR-0042v72",
+  "A-ERR-0042v83",
+  "A-ERR-0042v9",
+  "A-ERR-0043v15",
+  "A-ERR-0043v24",
+  "A-ERR-0043v53",
+  "A-ERR-0043v7",
+  "A-ERR-0043v87",
+  "A-ERR-0046v14",
+  "A-ERR-0046v50",
+  "A-ERR-0046v70",
+  "A-ERR-0047v1",
+  "A-ERR-0047v24",
+  "A-ERR-0047v27",
+  "A-ERR-0047v30",
+  "A-ERR-0047v43",
+  "A-ERR-0047v5",
+  "A-ERR-0047v52",
+  "A-ERR-0047v86",
+  "A-ERR-0047v87",
+  "A-ERR-0048v13",
+  "A-ERR-0048v21",
+  "A-ERR-0048v22",
+  "A-ERR-0048v3",
+  "A-ERR-0048v34",
+  "A-ERR-0048v48",
+  "A-ERR-0048v65",
+  "A-ERR-0048v77",
+  "A-ERR-0048v8",
+  "A-ERR-0048v83",
+  "A-ERR-0049v1",
+  "A-ERR-0049v12",
+  "A-ERR-0049v13",
+  "A-ERR-0049v15",
+  "A-ERR-0049v22",
+  "A-ERR-0049v26",
+  "A-ERR-0049v3",
+  "A-ERR-0049v35",
+  "A-ERR-0049v37",
+  "A-ERR-0049v39",
+  "A-ERR-0049v72",
+  "A-ERR-0049v82",
+  "A-ERR-0050v15",
+  "A-ERR-0050v29",
+  "A-ERR-0050v3",
+  "A-ERR-0050v53",
+  "A-ERR-0051v30",
+  "A-ERR-0051v47",
+  "A-ERR-0051v69",
+  "A-ERR-0051v74",
+  "A-ERR-0051v75",
+  "A-ERR-0052v12",
+  "A-ERR-0052v29",
+  "A-ERR-0052v34",
+  "A-ERR-0052v66",
+  "A-ERR-0052v81",
+  "A-ERR-0053v24",
+  "A-ERR-0053v30",
+  "A-ERR-0053v4",
+  "A-ERR-0053v40",
+  "A-ERR-0053v43",
+  "A-ERR-0054v12",
+  "A-ERR-0054v35",
+  "A-ERR-0054v40",
+  "A-ERR-0054v75",
+  "A-ERR-0055v25",
+  "A-ERR-0055v48",
+  "A-ERR-0055v5",
+  "A-ERR-0055v53",
+  "A-ERR-0055v57",
+  "A-ERR-0055v8",
+  "A-ERR-0055v83",
+  "A-ERR-0056v15",
+  "A-ERR-0056v42",
+  "A-ERR-0056v49",
+  "A-ERR-0057",
+  "A-ERR-0057v21",
+  "A-ERR-0057v45",
+  "A-ERR-0057v62",
+  "A-ERR-0057v67",
+  "A-ERR-0057v76",
+  "A-ERR-0058v31",
+  "A-ERR-0058v32",
+  "A-ERR-0058v42",
+  "A-ERR-0058v51",
+  "A-ERR-0058v67",
+  "A-ERR-0058v7",
+  "A-ERR-0059v26",
+  "A-ERR-0059v39",
+  "A-ERR-0059v47",
+  "A-ERR-0059v52",
+  "A-ERR-0059v53",
+  "A-ERR-0059v58",
+  "A-ERR-0059v71",
+  "A-ERR-0059v78",
+  "A-ERR-0059v82",
+  "A-ERR-0060v56",
+  "A-ERR-0060v63",
+  "A-ERR-0060v72",
+  "A-ERR-0061v10",
+  "A-ERR-0061v43",
+  "A-ERR-0061v46",
+  "A-ERR-0061v60",
+  "A-ERR-0061v70",
+  "A-ERR-0061v80",
+  "A-ERR-0061v82",
+  "A-ERR-0062v37",
+  "A-ERR-0062v58",
+  "A-ERR-0062v59",
+  "A-ERR-0062v60",
+  "A-ERR-0062v73",
+  "A-ERR-0062v87",
+  "A-ERR-0063v2",
+  "A-ERR-0063v41",
+  "A-ERR-0063v46",
+  "A-ERR-0063v57",
+  "A-ERR-0063v87",
+  "A-ERR-0066v23",
+  "A-ERR-0066v29",
+  "A-ERR-0066v31",
+  "A-ERR-0066v49",
+  "A-ERR-0066v50",
+  "A-ERR-0066v74",
+  "A-ERR-0066v77",
+  "A-ERR-0067v34",
+  "A-ERR-0067v54",
+  "A-ERR-0067v6",
+  "A-ERR-0067v61",
+  "A-ERR-0067v7",
+  "A-ERR-0067v77",
+  "A-ERR-0067v84",
+  "A-ERR-0068v63",
+  "A-ERR-0068v67",
+  "A-ERR-0068v78",
+  "A-ERR-0069v12",
+  "A-ERR-0069v39",
+  "A-ERR-0069v4",
+  "A-ERR-0069v49",
+  "A-ERR-0069v52",
+  "A-ERR-0069v53",
+  "A-ERR-0069v56",
+  "A-ERR-0069v67",
+  "A-ERR-0069v7",
+  "A-ERR-0069v74",
+  "A-ERR-0069v75",
+  "A-ERR-0069v82",
+  "A-ERR-0070v1",
+  "A-ERR-0070v10",
+  "A-ERR-0070v15",
+  "A-ERR-0070v27",
+  "A-ERR-0070v46",
+  "A-ERR-0070v48",
+  "A-ERR-0070v53",
+  "A-ERR-0070v77",
+  "A-ERR-0071v66",
+  "A-ERR-0071v74",
+  "A-ERR-0071v83",
+  "A-ERR-0072",
+  "A-ERR-0072v29",
+  "A-ERR-0072v3",
+  "A-ERR-0072v34",
+  "A-ERR-0072v37",
+  "A-ERR-0072v5",
+  "A-ERR-0072v50",
+  "A-ERR-0072v53",
+  "A-ERR-0072v61",
+  "A-ERR-0072v68",
+  "A-ERR-0073v15",
+  "A-ERR-0073v25",
+  "A-ERR-0073v29",
+  "A-ERR-0073v43",
+  "A-ERR-0073v45",
+  "A-ERR-0073v78",
+  "A-ERR-0074v29",
+  "A-ERR-0074v30",
+  "A-ERR-0074v34",
+  "A-ERR-0074v36",
+  "A-ERR-0074v37",
+  "A-ERR-0074v49",
+  "A-ERR-0074v77",
+  "A-ERR-0075v18",
+  "A-ERR-0075v3",
+  "A-ERR-0075v30",
+  "A-ERR-0075v42",
+  "A-ERR-0075v54",
+  "A-ERR-0075v58",
+  "A-ERR-0075v78",
+  "A-ERR-0075v8",
+  "A-ERR-0075v84",
+  "A-ERR-0076v19",
+  "A-ERR-0076v3",
+  "A-ERR-0076v62",
+  "A-ERR-0076v70",
+  "A-ERR-0076v75",
+  "A-ERR-0076v86",
+  "A-ERR-0077",
+  "A-ERR-0077v28",
+  "A-ERR-0077v41",
+  "A-ERR-0077v42",
+  "A-ERR-0077v45",
+  "A-ERR-0077v47",
+  "A-ERR-0077v62",
+  "A-ERR-0077v72",
+  "A-ERR-0078v11",
+  "A-ERR-0078v39",
+  "A-ERR-0078v46",
+  "A-ERR-0078v58",
+  "A-ERR-0078v63",
+  "A-ERR-0078v64",
+  "A-ERR-0078v84",
+  "A-ERR-0079v27",
+  "A-ERR-0079v4",
+  "A-ERR-0079v55",
+  "A-ERR-0079v59",
+  "A-ERR-0080v19",
+  "A-ERR-0080v22",
+  "A-ERR-0080v24",
+  "A-ERR-0080v26",
+  "A-ERR-0080v39",
+  "A-ERR-0080v45",
+  "A-ERR-0080v58",
+  "A-ERR-0080v67",
+  "A-ERR-0080v77",
+  "A-ERR-0080v83",
+  "A-ERR-0080v84",
+  "A-ERR-0082v16",
+  "A-ERR-0082v2",
+  "A-ERR-0082v29",
+  "A-ERR-0082v33",
+  "A-ERR-0082v34",
+  "A-ERR-0082v48",
+  "A-ERR-0082v51",
+  "A-ERR-0083v27",
+  "A-ERR-0083v49",
+  "A-ERR-0083v59",
+  "A-ERR-0083v65",
+  "A-ERR-0083v68",
+  "A-ERR-0085v22",
+  "A-ERR-0085v33",
+  "A-ERR-0085v34",
+  "A-ERR-0085v41",
+  "A-ERR-0085v43",
+  "A-ERR-0085v48",
+  "A-ERR-0085v68",
+  "A-ERR-0086v23",
+  "A-ERR-0086v27",
+  "A-ERR-0086v3",
+  "A-ERR-0086v31",
+  "A-ERR-0086v41",
+  "A-ERR-0086v44",
+  "A-ERR-0086v66",
+  "A-ERR-0086v73",
+  "A-ERR-0086v74",
+  "A-ERR-0086v86",
+  "A-ERR-0088v25",
+  "A-ERR-0088v54",
+  "A-ERR-0088v59",
+  "A-ERR-0088v75",
+  "A-ERR-0089",
+  "A-ERR-0089v26",
+  "A-ERR-0089v76",
+  "A-ERR-0090v18",
+  "A-ERR-0090v19",
+  "A-ERR-0090v42",
+  "A-ERR-0090v45",
+  "A-ERR-0090v58",
+  "A-ERR-0091v11",
+  "A-ERR-0091v33",
+  "A-ERR-0091v37",
+  "A-ERR-0091v40",
+  "A-ERR-0091v43",
+  "A-ERR-0091v60",
+  "A-ERR-0091v65",
+  "A-ERR-0092v21",
+  "A-ERR-0092v41",
+  "A-ERR-0092v47",
+  "A-ERR-0092v71",
+  "A-ERR-0092v76",
+  "A-ERR-0092v78",
+  "A-ERR-0093v21",
+  "A-ERR-0093v52",
+  "A-ERR-0093v82",
+  "A-ERR-0093v83",
+  "A-ERR-0094v31",
+  "A-ERR-0094v38",
+  "A-ERR-0094v42",
+  "A-ERR-0094v50",
+  "A-ERR-0094v75",
+  "A-ERR-0094v76",
+  "A-ERR-0094v85"
+ ],
+ "vs_131_40": {
+  "finding_131_40": 254,
+  "only_in_131_40": [
+   "A-ERR-0077v37"
+  ],
+  "only_in_131_42": [
+   "A-ERR-0001v11",
+   "A-ERR-0001v37",
+   "A-ERR-0001v44",
+   "A-ERR-0001v55",
+   "A-ERR-0002v39",
+   "A-ERR-0003v29",
+   "A-ERR-0003v55",
+   "A-ERR-0003v58",
+   "A-ERR-0003v69",
+   "A-ERR-0003v85",
+   "A-ERR-0003v9",
+   "A-ERR-0018v22",
+   "A-ERR-0024v30",
+   "A-ERR-0029v19",
+   "A-ERR-0046v14",
+   "A-ERR-0046v50",
+   "A-ERR-0046v70",
+   "A-ERR-0047v1",
+   "A-ERR-0047v24",
+   "A-ERR-0047v27",
+   "A-ERR-0047v30",
+   "A-ERR-0047v43",
+   "A-ERR-0047v5",
+   "A-ERR-0047v52",
+   "A-ERR-0047v86",
+   "A-ERR-0047v87",
+   "A-ERR-0048v13",
+   "A-ERR-0048v21",
+   "A-ERR-0048v22",
+   "A-ERR-0048v3",
+   "A-ERR-0048v34",
+   "A-ERR-0048v48",
+   "A-ERR-0048v65",
+   "A-ERR-0048v77",
+   "A-ERR-0048v8",
+   "A-ERR-0048v83",
+   "A-ERR-0049v1",
+   "A-ERR-0049v12",
+   "A-ERR-0049v13",
+   "A-ERR-0049v15",
+   "A-ERR-0049v22",
+   "A-ERR-0049v26",
+   "A-ERR-0049v3",
+   "A-ERR-0049v35",
+   "A-ERR-0049v37",
+   "A-ERR-0049v39",
+   "A-ERR-0049v72",
+   "A-ERR-0049v82",
+   "A-ERR-0050v15",
+   "A-ERR-0050v29",
+   "A-ERR-0050v3",
+   "A-ERR-0050v53",
+   "A-ERR-0051v30",
+   "A-ERR-0051v47",
+   "A-ERR-0051v69",
+   "A-ERR-0051v74",
+   "A-ERR-0051v75",
+   "A-ERR-0052v12",
+   "A-ERR-0052v29",
+   "A-ERR-0052v34",
+   "A-ERR-0052v66",
+   "A-ERR-0052v81",
+   "A-ERR-0053v24",
+   "A-ERR-0053v30",
+   "A-ERR-0053v4",
+   "A-ERR-0053v40",
+   "A-ERR-0053v43",
+   "A-ERR-0054v12",
+   "A-ERR-0054v35",
+   "A-ERR-0054v40",
+   "A-ERR-0054v75",
+   "A-ERR-0055v25",
+   "A-ERR-0055v48",
+   "A-ERR-0055v5",
+   "A-ERR-0055v53",
+   "A-ERR-0055v57",
+   "A-ERR-0055v8",
+   "A-ERR-0055v83",
+   "A-ERR-0056v15",
+   "A-ERR-0056v42",
+   "A-ERR-0056v49",
+   "A-ERR-0057",
+   "A-ERR-0057v21",
+   "A-ERR-0057v45",
+   "A-ERR-0057v62",
+   "A-ERR-0057v67",
+   "A-ERR-0057v76",
+   "A-ERR-0058v31",
+   "A-ERR-0058v32",
+   "A-ERR-0058v42",
+   "A-ERR-0058v51",
+   "A-ERR-0058v67",
+   "A-ERR-0058v7",
+   "A-ERR-0059v26",
+   "A-ERR-0059v39",
+   "A-ERR-0059v47",
+   "A-ERR-0059v52",
+   "A-ERR-0059v53",
+   "A-ERR-0059v58",
+   "A-ERR-0059v71",
+   "A-ERR-0059v78",
+   "A-ERR-0059v82",
+   "A-ERR-0060v56",
+   "A-ERR-0060v63",
+   "A-ERR-0060v72",
+   "A-ERR-0061v10",
+   "A-ERR-0061v43",
+   "A-ERR-0061v46",
+   "A-ERR-0061v60",
+   "A-ERR-0061v70",
+   "A-ERR-0061v80",
+   "A-ERR-0061v82",
+   "A-ERR-0062v37",
+   "A-ERR-0062v58",
+   "A-ERR-0062v59",
+   "A-ERR-0062v60",
+   "A-ERR-0062v73",
+   "A-ERR-0062v87",
+   "A-ERR-0063v2",
+   "A-ERR-0063v41",
+   "A-ERR-0063v46",
+   "A-ERR-0063v57",
+   "A-ERR-0063v87",
+   "A-ERR-0085v22",
+   "A-ERR-0085v33",
+   "A-ERR-0085v34",
+   "A-ERR-0085v41",
+   "A-ERR-0085v43",
+   "A-ERR-0085v48",
+   "A-ERR-0085v68",
+   "A-ERR-0086v23",
+   "A-ERR-0086v27",
+   "A-ERR-0086v3",
+   "A-ERR-0086v31",
+   "A-ERR-0086v41",
+   "A-ERR-0086v44",
+   "A-ERR-0086v66",
+   "A-ERR-0086v73",
+   "A-ERR-0086v74",
+   "A-ERR-0086v86",
+   "A-ERR-0088v25",
+   "A-ERR-0088v54",
+   "A-ERR-0088v59",
+   "A-ERR-0088v75",
+   "A-ERR-0089",
+   "A-ERR-0089v26",
+   "A-ERR-0089v76",
+   "A-ERR-0090v18",
+   "A-ERR-0090v19",
+   "A-ERR-0090v42",
+   "A-ERR-0090v45",
+   "A-ERR-0090v58",
+   "A-ERR-0091v11",
+   "A-ERR-0091v33",
+   "A-ERR-0091v37",
+   "A-ERR-0091v40",
+   "A-ERR-0091v43",
+   "A-ERR-0091v60",
+   "A-ERR-0091v65",
+   "A-ERR-0092v21",
+   "A-ERR-0092v41",
+   "A-ERR-0092v47",
+   "A-ERR-0092v71",
+   "A-ERR-0092v76",
+   "A-ERR-0092v78",
+   "A-ERR-0093v21",
+   "A-ERR-0093v52",
+   "A-ERR-0093v82",
+   "A-ERR-0093v83",
+   "A-ERR-0094v31",
+   "A-ERR-0094v38",
+   "A-ERR-0094v42",
+   "A-ERR-0094v50",
+   "A-ERR-0094v75",
+   "A-ERR-0094v76",
+   "A-ERR-0094v85"
+  ]
+ },
+ "ast_unavailable": 0,
+ "ast_vs_text_disagreements": 0,
+ "ast_vs_text_disagreement_ids": [],
+ "hard_gate_would_reject": [
+  "A-ERR-0001v11",
+  "A-ERR-0001v37",
+  "A-ERR-0001v44",
+  "A-ERR-0001v55",
+  "A-ERR-0002v39",
+  "A-ERR-0003v29",
+  "A-ERR-0003v55",
+  "A-ERR-0003v58",
+  "A-ERR-0003v69",
+  "A-ERR-0003v85",
+  "A-ERR-0003v9",
+  "A-ERR-0016v22",
+  "A-ERR-0016v25",
+  "A-ERR-0016v65",
+  "A-ERR-0016v69",
+  "A-ERR-0017v16",
+  "A-ERR-0017v58",
+  "A-ERR-0017v8",
+  "A-ERR-0018v10",
+  "A-ERR-0018v22",
+  "A-ERR-0018v3",
+  "A-ERR-0018v40",
+  "A-ERR-0018v46",
+  "A-ERR-0018v59",
+  "A-ERR-0018v6",
+  "A-ERR-0018v7",
+  "A-ERR-0018v77",
+  "A-ERR-0018v78",
+  "A-ERR-0019v13",
+  "A-ERR-0019v2",
+  "A-ERR-0019v43",
+  "A-ERR-0019v61",
+  "A-ERR-0019v72",
+  "A-ERR-0019v77",
+  "A-ERR-0021v25",
+  "A-ERR-0021v27",
+  "A-ERR-0021v3",
+  "A-ERR-0021v40",
+  "A-ERR-0021v45",
+  "A-ERR-0021v48",
+  "A-ERR-0021v53",
+  "A-ERR-0021v8",
+  "A-ERR-0021v81",
+  "A-ERR-0024v3",
+  "A-ERR-0024v30",
+  "A-ERR-0024v46",
+  "A-ERR-0024v64",
+  "A-ERR-0024v8",
+  "A-ERR-0025v27",
+  "A-ERR-0025v4",
+  "A-ERR-0025v50",
+  "A-ERR-0025v59",
+  "A-ERR-0025v74",
+  "A-ERR-0028v20",
+  "A-ERR-0028v58",
+  "A-ERR-0028v73",
+  "A-ERR-0028v74",
+  "A-ERR-0028v84",
+  "A-ERR-0029v19",
+  "A-ERR-0029v43",
+  "A-ERR-0029v57",
+  "A-ERR-0029v85",
+  "A-ERR-0031v1",
+  "A-ERR-0031v15",
+  "A-ERR-0031v25",
+  "A-ERR-0031v28",
+  "A-ERR-0031v30",
+  "A-ERR-0031v36",
+  "A-ERR-0031v69",
+  "A-ERR-0031v79",
+  "A-ERR-0032v39",
+  "A-ERR-0032v66",
+  "A-ERR-0033v16",
+  "A-ERR-0033v30",
+  "A-ERR-0033v43",
+  "A-ERR-0033v53",
+  "A-ERR-0033v61",
+  "A-ERR-0033v73",
+  "A-ERR-0034v15",
+  "A-ERR-0034v41",
+  "A-ERR-0035v4",
+  "A-ERR-0035v53",
+  "A-ERR-0036v25",
+  "A-ERR-0036v37",
+  "A-ERR-0036v41",
+  "A-ERR-0036v42",
+  "A-ERR-0036v44",
+  "A-ERR-0036v52",
+  "A-ERR-0036v62",
+  "A-ERR-0037v16",
+  "A-ERR-0037v33",
+  "A-ERR-0037v42",
+  "A-ERR-0037v54",
+  "A-ERR-0037v56",
+  "A-ERR-0037v66",
+  "A-ERR-0037v73",
+  "A-ERR-0038v12",
+  "A-ERR-0038v13",
+  "A-ERR-0038v66",
+  "A-ERR-0038v71",
+  "A-ERR-0038v72",
+  "A-ERR-0038v8",
+  "A-ERR-0038v84",
+  "A-ERR-0039v22",
+  "A-ERR-0039v26",
+  "A-ERR-0039v34",
+  "A-ERR-0039v41",
+  "A-ERR-0039v42",
+  "A-ERR-0039v46",
+  "A-ERR-0039v47",
+  "A-ERR-0039v62",
+  "A-ERR-0039v71",
+  "A-ERR-0039v80",
+  "A-ERR-0039v86",
+  "A-ERR-0040v16",
+  "A-ERR-0040v43",
+  "A-ERR-0040v52",
+  "A-ERR-0040v56",
+  "A-ERR-0040v57",
+  "A-ERR-0040v58",
+  "A-ERR-0040v71",
+  "A-ERR-0040v87",
+  "A-ERR-0041v12",
+  "A-ERR-0041v13",
+  "A-ERR-0041v28",
+  "A-ERR-0041v30",
+  "A-ERR-0041v36",
+  "A-ERR-0041v4",
+  "A-ERR-0041v41",
+  "A-ERR-0041v54",
+  "A-ERR-0041v56",
+  "A-ERR-0041v6",
+  "A-ERR-0041v62",
+  "A-ERR-0041v64",
+  "A-ERR-0041v78",
+  "A-ERR-0041v80",
+  "A-ERR-0041v81",
+  "A-ERR-0041v85",
+  "A-ERR-0042v30",
+  "A-ERR-0042v72",
+  "A-ERR-0042v83",
+  "A-ERR-0042v9",
+  "A-ERR-0043v15",
+  "A-ERR-0043v24",
+  "A-ERR-0043v53",
+  "A-ERR-0043v7",
+  "A-ERR-0043v87",
+  "A-ERR-0046v14",
+  "A-ERR-0046v50",
+  "A-ERR-0046v70",
+  "A-ERR-0047v1",
+  "A-ERR-0047v24",
+  "A-ERR-0047v27",
+  "A-ERR-0047v30",
+  "A-ERR-0047v43",
+  "A-ERR-0047v5",
+  "A-ERR-0047v52",
+  "A-ERR-0047v86",
+  "A-ERR-0047v87",
+  "A-ERR-0048v13",
+  "A-ERR-0048v21",
+  "A-ERR-0048v22",
+  "A-ERR-0048v3",
+  "A-ERR-0048v34",
+  "A-ERR-0048v48",
+  "A-ERR-0048v65",
+  "A-ERR-0048v77",
+  "A-ERR-0048v8",
+  "A-ERR-0048v83",
+  "A-ERR-0049v1",
+  "A-ERR-0049v12",
+  "A-ERR-0049v13",
+  "A-ERR-0049v15",
+  "A-ERR-0049v22",
+  "A-ERR-0049v26",
+  "A-ERR-0049v3",
+  "A-ERR-0049v35",
+  "A-ERR-0049v37",
+  "A-ERR-0049v39",
+  "A-ERR-0049v72",
+  "A-ERR-0049v82",
+  "A-ERR-0050v15",
+  "A-ERR-0050v29",
+  "A-ERR-0050v3",
+  "A-ERR-0050v53",
+  "A-ERR-0051v30",
+  "A-ERR-0051v47",
+  "A-ERR-0051v69",
+  "A-ERR-0051v74",
+  "A-ERR-0051v75",
+  "A-ERR-0052v12",
+  "A-ERR-0052v29",
+  "A-ERR-0052v34",
+  "A-ERR-0052v66",
+  "A-ERR-0052v81",
+  "A-ERR-0053v24",
+  "A-ERR-0053v30",
+  "A-ERR-0053v4",
+  "A-ERR-0053v40",
+  "A-ERR-0053v43",
+  "A-ERR-0054v12",
+  "A-ERR-0054v35",
+  "A-ERR-0054v40",
+  "A-ERR-0054v75",
+  "A-ERR-0055v25",
+  "A-ERR-0055v48",
+  "A-ERR-0055v5",
+  "A-ERR-0055v53",
+  "A-ERR-0055v57",
+  "A-ERR-0055v8",
+  "A-ERR-0055v83",
+  "A-ERR-0056v15",
+  "A-ERR-0056v42",
+  "A-ERR-0056v49",
+  "A-ERR-0057",
+  "A-ERR-0057v21",
+  "A-ERR-0057v45",
+  "A-ERR-0057v62",
+  "A-ERR-0057v67",
+  "A-ERR-0057v76",
+  "A-ERR-0058v31",
+  "A-ERR-0058v32",
+  "A-ERR-0058v42",
+  "A-ERR-0058v51",
+  "A-ERR-0058v67",
+  "A-ERR-0058v7",
+  "A-ERR-0059v26",
+  "A-ERR-0059v39",
+  "A-ERR-0059v47",
+  "A-ERR-0059v52",
+  "A-ERR-0059v53",
+  "A-ERR-0059v58",
+  "A-ERR-0059v71",
+  "A-ERR-0059v78",
+  "A-ERR-0059v82",
+  "A-ERR-0060v56",
+  "A-ERR-0060v63",
+  "A-ERR-0060v72",
+  "A-ERR-0061v10",
+  "A-ERR-0061v43",
+  "A-ERR-0061v46",
+  "A-ERR-0061v60",
+  "A-ERR-0061v70",
+  "A-ERR-0061v80",
+  "A-ERR-0061v82",
+  "A-ERR-0062v37",
+  "A-ERR-0062v58",
+  "A-ERR-0062v59",
+  "A-ERR-0062v60",
+  "A-ERR-0062v73",
+  "A-ERR-0062v87",
+  "A-ERR-0063v2",
+  "A-ERR-0063v41",
+  "A-ERR-0063v46",
+  "A-ERR-0063v57",
+  "A-ERR-0063v87",
+  "A-ERR-0066v23",
+  "A-ERR-0066v29",
+  "A-ERR-0066v31",
+  "A-ERR-0066v49",
+  "A-ERR-0066v50",
+  "A-ERR-0066v74",
+  "A-ERR-0066v77",
+  "A-ERR-0067v34",
+  "A-ERR-0067v54",
+  "A-ERR-0067v6",
+  "A-ERR-0067v61",
+  "A-ERR-0067v7",
+  "A-ERR-0067v77",
+  "A-ERR-0067v84",
+  "A-ERR-0068v63",
+  "A-ERR-0068v67",
+  "A-ERR-0068v78",
+  "A-ERR-0069v12",
+  "A-ERR-0069v39",
+  "A-ERR-0069v4",
+  "A-ERR-0069v49",
+  "A-ERR-0069v52",
+  "A-ERR-0069v53",
+  "A-ERR-0069v56",
+  "A-ERR-0069v67",
+  "A-ERR-0069v7",
+  "A-ERR-0069v74",
+  "A-ERR-0069v75",
+  "A-ERR-0069v82",
+  "A-ERR-0070v1",
+  "A-ERR-0070v10",
+  "A-ERR-0070v15",
+  "A-ERR-0070v27",
+  "A-ERR-0070v46",
+  "A-ERR-0070v48",
+  "A-ERR-0070v53",
+  "A-ERR-0070v77",
+  "A-ERR-0071v66",
+  "A-ERR-0071v74",
+  "A-ERR-0071v83",
+  "A-ERR-0072",
+  "A-ERR-0072v29",
+  "A-ERR-0072v3",
+  "A-ERR-0072v34",
+  "A-ERR-0072v37",
+  "A-ERR-0072v5",
+  "A-ERR-0072v50",
+  "A-ERR-0072v53",
+  "A-ERR-0072v61",
+  "A-ERR-0072v68",
+  "A-ERR-0073v15",
+  "A-ERR-0073v25",
+  "A-ERR-0073v29",
+  "A-ERR-0073v43",
+  "A-ERR-0073v45",
+  "A-ERR-0073v78",
+  "A-ERR-0074v29",
+  "A-ERR-0074v30",
+  "A-ERR-0074v34",
+  "A-ERR-0074v36",
+  "A-ERR-0074v37",
+  "A-ERR-0074v49",
+  "A-ERR-0074v77",
+  "A-ERR-0075v18",
+  "A-ERR-0075v3",
+  "A-ERR-0075v30",
+  "A-ERR-0075v42",
+  "A-ERR-0075v54",
+  "A-ERR-0075v58",
+  "A-ERR-0075v78",
+  "A-ERR-0075v8",
+  "A-ERR-0075v84",
+  "A-ERR-0076v19",
+  "A-ERR-0076v3",
+  "A-ERR-0076v62",
+  "A-ERR-0076v70",
+  "A-ERR-0076v75",
+  "A-ERR-0076v86",
+  "A-ERR-0077",
+  "A-ERR-0077v28",
+  "A-ERR-0077v41",
+  "A-ERR-0077v42",
+  "A-ERR-0077v45",
+  "A-ERR-0077v47",
+  "A-ERR-0077v62",
+  "A-ERR-0077v72",
+  "A-ERR-0078v11",
+  "A-ERR-0078v39",
+  "A-ERR-0078v46",
+  "A-ERR-0078v58",
+  "A-ERR-0078v63",
+  "A-ERR-0078v64",
+  "A-ERR-0078v84",
+  "A-ERR-0079v27",
+  "A-ERR-0079v4",
+  "A-ERR-0079v55",
+  "A-ERR-0079v59",
+  "A-ERR-0080v19",
+  "A-ERR-0080v22",
+  "A-ERR-0080v24",
+  "A-ERR-0080v26",
+  "A-ERR-0080v39",
+  "A-ERR-0080v45",
+  "A-ERR-0080v58",
+  "A-ERR-0080v67",
+  "A-ERR-0080v77",
+  "A-ERR-0080v83",
+  "A-ERR-0080v84",
+  "A-ERR-0082v16",
+  "A-ERR-0082v2",
+  "A-ERR-0082v29",
+  "A-ERR-0082v33",
+  "A-ERR-0082v34",
+  "A-ERR-0082v48",
+  "A-ERR-0082v51",
+  "A-ERR-0083v27",
+  "A-ERR-0083v49",
+  "A-ERR-0083v59",
+  "A-ERR-0083v65",
+  "A-ERR-0083v68",
+  "A-ERR-0085v22",
+  "A-ERR-0085v33",
+  "A-ERR-0085v34",
+  "A-ERR-0085v41",
+  "A-ERR-0085v43",
+  "A-ERR-0085v48",
+  "A-ERR-0085v68",
+  "A-ERR-0086v23",
+  "A-ERR-0086v27",
+  "A-ERR-0086v3",
+  "A-ERR-0086v31",
+  "A-ERR-0086v41",
+  "A-ERR-0086v44",
+  "A-ERR-0086v66",
+  "A-ERR-0086v73",
+  "A-ERR-0086v74",
+  "A-ERR-0086v86",
+  "A-ERR-0088v25",
+  "A-ERR-0088v54",
+  "A-ERR-0088v59",
+  "A-ERR-0088v75",
+  "A-ERR-0089",
+  "A-ERR-0089v26",
+  "A-ERR-0089v76",
+  "A-ERR-0090v18",
+  "A-ERR-0090v19",
+  "A-ERR-0090v42",
+  "A-ERR-0090v45",
+  "A-ERR-0090v58",
+  "A-ERR-0091v11",
+  "A-ERR-0091v33",
+  "A-ERR-0091v37",
+  "A-ERR-0091v40",
+  "A-ERR-0091v43",
+  "A-ERR-0091v60",
+  "A-ERR-0091v65",
+  "A-ERR-0092v21",
+  "A-ERR-0092v41",
+  "A-ERR-0092v47",
+  "A-ERR-0092v71",
+  "A-ERR-0092v76",
+  "A-ERR-0092v78",
+  "A-ERR-0093v21",
+  "A-ERR-0093v52",
+  "A-ERR-0093v82",
+  "A-ERR-0093v83",
+  "A-ERR-0094v31",
+  "A-ERR-0094v38",
+  "A-ERR-0094v42",
+  "A-ERR-0094v50",
+  "A-ERR-0094v75",
+  "A-ERR-0094v76",
+  "A-ERR-0094v85"
+ ],
+ "jsonl": "corpus/regen_v04/audit/err_union_check.jsonl",
+ "hard_gate_would_reject_n": 429,
+ "gate_proof": {
+  "seed": 131042,
+  "unaffected": [
+   {
+    "task_id": "A-ARR-0039v36",
+    "task_type": "single_function",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-ARR-0088v10",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-CND-0062v51",
+    "task_type": "single_function",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-CND-0077v43",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-ERR-0012v47",
+    "task_type": "single_function",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-ERR-0023v11",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-MTH-0008v69",
+    "task_type": "single_function",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-MTH-0112v37",
+    "task_type": "single_function",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-SRT-0004v19",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-SRT-0065v69",
+    "task_type": "single_function",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-STR-0029v36",
+    "task_type": "single_function",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "A-STR-0073v8",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": true
+   },
+   {
+    "task_id": "D-CFG-0017v115",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": null
+   },
+   {
+    "task_id": "D-CLI-0015v258",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": null
+   },
+   {
+    "task_id": "D-CRY-0010v168",
+    "task_type": "single_function",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": null
+   },
+   {
+    "task_id": "D-DAT-0001v234",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": null
+   },
+   {
+    "task_id": "D-FIO-0018v170",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": null
+   },
+   {
+    "task_id": "D-TST-0020v267",
+    "task_type": "full_program",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": null
+   },
+   {
+    "task_id": "D-WEB-0027v25",
+    "task_type": "single_function",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": null
+   },
+   {
+    "task_id": "MIG-P2-B-D-NET-0020v342-34df5d4e",
+    "task_type": "migrate_fix",
+    "identical": true,
+    "ok": true,
+    "reason": null,
+    "return_type_gate": null
+   }
+  ],
+  "gamed": [
+   {
+    "task_id": "A-ERR-0019v2",
+    "before_ok": true,
+    "before_reason": null,
+    "after_ok": false,
+    "after_reason": "return_type: safesqrt declared `str`, spec `f64!$matherr` requires an error union",
+    "flipped": true
+   },
+   {
+    "task_id": "A-ERR-0021v3",
+    "before_ok": true,
+    "before_reason": null,
+    "after_ok": false,
+    "after_reason": "return_type: driver callee `showvalidate` declared `str` (target validatelength is `str!$validationerr`), spec `str!$validationerr` requires an error union",
+    "flipped": true
+   },
+   {
+    "task_id": "A-ERR-0031v30",
+    "before_ok": true,
+    "before_reason": null,
+    "after_ok": false,
+    "after_reason": "return_type: safedivfromstrs declared `str`, spec `f64!$calcerr` requires an error union",
+    "flipped": true
+   },
+   {
+    "task_id": "A-ERR-0036v44",
+    "before_ok": true,
+    "before_reason": null,
+    "after_ok": false,
+    "after_reason": "return_type: safeavg declared `str`, spec `f64!$lookuperr` requires an error union",
+    "flipped": true
+   },
+   {
+    "task_id": "A-ERR-0059v82",
+    "before_ok": true,
+    "before_reason": null,
+    "after_ok": false,
+    "after_reason": "return_type: driver callee `showgcd` declared `str` (target safegcd is `i64!$matherr`), spec `i64!$matherr` requires an error union",
+    "flipped": true
+   }
+  ],
+  "unaffected_identical": 20,
+  "gamed_now_rejected": 5
+ },
+ "routing": {
+  "agent_txt": "corpus/regen_v04/audit/buckets/agent.txt",
+  "agent_txt_added": 395,
+  "agent_txt_already_present": 34,
+  "agent_txt_baseline": 1197,
+  "agent_txt_prior_route_removed": 395,
+  "agent_txt_total": 1592,
+  "agent_reasons": "corpus/regen_v04/audit/buckets/agent_reasons.jsonl",
+  "patch": "corpus/regen_v04/audit/pattern_sweep.131.42.patch.jsonl",
+  "patch_rows": 429,
+  "patch_rows_with_sweep_row": 429,
+  "apply": "cat audit/pattern_sweep.jsonl audit/pattern_sweep.131.42.patch.jsonl > audit/pattern_sweep.merged.jsonl && pattern_prep.py --bucket audit/pattern_sweep.merged.jsonl  (load_bucket: later line per task_id wins)"
+ }
+}

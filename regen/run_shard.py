@@ -30,6 +30,8 @@ sys.path.insert(0, HERE)
 from assemble import assemble, sanitize          # noqa: E402
 from build_prompt import build                   # noqa: E402
 from validate import tkc_check, signature_conforms  # noqa: E402
+from validate import return_type_conforms, has_target_function  # noqa: E402  (131.42 / 131.44 hook)
+from validate import render_expected  # noqa: E402  (131.44: err-aware; check_one imports it from here)
 from validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402  (131.18)
 import idiom_judge                                   # noqa: E402
 import metrics                                       # noqa: E402
@@ -90,14 +92,6 @@ def cmd_prepare(args):
                       "tkc_bin_sha": PIN.sha256 if PIN else tkc_pin.bin_sha(TKC)}))   # 131.39
 
 
-def render_expected(val):
-    if isinstance(val, bool):
-        return "true" if val else "false"
-    if isinstance(val, float) and val == int(val):
-        return str(int(val))
-    return str(val)
-
-
 def run_test_cases(binpath, spec):
     """Run the binary once; expect one printed line per test case, in order."""
     tcs = spec.get("test_cases") or []
@@ -152,10 +146,16 @@ def validate_one(spec, raw_src, workdir):
     return record, ok, reason
 
 
-def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=None):
+def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=None,
+                       return_type_gate=True):
     """validate_one plus a per-gate verdict dict (131.18). Gate keys:
-    compile, signature, build, tests, idiom, structure, pattern, lint — each
-    True/False/None (None = not applicable). `pattern` (131.10) is a hard gate
+    compile, signature, return_type, build, tests, idiom, structure, pattern,
+    lint — each True/False/None (None = not applicable). `return_type`
+    (131.42): an error-union spec return (`T!Err`) must be DECLARED as an
+    error union — hard fail; any other spec/declared return difference is
+    the soft flag `regen.return_type_mismatch` (131.43 decides);
+    `return_type_gate=False` skips it (A/B proof: regen/err_union_check.py).
+    `pattern` (131.10) is a hard gate
     on every path: any 131.9 pattern-rule error/warning rejects (hints pass),
     net of the spec's style mandate. `lint_gate=True` additionally rejects on
     any other lint warning > 0 (library ingest; NOT applied by validate_one). task_type stdin_program: source is
@@ -164,8 +164,8 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
     ttype = spec.get("task_type", "full_program")
     is_stdin = ttype == "stdin_program"
     src = raw_src if is_stdin else assemble(spec, raw_src)
-    gates = {"compile": None, "signature": None, "build": None, "tests": None,
-             "idiom": None, "structure": None, "pattern": None, "lint": None}
+    gates = {"compile": None, "signature": None, "return_type": None, "build": None,
+             "tests": None, "idiom": None, "structure": None, "pattern": None, "lint": None}
     if re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1a\x1c-\x1f]", src.replace("\x1b", "")) or "\x00" in src:
         gates["compile"] = False
         return None, False, "control bytes in source", gates
@@ -175,11 +175,17 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
     try:
         rc, codes, diag = tkc_check(tkpath)
         gates["compile"] = rc == 0
+        rt_ok, rt_detail, rt_soft, rt_declared = True, None, None, None
         if is_stdin:
             sig_ok, sig_detail = True, "stdin_program: no target signature"
         else:
             sig_ok, sig_detail = signature_conforms(spec, src)
+            if sig_ok and ttype == "single_function":       # 131.44 (b): target must be declared
+                sig_ok, sig_detail = has_target_function(src, spec)
             gates["signature"] = sig_ok
+            if return_type_gate:
+                rt_ok, rt_detail, rt_soft, rt_declared = return_type_conforms(spec, src)
+                gates["return_type"] = None if rt_declared is None else rt_ok
         runtime = None
         if rc == 0 and ttype in ("full_program", "stdin_program") and spec.get("test_cases"):
             binpath = tkpath + ".bin"
@@ -227,7 +233,7 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
             hit_rules = {d["rule"] for d in idiom_judge.pattern_hits(struct["lint"])}
             lint_exempt = [r for r in exempt if r in hit_rules]
         lint_fail = lint_gate and struct is not None and struct.get("lint_warnings", 0) > 0
-        ok = (rc == 0 and sig_ok and (runtime is None or runtime.get("match", True))
+        ok = (rc == 0 and sig_ok and rt_ok and (runtime is None or runtime.get("match", True))
               and idiom_score >= idiom_judge.IDIOM_FLOOR and not struct_fail
               and not pattern_fail and not lint_fail)
         reason = None
@@ -235,6 +241,8 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
             reason = "compile: " + ",".join(codes[:3])
         elif not sig_ok:
             reason = "signature: " + sig_detail
+        elif not rt_ok:
+            reason = "return_type: " + rt_detail
         elif runtime and not runtime.get("match", True):
             reason = "runtime: " + str(runtime.get("reason"))
         elif idiom_score < idiom_judge.IDIOM_FLOOR:
@@ -267,6 +275,11 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
                 "category": spec.get("category"),
                 "difficulty": spec.get("difficulty"),
                 "signature_ok": sig_ok,
+                # 131.42: return-type gate (hard only for the error-union case) +
+                # soft mismatch flag; 131.43 decides the type-aware signature gate
+                "return_type_ok": (None if rt_declared is None else rt_ok) if return_type_gate else None,
+                "declared_return_type": rt_declared,
+                "return_type_mismatch": rt_soft,
                 "runtime": runtime,
                 "source_sha256": hashlib.sha256(src.encode()).hexdigest(),
                 "min_bytes": struct.get("min_bytes") if struct else None,
