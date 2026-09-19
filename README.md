@@ -4,6 +4,26 @@ Corpus generation and audit pipeline for [toke](https://github.com/karwalski/tok
 training data. This repo produces, validates, and quality-audits the corpus of
 task-description → toke-source records used to fine-tune toke code models.
 
+## About toke
+
+> toke: a compiled language designed for LLM code generation, with a small grammar, one
+> canonical form and compiler verification.
+
+toke is a compiled programming language designed for LLM code generation. It has 14
+keywords, a 55-character set, a backtrack-free grammar with bounded lookahead, and one
+canonical form per construct, chosen by measurement in a 46-pattern catalogue and
+reproduced by `tkc --min`. That makes generated code cheap to constrain during decoding,
+cheap for a compiler to verify afterwards, and compact to emit. Token efficiency is one
+measured property of toke, always reported with its tokenizer and its baseline, not the
+whole claim.
+
+*The one-liner and the paragraph above are reproduced word for word from the canonical
+description,
+[`docs/about/canonical.md`](https://github.com/karwalski/toke/blob/main/docs/about/canonical.md).
+Every number published about toke comes from
+[`docs/metrics-baseline.md`](https://github.com/karwalski/toke/blob/main/docs/metrics-baseline.md)
+and nowhere else.*
+
 ## Current pipeline: v0.4 regen (`regen/`)
 
 The **live** pipeline is the v0.4 regeneration harness in `regen/`. It rebuilt the
