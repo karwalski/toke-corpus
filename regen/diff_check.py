@@ -22,6 +22,15 @@ and require byte-identical stdout + exit status on:
       wrap-around vs Python bigints) is recorded as `mismatch_shared`; only a
       candidate-only mismatch fails the check.
 
+131.69: `baseline_aware=True` (the 131.15 agent wave) relaxes (a) and (b)
+when the ORIGINAL itself fails its own test cases and a case expects an err
+marker — the 429 A-ERR records that fake their error case. The candidate must
+then PASS its test cases, with every NON-error stdout line still equal to the
+original's; only the err line may move, because that line IS the defect. The
+mode is reported as `mode` ("identity" | "repair") with the `baseline` verdict
+that chose it, so a caller can record "behaviour preserved" separately from
+"behaviour repaired". Default off: every other caller keeps byte-identity.
+
 Verdict: `identical` | `diverged` (first differing input + both outputs) |
 `unverifiable` (reason). Every binary and temp file is removed on exit; each
 run has a timeout. Wall time + peak RSS of every run come from os.wait4
@@ -510,16 +519,122 @@ def _same_run(a, b):
             and a["timed_out"] == b["timed_out"] and a.get("fixture_error") == b.get("fixture_error"))
 
 
+# ------------------------------------------------ 131.69: baseline-aware ---
+# The differential asks "does the candidate behave exactly like the original?".
+# That is the right question for a style rewrite, and the WRONG one whenever
+# the original is itself the defect: the 429 A-ERR records that fake their
+# error case by returning the a_tests marker as a `str` must change their
+# error line — that IS the fix — so byte-identity throws away precisely the
+# candidate that matches render_expected.
+#
+# So the gate picks its mode from the BASELINE, not from the candidate:
+#   original passes its own test cases  -> "identity" (byte-identity, as before)
+#   original fails them, and some case  -> "repair"  (candidate must PASS its
+#     expects an err marker                cases, and every NON-error stdout
+#                                          line must equal the original's)
+# A failing baseline with no err expectation stays in "identity" mode: there
+# is no line the repair rule would be allowed to change, so the two rules
+# coincide and the stricter one is kept. Only pattern_common.diff_and_perf
+# (the 131.15 agent wave) opts in; pattern_autofix's 131.14 AUTO wave keeps
+# plain byte-identity, which is the correct contract for a deterministic
+# lint-only rewrite.
+
+
+def _stdout_lines(b):
+    return b.decode("utf-8", "replace").splitlines()
+
+
+def expected_runs(prog, spec):
+    """[(want_lines, err_flags)] parallel to run_spec_cases(prog), or None when
+    the expectation cannot be derived for this program's mode."""
+    if prog.mode == "stdin":
+        out = []
+        for tc in drv.stdin_cases(spec):
+            want = (tc.get("expected_output") or "").splitlines()
+            out.append((want, [False] * len(want)))    # stdin expectations are raw text, never err markers
+        return out or None
+    if prog.mode in ("driver", "main"):
+        want = drv.expected_lines(spec)
+        flags = drv.expected_line_err_flags(spec)
+        if not want or len(flags) != len(want):
+            return None
+        return [(want, flags)]
+    return None
+
+
+def _run_passes(run, want):
+    """One run of run_spec_cases matches its expectation (the `tests_new`
+    contract of audit._exec_tests: clean exit, no extra lines)."""
+    return (not run["timed_out"] and run["exit"] == 0 and not run.get("fixture_error")
+            and lines_equal(_stdout_lines(run["stdout"]), want))
+
+
+def baseline_verdict(prog, spec, runs):
+    """131.69: does the ORIGINAL pass its own spec test cases?
+    {"verdict": "pass"|"fail"|"unknown", "detail", "err_lines", "failing_runs"}.
+    "unknown" whenever the question cannot be answered (nothing executable, no
+    derivable expectation) — and "unknown" keeps the strict identity gate."""
+    out = {"verdict": "unknown", "detail": None, "err_lines": 0}
+    if not prog.test_bin:
+        out["detail"] = prog.reason or "original not executable"
+        return out
+    exp = expected_runs(prog, spec)
+    if exp is None or len(exp) != len(runs):
+        out["detail"] = f"no comparable expectation for mode {prog.mode!r}"
+        return out
+    out["err_lines"] = sum(sum(1 for f in flags if f) for _w, flags in exp)
+    bad = [i for i, ((want, _f), (_lab, r)) in enumerate(zip(exp, runs)) if not _run_passes(r, want)]
+    if not bad:
+        out.update({"verdict": "pass", "detail": "original passes its own test cases"})
+        return out
+    out.update({"verdict": "fail", "failing_runs": bad,
+                "detail": f"original fails its own test cases ({len(bad)}/{len(runs)} runs)"})
+    return out
+
+
+def repair_compare(exp, ro, rc):
+    """131.69 repair mode over run_spec_cases results. The candidate must pass
+    its own test cases, and every stdout line that is NOT an err-marker line
+    must be byte-identical to the original's. Returns
+    (ok, reason, changed_lines, first_bad_run_index)."""
+    changed = []
+    for i, ((want, flags), (lab, a), (_lab2, b)) in enumerate(zip(exp, ro, rc)):
+        if b["timed_out"] or b["exit"] != 0 or b.get("fixture_error"):
+            return False, (f"candidate run {lab} did not complete cleanly "
+                           f"(exit {b['exit']}, timeout {b['timed_out']})"), changed, i
+        cl, ol = _stdout_lines(b["stdout"]), _stdout_lines(a["stdout"])
+        if not lines_equal(cl, want):
+            return False, f"candidate fails its own test cases ({lab})", changed, i
+        if len(ol) != len(cl):
+            return False, f"line count changed ({lab}: {len(ol)} -> {len(cl)})", changed, i
+        for k, (o, c) in enumerate(zip(ol, cl)):
+            if o == c:
+                continue
+            if not flags[k]:
+                return False, f"non-error output line {k + 1} changed ({lab})", changed, i
+            changed.append({"run": lab, "line": k + 1, "orig": o[:STDOUT_KEEP], "cand": c[:STDOUT_KEEP]})
+    if not changed:
+        return True, "candidate passes; no line changed", changed, None
+    return True, f"error line repaired ({len(changed)} line(s)); every other line identical", changed, None
+
+
 def compare(porig, pcand, spec, task_id, workdir, gen_inputs=None, a_test=None,
-            timeout=RUN_TIMEOUT):
+            timeout=RUN_TIMEOUT, baseline_aware=False):
     """Differential verdict for two prepared programs. Returns the result dict
-    (verdict, reason, checks, first_diff, timings)."""
+    (verdict, reason, mode, baseline, checks, first_diff, timings).
+
+    `baseline_aware` (131.69) lets the gate switch to "repair" mode when the
+    ORIGINAL fails its own test cases and some case expects an err marker; see
+    the block comment above baseline_verdict. Default False — every pre-131.69
+    caller keeps plain byte-identity."""
     res = {"task_id": task_id, "verdict": None, "reason": None,
+           "mode": "identity", "baseline": None,        # 131.69
            "checks": {"spec_cases": None, "generated": None, "ref": None},
            "first_diff": None,
            "tkc_bin_sha": tkc_pin.bin_sha(TKC),          # 131.39: the binary both sides were built with
            "timings": {"orig": [], "cand": []}}
     checked_any = False
+    repair = False
     # (a) spec cases
     if porig.test_bin and pcand.test_bin:
         ro = run_spec_cases(porig, workdir, timeout)
@@ -527,20 +642,45 @@ def compare(porig, pcand, spec, task_id, workdir, gen_inputs=None, a_test=None,
         res["timings"]["orig"] += [{"wall_ms": r["wall_ms"], "rss_kb": r["rss_kb"]} for _, r in ro]
         res["timings"]["cand"] += [{"wall_ms": r["wall_ms"], "rss_kb": r["rss_kb"]} for _, r in rc]
         both_timeout = [lab for (lab, a), (_, b) in zip(ro, rc) if a["timed_out"] and b["timed_out"]]
-        diffs = [(lab, a, b) for (lab, a), (_, b) in zip(ro, rc) if not _same_run(a, b)]
-        res["checks"]["spec_cases"] = {"mode": porig.mode, "runs": len(ro), "identical": not diffs,
-                                       "both_timeout": both_timeout}
-        if diffs:
-            lab, a, b = diffs[0]
-            res["first_diff"] = {"stage": "spec_cases", "input": lab,
-                                 "orig_stdout": _trunc(a["stdout"]), "cand_stdout": _trunc(b["stdout"]),
-                                 "orig_exit": a["exit"], "cand_exit": b["exit"]}
-            res["verdict"], res["reason"] = "diverged", f"spec cases differ ({lab})"
-            return res
-        if both_timeout:
-            res["verdict"], res["reason"] = "unverifiable", f"timeout on both sides ({both_timeout[0]})"
-            return res
-        checked_any = True
+        if baseline_aware:                                # 131.69: decide the mode from the baseline
+            base = baseline_verdict(porig, spec, ro)
+            res["baseline"] = base
+            repair = base["verdict"] == "fail" and base["err_lines"] > 0
+            res["mode"] = "repair" if repair else "identity"
+        if repair:
+            if both_timeout:
+                res["verdict"], res["reason"] = "unverifiable", f"timeout on both sides ({both_timeout[0]})"
+                return res
+            exp = expected_runs(porig, spec)
+            ok, why, changed, bad_i = repair_compare(exp, ro, rc)
+            res["checks"]["spec_cases"] = {"mode": porig.mode, "runs": len(ro), "identical": ok,
+                                           "both_timeout": both_timeout, "gate": "repair",
+                                           "error_lines_changed": changed}
+            if not ok:
+                lab, a = ro[bad_i]
+                b = rc[bad_i][1]
+                res["first_diff"] = {"stage": "spec_cases", "input": lab,
+                                     "orig_stdout": _trunc(a["stdout"]), "cand_stdout": _trunc(b["stdout"]),
+                                     "orig_exit": a["exit"], "cand_exit": b["exit"]}
+                res["verdict"], res["reason"] = "diverged", why
+                return res
+            res["reason"] = why
+            checked_any = True
+        else:
+            diffs = [(lab, a, b) for (lab, a), (_, b) in zip(ro, rc) if not _same_run(a, b)]
+            res["checks"]["spec_cases"] = {"mode": porig.mode, "runs": len(ro), "identical": not diffs,
+                                           "both_timeout": both_timeout}
+            if diffs:
+                lab, a, b = diffs[0]
+                res["first_diff"] = {"stage": "spec_cases", "input": lab,
+                                     "orig_stdout": _trunc(a["stdout"]), "cand_stdout": _trunc(b["stdout"]),
+                                     "orig_exit": a["exit"], "cand_exit": b["exit"]}
+                res["verdict"], res["reason"] = "diverged", f"spec cases differ ({lab})"
+                return res
+            if both_timeout:
+                res["verdict"], res["reason"] = "unverifiable", f"timeout on both sides ({both_timeout[0]})"
+                return res
+            checked_any = True
     elif porig.test_bin and not pcand.test_bin:
         res["verdict"], res["reason"] = "diverged", "candidate not executable: " + str(pcand.reason)
         res["first_diff"] = {"stage": "build", "input": "spec cases", "orig_stdout": "", "cand_stdout": "",
@@ -559,7 +699,25 @@ def compare(porig, pcand, spec, task_id, workdir, gen_inputs=None, a_test=None,
             gen = {"n": porig.n_gen, "reached": reached, "orig_exit": a["exit"], "cand_exit": b["exit"],
                    "identical": _same_run(a, b)}
             res["checks"]["generated"] = gen
-            if not gen["identical"]:
+            if repair:
+                # 131.69: the baseline is the defect, so orig == cand on the
+                # generated inputs is not a requirement here either (the error
+                # path is exactly where they must differ). The candidate is
+                # still gated on not crashing where the original did not, and
+                # the python_ref cross-check below still holds it to ground
+                # truth. The divergence count is recorded for AUDIT_131.
+                gen["gate"] = "repair"
+                gen["differs"] = sum(1 for i in range(porig.n_gen) if oa[i] != ob[i])
+                gen["skipped"] = "baseline defective — orig/cand equality not required"
+                if b["timed_out"] or (b["exit"] != 0 and not a["timed_out"] and a["exit"] == 0):
+                    res["first_diff"] = {"stage": "generated", "input": None, "input_index": None,
+                                         "orig_stdout": _trunc(a["stdout"]), "cand_stdout": _trunc(b["stdout"]),
+                                         "orig_exit": a["exit"], "cand_exit": b["exit"]}
+                    res["verdict"] = "diverged"
+                    res["reason"] = (f"candidate fails on generated inputs (exit {b['exit']}, "
+                                     f"timeout {b['timed_out']})")
+                    return res
+            elif not gen["identical"]:
                 k = next((i for i in range(porig.n_gen) if oa[i] != ob[i]), None)
                 res["first_diff"] = {"stage": "generated",
                                      "input": gen_inputs[k] if (gen_inputs and k is not None) else None,
@@ -648,7 +806,7 @@ def _ref_check(ref_src, gen_inputs, orig_outs, cand_outs):
 
 
 def diff_check(orig_src, cand_src, spec, task_id, workdir=None, a_test=None,
-               n_generated=N_GENERATED, timeout=RUN_TIMEOUT):
+               n_generated=N_GENERATED, timeout=RUN_TIMEOUT, baseline_aware=False):
     """Build both sources, run every check, remove all artefacts. Returns the
     compare() result dict (plus `generated_inputs` reason when skipped)."""
     base = workdir or tempfile.gettempdir()
@@ -661,7 +819,8 @@ def diff_check(orig_src, cand_src, spec, task_id, workdir=None, a_test=None,
     try:
         porig = prepare_program(orig_src, spec, task_id, td, "orig", gen_inputs)
         pcand = prepare_program(cand_src, spec, task_id, td, "cand", gen_inputs)
-        res = compare(porig, pcand, spec, task_id, td, gen_inputs, a_test, timeout)
+        res = compare(porig, pcand, spec, task_id, td, gen_inputs, a_test, timeout,
+                      baseline_aware=baseline_aware)
         if gen_why:
             res["checks"]["generated"] = {"n": 0, "identical": None, "skipped": gen_why}
         return res
@@ -672,13 +831,15 @@ def diff_check(orig_src, cand_src, spec, task_id, workdir=None, a_test=None,
         shutil.rmtree(td, ignore_errors=True)
 
 
-def differential(spec, orig_src, cand_src, workdir=None, a_test=None, task_id=None):
+def differential(spec, orig_src, cand_src, workdir=None, a_test=None, task_id=None,
+                 baseline_aware=False):
     """Gate-shaped entrypoint (the 131.15 pattern_common.diff_gate contract):
     diff_check() plus `identical` = True | False (diverged) | None
     (unverifiable). Keyword order matches diff_gate's positional call
     (spec, orig, cand, tmpdir)."""
     tid = task_id or spec.get("task_id", "task")
-    res = diff_check(orig_src, cand_src, spec, tid, workdir, a_test)
+    res = diff_check(orig_src, cand_src, spec, tid, workdir, a_test,
+                     baseline_aware=baseline_aware)
     res["identical"] = {"identical": True, "diverged": False}.get(res["verdict"])
     return res
 

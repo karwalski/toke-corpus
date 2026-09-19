@@ -221,6 +221,26 @@ def expected_lines(spec):
     return lines
 
 
+def expected_line_err_flags(spec):
+    """131.69: parallel to expected_lines(spec) — True where that stdout line
+    renders an a_tests err marker (`{'err': …}` / `{'error': …}` -> `err:<n>`).
+    The baseline-aware diff gate lets exactly these lines change when the
+    ORIGINAL fails its own test cases (the faked-error defect is the thing the
+    rewrite repairs); every other line must stay byte-identical."""
+    flags = []
+    for tc in spec.get("test_cases") or []:
+        exp = tc.get("expected")
+        if err_name(exp) is not None:
+            flags.append(True)
+        elif isinstance(exp, list):
+            flags.extend([False] * len(exp))
+        elif isinstance(exp, str) and "\n" in exp:
+            flags.extend([False] * len(exp.split("\n")))
+        else:
+            flags.append(False)
+    return flags
+
+
 def _stub_names(spec):
     ctx = spec.get("domain_context_v03", "") or spec.get("domain_context", "")
     return {m.group(1) for m in _FN.finditer(ctx.replace(" ", "\n") + "{")} | \

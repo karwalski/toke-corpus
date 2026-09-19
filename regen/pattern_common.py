@@ -14,6 +14,9 @@ failure; check_pattern reports every static gate it can evaluate):
   shape -> compile -> signature -> build -> tests -> idiom -> structure ->
   pattern (lint net 0, hints pass, exemptions honoured) -> min_bytes ->
   proxy_tokens -> diff (131.14 diff_check, guarded) -> perf (Tier-1)
+The diff gate is baseline-aware (131.69): byte-identity where the ORIGINAL
+passes its own test cases, and "candidate passes its tests, every non-error
+line unchanged" where it does not and a case expects an err marker.
 
 Guarded imports (in-flight sibling stories):
   metrics.proxy_tokens          131.10  (present on disk; guarded anyway)
@@ -574,6 +577,16 @@ def size_gates(res, before):
     return res
 
 
+def _accepts_baseline(fn):
+    """131.69: the baseline-aware kwarg only exists on a diff_check that has
+    the 131.69 gate (this file still guards the 131.14 import)."""
+    try:
+        import inspect
+        return "baseline_aware" in inspect.signature(fn).parameters
+    except (TypeError, ValueError):                   # noqa: BLE001
+        return False
+
+
 def diff_gate(spec, orig_src, cand_src, tmpdir, **kw):
     """131.14 differential check (20 extra typed inputs, original vs candidate
     binary, identical stdout). Returns (verdict True/False/None, detail).
@@ -583,6 +596,8 @@ def diff_gate(spec, orig_src, cand_src, tmpdir, **kw):
     fn = getattr(diff_check, "differential", None) or getattr(diff_check, "compare", None)
     if fn is None:                                    # TODO(131.14): pin the entrypoint name
         return None, "diff_check.py present but no differential()/compare() entrypoint — gate skipped"
+    if kw.pop("baseline_aware", False) and _accepts_baseline(fn):
+        kw["baseline_aware"] = True                   # 131.69
     try:
         out = fn(spec, orig_src, cand_src, tmpdir, **kw)
     except Exception as e:                            # noqa: BLE001 — never let the sibling story crash the bank
@@ -843,14 +858,24 @@ def _norm_perf(out, via):
 
 
 def diff_and_perf(spec, orig_src, cand_src, tmpdir, task_id=None, a_test=None,
-                  runs=PERF_RUNS):
+                  runs=PERF_RUNS, baseline_aware=True):
     """Differential + Tier-1 perf in one pass, sharing diff_check's prepared
     programs when both 131.14 helpers are importable (diff_check.prepare_program
     / compare + pattern_autofix.perf_compare); otherwise diff_gate + the local
     median-of-3. Returns {"diff": {"verdict": True|False|None, "reason", "via",
-    "checks"}, "perf": {tier, ratio, verdict, via, ...}}. Never raises."""
+    "checks", "mode", "baseline"}, "perf": {tier, ratio, verdict, via, ...}}.
+    Never raises.
+
+    131.69: `baseline_aware` (default True for this wave) asks diff_check to
+    pick its mode from whether the ORIGINAL passes its own test cases —
+    "identity" (byte-identity, the pre-131.69 rule) when it does, "repair"
+    (candidate must PASS its cases and only err-marker lines may change) when
+    it does not and some case expects an err. `mode` rides back out so the
+    bank records "behaviour preserved" vs "behaviour repaired" in provenance;
+    those are different claims and the freeze must not blur them."""
     tid = task_id or spec.get("task_id", "task")
-    diff = {"verdict": None, "reason": None, "via": None, "checks": None}
+    diff = {"verdict": None, "reason": None, "via": None, "checks": None,
+            "mode": "identity", "baseline": None}
     perf = None
     shared = (HAVE_DIFF_CHECK and HAVE_AUTOFIX_PERF
               and hasattr(diff_check, "prepare_program") and hasattr(diff_check, "compare"))
@@ -863,11 +888,15 @@ def diff_and_perf(spec, orig_src, cand_src, tmpdir, task_id=None, a_test=None,
                 gen_inputs, gen_why = diff_check.generate_inputs(spec, tid)
             porig = diff_check.prepare_program(orig_src, spec, tid, td, "orig", gen_inputs)
             pcand = diff_check.prepare_program(cand_src, spec, tid, td, "cand", gen_inputs)
-            out = diff_check.compare(porig, pcand, spec, tid, td, gen_inputs, a_test)
+            out = diff_check.compare(porig, pcand, spec, tid, td, gen_inputs, a_test,
+                                     **({"baseline_aware": True} if baseline_aware and
+                                        _accepts_baseline(diff_check.compare) else {}))
             v = out.get("verdict")
             diff.update({"verdict": {"identical": True, "diverged": False}.get(v),
                          "reason": out.get("reason") or v, "via": "diff_check.compare",
-                         "checks": out.get("checks"), "first_diff": out.get("first_diff")})
+                         "checks": out.get("checks"), "first_diff": out.get("first_diff"),
+                         "mode": out.get("mode") or "identity",       # 131.69
+                         "baseline": out.get("baseline")})
             if gen_why and diff["checks"] is not None:
                 diff["checks"]["generated"] = {"n": 0, "identical": None, "skipped": gen_why}
             if diff["verdict"] is not False:
@@ -877,7 +906,8 @@ def diff_and_perf(spec, orig_src, cand_src, tmpdir, task_id=None, a_test=None,
                          "detail": (porig.reason or pcand.reason or "not runnable")})
         except Exception as e:                        # noqa: BLE001 — fall back to the separate gates
             diff = {"verdict": None, "reason": f"shared path raised {type(e).__name__}: {e}",
-                    "via": "diff_check.compare", "checks": None}
+                    "via": "diff_check.compare", "checks": None,
+                    "mode": "identity", "baseline": None}
             shared = False
         finally:
             for pr_ in (porig, pcand):
@@ -889,9 +919,10 @@ def diff_and_perf(spec, orig_src, cand_src, tmpdir, task_id=None, a_test=None,
             import shutil
             shutil.rmtree(td, ignore_errors=True)
     if not shared:
-        v, why = diff_gate(spec, orig_src, cand_src, tmpdir, task_id=tid, a_test=a_test)
+        v, why = diff_gate(spec, orig_src, cand_src, tmpdir, task_id=tid, a_test=a_test,
+                           baseline_aware=baseline_aware)
         diff = {"verdict": v, "reason": why, "via": "diff_gate" if HAVE_DIFF_CHECK else None,
-                "checks": None}
+                "checks": None, "mode": "identity", "baseline": None}
     if perf is None and diff["verdict"] is not False:
         try:
             perf = tier1_perf(spec, orig_src, cand_src, tmpdir, runs=runs)

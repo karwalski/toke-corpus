@@ -6,11 +6,25 @@ are never trusted). For each work/pattern_131/gen/pat_<task_id>.tk:
                        idiom >= floor -> structure -> pattern lint net 0
                        (exemptions honoured) -> non-pattern lint <= before ->
                        --min bytes <= before -> proxy tokens <= before
-  main-thread gates    differential identical (131.14 diff_check; n/a for
-                       not-executable records) -> Tier-1 perf (median of 3,
-                       flag iff ratio > 1.5 AND delta > 5 ms / 1 MB) ->
-                       Tier-2 flag recorded when the row is perf_sensitive
-                       (131.5 runs Tier-2 serially after the wave; not here)
+  main-thread gates    differential (131.14 diff_check; n/a for not-executable
+                       records) -> Tier-1 perf (median of 3, flag iff ratio >
+                       1.5 AND delta > 5 ms / 1 MB) -> Tier-2 flag recorded
+                       when the row is perf_sensitive (131.5 runs Tier-2
+                       serially after the wave; not here)
+  differential mode    131.69 — the rule is chosen from the BASELINE, not the
+                       candidate. Original PASSES its own test cases ->
+                       `identity`: byte-identical stdout, exactly as before.
+                       Original FAILS them and some case expects an err marker
+                       -> `repair`: the candidate must PASS its test cases and
+                       every NON-error stdout line must still equal the
+                       original's; only the err line may move. That is the
+                       429 gamed A-ERR records, whose error line IS the defect
+                       — byte-identity against a known-wrong baseline threw
+                       away precisely the correct rewrite. A failing baseline
+                       with no err expectation stays in `identity` mode.
+                       Banked as regen.rewrite131.{diff_mode,behaviour,
+                       baseline_tests,error_lines_changed} so the freeze can
+                       tell "behaviour preserved" from "behaviour repaired".
   stale guard          the record on disk must still be the one the prompt
                        was prepped from (meta.before.file_sha256)
 
@@ -22,7 +36,8 @@ retry via re-prep, MAX_ATTEMPTS then exhausted) | skipped (stale / no spec).
 work/pattern_131/dryrun/<task_id>.json + a summary; --bank performs the bank:
   archive original -> audit/replaced/131/<tid>.tk (first touch only)
   record: tk_source, regen.{source_sha256,min_bytes,proxy_tokens,max_depth,
-          lint_pattern_violations=[],lint_exempt,over_budget,rewrite131{...}}
+          lint_pattern_violations=[],lint_exempt,over_budget,rewrite131{...,
+          diff_mode,behaviour,baseline_tests,error_lines_changed}}
   ledger/rewrite_131.jsonl  {task_id, wave:"agent", status, reason,
           attempts, prev_sha256, new_sha256, ts, tkc_bin_sha}   (freeze/README
           schema + the 131.39 pinned-binary sha)
@@ -103,6 +118,12 @@ def evaluate(paths, tid, tmp, meta=None):
     pc.perf_gate(res, dp["perf"], out["perf_sensitive"])
     out["diff"] = dp["diff"]
     out["perf"] = dp["perf"]
+    # 131.69: the gate's mode. "identity" = byte-identity was required and held
+    # (behaviour preserved); "repair" = the ORIGINAL failed its own test cases,
+    # so the candidate had to PASS them with every non-error line unchanged
+    # (behaviour repaired). Two different claims — AUDIT_131 must see which.
+    out["diff_mode"] = dp["diff"].get("mode") or "identity"
+    out["baseline_tests"] = ((dp["diff"].get("baseline") or {}).get("verdict"))
     out["tier2_flag"] = res.get("tier2_flag", False)
     out["gates"] = res["gates"]
     out["reason"] = res.get("reason")
@@ -117,6 +138,15 @@ def evaluate(paths, tid, tmp, meta=None):
     out["patterns_fixed"] = meta.get("patterns") or []
     out["reason"] = ("rewritten: " + ",".join(out["rules_fixed"])) if out["rules_fixed"] else "rewritten"
     return out
+
+
+def _error_lines_changed(ev):
+    """131.69: the error lines a `repair`-mode rewrite was allowed to change
+    (empty in `identity` mode). Banked as provenance so AUDIT_131 can show
+    exactly which output line moved and to what."""
+    spec_cases = ((ev.get("diff") or {}).get("checks") or {}).get("spec_cases") or {}
+    return [{k: c.get(k) for k in ("run", "line", "orig", "cand")}
+            for c in (spec_cases.get("error_lines_changed") or [])]
 
 
 def bank_one(paths, ev, meta, manifest, shas, now):
@@ -145,6 +175,8 @@ def bank_one(paths, ev, meta, manifest, shas, now):
     if (ev.get("after") or {}).get("idiom") is not None:
         rec.setdefault("judge", {})["score"] = ev["after"]["idiom"]
     perf = ev.get("perf") or {}
+    dmode = ev.get("diff_mode") or "identity"                     # 131.69
+    err_changed = _error_lines_changed(ev)
     rg["rewrite131"] = {
         "wave": pc.WAVE, "story": pc.STORY, "ts": now, "prev_sha256": ev["prev_sha256"],
         "card_sha": meta.get("card_sha") or shas.get("card_sha"),
@@ -162,6 +194,13 @@ def bank_one(paths, ev, meta, manifest, shas, now):
                  "verdict": perf.get("verdict", "n/a")},
         "tier2_pending": bool(ev.get("tier2_flag")),
         "diff_check": (ev.get("diff") or {}).get("verdict"),
+        # 131.69: which differential rule judged this rewrite, and what the
+        # baseline did — so the freeze can separate "behaviour preserved" from
+        # "behaviour repaired" instead of blurring them into one `diff_check`.
+        "diff_mode": dmode,
+        "behaviour": "repaired" if dmode == "repair" else "preserved",
+        "baseline_tests": ev.get("baseline_tests"),
+        "error_lines_changed": err_changed,
         "attempts": ev.get("attempts", 1),
     }
     with open(rec_path, "w") as f:
@@ -203,6 +242,7 @@ def run(paths, bank=False, only=None, limit=None, shas=None):
     manifest = manifest_tool.Manifest(paths.manifest) if bank else None
     now = pc.now_iso()
     counts = {"rewritten": 0, "unchanged": 0, "failed": 0, "skipped": 0}
+    modes = {"identity": 0, "repair": 0}              # 131.69: rewritten, by diff mode
     tier1_regressions = tier2_flags = exhausted = 0
     lint_net_after = 0
     tokens_before = tokens_after = 0
@@ -223,6 +263,8 @@ def run(paths, bank=False, only=None, limit=None, shas=None):
             if ev.get("tier2_flag") and v == "rewritten":
                 tier2_flags += 1
             if v == "rewritten":
+                modes[ev.get("diff_mode") or "identity"] = \
+                    modes.get(ev.get("diff_mode") or "identity", 0) + 1     # 131.69
                 lint_net_after += len(ev.get("pattern_hits") or [])
                 tokens_before += (ev.get("before") or {}).get("proxy_tokens") or 0
                 tokens_after += (ev.get("after") or {}).get("proxy_tokens") or 0
@@ -264,6 +306,9 @@ def run(paths, bank=False, only=None, limit=None, shas=None):
                "banked_rate": round(banked / decided, 4) if decided else None,
                "wave_gate_95pct": (banked / decided >= 0.95) if decided else None,
                "test_regressions": 0, "lint_net": lint_net_after,
+               # 131.69: how many banked rewrites preserved behaviour vs repaired it
+               "behaviour_preserved": modes.get("identity", 0),
+               "behaviour_repaired": modes.get("repair", 0),
                "tier1_regressions": tier1_regressions, "tier2_flagged": tier2_flags,
                "exhausted": exhausted,
                "proxy_tokens_before": tokens_before, "proxy_tokens_after": tokens_after,
