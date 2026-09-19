@@ -35,7 +35,9 @@ difficulty 1–3), split into 100 batches of 20.
    `retry_queue.jsonl`.
 4. **`run_shard.py stats`** — per-category / reason accept-rate summary.
 
-`card_sha` = `bea2083b3df2` (probe-verified vs tkc 2.8.0).
+`card_sha` = `627f63c50b94` (card v2, story 131.11: the 46-entry pattern block
+inserted, the Epic 127 known-broken block re-audited, charset/keyword facts
+corrected to spec v0.4 §A/§E/§G. Gated by `regen/check_card.py`).
 
 ## Status
 
