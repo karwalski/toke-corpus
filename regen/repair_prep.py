@@ -13,6 +13,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from audit import load_specs, style_mandate      # noqa: E402
 import driver as drv                              # noqa: E402
+from build_prompt import (expected_stdout_lines,   # noqa: E402  (131.74)
+                          ERR_CONVENTION_COMMON,
+                          ERR_CONVENTION_FULL,
+                          ERR_CONVENTION_SINGLE)
 
 CORPUS = "/Users/matthew.watt/tk/toke-corpus/corpus/regen_v04"
 WD = os.path.join(CORPUS, "work", "repair_129")
@@ -28,26 +32,50 @@ def audit_rows():
 
 
 def repair_prompt(spec, rec, row):
+    """131.74: the test lock is rendered by the GATE'S OWN renderer, through
+    the single implementation in build_prompt.expected_stdout_lines
+    (validate.render_expected for full_program, driver.expected_lines for
+    single_function).  Before this story the full_program branch json.dumps'd
+    the raw expectation and printed no line-form at all — a worker repairing
+    an output mismatch was shown `-> expected "localhost"` and judged against
+    the line `localhost` — while the single_function branch showed the raw
+    JSON *and* the gate's lines.  Do not hand-roll a renderer here;
+    tests/test_prompt_gate_agreement.py fails if this stops delegating."""
+    ttype = spec.get("task_type", "full_program")
     tcs = spec.get("test_cases") or []
     lines = [f"REPAIR TASK ({spec.get('category')}): the toke program below was "
              f"accepted at compile time but FAILS execution.",
              "",
              f"Task: {spec.get('description', '')}",
              ""]
-    if spec.get("task_type") == "single_function":
-        want = drv.expected_lines(spec)
-        lines.append("The validation harness appends a main() that calls your target "
-                     "function on each test input and prints one line per result "
-                     "(bool prints as 1/0). Expected lines, in order:")
-        for tc, _ in zip(tcs, range(99)):
-            lines.append(f"  inputs={json.dumps(tc.get('inputs'))} -> expected "
-                         f"{json.dumps(tc.get('expected'))}")
-        lines.append(f"  (as printed lines: {json.dumps(want)})")
+    if ttype == "stdin_program":
+        lines.append("main() is run once per test case with the input on stdin; the "
+                     "whole stdout must match exactly (exit 0):")
+        for i, tc in enumerate(drv.stdin_cases(spec)):
+            lines.append(f"  case {i}: stdin={json.dumps(tc['input'])} -> stdout="
+                         f"{json.dumps(tc['expected_output'])}")
     else:
-        lines.append("main() must print exactly one line per test case, in order:")
+        single = ttype == "single_function"
+        if single:
+            lines.append("The validation harness appends a main() that calls your target "
+                         "function on each test input and prints one line per result "
+                         "(bool prints as 1/0; an array result prints one line per "
+                         "element). Your fix must make these EXACT stdout lines come "
+                         "out, in order:")
+        else:
+            lines.append("main() must print, with io.println, exactly the stdout line(s) "
+                         "shown for each test case, in order — byte for byte, no extra "
+                         "lines, exit 0:")
+        has_err = False
         for tc in tcs:
-            lines.append(f"  inputs={json.dumps(tc.get('inputs'))} -> expected "
-                         f"{json.dumps(tc.get('expected'))}")
+            if drv.err_name(tc.get("expected")) is not None:
+                has_err = True
+            lines.append(f"  inputs={json.dumps(tc.get('inputs'))} -> stdout "
+                         f"{json.dumps(expected_stdout_lines(spec, tc))}")
+        if has_err:
+            lines.append("")
+            lines.append(ERR_CONVENTION_COMMON +
+                         (ERR_CONVENTION_SINGLE if single else ERR_CONVENTION_FULL))
     lines += ["",
               f"Audit failure: {row.get('reason') or ('build failed (E9003-class codegen)' if not row.get('build') else 'output mismatch')}",
               "",

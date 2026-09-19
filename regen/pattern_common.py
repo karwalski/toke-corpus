@@ -39,6 +39,10 @@ import run_shard                                      # noqa: E402  (131.39: reb
 import validate                                       # noqa: E402  (131.39: rebind its TKC)
 import tkc_pin                                        # noqa: E402  (131.39)
 from run_shard import validate_one_gates              # noqa: E402
+from build_prompt import (expected_stdout_lines,       # noqa: E402  (131.74)
+                          ERR_CONVENTION_COMMON,
+                          ERR_CONVENTION_FULL,
+                          ERR_CONVENTION_SINGLE)
 from validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402
 
 # 131.39: the compiler every gate execs. A harness main() calls pin_tkc() once
@@ -428,34 +432,55 @@ def exempt_rules(spec, row=None):
 
 def expected_output_lines(spec):
     """Prompt text describing the test lock for the task type, or the
-    not-executable note."""
+    not-executable note.
+
+    131.74: every expectation is rendered by the GATE'S OWN renderer, via the
+    single implementation in build_prompt.expected_stdout_lines —
+    validate.render_expected for full_program (run_shard.run_test_cases,
+    audit.audit_one) and driver.expected_lines for single_function
+    (audit.audit_one via driver.append_main).  Never json.dumps of the raw
+    expectation: until this story the full_program branch showed
+    `-> expected "localhost"` where the gate demands the line `localhost`
+    (and `2.0` for `2`, `["a", "b"]` for `['a', 'b']`) and showed no
+    line-form at all, while the single_function branch showed the raw JSON
+    *and* the gate's lines — one representation shown, another judged.
+
+    There is exactly ONE renderer per task type and it is the gate's: do not
+    hand-roll a copy here, that is how 131.72 and 131.74 drifted apart in the
+    first place.  tests/test_prompt_gate_agreement.py fails if this stops
+    delegating."""
     ttype = spec.get("task_type", "full_program")
     tcs = spec.get("test_cases") or []
     if not tcs:
         return ["NO TEST LOCK for this record (not executable): the gates are compile + "
                 "build + --min only. Behaviour must still be identical — change only "
                 "form, never semantics."]
-    lines = []
-    if ttype == "single_function":
-        lines.append("The harness appends a main() that calls the target function on each "
-                     "test input and prints one line per result (bool prints as 1/0; array "
-                     "results print one line per element). Expected, in order:")
-        for tc in tcs:
-            lines.append(f"  inputs={json.dumps(tc.get('inputs'))} -> expected "
-                         f"{json.dumps(tc.get('expected'))}")
-        lines.append(f"  (as printed lines: {json.dumps(drv.expected_lines(spec))})")
-    elif ttype == "stdin_program":
-        lines.append("main() is run once per test case with the input on stdin; the whole "
-                     "stdout must match exactly (exit 0):")
+    if ttype == "stdin_program":
+        lines = ["main() is run once per test case with the input on stdin; the whole "
+                 "stdout must match exactly (exit 0):"]
         for i, tc in enumerate(drv.stdin_cases(spec)):
             lines.append(f"  case {i}: stdin={json.dumps(tc['input'])} -> stdout="
                          f"{json.dumps(tc['expected_output'])}")
+        return lines
+    single = ttype == "single_function"
+    if single:
+        lines = ["The harness appends a main() that calls the target function on each "
+                 "test input and prints one line per result (bool prints as 1/0; an "
+                 "array result prints one line per element). Your rewrite must make "
+                 "these EXACT stdout lines come out, in order:"]
     else:
-        lines.append("main() must print exactly one line per test case, in order (exit 0, "
-                     "no extra lines):")
-        for tc in tcs:
-            lines.append(f"  inputs={json.dumps(tc.get('inputs'))} -> expected "
-                         f"{json.dumps(tc.get('expected'))}")
+        lines = ["main() must print, with io.println, exactly the stdout line(s) shown "
+                 "for each test case, in order — byte for byte, no extra lines, exit 0:"]
+    has_err = False
+    for tc in tcs:
+        if drv.err_name(tc.get("expected")) is not None:
+            has_err = True
+        lines.append(f"  inputs={json.dumps(tc.get('inputs'))} -> stdout "
+                     f"{json.dumps(expected_stdout_lines(spec, tc))}")
+    if has_err:
+        lines.append("")
+        lines.append(ERR_CONVENTION_COMMON +
+                     (ERR_CONVENTION_SINGLE if single else ERR_CONVENTION_FULL))
     return lines
 
 

@@ -195,7 +195,10 @@ def test_wave_end_to_end(corpus):
     assert prompt.count("### pattern `") == 1 and "### pattern `cond-bind-if`" in prompt
     assert "mut-flag-if [warning, MUST fix]" in prompt
     assert "SYNTAX CARD" in prompt and m["card_sha"] in prompt
-    assert "inputs=[true, 1, 2] -> expected 1" in prompt
+    # 131.74: the test lock is rendered by the gate's own renderer, so the
+    # prompt shows the literal stdout line(s) the gate compares against —
+    # not json.dumps of the raw expectation (which was `-> expected 1`).
+    assert 'inputs=[true, 1, 2] -> stdout ["1"]' in prompt
     assert "let x=mut.0;" in prompt
     sf_prompt = open(paths.sub("prompts", _tid(21) + ".txt")).read()
     assert "Module shape: single_function" in sf_prompt and "m=harness;" in sf_prompt
