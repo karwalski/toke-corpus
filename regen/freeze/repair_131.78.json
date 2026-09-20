@@ -1,0 +1,3581 @@
+{
+ "story": "131.78",
+ "generated": "2026-09-20",
+ "input": "regen/freeze/blast_radius_131.77.json (8bae619)",
+ "compiler_old": "64a4336969dd14e73cd17b71ca04b11c1539f14a",
+ "compiler_new": "eb9c901762aca2157f1db6431a9af33c0f3f16fa",
+ "compilers_used": {
+  "old": "~/tk/tmpwork/131_77/old/toke \u2014 baseline: what the ORIGINAL source printed",
+  "new": "~/tk/tmpwork/131_77/new/toke \u2014 repair driver, re-verification and every metric",
+  "note": "the 131.77 pins, built in clean worktrees (127.92); nothing rebuilt here"
+ },
+ "tkc_bin_sha": "97ff870e2e3e8c3d695fc48644a9061a6f7648833cd0e1c47a5f5215c56ee167",
+ "method": "compiler-diagnostic-driven repair: loop the new compiler over each record, take the E4034 field name / E4025 struct field from the diagnostic, rewrite, repeat until the record emits IR clean. Then re-execute: ORIGINAL under the old pin vs REPAIRED under the new pin, and compare stdout byte for byte, plus the spec test-case oracle (validate.render_expected for full_program, driver.expected_lines for single_function).",
+ "repair_table": {
+  "upper/lower/trim": "method-style call \u2014 add the parentheses (builtin UFCS to std.str)",
+  "bytes": "s.bytes(x) \u2014 the module form; the method form does not link",
+  "ord/code/tocode/tocharcode/charcode/ascii": "s.charcode(x;0) \u2014 none of these is a stdlib name; str.charcode is",
+  "legacy-case struct decl (E4025)": "lowercase the `t=$e{NotFound:str}` field names \u2014 Profile-1 has no uppercase",
+  "keys": "NOT a call \u2014 `mut.@()` is an empty ARRAY, so `.keys` can never resolve; needs regeneration"
+ },
+ "totals": {
+  "in_blast_radius": 137,
+  "handled": 137,
+  "rewritten": 133,
+  "flagged_needs_regen": 4
+ },
+ "output_check": {
+  "unchanged": 20,
+  "changed": 75,
+  "still_rejected": 4,
+  "not_executable_under_either": 38
+ },
+ "validated_ten": [
+  {
+   "id": "P3-D-CRY-0003v242",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "call",
+   "status": "rewritten"
+  },
+  {
+   "id": "P3-D-CRY-0004v131",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "call",
+   "status": "rewritten"
+  },
+  {
+   "id": "P3-D-CRY-0004v253",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "call",
+   "status": "rewritten"
+  },
+  {
+   "id": "P3-D-CRY-0004v285",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "call",
+   "status": "rewritten"
+  },
+  {
+   "id": "P3-D-CRY-0004v3",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "call",
+   "status": "rewritten"
+  },
+  {
+   "id": "P3-D-CRY-0012v285",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "charcode",
+   "status": "rewritten"
+  },
+  {
+   "id": "P3-D-CRY-0012v8",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "call",
+   "status": "rewritten"
+  },
+  {
+   "id": "P3-D-CRY-0013v208",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "call",
+   "status": "rewritten"
+  },
+  {
+   "id": "P3-D-CRY-0015v232",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "call",
+   "status": "rewritten"
+  },
+  {
+   "id": "P3-D-NET-0016v255",
+   "output_check": "unchanged",
+   "tests_after": true,
+   "repair_mode": "call",
+   "status": "rewritten"
+  }
+ ],
+ "changed_output_all_lacked_an_oracle": true,
+ "provenance": {
+  "record_stamp": "regen.rewrite131 {wave:\"struct-layout\", story:\"131.78\", ...}",
+  "archive": "corpus/regen_v04/audit/replaced/131/<task_id>.tk (first touch only)",
+  "ledger": "corpus/regen_v04/ledger/rewrite_131.jsonl, wave \"struct-layout\"",
+  "manifest": "re-stamped via manifest_tool.Manifest (131.35); check clean, 0 stale"
+ },
+ "records": [
+  {
+   "id": "P3-D-CRY-0003v242",
+   "task_id": "D-CRY-0003v242",
+   "category": "D-CRY",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "tocode"
+   ],
+   "repairs": [
+    [
+     "tocode",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "0\n26\n52\n",
+   "output_after": "0\n26\n52\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0003v242.json"
+  },
+  {
+   "id": "P3-D-CRY-0004v131",
+   "task_id": "D-CRY-0004v131",
+   "category": "D-CRY",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "65\n97\n48\n",
+   "output_after": "65\n97\n48\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0004v131.json"
+  },
+  {
+   "id": "P3-D-CRY-0004v253",
+   "task_id": "D-CRY-0004v253",
+   "category": "D-CRY",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "65\n97\n48\n",
+   "output_after": "65\n97\n48\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0004v253.json"
+  },
+  {
+   "id": "P3-D-CRY-0004v285",
+   "task_id": "D-CRY-0004v285",
+   "category": "D-CRY",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "ascii"
+   ],
+   "repairs": [
+    [
+     "ascii",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "65\n97\n48\n",
+   "output_after": "65\n97\n48\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0004v285.json"
+  },
+  {
+   "id": "P3-D-CRY-0004v3",
+   "task_id": "D-CRY-0004v3",
+   "category": "D-CRY",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "65\n97\n48\n",
+   "output_after": "65\n97\n48\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0004v3.json"
+  },
+  {
+   "id": "P3-D-CRY-0012v285",
+   "task_id": "D-CRY-0012v285",
+   "category": "D-CRY",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "charcode"
+    ]
+   ],
+   "repair_mode": "charcode",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "true\nfalse\nfalse\n",
+   "output_after": "true\nfalse\nfalse\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0012v285.json"
+  },
+  {
+   "id": "P3-D-CRY-0012v8",
+   "task_id": "D-CRY-0012v8",
+   "category": "D-CRY",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "true\nfalse\nfalse\n",
+   "output_after": "true\nfalse\nfalse\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0012v8.json"
+  },
+  {
+   "id": "P3-D-CRY-0013v208",
+   "task_id": "D-CRY-0013v208",
+   "category": "D-CRY",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "true\nfalse\ntrue\n",
+   "output_after": "true\nfalse\ntrue\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0013v208.json"
+  },
+  {
+   "id": "P3-D-CRY-0015v232",
+   "task_id": "D-CRY-0015v232",
+   "category": "D-CRY",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "38\n65\n0\n",
+   "output_after": "38\n65\n0\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0015v232.json"
+  },
+  {
+   "id": "P3-D-NET-0016v255",
+   "task_id": "D-NET-0016v255",
+   "category": "D-NET",
+   "task_type": "full_program",
+   "corpus_marks_validated": true,
+   "bad_spellings": [
+    "code"
+   ],
+   "repairs": [
+    [
+     "code",
+     3,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "true\nfalse\ntrue\n",
+   "output_after": "true\nfalse\ntrue\n",
+   "tests_after": true,
+   "reason": null,
+   "record": "corpus/regen_v04/D-NET/D-NET-0016v255.json"
+  },
+  {
+   "id": "P3-A-CND-0042v1",
+   "task_id": "A-CND-0042v1",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [],
+   "repairs": [
+    [
+     "upper",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "102izz98uzz\n102izz\n98uzz\n7\n",
+   "output_after": "FizzBuzz\nFizz\nBuzz\n7\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0042v1.json"
+  },
+  {
+   "id": "P3-A-CND-0057v33",
+   "task_id": "A-CND-0057v33",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ],
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n1\n0\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0057v33.json"
+  },
+  {
+   "id": "P3-A-CND-0058v46",
+   "task_id": "A-CND-0058v46",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n1\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0058v46.json"
+  },
+  {
+   "id": "P3-A-CND-0058v48",
+   "task_id": "A-CND-0058v48",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "true\ntrue\nfalse\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0058v48.json"
+  },
+  {
+   "id": "P3-A-CND-0058v72",
+   "task_id": "A-CND-0058v72",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n1\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0058v72.json"
+  },
+  {
+   "id": "P3-A-CND-0059v20",
+   "task_id": "A-CND-0059v20",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n0\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0059v20.json"
+  },
+  {
+   "id": "P3-A-CND-0059v64",
+   "task_id": "A-CND-0059v64",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n0\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0059v64.json"
+  },
+  {
+   "id": "P3-A-CND-0059v75",
+   "task_id": "A-CND-0059v75",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n0\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0059v75.json"
+  },
+  {
+   "id": "P3-A-CND-0060v29",
+   "task_id": "A-CND-0060v29",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ],
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "0\n0\n0\n",
+   "output_after": "0\n0\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0060v29.json"
+  },
+  {
+   "id": "P3-A-CND-0062v45",
+   "task_id": "A-CND-0062v45",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "code"
+   ],
+   "repairs": [
+    [
+     "code",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "true\ntrue\ntrue\nfalse\nfalse\n",
+   "output_after": "true\ntrue\ntrue\nfalse\nfalse\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0062v45.json"
+  },
+  {
+   "id": "P3-A-CND-0095v6",
+   "task_id": "A-CND-0095v6",
+   "category": "A-CND",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "GET\nPOST\nPUT\nDELETE\nPATCH\nUNKNOWN\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-CND/A-CND-0095v6.json"
+  },
+  {
+   "id": "P3-A-ERR-0070v19",
+   "task_id": "A-ERR-0070v19",
+   "category": "A-ERR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1 3\nerror\n8\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-ERR/A-ERR-0070v19.json"
+  },
+  {
+   "id": "P3-A-ERR-0078v15",
+   "task_id": "A-ERR-0078v15",
+   "category": "A-ERR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nerr\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-ERR/A-ERR-0078v15.json"
+  },
+  {
+   "id": "P3-A-ERR-0078v17",
+   "task_id": "A-ERR-0078v17",
+   "category": "A-ERR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nerror\nworld\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-ERR/A-ERR-0078v17.json"
+  },
+  {
+   "id": "P3-A-ERR-0078v24",
+   "task_id": "A-ERR-0078v24",
+   "category": "A-ERR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nerror\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-ERR/A-ERR-0078v24.json"
+  },
+  {
+   "id": "P3-A-ERR-0078v33",
+   "task_id": "A-ERR-0078v33",
+   "category": "A-ERR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nerr\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-ERR/A-ERR-0078v33.json"
+  },
+  {
+   "id": "P3-A-ERR-0078v37",
+   "task_id": "A-ERR-0078v37",
+   "category": "A-ERR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hi\nerr\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-ERR/A-ERR-0078v37.json"
+  },
+  {
+   "id": "P3-A-ERR-0078v6",
+   "task_id": "A-ERR-0078v6",
+   "category": "A-ERR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nerror\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-ERR/A-ERR-0078v6.json"
+  },
+  {
+   "id": "P3-A-ERR-0087v19",
+   "task_id": "A-ERR-0087v19",
+   "category": "A-ERR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [],
+   "repairs": [
+    [
+     "lookuperr.emptycollection",
+     1,
+     "lowercase-struct-decl"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "3\n",
+   "output_after": "3\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-ERR/A-ERR-0087v19.json"
+  },
+  {
+   "id": "P3-A-ERR-0093v53",
+   "task_id": "A-ERR-0093v53",
+   "category": "A-ERR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [],
+   "repairs": [
+    [
+     "matherr.overflow",
+     1,
+     "lowercase-struct-decl"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "4317731752\n",
+   "output_after": "4343077896\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-ERR/A-ERR-0093v53.json"
+  },
+  {
+   "id": "P3-A-SRT-0009v63",
+   "task_id": "A-SRT-0009v63",
+   "category": "A-SRT",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "arr",
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1.2 1.2 3.5 4.8\n9\n-2.5 0.5 7.25\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-SRT/A-SRT-0009v63.json"
+  },
+  {
+   "id": "P3-A-SRT-0058v69",
+   "task_id": "A-SRT-0058v69",
+   "category": "A-SRT",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "-1 -2 3 4 0\n-5 -6\n1 2 3\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-SRT/A-SRT-0058v69.json"
+  },
+  {
+   "id": "P3-A-STR-0002v10",
+   "task_id": "A-STR-0002v10",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "HELLO\nTOKE123\n\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0002v10.json"
+  },
+  {
+   "id": "P3-A-STR-0002v15",
+   "task_id": "A-STR-0002v15",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "HELLO\nABC XYZ\n\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0002v15.json"
+  },
+  {
+   "id": "P3-A-STR-0002v29",
+   "task_id": "A-STR-0002v29",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "HELLO\nABC XYZ\nA1B2\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0002v29.json"
+  },
+  {
+   "id": "P3-A-STR-0002v6",
+   "task_id": "A-STR-0002v6",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "HELLO\nTOKE\nABC123\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0002v6.json"
+  },
+  {
+   "id": "P3-A-STR-0002v67",
+   "task_id": "A-STR-0002v67",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "HELLO\nABC DEF\nMIXED123\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0002v67.json"
+  },
+  {
+   "id": "P3-A-STR-0002v70",
+   "task_id": "A-STR-0002v70",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "HELLO\nWORLD\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0002v70.json"
+  },
+  {
+   "id": "P3-A-STR-0003v36",
+   "task_id": "A-STR-0003v36",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello world\ntoke\nalready\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0003v36.json"
+  },
+  {
+   "id": "P3-A-STR-0003v57",
+   "task_id": "A-STR-0003v57",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nworld\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0003v57.json"
+  },
+  {
+   "id": "P3-A-STR-0003v60",
+   "task_id": "A-STR-0003v60",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nworld\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0003v60.json"
+  },
+  {
+   "id": "P3-A-STR-0003v66",
+   "task_id": "A-STR-0003v66",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nworld\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0003v66.json"
+  },
+  {
+   "id": "P3-A-STR-0003v70",
+   "task_id": "A-STR-0003v70",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nworld\nabc\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0003v70.json"
+  },
+  {
+   "id": "P3-A-STR-0003v74",
+   "task_id": "A-STR-0003v74",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\ntoke\nalready\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0003v74.json"
+  },
+  {
+   "id": "P3-A-STR-0003v80",
+   "task_id": "A-STR-0003v80",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello world\nabc\nalready\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0003v80.json"
+  },
+  {
+   "id": "P3-A-STR-0012v26",
+   "task_id": "A-STR-0012v26",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nworld\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0012v26.json"
+  },
+  {
+   "id": "P3-A-STR-0012v32",
+   "task_id": "A-STR-0012v32",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nworld\na b\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0012v32.json"
+  },
+  {
+   "id": "P3-A-STR-0012v60",
+   "task_id": "A-STR-0012v60",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nworld\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0012v60.json"
+  },
+  {
+   "id": "P3-A-STR-0026v17",
+   "task_id": "A-STR-0026v17",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "Hello World\nThe Quick Brown Fox\nA\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0026v17.json"
+  },
+  {
+   "id": "P3-A-STR-0026v47",
+   "task_id": "A-STR-0026v47",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "104ello 119orld\n116he 113uick 98rown 102ox\n97\n",
+   "output_after": "Hello World\nThe Quick Brown Fox\nA\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0026v47.json"
+  },
+  {
+   "id": "P3-A-STR-0026v58",
+   "task_id": "A-STR-0026v58",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "Hello World\nThe Quick Brown Fox\nSingle\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0026v58.json"
+  },
+  {
+   "id": "P3-A-STR-0026v76",
+   "task_id": "A-STR-0026v76",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "104ello 119orld\n116he 113uick 98rown 102ox\n",
+   "output_after": "Hello World\nThe Quick Brown Fox\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0026v76.json"
+  },
+  {
+   "id": "P3-A-STR-0027v45",
+   "task_id": "A-STR-0027v45",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello_world\nfoo_bar_baz\nplain\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0027v45.json"
+  },
+  {
+   "id": "P3-A-STR-0027v57",
+   "task_id": "A-STR-0027v57",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello_world_foo\nsimple\ncamel_case_input\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0027v57.json"
+  },
+  {
+   "id": "P3-A-STR-0027v62",
+   "task_id": "A-STR-0027v62",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "camel_67ase\nhello_87orld_70oo\n",
+   "output_after": "camel_case\nhello_world_foo\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0027v62.json"
+  },
+  {
+   "id": "P3-A-STR-0028v22",
+   "task_id": "A-STR-0028v22",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "hello119orld\nfoo98ar98az\nsingle\n",
+   "output_after": "helloWorld\nfooBarBaz\nsingle\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0028v22.json"
+  },
+  {
+   "id": "P3-A-STR-0028v23",
+   "task_id": "A-STR-0028v23",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "myVarName\nhelloWorld\nsingle\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0028v23.json"
+  },
+  {
+   "id": "P3-A-STR-0028v39",
+   "task_id": "A-STR-0028v39",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "hello119orld\n",
+   "output_after": "helloWorld\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0028v39.json"
+  },
+  {
+   "id": "P3-A-STR-0028v77",
+   "task_id": "A-STR-0028v77",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "parts"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "hello119orld\nmake115nake99ase\nsingle\n",
+   "output_after": "helloWorld\nmakeSnakeCase\nsingle\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0028v77.json"
+  },
+  {
+   "id": "P3-A-STR-0028v8",
+   "task_id": "A-STR-0028v8",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "helloWorld\nfooBarBaz\nsingle\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0028v8.json"
+  },
+  {
+   "id": "P3-A-STR-0034v23",
+   "task_id": "A-STR-0034v23",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "keys"
+   ],
+   "repairs": [],
+   "repair_mode": "call",
+   "status": "flagged",
+   "output_check": "still_rejected",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": "no valid repair: E4034 \u2014 no struct in scope declares a field 'keys', and the type of this value is not es",
+   "record": "corpus/regen_v04/A-STR/A-STR-0034v23.json"
+  },
+  {
+   "id": "P3-A-STR-0034v34",
+   "task_id": "A-STR-0034v34",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "keys"
+   ],
+   "repairs": [],
+   "repair_mode": "call",
+   "status": "flagged",
+   "output_check": "still_rejected",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": "no valid repair: E4034 \u2014 no struct in scope declares a field 'keys', and the type of this value is not es",
+   "record": "corpus/regen_v04/A-STR/A-STR-0034v34.json"
+  },
+  {
+   "id": "P3-A-STR-0034v7",
+   "task_id": "A-STR-0034v7",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "keys"
+   ],
+   "repairs": [],
+   "repair_mode": "call",
+   "status": "flagged",
+   "output_check": "still_rejected",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": "no valid repair: E4034 \u2014 no struct in scope declares a field 'keys', and the type of this value is not es",
+   "record": "corpus/regen_v04/A-STR/A-STR-0034v7.json"
+  },
+  {
+   "id": "P3-A-STR-0034v8",
+   "task_id": "A-STR-0034v8",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "keys"
+   ],
+   "repairs": [],
+   "repair_mode": "call",
+   "status": "flagged",
+   "output_check": "still_rejected",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": "no valid repair: E4034 \u2014 no struct in scope declares a field 'keys', and the type of this value is not es",
+   "record": "corpus/regen_v04/A-STR/A-STR-0034v8.json"
+  },
+  {
+   "id": "P3-A-STR-0037v16",
+   "task_id": "A-STR-0037v16",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n0\n1\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v16.json"
+  },
+  {
+   "id": "P3-A-STR-0037v25",
+   "task_id": "A-STR-0037v25",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "bytes",
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ],
+    [
+     "bytes",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n1\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v25.json"
+  },
+  {
+   "id": "P3-A-STR-0037v51",
+   "task_id": "A-STR-0037v51",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n1\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v51.json"
+  },
+  {
+   "id": "P3-A-STR-0037v59",
+   "task_id": "A-STR-0037v59",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "true\nfalse\ntrue\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v59.json"
+  },
+  {
+   "id": "P3-A-STR-0037v62",
+   "task_id": "A-STR-0037v62",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n0\n1\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v62.json"
+  },
+  {
+   "id": "P3-A-STR-0037v64",
+   "task_id": "A-STR-0037v64",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "keys",
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v64.json"
+  },
+  {
+   "id": "P3-A-STR-0037v65",
+   "task_id": "A-STR-0037v65",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n0\n1\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v65.json"
+  },
+  {
+   "id": "P3-A-STR-0037v8",
+   "task_id": "A-STR-0037v8",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "true\ntrue\nfalse\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v8.json"
+  },
+  {
+   "id": "P3-A-STR-0037v82",
+   "task_id": "A-STR-0037v82",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "chars",
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "true\ntrue\nfalse\ntrue\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v82.json"
+  },
+  {
+   "id": "P3-A-STR-0037v9",
+   "task_id": "A-STR-0037v9",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0037v9.json"
+  },
+  {
+   "id": "P3-A-STR-0048v34",
+   "task_id": "A-STR-0048v34",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "abc\nHelloWorld\n\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0048v34.json"
+  },
+  {
+   "id": "P3-A-STR-0048v71",
+   "task_id": "A-STR-0048v71",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ],
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "\n\n",
+   "output_after": "abcxyz\nhelloworld\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0048v71.json"
+  },
+  {
+   "id": "P3-A-STR-0049v67",
+   "task_id": "A-STR-0049v67",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello world\nabc 123\nno punct here\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0049v67.json"
+  },
+  {
+   "id": "P3-A-STR-0050v59",
+   "task_id": "A-STR-0050v59",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello world\na b c\n\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0050v59.json"
+  },
+  {
+   "id": "P3-A-STR-0050v61",
+   "task_id": "A-STR-0050v61",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello world\na b\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0050v61.json"
+  },
+  {
+   "id": "P3-A-STR-0052v80",
+   "task_id": "A-STR-0052v80",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ],
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hElLo\nwOrLd\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0052v80.json"
+  },
+  {
+   "id": "P3-A-STR-0053v35",
+   "task_id": "A-STR-0053v35",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ],
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "Hello\nWorld123\naBcD\n",
+   "output_after": "hELLO\nwORLD123\nAbCd\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0053v35.json"
+  },
+  {
+   "id": "P3-A-STR-0053v4",
+   "task_id": "A-STR-0053v4",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ],
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "\n\n\n",
+   "output_after": "\n\n\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0053v4.json"
+  },
+  {
+   "id": "P3-A-STR-0053v6",
+   "task_id": "A-STR-0053v6",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ],
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "\n\n",
+   "output_after": "\n\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0053v6.json"
+  },
+  {
+   "id": "P3-A-STR-0055v23",
+   "task_id": "A-STR-0055v23",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n0\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0055v23.json"
+  },
+  {
+   "id": "P3-A-STR-0055v64",
+   "task_id": "A-STR-0055v64",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "true\nfalse\nfalse\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0055v64.json"
+  },
+  {
+   "id": "P3-A-STR-0055v70",
+   "task_id": "A-STR-0055v70",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "true\nfalse\nfalse\n",
+   "output_after": "true\nfalse\nfalse\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0055v70.json"
+  },
+  {
+   "id": "P3-A-STR-0056v13",
+   "task_id": "A-STR-0056v13",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "1\n0\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0056v13.json"
+  },
+  {
+   "id": "P3-A-STR-0057v18",
+   "task_id": "A-STR-0057v18",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "2\n5\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0057v18.json"
+  },
+  {
+   "id": "P3-A-STR-0057v28",
+   "task_id": "A-STR-0057v28",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "2\n5\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0057v28.json"
+  },
+  {
+   "id": "P3-A-STR-0057v72",
+   "task_id": "A-STR-0057v72",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "2\n5\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0057v72.json"
+  },
+  {
+   "id": "P3-A-STR-0070v4",
+   "task_id": "A-STR-0070v4",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ],
+    [
+     "upper",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "uryyb\nhello\nURYYB\nnop klm!\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0070v4.json"
+  },
+  {
+   "id": "P3-A-STR-0070v47",
+   "task_id": "A-STR-0070v47",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "uryyb\nUryyb, Jbeyq!\nnop\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0070v47.json"
+  },
+  {
+   "id": "P3-A-STR-0074v62",
+   "task_id": "A-STR-0074v62",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [],
+   "repairs": [
+    [
+     "upper",
+     3,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello world\nhello\nabc123\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0074v62.json"
+  },
+  {
+   "id": "P3-A-STR-0074v75",
+   "task_id": "A-STR-0074v75",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     3,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "hello\nabcdef\nalready lower 123\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0074v75.json"
+  },
+  {
+   "id": "P3-A-STR-0075v26",
+   "task_id": "A-STR-0075v26",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "HELLO WORLD!\nABC123\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0075v26.json"
+  },
+  {
+   "id": "P3-A-STR-0090v74",
+   "task_id": "A-STR-0090v74",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "def\nabc\nHfmmp Wpsme\n",
+   "output_after": "def\nabc\nHfmmp Wpsme\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0090v74.json"
+  },
+  {
+   "id": "P3-A-STR-0092v13",
+   "task_id": "A-STR-0092v13",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "alpha\ndelta\nunknown\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0092v13.json"
+  },
+  {
+   "id": "P3-A-STR-0094v46",
+   "task_id": "A-STR-0094v46",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "bytes"
+   ],
+   "repairs": [
+    [
+     "bytes",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "changed",
+   "output_before": "",
+   "output_after": "axbycz\na1b2345\nhello\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0094v46.json"
+  },
+  {
+   "id": "P3-A-STR-0095v2",
+   "task_id": "A-STR-0095v2",
+   "category": "A-STR",
+   "task_type": "full_program",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ],
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "unchanged",
+   "output_before": "0\n0\n0\n",
+   "output_after": "0\n0\n0\n",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/A-STR-0095v2.json"
+  },
+  {
+   "id": "P3-D-CRY-0002v34",
+   "task_id": "D-CRY-0002v34",
+   "category": "D-CRY",
+   "task_type": "single_function",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "code"
+   ],
+   "repairs": [
+    [
+     "code",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": false,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0002v34.json"
+  },
+  {
+   "id": "P3-D-CRY-0012v45",
+   "task_id": "D-CRY-0012v45",
+   "category": "D-CRY",
+   "task_type": "single_function",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": false,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0012v45.json"
+  },
+  {
+   "id": "P3-D-CRY-0013v277",
+   "task_id": "D-CRY-0013v277",
+   "category": "D-CRY",
+   "task_type": "single_function",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "tocharcode"
+   ],
+   "repairs": [
+    [
+     "tocharcode",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": false,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/D-CRY-0013v277.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0002v66-a3d151f2",
+   "task_id": "MIG-P2-A-A-STR-0002v66-a3d151f2",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0002v66-a3d151f2.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0003v29-ee6a7f57",
+   "task_id": "MIG-P2-A-A-STR-0003v29-ee6a7f57",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0003v29-ee6a7f57.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0003v31-128d0316",
+   "task_id": "MIG-P2-A-A-STR-0003v31-128d0316",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0003v31-128d0316.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0026v78-4d894384",
+   "task_id": "MIG-P2-A-A-STR-0026v78-4d894384",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ],
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0026v78-4d894384.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0028v82-99af8bcd",
+   "task_id": "MIG-P2-A-A-STR-0028v82-99af8bcd",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "parts"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0028v82-99af8bcd.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0037v1-0b509c2b",
+   "task_id": "MIG-P2-A-A-STR-0037v1-0b509c2b",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0037v1-0b509c2b.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0037v19-0b2c47b0",
+   "task_id": "MIG-P2-A-A-STR-0037v19-0b2c47b0",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0037v19-0b2c47b0.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0048v26-9f1c6f4b",
+   "task_id": "MIG-P2-A-A-STR-0048v26-9f1c6f4b",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ],
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0048v26-9f1c6f4b.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0055v32-1ae5d17f",
+   "task_id": "MIG-P2-A-A-STR-0055v32-1ae5d17f",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "bytes"
+   ],
+   "repairs": [
+    [
+     "bytes",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0055v32-1ae5d17f.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0070v5-7693f0ef",
+   "task_id": "MIG-P2-A-A-STR-0070v5-7693f0ef",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0070v5-7693f0ef.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0074v23-ed13aac5",
+   "task_id": "MIG-P2-A-A-STR-0074v23-ed13aac5",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0074v23-ed13aac5.json"
+  },
+  {
+   "id": "P3-MIG-P2-A-A-STR-0075v10-088ac31b",
+   "task_id": "MIG-P2-A-A-STR-0075v10-088ac31b",
+   "category": "A-STR",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/A-STR/MIG-P2-A-A-STR-0075v10-088ac31b.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CFG-0004v360-42eaf678",
+   "task_id": "MIG-P2-B-D-CFG-0004v360-42eaf678",
+   "category": "D-CFG",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CFG/MIG-P2-B-D-CFG-0004v360-42eaf678.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CLI-0005v283-e3e32105",
+   "task_id": "MIG-P2-B-D-CLI-0005v283-e3e32105",
+   "category": "D-CLI",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "bytes"
+   ],
+   "repairs": [
+    [
+     "bytes",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CLI/MIG-P2-B-D-CLI-0005v283-e3e32105.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CRY-0002v266-506fdbd7",
+   "task_id": "MIG-P2-B-D-CRY-0002v266-506fdbd7",
+   "category": "D-CRY",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/MIG-P2-B-D-CRY-0002v266-506fdbd7.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CRY-0003v267-6c39bb3f",
+   "task_id": "MIG-P2-B-D-CRY-0003v267-6c39bb3f",
+   "category": "D-CRY",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "charcode"
+   ],
+   "repairs": [
+    [
+     "charcode",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/MIG-P2-B-D-CRY-0003v267-6c39bb3f.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CRY-0004v257-65d2d3f5",
+   "task_id": "MIG-P2-B-D-CRY-0004v257-65d2d3f5",
+   "category": "D-CRY",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "bytes"
+   ],
+   "repairs": [
+    [
+     "bytes",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/MIG-P2-B-D-CRY-0004v257-65d2d3f5.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CRY-0004v258-50685958",
+   "task_id": "MIG-P2-B-D-CRY-0004v258-50685958",
+   "category": "D-CRY",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "tocharcode"
+   ],
+   "repairs": [
+    [
+     "tocharcode",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/MIG-P2-B-D-CRY-0004v258-50685958.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CRY-0006v281-7c67a30c",
+   "task_id": "MIG-P2-B-D-CRY-0006v281-7c67a30c",
+   "category": "D-CRY",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/MIG-P2-B-D-CRY-0006v281-7c67a30c.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CRY-0012v248-a45f9e25",
+   "task_id": "MIG-P2-B-D-CRY-0012v248-a45f9e25",
+   "category": "D-CRY",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower",
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ],
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/MIG-P2-B-D-CRY-0012v248-a45f9e25.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CRY-0015v233-7b8394f7",
+   "task_id": "MIG-P2-B-D-CRY-0015v233-7b8394f7",
+   "category": "D-CRY",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "bytes"
+   ],
+   "repairs": [
+    [
+     "bytes",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/MIG-P2-B-D-CRY-0015v233-7b8394f7.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CRY-0015v239-e8d0bf83",
+   "task_id": "MIG-P2-B-D-CRY-0015v239-e8d0bf83",
+   "category": "D-CRY",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "bytes"
+   ],
+   "repairs": [
+    [
+     "bytes",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/MIG-P2-B-D-CRY-0015v239-e8d0bf83.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-CRY-0015v254-a8732b10",
+   "task_id": "MIG-P2-B-D-CRY-0015v254-a8732b10",
+   "category": "D-CRY",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     2,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-CRY/MIG-P2-B-D-CRY-0015v254-a8732b10.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-DAT-0003v253-e6f5c04a",
+   "task_id": "MIG-P2-B-D-DAT-0003v253-e6f5c04a",
+   "category": "D-DAT",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-DAT/MIG-P2-B-D-DAT-0003v253-e6f5c04a.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-DAT-0022v222-4d9aedb2",
+   "task_id": "MIG-P2-B-D-DAT-0022v222-4d9aedb2",
+   "category": "D-DAT",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-DAT/MIG-P2-B-D-DAT-0022v222-4d9aedb2.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-DAT-0022v245-fa315850",
+   "task_id": "MIG-P2-B-D-DAT-0022v245-fa315850",
+   "category": "D-DAT",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-DAT/MIG-P2-B-D-DAT-0022v245-fa315850.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-DAT-0022v261-353ba815",
+   "task_id": "MIG-P2-B-D-DAT-0022v261-353ba815",
+   "category": "D-DAT",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-DAT/MIG-P2-B-D-DAT-0022v261-353ba815.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-DAT-0024v250-38da938d",
+   "task_id": "MIG-P2-B-D-DAT-0024v250-38da938d",
+   "category": "D-DAT",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-DAT/MIG-P2-B-D-DAT-0024v250-38da938d.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-FIO-0006v373-dae142f8",
+   "task_id": "MIG-P2-B-D-FIO-0006v373-dae142f8",
+   "category": "D-FIO",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "bytes"
+   ],
+   "repairs": [
+    [
+     "bytes",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-FIO/MIG-P2-B-D-FIO-0006v373-dae142f8.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-NET-0016v304-a2742992",
+   "task_id": "MIG-P2-B-D-NET-0016v304-a2742992",
+   "category": "D-NET",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lower"
+   ],
+   "repairs": [
+    [
+     "lower",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-NET/MIG-P2-B-D-NET-0016v304-a2742992.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-NET-0018v322-ae4d934a",
+   "task_id": "MIG-P2-B-D-NET-0018v322-ae4d934a",
+   "category": "D-NET",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "ord"
+   ],
+   "repairs": [
+    [
+     "ord",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-NET/MIG-P2-B-D-NET-0018v322-ae4d934a.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-WEB-0019v237-34571717",
+   "task_id": "MIG-P2-B-D-WEB-0019v237-34571717",
+   "category": "D-WEB",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-WEB/MIG-P2-B-D-WEB-0019v237-34571717.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-WEB-0019v245-c4c62b9b",
+   "task_id": "MIG-P2-B-D-WEB-0019v245-c4c62b9b",
+   "category": "D-WEB",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "upper"
+   ],
+   "repairs": [
+    [
+     "upper",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-WEB/MIG-P2-B-D-WEB-0019v245-c4c62b9b.json"
+  },
+  {
+   "id": "P3-MIG-P2-B-D-WEB-0025v223-e6022b6f",
+   "task_id": "MIG-P2-B-D-WEB-0025v223-e6022b6f",
+   "category": "D-WEB",
+   "task_type": "migrate_fix",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "trim"
+   ],
+   "repairs": [
+    [
+     "trim",
+     1,
+     "call"
+    ]
+   ],
+   "repair_mode": "call",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/regen_v04/D-WEB/MIG-P2-B-D-WEB-0025v223-e6022b6f.json"
+  },
+  {
+   "id": "MUT-vari-019701-8770d29d",
+   "task_id": "MUT-vari-019701-8770d29d",
+   "category": "MUT-variable_rename",
+   "task_type": "phase2_archive",
+   "corpus_marks_validated": false,
+   "bad_spellings": [
+    "lenr"
+   ],
+   "repairs": [
+    [
+     "lenr",
+     1,
+     "restore-property"
+    ]
+   ],
+   "repair_mode": "restore-property",
+   "status": "rewritten",
+   "output_check": "not_executable_under_either",
+   "output_before": "",
+   "output_after": "",
+   "tests_after": null,
+   "reason": null,
+   "record": "corpus/phase2_deduplicated/MUT-variable_rename/MUT-vari-019701-8770d29d.json"
+  }
+ ]
+}
