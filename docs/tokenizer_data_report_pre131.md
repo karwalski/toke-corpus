@@ -173,7 +173,7 @@ oversize (first 15): `AIA-127` (6120 bytes > 4096), `AIA-128` (4101 bytes > 4096
 
 ## Stdlib public-surface doc
 
-- generated from `/Users/matthew.watt/tk/toke/stdlib/*.tki`: 57 modules, 645 entries (10 skipped: `_`/uppercase/comma names or unknown kinds)
+- generated from `/Users/matthew.watt/tk/toke/stdlib/*.tki` at toke `5b77cfe1f0ba` (2026-09-19): 57 modules, 645 entries (10 skipped: `_`/uppercase/comma names or unknown kinds)
 - one line per module `i=<short>:<module>;name(params):ret;t=<short>.<type>{fields};...`, types rendered `[T]`->`@T`, lowercased, `!Err`->`!$err` (v0.4 Profile-1 charset)
 - repetition factor **5** (each name appears once per line; 5 clears every `min_frequency` in the Phase 2 sweep range 2..5) -> 280 training lines; doc sha256 `97948b879deab7df8b50478e48325471ca313eff84ec1145ccf75ef049f317fa`
 - never in the holdout
