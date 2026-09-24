@@ -5,6 +5,14 @@
 **Status:** Draft for researcher review
 **Version:** 0.1
 
+> **Archived 2026-09-24 (story 132.88).** This document is a dated record of the
+> April-2026 Phase 2 (v0.3-era) corpus, not a current description of toke or of the
+> corpus. Its language facts are superseded: the keyword set is **14**, not 12
+> (`toke/docs/spec/toke-spec-v0.4.md` §A), and the 59-character set has 23 symbols,
+> not 18. Its corpus sizes describe the April pool, which the v0.4 regeneration
+> (Epic 131) replaced; current figures live in `toke/docs/metrics-baseline.md`
+> § Project facts.
+
 ---
 
 ## 1. Executive Summary
