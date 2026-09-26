@@ -218,7 +218,16 @@ class MutationEngine:
         """
         # Split by string literals to avoid renaming inside them
         parts = re.split(r'("(?:[^"\\]|\\.)*")', source)
-        pattern = re.compile(r"(?<![a-zA-Z0-9_])" + re.escape(old) + r"(?![a-zA-Z0-9_])")
+        # A name that also appears as a property access (`rec.count`) is a
+        # field name there, not the variable (127.98 iv).  Renaming the access
+        # breaks the program; renaming only the variable would leave the
+        # field's declaration and struct-literal keys (`{count:1}`) renamed
+        # with it, since they are indistinguishable here.  So decline the
+        # rename outright rather than risk manufacturing a bad field access.
+        field_access = re.compile(r"\." + re.escape(old) + r"(?![a-zA-Z0-9_])")
+        if any(field_access.search(p) for p in parts[0::2]):
+            return source
+        pattern = re.compile(r"(?<![a-zA-Z0-9_.])" + re.escape(old) + r"(?![a-zA-Z0-9_])")
         result_parts: list[str] = []
         for i, part in enumerate(parts):
             if i % 2 == 1:
