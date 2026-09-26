@@ -187,14 +187,28 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
                 rt_ok, rt_detail, rt_soft, rt_declared = return_type_conforms(spec, src)
                 gates["return_type"] = None if rt_declared is None else rt_ok
         runtime = None
-        if rc == 0 and ttype in ("full_program", "stdin_program") and spec.get("test_cases"):
+        # 127.187: a program is BUILT whether or not its spec carries test
+        # cases. The build used to run only when test cases were present, so a
+        # full_program with none was judged on `--check` alone, and three A-ERR
+        # records whose nested interpolation `--check` accepted but the build
+        # rejected (P3-A-ERR-0028v76, 0033v41, 0061v14) were banked. A build
+        # failure is now a rejection (`ok` below) on both paths; before, even
+        # WITH test cases it left `runtime` without a `match` key and passed.
+        build_ok = None
+        if rc == 0 and ttype in ("full_program", "stdin_program"):
             binpath = tkpath + ".bin"
             # stdin_program specs may carry build_flags (library: --allow-all for
             # fs/env/net capabilities); the full_program build line is unchanged
             flags = list(spec.get("build_flags") or []) if is_stdin else []
             b = subprocess.run([TKC, tkpath, "-o", binpath] + flags, capture_output=True, text=True, timeout=90)
-            gates["build"] = b.returncode == 0
-            if b.returncode == 0:
+            gates["build"] = build_ok = b.returncode == 0
+            if b.returncode != 0:
+                build_detail = ",".join(re.findall(r'"error_code":"([A-Z0-9]+)"', b.stdout + b.stderr)[:3]) \
+                    or (b.stderr or b.stdout).strip()[:120]
+            if not spec.get("test_cases"):
+                if os.path.exists(binpath):
+                    os.unlink(binpath)
+            elif b.returncode == 0:
                 if is_stdin:
                     runtime = run_stdin_cases(binpath, spec, workdir,
                                               case_timeout or STDIN_CASE_TIMEOUT)
@@ -233,7 +247,8 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
             hit_rules = {d["rule"] for d in idiom_judge.pattern_hits(struct["lint"])}
             lint_exempt = [r for r in exempt if r in hit_rules]
         lint_fail = lint_gate and struct is not None and struct.get("lint_warnings", 0) > 0
-        ok = (rc == 0 and sig_ok and rt_ok and (runtime is None or runtime.get("match", True))
+        ok = (rc == 0 and sig_ok and rt_ok and build_ok is not False
+              and (runtime is None or runtime.get("match", True))
               and idiom_score >= idiom_judge.IDIOM_FLOOR and not struct_fail
               and not pattern_fail and not lint_fail)
         reason = None
@@ -243,6 +258,8 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
             reason = "signature: " + sig_detail
         elif not rt_ok:
             reason = "return_type: " + rt_detail
+        elif build_ok is False:
+            reason = "build: " + build_detail
         elif runtime and not runtime.get("match", True):
             reason = "runtime: " + str(runtime.get("reason"))
         elif idiom_score < idiom_judge.IDIOM_FLOOR:
