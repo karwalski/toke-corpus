@@ -114,6 +114,33 @@ class TestVariableRenaming:
         # 'a' should no longer appear as a standalone variable
         assert "let b=" in mutated or "let p=" in mutated or "let v=" in mutated
 
+    def test_rename_leaves_property_access_alone(self) -> None:
+        """127.98 (iv): `rec.count` is a field access, never the variable."""
+        src = 'let count=1;io.println(rec.count);'
+        out = MutationEngine._rename_variable(src, "count", "total")
+        assert "rec.total" not in out
+        assert "rec.count" in out
+
+    def test_rename_declined_when_name_is_also_a_field(
+            self, engine: MutationEngine) -> None:
+        """No mutation may rename a name that is also used as a field."""
+        src = ("T=Rec{count:i64};\n"
+               "F=main():i64{\n"
+               "  let count=2;\n"
+               "  let rec=Rec{count:count};\n"
+               "  <rec.count\n"
+               "};\n")
+        results = engine.mutate(src)
+        for mutated, kind, details in results:
+            if kind == "variable_rename":
+                assert not details.startswith("count ->"), details
+                assert ".count\n" in mutated  # the access keeps its field
+
+    def test_rename_still_applies_without_field_use(self) -> None:
+        src = 'let count=1;io.println(count);'
+        out = MutationEngine._rename_variable(src, "count", "total")
+        assert out == 'let total=1;io.println(total);'
+
     def test_rename_is_consistent(self, engine: MutationEngine) -> None:
         results = engine.mutate(SIMPLE_FUNC)
         rename_results = [r for r in results if r[1] == "variable_rename"]
