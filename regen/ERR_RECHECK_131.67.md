@@ -58,6 +58,14 @@ the banked ledger executed only 21 of the 1,117.
 | `fail_stable` | 27 | fails its tests on **both** compilers (9 bases) — already broken, never caught |
 | `driver_fail` | 29 | harness cannot synthesise a driver (map-typed input `@str:i64`) |
 
+> **Correction (136.72, 2026-09-27).** 20 of the 894 `unverified_behaviour_same`
+> built on **neither** compiler (`--check` clean, `bare.build: false` on both), so
+> no output was compared. `classify()` now labels those `unverified_no_output`
+> (and a one-sided run `unverified_output_one_side`). Re-derived from the stored
+> rows, without re-running: 874 `unverified_behaviour_same`, 20 `unverified_no_output`
+> (bases A-ERR-0011/0015/0028/0030/0033/0061, MIG-P2-A-A-ERR-0064/0083). The
+> summary JSON above is the 2026-09-19 run's and is left as recorded.
+
 **981 of the 1,117 (87.8%) have no test cases at all** — 967 `full_program`,
 3 `migrate_fix`, 11 `single_function`. They were never executed in the banked
 audit (`banked_not_executed` = 1,096) and cannot be given a pass/fail now.
