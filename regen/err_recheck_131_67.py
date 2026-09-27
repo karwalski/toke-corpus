@@ -238,6 +238,16 @@ def classify(old, new, has_tests, err_expect, deterministic=True):
     if not has_tests:
         if new.get("driver_fail"):
             return "unverified_no_driver", new["driver_fail"]
+        # 136.72: with no run on a side there is no output to compare, so
+        # "unchanged" would be a claim nobody observed (20 records built on
+        # neither compiler and were labelled behaviour_same).
+        if o is None and n is None:
+            return "unverified_no_output", ("no test cases; neither compiler produced a run "
+                                            "(build failed or timed out on both)")
+        if o is None or n is None:
+            return "unverified_output_one_side", ("no test cases; only the "
+                                                  + ("fixed" if o is None else "pre-fix")
+                                                  + " compiler produced a run")
         if deterministic is False:
             return "unverified_nondeterministic", ("no test cases; two runs of the fixed "
                                                    "compiler disagree (run-dependent output)")

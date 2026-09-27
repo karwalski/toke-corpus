@@ -38,6 +38,9 @@ difficulty 1–3), split into 100 batches of 20.
 `card_sha` = `627f63c50b94` (card v2, story 131.11: the 46-entry pattern block
 inserted, the Epic 127 known-broken block re-audited, charset/keyword facts
 corrected to spec v0.4 §A/§E/§G. Gated by `regen/check_card.py`).
+Card v2.1 (story 136.72, 2026-09-27): `card_sha` = `c236ef1dff26` — the gate
+was red on main; 127.1/127.5/127.54 moved to NO LONGER BROKEN and the strings
+fence stopped shadowing the `s` alias. Records banked before it carry `627f63c50b94`.
 
 ## Status
 
