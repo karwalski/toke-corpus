@@ -99,7 +99,7 @@ f=main():i64{
 
 ## Strings — no + concatenation
 ```
-let s="count is \(n)";                     interpolation "\(expr)" — PREFERRED for all
+let msg="count is \(n)";                   interpolation "\(expr)" — PREFERRED for all
                                            templating and multi-part strings
 let w=s.split(text;" ");                   the s. module form is canonical for str ops
 let n2=s.len(text);                        (i=s:std.str;) — it is what the pattern
@@ -112,11 +112,8 @@ unions — consume with mt. Builder for loops:
 `let b=s.builder(); s.add(b;"x"); let r=s.build(b);`
 String equality: `a=="b"` (works for variables too). Arrays keep `.len`/`.get`/`.set`.
 STILL BROKEN — keep these workarounds:
-- `a.concat(x;y)` silently drops y (127.1). Stdlib arity is unchecked in general:
-  `s.len()` with no argument passes `--check`. Never nest concat — interpolate:
-  `"\(a)\(b)\(c)"`.
-- separator FIRST: `s.join("-";parts)` is correct. The swapped `s.join(parts;"-")`
-  type-checks and then SIGSEGVs (127.5).
+- never nest concat — interpolate: `"\(a)\(b)\(c)"`.
+- separator FIRST: `s.join("-";parts)` is correct.
 - a bool interpolates as `1`/`0`, never `true`/`false` (127.15) — use `fmt.bool(b)`,
   but not in a hot loop (127.48).
 - an interpolated literal nested inside another — `"\(tag("\(n)"))"` — passes
@@ -124,8 +121,12 @@ STILL BROKEN — keep these workarounds:
 - an undeclared identifier inside an interpolation passes `--check` and only fails at
   link time (127.24): the name resolver never sees interpolation segments.
 NO LONGER BROKEN, drop the old workarounds: `text.len` on a str (127.8), interpolating
-a method-call result (127.7) or an `s.fields()` result (127.9), and strings built by
+a method-call result (127.7) or an `s.fields(text)` result (127.9), and strings built by
 interpolation then stored with `arr.append` (127.10) — all correct as of 2026-09-19.
+Stdlib arity and argument order are now checked instead of misbehaving at run time:
+`a.concat(x;y)` is a compile error (E4026; it used to drop y, 127.1).
+`s.len()` with no argument is a compile error (E4026).
+The swapped `s.join(parts;"-")` is a compile error (E4031; it used to SIGSEGV, 127.5).
 
 ## Arrays and maps — VALUE SEMANTICS: mutations return a NEW collection
 ```
@@ -153,8 +154,6 @@ STILL BROKEN — keep these workarounds:
   a plain str through a helper call first.
 - expression-`if` is not accepted as an operand of `+` or a comparison (127.21):
   `let x=1+if(c){2}el{3};` is a compile error. Bind it first, then use the binding.
-- a tail-returned empty typed-array literal `<@($rec)` fails `--check` with a
-  self-contradictory E4031 (127.54). Bind it first: `let e=@($rec); <e`.
 Swap inside a sort:
 ```
 let r=mut.arr;
