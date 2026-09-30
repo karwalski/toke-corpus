@@ -36,8 +36,11 @@ Holdout (D7)
   regen/a_tests_prep.py; library programs are their own family), stratified by
   category x difficulty, whole eligible families drawn per stratum in seeded
   order until ~--holdout-frac of the stratum's records is covered.  Families with any member in data/holdout_task_ids.txt
-  (benchmark ids) or in the 131.20 baseline sample are ineligible; disjointness
-  is asserted after the carve.
+  (benchmark ids) or in the 131.20 baseline sample are ineligible.  After the
+  carve every disjointness claim is checked by scripts/id_disjoint.py and stamped
+  PASS / FAIL / VACUOUS (131.22a): FAIL aborts; VACUOUS -- the operands share no
+  id shape, so they cannot intersect -- is recorded, never reported as a pass
+  (--strict-disjoint makes it fatal).
 
 Outputs (labelled by --label)
   data/tokenizer_training_<label>.txt      one masked --min program per line
@@ -87,6 +90,9 @@ try:
     from mask_strings import mask_strings, skip_string  # noqa: E402
 except ImportError as e:  # pragma: no cover
     sys.exit(f"cannot import toke/scripts/patterns/mask_strings.py ({e}); set $TOKE_REPO")
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from id_disjoint import FAIL, PASS, VACUOUS, check_disjoint, summary_line  # 131.22a
 
 STUB_PREFIX = "m=harness;i=io:std.io;"           # single_function harness stub (131.4 note)
 RECORD_DIR_GLOBS = ("A-*", "D-*", "L-*")          # same as regen/manifest_tool.py
@@ -425,6 +431,30 @@ def read_id_file(p: Path | None) -> set[str]:
     return ids
 
 
+def worst_status(*results: dict) -> str:
+    """FAIL beats VACUOUS beats PASS: a combined claim is only as strong as its weakest check."""
+    order = {FAIL: 0, VACUOUS: 1, PASS: 2}
+    return min((r["status"] for r in results), key=order.__getitem__)
+
+
+def holdout_disjointness(hold_ids: set[str], hold_bases: set[str], train_bases: set[str],
+                         bench_ids: set[str], baseline_ids: set[str]) -> list[dict]:
+    """131.22a: every holdout disjointness claim, each reported PASS / FAIL / VACUOUS.
+
+    The benchmark file (data/holdout_task_ids.txt) holds external-benchmark ids --
+    bare integers and HumanEval/N -- which share no shape with corpus record or
+    family ids, so those two checks report VACUOUS until a benchmark id list in
+    the corpus namespace (BENCH-128, 128.1a) or a content-hash check (128.1b D4)
+    is supplied.  A missing ids file is an empty operand, also VACUOUS.
+    """
+    return [
+        check_disjoint("holdout_records_vs_benchmark", hold_ids, bench_ids),
+        check_disjoint("holdout_families_vs_benchmark", hold_bases, bench_ids),
+        check_disjoint("holdout_records_vs_baseline", hold_ids, baseline_ids),
+        check_disjoint("holdout_families_vs_train_families", hold_bases, train_bases),
+    ]
+
+
 def carve_holdout(kept: list[dict], frac: float, seed: int, protected: set[str], target: str = "records") -> dict:
     """Family-level stratified carve.  Returns spec dict; sets item['split'].
 
@@ -560,17 +590,26 @@ def run(args: argparse.Namespace) -> dict:
     hold_ids = {it["task_id"] for it in kept if it["split"] == "holdout"}
     hold_bases = {it["base"] for it in kept if it["split"] == "holdout"}
     train_bases = {it["base"] for it in kept if it["split"] == "train"}
-    assert not (hold_ids & bench_ids), f"holdout overlaps benchmark ids: {sorted(hold_ids & bench_ids)[:5]}"
-    assert not (hold_bases & bench_ids), "holdout family overlaps benchmark ids"
-    assert not (hold_ids & baseline_ids), f"holdout overlaps 131.20 baseline ids: {sorted(hold_ids & baseline_ids)[:5]}"
-    assert not (hold_bases & train_bases), "a family is split across train and holdout"
+    checks = holdout_disjointness(hold_ids, hold_bases, train_bases, bench_ids, baseline_ids)
+    for r in checks:
+        log(f"[{args.label}] disjoint {summary_line(r)}")
+    failed = [r for r in checks if r["status"] == FAIL]
+    if failed:
+        raise AssertionError("; ".join(f"{r['check']}: {r['reason']} e.g. {r['overlap_examples']}" for r in failed))
+    by = {r["check"]: r for r in checks}
     holdout_spec["benchmark_ids_file"] = str(args.benchmark_ids) if args.benchmark_ids else None
     holdout_spec["benchmark_ids_n"] = len(bench_ids)
     holdout_spec["baseline_ids_file"] = str(args.baseline_ids) if args.baseline_ids else None
     holdout_spec["baseline_ids_n"] = len(baseline_ids)
-    holdout_spec["disjoint_benchmark"] = True
-    holdout_spec["disjoint_baseline"] = True
-    holdout_spec["family_disjoint_train"] = True
+    # 131.22a: statuses, not booleans -- "VACUOUS" means the check could not have failed.
+    holdout_spec["disjoint_benchmark"] = worst_status(by["holdout_records_vs_benchmark"],
+                                                      by["holdout_families_vs_benchmark"])
+    holdout_spec["disjoint_baseline"] = by["holdout_records_vs_baseline"]["status"]
+    holdout_spec["family_disjoint_train"] = by["holdout_families_vs_train_families"]["status"]
+    holdout_spec["disjointness_checks"] = checks
+    vac = [r["check"] for r in checks if r["status"] == VACUOUS]
+    if vac and args.strict_disjoint:
+        raise AssertionError(f"--strict-disjoint: vacuous disjointness check(s): {vac}")
 
     # stdlib public-surface doc (training only, repeated)
     stdlib_lines, stdlib_stats = build_stdlib_doc(args.stdlib_dir, excl)
@@ -821,8 +860,10 @@ def build_report(res: dict, args: argparse.Namespace, out_shas: dict, manifest: 
           f"- families {h['families_total']:,}, holdout families {h['families_holdout']:,}, holdout records {c['holdout_records']:,}",
           f"- protected (ineligible) ids: benchmark `{h['benchmark_ids_file']}` ({h['benchmark_ids_n']:,} ids), "
           f"131.20 baseline `{h['baseline_ids_file']}` ({h['baseline_ids_n']:,} ids)",
-          f"- asserted: disjoint from benchmark ids = {h['disjoint_benchmark']}, disjoint from baseline ids = "
-          f"{h['disjoint_baseline']}, no family split across train/holdout = {h['family_disjoint_train']}",
+          f"- disjointness (131.22a; VACUOUS = the operands cannot intersect, so the check proves nothing): "
+          f"benchmark ids **{h['disjoint_benchmark']}**, baseline ids **{h['disjoint_baseline']}**, "
+          f"no family split across train/holdout **{h['family_disjoint_train']}**",
+          *[f"  - `{summary_line(r)}`" for r in h.get("disjointness_checks", [])],
           "", "| stratum (category|difficulty) | families | eligible | protected | records | goal | holdout fam | holdout rec |",
           "|---|--:|--:|--:|--:|--:|--:|--:|"]
     for st, v in h["per_stratum"].items():
@@ -901,6 +942,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="what --holdout-frac applies to per stratum (whole families either way)")
     ap.add_argument("--benchmark-ids", type=Path, default=ROOT / "data" / "holdout_task_ids.txt")
     ap.add_argument("--baseline-ids", type=Path, default=DEFAULT_TOKENIZER_REPO / "data" / "baseline_sample_ids_v04.txt")
+    ap.add_argument("--strict-disjoint", action="store_true",
+                    help="fail the run if any holdout disjointness check is VACUOUS (131.22a)")
     ap.add_argument("--dedup-stub-prefix", action="store_true")
     ap.add_argument("--repro-check", action="store_true", help="run twice; assert byte-identical outputs")
     ap.add_argument("--limit", type=int, default=0, help="smoke test: first N regen + N library candidates")

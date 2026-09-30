@@ -24,6 +24,9 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from export_guards import ExportGuardError, assert_no_claim_annotations  # 131.63
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -903,21 +906,28 @@ def main() -> None:
     eval_path = args.output_dir / "eval.jsonl"
 
     dropped = 0
-    with open(train_path, "w") as f:
-        for entry in train_set:
+    rendered: dict[Path, list[dict]] = {train_path: [], eval_path: []}
+    for path, entries in ((train_path, train_set), (eval_path, eval_set)):
+        for entry in entries:
             row = to_chat_format(entry)
             if row is None:
                 dropped += 1
                 continue
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            rendered[path].append(row)
 
-    with open(eval_path, "w") as f:
-        for entry in eval_set:
-            row = to_chat_format(entry)
-            if row is None:
-                dropped += 1
-                continue
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    # 131.63: no row may carry a [RATIO] line or any other token-ratio claim.
+    # Checked before anything is written, so a failing export leaves no file behind.
+    for path, rows in rendered.items():
+        try:
+            assert_no_claim_annotations(rows, label=path.name)
+        except ExportGuardError as e:
+            print(f"ERROR: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    for path, rows in rendered.items():
+        with open(path, "w") as f:
+            for row in rows:
+                f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     print(f"\n  Written: {train_path}")
     print(f"  Written: {eval_path}")
