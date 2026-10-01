@@ -105,6 +105,11 @@ HELPERS = ["f=dbl(x:i64):i64{<x*2};", "f=cmp(a:i64;b:i64):i64{<a-b};",
            "f=notflag(x:str):bool{<s.len(x)>0};", "f=p(x:i64):bool{<x>0};",
            "f=fadd(acc:i64;x:i64):i64{<acc+x};"]
 
+# Inline spans whose argument type is fixed by the callee (fmt.tki: fmt.bool
+# takes a bool). The strings prelude binds `b` as a str for that section's fence,
+# and tkc rejects `fmt.bool(<str>)` with E4031, so the span gets its own binding.
+TYPED_ARGS = [(re.compile(r"\bfmt\.bool\(([a-z][a-z0-9]*)\)"), "let {}=true;")]
+
 
 def sec_key(heading):
     h = re.sub(r"[^a-z0-9 ]", " ", heading.lower()).split()
@@ -259,15 +264,38 @@ def harness(frag):
     pre_lines = [p for p in frag.get("pre", []) if not TEMPLATE.search(p)]
     pre_lines = [p if p.rstrip().endswith((";", "}")) else p + ";" for p in pre_lines
                  if not p.lstrip().startswith("<")]
+    if frag["kind"] == "inline":
+        # A prose span names its argument by the type the call takes, which the
+        # section prelude may bind differently (`fmt.bool(b)` in a section where
+        # `b` is a str): bind it from the callee's own signature for this span.
+        for rx, bind in TYPED_ARGS:
+            pre_lines = [bind.format(m.group(1)) for m in rx.finditer(code)] + pre_lines
     bound = set(re.findall(r"let\s+([a-z][a-z0-9]*)=", code + "\n" + "\n".join(pre_lines)))
     pre = [p for p in pre if re.match(r"let\s+([a-z][a-z0-9]*)=", p)
            and re.match(r"let\s+([a-z][a-z0-9]*)=", p).group(1) not in bound]
+    # A prose span that is a bare comparison (`a=="b"`) is an expression, not a
+    # statement: since toke 4c44c669 (137.14) a comparison standing as a
+    # statement is E4074, so bind it instead of discarding it.
+    if frag["kind"] == "inline" and is_bare_comparison(code):
+        code = "let cardv=" + code.rstrip(";")
     stmt = code if code.rstrip().endswith((";", "}")) else code + ";"
     # A fragment whose last DEPTH-0 statement is a return supplies main's own
     # return -- appending `<0` after it would be E5002 unreachable code.
     tail = "" if last_stmt(stmt).lstrip().startswith(("<", "rt ")) else "<0"
     return "\n".join(["m=cardchk;"] + IMPORTS + TOPTYPES + HELPERS +
                      ["f=main():i64{"] + pre + pre_lines + [stmt, tail, "};"])
+
+
+def is_bare_comparison(code):
+    """True for a single expression whose top operator is a comparison and that
+    carries no assignment: `a=="b"`, `x!=0`. Strings are masked first so a
+    literal `=` inside one does not count."""
+    c = re.sub(r'"(?:\\.|[^"\\])*"', '""', code.strip().rstrip(";"))
+    if ";" in c or re.match(r"^(let|if|lp|mt|rt|br|<)\b", c) or c.startswith("<"):
+        return False
+    if re.search(r"(?<![=!<>])=(?!=)", c):
+        return False                               # an assignment
+    return bool(re.search(r"==|!=|<=|>=", c))
 
 
 def last_stmt(code):

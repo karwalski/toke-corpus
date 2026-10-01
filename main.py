@@ -49,6 +49,11 @@ from validate.autofixer import AutoFixer
 from validate.quality import QualityScorer
 from transpile.c_to_toke import CToTokeTranspiler, TranspileError
 
+_SCRIPTS = str(Path(__file__).resolve().parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.append(_SCRIPTS)
+from id_disjoint import FAIL, VACUOUS, check_disjoint, summary_line  # noqa: E402  (131.85)
+
 
 def compact_toke(src: str) -> str:
     """Remove all non-essential whitespace from toke source."""
@@ -853,6 +858,25 @@ async def run_pipeline(args: argparse.Namespace) -> None:
         curriculum = CurriculumGenerator(seed=seed, total_tasks=total_tasks)
         task_specs = curriculum.generate()
     logger.info("Generated %d task specifications", len(task_specs))
+
+    # ---- Holdout disjointness of the whole curriculum (131.85) ------------
+    # A real overlap blocks the run. A VACUOUS result -- no curriculum id has
+    # a shape any holdout id has -- means the per-entry holdout checks in
+    # QualityScorer / CorpusWriter cannot fire for this run: say so loudly
+    # instead of letting it read as a pass.
+    holdout_res = check_disjoint(
+        "curriculum_vs_holdout", {t.task_id for t in task_specs}, holdout_task_ids
+    )
+    if holdout_res["status"] == FAIL:
+        logger.error("Holdout isolation: %s (e.g. %s) -- aborting",
+                     summary_line(holdout_res), holdout_res["overlap_examples"])
+        sys.exit(1)
+    if holdout_res["status"] == VACUOUS:
+        logger.warning("Holdout isolation: %s. The holdout check cannot match any "
+                       "task in this run; it is NOT evidence of disjointness.",
+                       summary_line(holdout_res))
+    else:
+        logger.info("Holdout isolation: %s", summary_line(holdout_res))
 
     # ---- Dry-run mode: generate curriculum and print sample, then exit ----
     if args.dry_run:

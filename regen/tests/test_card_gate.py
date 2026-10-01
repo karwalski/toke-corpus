@@ -52,3 +52,29 @@ def test_gate_catches_a_stale_broken_claim(tmp_path):
                    "`let x:i64=42;` is a compile error.\n",
                    encoding="utf-8")
     assert _run(str(bad)) == 1
+
+
+def test_bare_comparison_span_is_checked_as_an_expression(tmp_path):
+    """A prose span like `a=="b"` is an expression. Wrapped as a statement it is
+    E4074 (toke 4c44c669), so the gate binds it -- and still type-checks it."""
+    assert check_card.is_bare_comparison('a=="b"')
+    assert check_card.is_bare_comparison('x!=0;')
+    assert not check_card.is_bare_comparison('let a=1')
+    assert not check_card.is_bare_comparison('a="=="')
+    assert not check_card.is_bare_comparison('a=b==c')
+    good = tmp_path / "good.md"
+    good.write_text('## Strings no concatenation\n'
+                    'String equality: `a=="b"` works.\n', encoding="utf-8")
+    assert _run(str(good)) == 0
+    bad = tmp_path / "bad.md"
+    bad.write_text('## Strings no concatenation\n'
+                   'Always use `a==1` here.\n', encoding="utf-8")
+    assert _run(str(bad)) == 1          # str == i64 still fails the check
+
+
+def test_fmt_bool_span_binds_its_argument_as_bool(tmp_path):
+    """`fmt.bool(b)` is checked with b:bool even where the prelude binds b:str."""
+    card = tmp_path / "card.md"
+    card.write_text('## Strings no concatenation\n'
+                    'Always use `fmt.bool(b)` for a bool.\n', encoding="utf-8")
+    assert _run(str(card)) == 0

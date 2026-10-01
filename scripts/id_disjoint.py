@@ -23,6 +23,9 @@ Statuses
             ``right_comparable`` say how many ids on each side were actually
             comparable; ids outside the shared shapes are counted, not hidden.
 
+HoldoutGuard applies the same statuses to one id at a time (131.85): it is what
+store/writer.py, validate/quality.py and main.py use for their holdout checks.
+
 CLI (negative controls, ad-hoc audits)
   python3 scripts/id_disjoint.py LEFT_FILE RIGHT_FILE [--strict]
   Files hold one id per line (first whitespace/tab field; ``#`` comments).
@@ -88,6 +91,55 @@ def check_disjoint(name: str, left: Iterable[str], right: Iterable[str],
         res["reason"] = (f"disjoint over {res['left_comparable']}/{len(lset)} left and "
                          f"{res['right_comparable']}/{len(rset)} right comparable ids")
     return res
+
+
+class HoldoutGuard:
+    """Per-id holdout membership with the same three statuses (131.85).
+
+    The corpus writer and quality gate check one ``task_id`` at a time against
+    the holdout list. ``status(task_id)`` is ``check_disjoint({task_id}, holdout)``
+    without recomputing the holdout's shapes on every call:
+
+      FAIL      the id is in the holdout list -- the caller must block it
+      VACUOUS   the holdout list is empty, or no holdout id has this id's shape,
+                so membership could not have matched: the id was NOT checked
+      PASS      the id has a shape the holdout uses and is not in it
+
+    ``counts`` tallies the statuses so a run can report how many ids were
+    checked for real. ``first_vacuous(task_id)`` is True the first time an id
+    of a given shape comes back VACUOUS, so callers can warn once per shape.
+    """
+
+    def __init__(self, name: str, holdout: Iterable[str]) -> None:
+        self.name = name
+        self.ids = frozenset(holdout)
+        self.shapes = Counter(id_shape(x) for x in sorted(self.ids))
+        self.counts: Counter[str] = Counter()
+        self._vacuous_shapes: set[str] = set()
+
+    def status(self, task_id: str) -> str:
+        if task_id in self.ids:
+            st = FAIL
+        elif id_shape(task_id) not in self.shapes:
+            st = VACUOUS
+        else:
+            st = PASS
+        self.counts[st] += 1
+        return st
+
+    def first_vacuous(self, task_id: str) -> bool:
+        shape = id_shape(task_id)
+        if shape in self._vacuous_shapes:
+            return False
+        self._vacuous_shapes.add(shape)
+        return True
+
+    def vacuous_reason(self, task_id: str) -> str:
+        if not self.ids:
+            return f"{self.name}: the holdout list is empty"
+        return (f"{self.name}: task_id {task_id!r} has shape {id_shape(task_id)!r}, which no "
+                f"holdout id has (holdout shapes {sorted(self.shapes)[:4]}), so it cannot match "
+                f"by construction -- this id was not checked against the holdout")
 
 
 def summary_line(res: dict[str, Any]) -> str:

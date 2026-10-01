@@ -12,6 +12,7 @@ import hashlib
 import json
 import logging
 import re
+import sys
 import tempfile
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -23,6 +24,11 @@ from generator.curriculum import TaskSpec
 from validate.compiler import CompileResult
 from validate.diff_test import DiffResult
 from validate.quality import QualityScore
+
+_SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.append(_SCRIPTS)
+from id_disjoint import FAIL, VACUOUS, HoldoutGuard  # noqa: E402  (131.85)
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +166,7 @@ class CorpusWriter:
                 "Refusing to write corpus entries without holdout isolation."
             )
         self._holdout_task_ids: set[str] = holdout_task_ids
+        self.holdout_guard = HoldoutGuard("writer_holdout", holdout_task_ids)
         self._corpus_dir = Path(corpus_dir)
         self._count = 0
 
@@ -257,11 +264,19 @@ class CorpusWriter:
                 (append-only guarantee).
         """
         # Hard reject: holdout tasks must never be written to the corpus.
-        if entry.task_id in self._holdout_task_ids:
+        # Routed through id_disjoint (131.85): a task_id whose shape never
+        # occurs in the holdout list could not have matched it, so it is
+        # reported as VACUOUS (once per shape; see holdout_guard.counts)
+        # rather than counted as checked.
+        holdout_status = self.holdout_guard.status(entry.task_id)
+        if holdout_status == FAIL:
             raise ValueError(
                 f"HOLDOUT VIOLATION: task_id '{entry.task_id}' is in the "
                 f"holdout set and must not be written to the training corpus."
             )
+        if holdout_status == VACUOUS and self.holdout_guard.first_vacuous(entry.task_id):
+            logger.warning("holdout check VACUOUS: %s",
+                           self.holdout_guard.vacuous_reason(entry.task_id))
 
         entry_dict = entry.to_dict()
 
