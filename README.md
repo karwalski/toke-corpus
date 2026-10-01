@@ -100,6 +100,32 @@ reads `corpus/regen_v04/` requires access to the local data.
 - Python 3.11+
 - [tkc](https://github.com/karwalski/tkc) 2.8.0 on PATH (the compiler is the root
   of trust — records are only banked if tkc accepts them)
+- the `toke` repo checked out beside this one (`~/tk/toke`): `regen/` execs its
+  `tkc` (pinned, see `regen/tkc_pin.py`) and imports its
+  `scripts/patterns/count_tokens.py`
+
+## Running the tests
+
+One interpreter runs every suite: the repo virtualenv `.venv`, with every
+dependency declared in `pyproject.toml` (including `tokenizers`, which `regen/`
+needs for `count_tokens.py`, and the `dev` extra for pytest). A system Python
+does not work — Homebrew's, for one, has no `jsonschema` or `tokenizers`.
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -e '.[dev]'
+```
+
+The tests run as **two** pytest invocations, because `regen/validate.py` and the
+top-level `validate/` package share a module name and cannot be collected in
+one process:
+
+```sh
+.venv/bin/python -m pytest -q --ignore=regen   # every suite outside regen/
+.venv/bin/python -m pytest -q regen/tests      # the regen harness (slow: builds with tkc)
+```
+
+Both must pass before a merge.
 
 ## Related repos
 

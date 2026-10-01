@@ -13,6 +13,10 @@
 
 ## Testing
 
-    python -m pytest generator/tests/ pipeline/tests/ judge/tests/ diff_test/tests/
+Use the repo virtualenv and run both invocations; setup and the reason for
+two runs are in the README, "Running the tests".
+
+    .venv/bin/python -m pytest -q --ignore=regen
+    .venv/bin/python -m pytest -q regen/tests
 
 All tests must pass before any PR is merged.
