@@ -16,6 +16,7 @@ dependencies = [
     "jsonschema>=4.20",
     "pyyaml>=6.0",
     "pycparser>=2.21",  # transpile/c_to_toke.py, imported by main.py
+    "tokenizers>=0.15",  # regen/metrics.py -> toke/scripts/patterns/count_tokens.py
 ]
 
 [project.optional-dependencies]

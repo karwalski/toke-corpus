@@ -74,3 +74,20 @@ def test_classify_reports_legacy_false_negative():
     assert c["ok"] and c["legacy_ok"] and not c["nested_paren_params"]
     c = rsc.classify(PREFIX, SPEC)
     assert not c["ok"] and not c["legacy_ok"] and c["driver_target"] is None
+
+
+# 128.28: a body-less `f=` is a legal extern, so `tkc --check` passes a target
+# that is declared but never defined, and a single_function spec without test
+# cases is never built. The target must have a body.
+def test_has_target_function_rejects_bodyless_target():
+    ok, detail = has_target_function(PREFIX + "f=flatten(p:@(@u64)):@u64;\n", SPEC)
+    assert not ok and "flatten declared without a body" in detail
+    spec = {"task_type": "single_function", "description": "Sum the inputs. Variant 1."}
+    ok, detail = has_target_function(PREFIX + "f=total(a:@i64):i64;\n", spec)
+    assert not ok and "without a body" in detail and "total" in detail
+
+
+def test_has_target_function_bodied_target_next_to_extern_ok():
+    # negative control: an extern beside the defined target does not trip the gate
+    src = PREFIX + "f=helper(a:u64):u64;\n" + SRC_NESTED.split(PREFIX, 1)[1]
+    assert has_target_function(src, SPEC) == (True, "ok")

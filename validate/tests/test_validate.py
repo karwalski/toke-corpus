@@ -290,18 +290,69 @@ class TestQualityScorer:
         with pytest.raises(ValueError, match="holdout_task_ids is required"):
             QualityScorer(holdout_task_ids=set())
 
+    _PROGRAM = "m=t;\nf=add(a:i64;b:i64):i64{<a+b};"
+    _PYTHON = "def add(a, b):\n    return a + b\n" * 3
+
     def test_perfect_score(self) -> None:
         scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)
         qs = scorer.score(
             task_id="A-MTH-001",
-            toke_src="x=1;",
-            python_src="x = 1",
+            toke_src=self._PROGRAM,
+            python_src=self._PYTHON,
             compile_result=_make_compile_result(success=True),
             diff_result=_make_diff_result(passed=True, toke_agrees=True),
         )
         assert qs.accepted is True
         assert qs.score > 0.6
         assert len(qs.reasons) == 0
+
+    # 128.28: `tkc --check` passes a declaration-only module and the diff
+    # test never runs toke, so the scorer is where a body-less "program" is
+    # stopped. The first source is one of the 7 records that reached
+    # toke-model/training-data (A-A-ERR-0078v11-b155556f).
+    def test_declaration_only_source_rejects(self) -> None:
+        scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)
+        for src in (
+            ("M=safetrim;T=ValidationErr{TooShort:Str;TooLong:Str;InvalidChar:Str};"
+             "F=safeTrim(s:Str):Str"),
+            "m=t;\nt=$e{$z:bool};\nf=div(a:f64;b:f64):f64!$e;",
+            "m=t;\nt=$e{$z:bool};",
+        ):
+            qs = scorer.score(
+                task_id="A-ERR-0001",
+                toke_src=src,
+                python_src=self._PYTHON,
+                compile_result=_make_compile_result(success=True),
+                diff_result=_make_diff_result(passed=True, toke_agrees=True),
+            )
+            assert qs.accepted is False, src
+            assert any("not a program" in r for r in qs.reasons), src
+
+    def test_extern_next_to_a_definition_is_accepted(self) -> None:
+        # Negative control: a body-less extern is legal when the module
+        # defines a function; only "nothing defined" is rejected.
+        scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)
+        qs = scorer.score(
+            task_id="A-MTH-006",
+            toke_src="m=t;\nf=ext(a:i64):i64;\nf=add(a:i64;b:i64):i64{<a+b};",
+            python_src=self._PYTHON,
+            compile_result=_make_compile_result(success=True),
+            diff_result=_make_diff_result(passed=True, toke_agrees=True),
+        )
+        assert qs.accepted is True
+        assert not any("not a program" in r for r in qs.reasons)
+
+    def test_interface_task_is_exempt(self) -> None:
+        scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)
+        qs = scorer.score(
+            task_id="A-MTH-007",
+            toke_src="m=t;\nf=add(a:i64;b:i64):i64;",
+            python_src=self._PYTHON,
+            compile_result=_make_compile_result(success=True),
+            diff_result=_make_diff_result(passed=True, toke_agrees=True),
+            task_type="interface",
+        )
+        assert not any("not a program" in r for r in qs.reasons)
 
     def test_compiler_failure_rejects(self) -> None:
         scorer = QualityScorer(holdout_task_ids=self._DEFAULT_HOLDOUT)

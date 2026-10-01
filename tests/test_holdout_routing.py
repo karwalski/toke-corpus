@@ -99,7 +99,9 @@ def test_writer_vacuous_writes_and_warns(caplog: pytest.LogCaptureFixture) -> No
 async def _dry_run(tmpdir: str, holdout_ids: list[str]) -> None:
     import yaml
 
-    from tests.test_integration import _write_config, _write_prompts
+    # tests/ is not a package: under a whole-repo run `tests` resolves to
+    # another package on sys.path, so import the sibling module directly.
+    from test_integration import _write_config, _write_prompts
     from main import parse_args, run_pipeline
 
     _write_prompts(tmpdir)
