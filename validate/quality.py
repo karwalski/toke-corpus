@@ -8,12 +8,19 @@ acceptance threshold or failing required checks are rejected.
 from __future__ import annotations
 
 import logging
+import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import tiktoken
 
 from validate.compiler import CompileResult
 from validate.diff_test import DiffResult
+
+_SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.append(_SCRIPTS)
+from id_disjoint import FAIL, VACUOUS, HoldoutGuard  # noqa: E402  (131.85)
 
 logger = logging.getLogger(__name__)
 
@@ -54,6 +61,9 @@ class QualityScore:
     accepted: bool
     score: float
     reasons: list[str] = field(default_factory=list)
+    # PASS / FAIL / VACUOUS from scripts/id_disjoint.py (131.85). VACUOUS means
+    # the task_id could not have matched the holdout list: it was not checked.
+    holdout_status: str = ""
 
 
 class QualityScorer:
@@ -76,6 +86,7 @@ class QualityScorer:
                 "holdout set — evaluation tasks would leak into training data."
             )
         self.holdout_task_ids: set[str] = holdout_task_ids
+        self.holdout_guard = HoldoutGuard("quality_holdout", holdout_task_ids)
 
     def score(
         self,
@@ -132,11 +143,17 @@ class QualityScorer:
                 reasons.append("toke output does not match majority")
 
         # ---- Holdout isolation (hard reject) -------------------------
-        holdout_rejected = task_id in self.holdout_task_ids
+        # Routed through id_disjoint (131.85): an id whose shape never occurs
+        # in the holdout list is VACUOUS -- reported, never a silent pass.
+        holdout_status = self.holdout_guard.status(task_id)
+        holdout_rejected = holdout_status == FAIL
         if holdout_rejected:
             reasons.append(
                 f"task_id '{task_id}' is in the holdout set — rejected"
             )
+        elif holdout_status == VACUOUS and self.holdout_guard.first_vacuous(task_id):
+            logger.warning("holdout check VACUOUS: %s",
+                           self.holdout_guard.vacuous_reason(task_id))
 
         # ---- Final score ---------------------------------------------
         total = sum(partial_scores.values())
@@ -154,4 +171,5 @@ class QualityScorer:
             accepted=accepted,
             score=round(total, 4),
             reasons=reasons,
+            holdout_status=holdout_status,
         )
