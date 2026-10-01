@@ -11,7 +11,7 @@ a printed string. This tool
      --dump-ast` (pinned binary, regen/tkc_pin.py) — the RETURN_SPEC node's
      children span the declared text; a union has a TYPE_IDENT err child —
      and cross-checks it against the text parser the gate uses
-     (validate.declared_return_type);
+     (regen_validate.declared_return_type);
   2. classifies each record: gamed_err_marker (declared not a union AND
      evidence the marker is what gets printed: a string literal carrying
      `{'err` / the a_tests marker text in the target or a helper — OR the
@@ -52,7 +52,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import audit                                    # noqa: E402
 import driver as drv                            # noqa: E402
-import idiom_judge, metrics, validate, tkc_pin  # noqa: E402
+import idiom_judge, metrics, regen_validate, tkc_pin  # noqa: E402
 import pattern_common as pc                     # noqa: E402  (131.39 Part B: pin_tkc)
 
 STORY = "131.42"
@@ -162,7 +162,7 @@ def execute_tests(spec, src, workdir, name, tkc=None):
     dsrc, err = drv.append_main(spec, src)
     if err:
         return {"build": None, "printed_marker": None, "got": [], "driver_fail": err}
-    tkc = tkc or validate.TKC
+    tkc = tkc or regen_validate.TKC
     tkpath = os.path.join(workdir, name + ".drv.tk")
     binpath = tkpath + ".bin"
     with open(tkpath, "w") as f:
@@ -193,12 +193,12 @@ def classify(spec, src, funcs, ast_ok=True, exec_result=None):
     execute_tests() output for the hard-fail case (None = not run)."""
     stubs = drv._stub_names(spec)
     callee = drv.find_target(spec, src)                 # what the driver main calls
-    named = validate.target_name(spec)
-    target = named if named and (not funcs or named in funcs) and validate.declared_return_type(src, named) else callee
-    want = validate.spec_return_type(spec)
+    named = regen_validate.target_name(spec)
+    target = named if named and (not funcs or named in funcs) and regen_validate.declared_return_type(src, named) else callee
+    want = regen_validate.spec_return_type(spec)
     row = {"target": target, "driver_callee": callee, "gaming_shape": None,
-           "spec_return": want, "spec_return_norm": validate.norm_return_type(want),
-           "spec_is_union": validate.is_error_union(want), "ast_ok": ast_ok,
+           "spec_return": want, "spec_return_norm": regen_validate.norm_return_type(want),
+           "spec_is_union": regen_validate.is_error_union(want), "ast_ok": ast_ok,
            "declared_return": None, "declared_return_norm": None, "declared_is_union": None,
            "declared_text": None, "ast_text_agree": None,
            "marker_texts_found": [], "marker_in": [], "evidence": [], "exec": exec_result,
@@ -206,24 +206,24 @@ def classify(spec, src, funcs, ast_ok=True, exec_result=None):
     if not target:
         row["verdict"] = "no_target"
         return row
-    text_decl = validate.declared_return_type(src, target)
+    text_decl = regen_validate.declared_return_type(src, target)
     row["declared_text"] = text_decl
     fn = funcs.get(target)
     if fn and fn["declared"] is not None:
         declared, is_union = fn["declared"], fn["is_union"]
-        row["ast_text_agree"] = (validate.norm_return_type(declared) ==
-                                 validate.norm_return_type(text_decl))
+        row["ast_text_agree"] = (regen_validate.norm_return_type(declared) ==
+                                 regen_validate.norm_return_type(text_decl))
     else:
-        declared, is_union = text_decl, validate.is_error_union(text_decl)
+        declared, is_union = text_decl, regen_validate.is_error_union(text_decl)
     row["declared_return"] = declared
-    row["declared_return_norm"] = validate.norm_return_type(declared)
+    row["declared_return_norm"] = regen_validate.norm_return_type(declared)
     row["declared_is_union"] = is_union
     # second gaming shape: named target is a union, the driver's callee is not
     callee_union = None
     if callee and callee != target:
         cf = funcs.get(callee)
-        cdecl = cf["declared"] if cf and cf["declared"] is not None else validate.declared_return_type(src, callee)
-        callee_union = validate.is_error_union(cdecl) if cdecl is not None else None
+        cdecl = cf["declared"] if cf and cf["declared"] is not None else regen_validate.declared_return_type(src, callee)
+        callee_union = regen_validate.is_error_union(cdecl) if cdecl is not None else None
         row["callee_return"] = cdecl
     # marker literals: in the target or any helper (the gamed records route
     # the marker through an `errstr` helper), never in context stubs / main
@@ -304,10 +304,10 @@ def record_path(entry):
 
 
 def in_scope(spec, all_task_types):
-    ret = validate.spec_return_type(spec) or ""
+    ret = regen_validate.spec_return_type(spec) or ""
     if spec.get("task_type") == "single_function":
-        return spec.get("category") == "A-ERR" or validate.is_error_union(ret)
-    return all_task_types and validate.is_error_union(ret)
+        return spec.get("category") == "A-ERR" or regen_validate.is_error_union(ret)
+    return all_task_types and regen_validate.is_error_union(ret)
 
 
 def check_all(specs, man, tkc, workdir, all_task_types=False, limit=None, reuse_exec=None):

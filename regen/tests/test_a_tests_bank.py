@@ -138,9 +138,9 @@ def test_stub_module_spellings():
 
 @needs_tkc
 def test_driver_probe_under_pinned_tkc():
-    import validate
-    with tkc_pin.pin().install(validate) as p:
-        assert validate.TKC == p.path          # the probe compiles with the pinned copy
+    import regen_validate
+    with tkc_pin.pin().install(regen_validate) as p:
+        assert regen_validate.TKC == p.path          # the probe compiles with the pinned copy
         errs, note = va.driver_probe(SPEC, GOOD["test_cases"])
         assert errs == [] and note.startswith("probe ok")
         errs, note = va.driver_probe(SPEC, [{"inputs": [[1, -2], 7], "expected": 6}])
@@ -210,9 +210,9 @@ def test_bank_default_provenance_and_workdir_are_the_129_7_ones():
 
 @needs_tkc
 def test_bank_with_probe_end_to_end(wave):
-    import validate
+    import regen_validate
     json.dump(GOOD, open(wave["gen"], "w"))
-    with tkc_pin.pin().install(validate) as p:
+    with tkc_pin.pin().install(regen_validate) as p:
         s = ba.bank(wave["wd"], wave["bank"], "131.47-agent+ref-verified", probe=True,
                     tkc_stamp=p.stamp())
     assert s["banked"] == 1 and s["probe_notes"][BASE].startswith("probe ok")

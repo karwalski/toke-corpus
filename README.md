@@ -116,16 +116,15 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -e '.[dev]'
 ```
 
-The tests run as **two** pytest invocations, because `regen/validate.py` and the
-top-level `validate/` package share a module name and cannot be collected in
-one process:
+One pytest run covers every suite, `regen/` included (the regen gate module is
+`regen/regen_validate.py`, so it no longer shadows the top-level `validate/`
+package):
 
 ```sh
-.venv/bin/python -m pytest -q --ignore=regen   # every suite outside regen/
-.venv/bin/python -m pytest -q regen/tests      # the regen harness (slow: builds with tkc)
+.venv/bin/python -m pytest -q    # the whole repo (slow: regen/ builds with tkc)
 ```
 
-Both must pass before a merge.
+It must pass before a merge.
 
 ## Related repos
 

@@ -29,9 +29,9 @@ import driver as drv                              # noqa: E402
 from driver import effective_input_types      # noqa: E402
 import idiom_judge                                # noqa: E402
 import metrics                                    # noqa: E402
-from validate import render_expected             # noqa: E402  (131.44: err-aware)
-from validate import tkc_check, run_stdin_cases   # noqa: E402
-import validate                                   # noqa: E402  (131.39: rebind its TKC)
+from regen_validate import render_expected             # noqa: E402  (131.44: err-aware)
+from regen_validate import tkc_check, run_stdin_cases   # noqa: E402
+import regen_validate                                   # noqa: E402  (131.39: rebind its TKC)
 import tkc_pin                                    # noqa: E402  (131.39)
 
 # 131.39: pinned private copy (cmd_run pins once, workers reuse via $TOKE_TKC_PIN)
@@ -144,7 +144,7 @@ def _exec_tests(src, want_lines, tmpdir, tag):
 
 def _exec_stdin_tests(src, spec, tmpdir, tag):
     """131.18 stdin_program: build once, run every test case with its input on
-    stdin (validate.run_stdin_cases). tests_old = verify-one.py semantics
+    stdin (regen_validate.run_stdin_cases). tests_old = verify-one.py semantics
     (no crash, exact normalised output); tests_new = tests_old AND exit 0."""
     tkpath = os.path.join(tmpdir, tag + ".tk")
     binpath = tkpath + ".bin"
@@ -276,7 +276,7 @@ def cmd_run(args):
     if args.limit:
         jobs = jobs[:args.limit]
     # 131.39: pin the compiler before the pool starts; every row carries its sha
-    pinned = tkc_pin.pin().install(sys.modules[__name__], validate, metrics, idiom_judge)
+    pinned = tkc_pin.pin().install(sys.modules[__name__], regen_validate, metrics, idiom_judge)
     print(f"auditing {len(jobs)} records ({len(done) - len(jobs)} already done), "
           f"{args.workers} workers, tkc {pinned.version} sha256 {pinned.sha256[:12]}", file=sys.stderr)
     n = ok_new = 0

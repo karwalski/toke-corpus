@@ -14,7 +14,7 @@ REGEN = os.path.dirname(HERE)
 sys.path.insert(0, REGEN)
 import tkc_pin                      # noqa: E402
 import pattern_common as pc         # noqa: E402
-import validate                     # noqa: E402
+import regen_validate                     # noqa: E402
 import metrics                      # noqa: E402
 import idiom_judge                  # noqa: E402
 import run_shard                    # noqa: E402
@@ -23,7 +23,7 @@ import diff_check                   # noqa: E402
 import pattern_autofix as pa        # noqa: E402
 import manifest_tool                # noqa: E402
 
-MODS = (pc, validate, metrics, idiom_judge, run_shard, audit, diff_check, pa)
+MODS = (pc, regen_validate, metrics, idiom_judge, run_shard, audit, diff_check, pa)
 
 
 def _fake(dirp: Path, name: str, text: str) -> Path:

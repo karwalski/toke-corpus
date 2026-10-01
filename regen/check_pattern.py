@@ -20,7 +20,7 @@ import argparse, json, os, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import pattern_common as pc                       # noqa: E402
-from validate import tkc_check                    # noqa: E402
+from regen_validate import tkc_check                    # noqa: E402
 
 WORKER_GATES = ("shape", "compile", "signature", "build", "tests", "idiom", "structure",
                 "pattern", "lint_other", "min_bytes", "proxy_tokens")

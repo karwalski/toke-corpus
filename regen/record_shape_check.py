@@ -6,7 +6,7 @@ DECLARE its target function?
 (driver_fail: no target function found). They do declare
 `f=flatten(p:@(@u64)):@u64` — the driver's `[^)]*` regex could not parse the
 nested-paren parameter, a false negative fixed in driver.function_decls.
-This script re-counts with the paren-aware predicate validate.has_target_function
+This script re-counts with the paren-aware predicate regen_validate.has_target_function
 and, for the record, the legacy regex, so both numbers are on file.
 
 Reads only; banks nothing. Writes
@@ -19,7 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import audit                                   # noqa: E402
 import driver as drv                           # noqa: E402
-from validate import has_target_function, target_name  # noqa: E402
+from regen_validate import has_target_function, target_name  # noqa: E402
 
 CORPUS = os.path.join(os.path.dirname(HERE), "corpus", "regen_v04")
 OUT_JSONL = os.path.join(CORPUS, "audit", "record_shape_131.44.jsonl")

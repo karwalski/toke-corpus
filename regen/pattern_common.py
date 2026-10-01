@@ -36,14 +36,14 @@ from assemble import sanitize                         # noqa: E402
 from audit import _exec_tests, style_mandate          # noqa: E402
 import audit                                          # noqa: E402  (131.39: rebind its TKC)
 import run_shard                                      # noqa: E402  (131.39: rebind its TKC)
-import validate                                       # noqa: E402  (131.39: rebind its TKC)
+import regen_validate                                       # noqa: E402  (131.39: rebind its TKC)
 import tkc_pin                                        # noqa: E402  (131.39)
 from run_shard import validate_one_gates              # noqa: E402
 from build_prompt import (expected_stdout_lines,       # noqa: E402  (131.74)
                           ERR_CONVENTION_COMMON,
                           ERR_CONVENTION_FULL,
                           ERR_CONVENTION_SINGLE)
-from validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402
+from regen_validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402
 
 # 131.39: the compiler every gate execs. A harness main() calls pin_tkc() once
 # (before any loop / pool) which rebinds this and every sibling module's TKC
@@ -146,11 +146,11 @@ def pin_tkc(*modules):
     """131.39: pin the compiler once per harness run, BEFORE any loop or pool.
     Copies the resolved binary to a private temp dir, exports $TOKE_TKC_PIN
     for child processes and rebinds `TKC` here and in every sibling module
-    that execs it (validate, metrics, idiom_judge, run_shard, audit,
+    that execs it (regen_validate, metrics, idiom_judge, run_shard, audit,
     diff_check, pattern_autofix) plus the `modules` given. Keep the returned
     Pinned alive for the run (`with pc.pin_tkc(...) as PIN:`); its .sha256
     is the `tkc_bin_sha` to stamp."""
-    mods = [sys.modules[__name__], validate, metrics, idiom_judge, run_shard, audit]
+    mods = [sys.modules[__name__], regen_validate, metrics, idiom_judge, run_shard, audit]
     for m in (diff_check, _autofix_mod):
         if m is not None:
             mods.append(m)
@@ -436,7 +436,7 @@ def expected_output_lines(spec):
 
     131.74: every expectation is rendered by the GATE'S OWN renderer, via the
     single implementation in build_prompt.expected_stdout_lines —
-    validate.render_expected for full_program (run_shard.run_test_cases,
+    regen_validate.render_expected for full_program (run_shard.run_test_cases,
     audit.audit_one) and driver.expected_lines for single_function
     (audit.audit_one via driver.append_main).  Never json.dumps of the raw
     expectation: until this story the full_program branch showed

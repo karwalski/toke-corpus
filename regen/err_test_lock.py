@@ -36,7 +36,7 @@ from concurrent.futures import ProcessPoolExecutor
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import driver as drv                                            # noqa: E402
 import audit as aud                                             # noqa: E402
-import validate                                                 # noqa: E402
+import regen_validate                                                 # noqa: E402
 import tkc_pin                                                  # noqa: E402
 import verify_a_tests as vat                                    # noqa: E402
 
@@ -268,7 +268,7 @@ def main():
                               if os.path.exists(os.path.join(ADIR, b + ".json")))
     rows = []
     with tkc_pin.pin() as p:
-        p.install(validate, aud, drv)
+        p.install(regen_validate, aud, drv)
         aud.TKC = p.path
         stamp = p.stamp()
         if a.jobs > 1:

@@ -9,7 +9,7 @@ Subcommands:
               MANIFEST + ledger, queue rejects for one retry
               task_type full_program: binary run once, one line per case;
               task_type stdin_program (131.18): one run per case, input on
-              stdin, whole stdout vs expected_output (validate.run_stdin_cases)
+              stdin, whole stdout vs expected_output (regen_validate.run_stdin_cases)
   stats     - pass-rate summary per category / task_type for a shard
 
 Layout (all under --workdir, one workdir per shard):
@@ -29,14 +29,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from assemble import assemble, sanitize          # noqa: E402
 from build_prompt import build                   # noqa: E402
-from validate import tkc_check, signature_conforms  # noqa: E402
-from validate import return_type_conforms, has_target_function  # noqa: E402  (131.42 / 131.44 hook)
-from validate import render_expected  # noqa: E402  (131.44: err-aware; check_one imports it from here)
-from validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402  (131.18)
+from regen_validate import tkc_check, signature_conforms  # noqa: E402
+from regen_validate import return_type_conforms, has_target_function  # noqa: E402  (131.42 / 131.44 hook)
+from regen_validate import render_expected  # noqa: E402  (131.44: err-aware; check_one imports it from here)
+from regen_validate import run_stdin_cases, STDIN_CASE_TIMEOUT  # noqa: E402  (131.18)
 import idiom_judge                                   # noqa: E402
 import metrics                                       # noqa: E402
 import manifest_tool                                 # noqa: E402  (131.35)
-import validate                                      # noqa: E402  (131.39: rebind its TKC)
+import regen_validate                                      # noqa: E402  (131.39: rebind its TKC)
 import tkc_pin                                       # noqa: E402  (131.39)
 
 # 131.39: exec a pinned private copy of tkc, never the ~/tk/toke/tkc symlink a
@@ -160,7 +160,7 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
     net of the spec's style mandate. `lint_gate=True` additionally rejects on
     any other lint warning > 0 (library ingest; NOT applied by validate_one). task_type stdin_program: source is
     taken verbatim (no assemble/sanitize), no target-signature check, one
-    execution per test case with stdin fed (validate.run_stdin_cases)."""
+    execution per test case with stdin fed (regen_validate.run_stdin_cases)."""
     ttype = spec.get("task_type", "full_program")
     is_stdin = ttype == "stdin_program"
     src = raw_src if is_stdin else assemble(spec, raw_src)
@@ -421,7 +421,7 @@ def main():
     global PIN
     if args.cmd != "stats":
         # 131.39: one private copy for the whole run; stats never execs tkc
-        PIN = tkc_pin.pin().install(sys.modules[__name__], validate, metrics, idiom_judge)
+        PIN = tkc_pin.pin().install(sys.modules[__name__], regen_validate, metrics, idiom_judge)
     try:
         {"prepare": cmd_prepare, "validate": cmd_validate, "stats": cmd_stats}[args.cmd](args)
     finally:

@@ -39,7 +39,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import run_shard                                  # noqa: E402
 import manifest_tool                              # noqa: E402  (131.35)
-import validate                                   # noqa: E402  (131.39)
+import regen_validate                                   # noqa: E402  (131.39)
 import idiom_judge                                # noqa: E402  (131.39)
 import metrics                                    # noqa: E402  (131.39)
 import tkc_pin                                    # noqa: E402  (131.39)
@@ -168,7 +168,7 @@ def cmd_run(args):
     shas = tool_shas()
     global PIN
     # 131.39: pin before the pool starts; workers reuse the copy via $TOKE_TKC_PIN
-    PIN = tkc_pin.pin().install(sys.modules[__name__], run_shard, validate, metrics, idiom_judge)
+    PIN = tkc_pin.pin().install(sys.modules[__name__], run_shard, regen_validate, metrics, idiom_judge)
     mode = "BANK" if args.bank else "dry-run"
     print(f"{mode}: {len(specs)} programs, {args.workers} workers, ledger {ledger_path}, "
           f"tkc_sha={shas[0]} catalogue_sha={shas[1]} tkc_bin_sha={PIN.sha256[:12]}", file=sys.stderr)

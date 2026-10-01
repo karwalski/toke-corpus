@@ -240,12 +240,12 @@ def stub_module(spec, cases=None):
 
 
 def _check(src, tag):
-    import validate
+    import regen_validate
     with tempfile.NamedTemporaryFile("w", suffix=f".{tag}.tk", delete=False) as f:
         f.write(src)
         p = f.name
     try:
-        rc, codes, diag = validate.tkc_check(p)
+        rc, codes, diag = regen_validate.tkc_check(p)
     finally:
         os.unlink(p)
     return rc, codes, diag
@@ -253,8 +253,8 @@ def _check(src, tag):
 
 def driver_probe(spec, cases):
     """Render `cases` through driver.append_main against stub_module(spec)
-    and `tkc --check` the result with validate.TKC (the pinned copy once
-    tkc_pin.pin().install(validate) ran). Returns (errors, note): errors
+    and `tkc --check` the result with regen_validate.TKC (the pinned copy once
+    tkc_pin.pin().install(regen_validate) ran). Returns (errors, note): errors
     non-empty = the CASES are unrenderable (reject); a stub that does not
     compile on its own is a probe limitation (skipped, note only)."""
     types = input_types(spec)
@@ -302,8 +302,8 @@ def main():
     if args.no_probe:
         errs = verify(args.base, doc, spec)
     else:
-        import validate
-        with tkc_pin.pin().install(validate):
+        import regen_validate
+        with tkc_pin.pin().install(regen_validate):
             errs = verify(args.base, doc, spec, probe=True, notes=notes)
     if errs:
         print("FAIL " + "; ".join(errs))
