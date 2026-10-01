@@ -7,7 +7,8 @@ Spot-check the generated train.jsonl / eval.jsonl:
 - user prompt non-empty and does NOT contain raw template placeholders
 - assistant content begins with `m=` (module decl)
 - assistant content passes a cheap Phase 2 surface check
-  (no uppercase letters outside strings, no `==`, no `!=`, no `[...]` indexing)
+  (no uppercase letters outside strings, no `[...]` indexing; `==` and `!=`
+  are legal toke and are not flagged -- see regen/syntax_card.md, Operators)
 - prints a summary and exits non-zero if any issues
 
 Also samples 10 rows and dumps them for human review.
@@ -55,8 +56,6 @@ def _strip_strings(src: str) -> str:
 
 
 _RE_UPPER = re.compile(r"[A-Z]")
-_RE_EQEQ = re.compile(r"==")
-_RE_NEQ = re.compile(r"!=")
 _RE_BRACKET_INDEX = re.compile(r"[a-z0-9_][\[]")  # identifier followed by [
 
 
@@ -67,11 +66,7 @@ def surface_check(src: str) -> list[str]:
         issues.append("missing_module_decl")
     if _RE_UPPER.search(stripped):
         issues.append("uppercase_letter")
-    if _RE_EQEQ.search(masked):
-        issues.append("double_equals")
-    if _RE_NEQ.search(masked):
-        issues.append("not_equals")
-    if _RE_BRACKET_INDEX.search(masked) or "[" in masked or "]" in masked:
+    if _RE_BRACKET_INDEX.search(stripped) or "[" in stripped or "]" in stripped:
         issues.append("square_bracket")
     return issues
 
