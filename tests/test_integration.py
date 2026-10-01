@@ -196,6 +196,8 @@ def _write_config(
         },
         "dedup": {"threshold": 0.95},
         "cost_limit": cost_limit,
+        # main.py refuses to run without a holdout set (bb40018, story 10.7.4).
+        "holdout": {"task_ids": ["HOLDOUT-TEST-001"]},
     }
     import yaml
 
