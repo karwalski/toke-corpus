@@ -46,9 +46,9 @@ import tempfile, threading, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import driver as drv                                    # noqa: E402
-import validate                                         # noqa: E402  (131.39: rebind its TKC)
+import regen_validate                                         # noqa: E402  (131.39: rebind its TKC)
 import tkc_pin                                          # noqa: E402  (131.39)
-from validate import materialise_fixtures               # noqa: E402
+from regen_validate import materialise_fixtures               # noqa: E402
 
 # 131.39: $TOKE_TKC_PIN (a harness's pinned copy), else $TKC, else ~/tk/toke/tkc;
 # main() pins its own copy. Every compare() result carries `tkc_bin_sha`.
@@ -856,7 +856,7 @@ def main(argv=None):
     args = ap.parse_args(argv)
     spec = json.load(open(args.spec))
     a_test = json.load(open(args.a_test)) if args.a_test else None
-    with tkc_pin.pin().install(sys.modules[__name__], validate):   # 131.39
+    with tkc_pin.pin().install(sys.modules[__name__], regen_validate):   # 131.39
         res = diff_check(open(args.orig).read(), open(args.cand).read(), spec,
                          args.task_id or spec.get("task_id", "task"), args.workdir, a_test, args.n)
     print(json.dumps(res, indent=1))

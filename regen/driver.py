@@ -416,7 +416,7 @@ def append_main(spec, assembled_src):
     """Assembled single_function module + real-bodied stubs + generated main().
     Returns (source, error) — error is set when synthesis isn't possible."""
     if spec.get("task_type") == "stdin_program":
-        return None, "stdin_program: has its own main; run via validate.run_stdin_cases"
+        return None, "stdin_program: has its own main; run via regen_validate.run_stdin_cases"
     in_types = effective_input_types(spec)
     ret = spec.get("output_type_v03") or spec.get("output_type") or ""
     tcs = spec.get("test_cases") or []

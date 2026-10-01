@@ -22,7 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import audit                                   # noqa: E402
 import driver as drv                           # noqa: E402
-import idiom_judge, metrics, validate, tkc_pin  # noqa: E402
+import idiom_judge, metrics, regen_validate, tkc_pin  # noqa: E402
 
 CORPUS = os.path.join(os.path.dirname(HERE), "corpus", "regen_v04")
 OUT_JSONL = os.path.join(CORPUS, "audit", "u64_recheck_131.40.jsonl")
@@ -192,7 +192,7 @@ def main(workers=8):
     os.makedirs(tmpdir, exist_ok=True)
     jobs = [(tid, os.path.join(CORPUS, man[tid], tid + ".json"), s, tmpdir)
             for tid, (s, _) in sorted(aff.items()) if tid in man]
-    pinned = tkc_pin.pin().install(audit, validate, metrics, idiom_judge)
+    pinned = tkc_pin.pin().install(audit, regen_validate, metrics, idiom_judge)
     print(f"{len(jobs)} affected records, tkc {pinned.version} sha {pinned.sha256[:12]}",
           file=sys.stderr)
     results = {}

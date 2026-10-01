@@ -19,14 +19,14 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 import driver as drv                            # noqa: E402  (131.72)
-from validate import render_expected            # noqa: E402  (131.72)
+from regen_validate import render_expected            # noqa: E402  (131.72)
 
 # ---------------------------------------------------------------------------
 # 131.72: the prompt MUST ask for exactly what the acceptance gate accepts.
 #
 # Until this story the prompt dumped a test case's expectation as raw JSON
 # (`expected output: {"err": "NotFound"}`) while the gate compares stdout
-# against `validate.render_expected` (`err:notfound`) for full_program and
+# against `regen_validate.render_expected` (`err:notfound`) for full_program and
 # `driver.expected_lines` for single_function.  A worker was therefore told to
 # print a marker string and then failed for printing it — and `str` / `float`
 # / `list` / `None` expectations diverged from the gate in the same way
@@ -60,7 +60,7 @@ def expected_stdout_lines(spec, tc):
     """The exact stdout line(s) the acceptance gate expects for ONE test case,
     computed by the gate's own renderer for the spec's task type:
 
-      full_program    validate.render_expected (run_shard.run_test_cases,
+      full_program    regen_validate.render_expected (run_shard.run_test_cases,
                       audit.audit_one) — one line, split on embedded newlines
       single_function driver.expected_lines (audit.audit_one via
                       driver.append_main) — array results are one line per

@@ -1,14 +1,14 @@
 """131.44 (b) — a single_function record must declare its target function.
 driver.function_decls is paren-aware (the pre-131.44 `[^)]*` regex could not
 see `f=flatten(p:@(@u64)):@u64` and reported 6 A-ARR-0077 records as
-function-less); validate.has_target_function is the gate predicate."""
+function-less); regen_validate.has_target_function is the gate predicate."""
 import os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 import driver as drv                      # noqa: E402
 import record_shape_check as rsc          # noqa: E402
-from validate import has_target_function, target_name  # noqa: E402
+from regen_validate import has_target_function, target_name  # noqa: E402
 
 PREFIX = "m=harness;\ni=io:std.io;\ni=s:std.str;\n"
 SRC_NESTED = PREFIX + "f=flatten(p:@(@u64)):@u64{\n  let out=mut.@();\n  <out\n};\n"

@@ -11,7 +11,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 import driver as drv  # noqa: E402
 import tkc_pin        # noqa: E402
-import validate       # noqa: E402
+import regen_validate       # noqa: E402
 
 TKC = tkc_pin.default_tkc()
 HAVE_TKC = os.path.exists(TKC)
@@ -68,11 +68,11 @@ def test_expected_lines_render_err_cases():
 
 
 def test_validate_render_expected_is_err_aware():
-    assert validate.render_expected({"err": "NotFound"}) == "err:notfound"
-    assert validate.render_expected({"error": "DivByZero"}) == "err:divbyzero"
-    assert validate.render_expected(True) == "true"        # full_program convention kept
-    assert validate.render_expected(2.0) == "2"
-    assert validate.render_expected("x") == "x"
+    assert regen_validate.render_expected({"err": "NotFound"}) == "err:notfound"
+    assert regen_validate.render_expected({"error": "DivByZero"}) == "err:divbyzero"
+    assert regen_validate.render_expected(True) == "true"        # full_program convention kept
+    assert regen_validate.render_expected(2.0) == "2"
+    assert regen_validate.render_expected("x") == "x"
 
 
 def test_declared_err_variants_and_return_type():

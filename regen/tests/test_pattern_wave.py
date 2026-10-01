@@ -87,7 +87,7 @@ def _row(k):
 
 
 # 131.39: the modules pin_tkc() rebinds; the fixture restores them after the wave
-_PIN_MODS = tuple(m for m in (pc, pc.validate, pc.metrics, pc.idiom_judge, pc.run_shard, pc.audit,
+_PIN_MODS = tuple(m for m in (pc, pc.regen_validate, pc.metrics, pc.idiom_judge, pc.run_shard, pc.audit,
                               pc.diff_check, pc._autofix_mod) if m is not None)
 
 

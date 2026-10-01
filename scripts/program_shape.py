@@ -24,7 +24,7 @@ Interface tasks (a ``.tki`` / interface record) are declaration-only by design;
 
 Wired into
   * validate/quality.py      QualityScorer.score -- required gate
-  * regen/validate.py        has_target_function -- the target must be defined
+  * regen/regen_validate.py  has_target_function -- the target must be defined
   * scripts/prepare_training_data.py -- exporter quality gate (skips + counts)
 
 CLI

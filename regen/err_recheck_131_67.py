@@ -18,7 +18,7 @@ outside A-ERR whose spec return is an error union — currently none):
                 (a private worktree; --old-tkc points at its binary)
 
 Both passes use today's machinery — the 131.44 `$err` expectation rendering
-in validate.render_expected and the 131.40 driver fixes — so the ONLY thing
+in regen_validate.render_expected and the 131.40 driver fixes — so the ONLY thing
 that differs between them is the compiler.  Records with no test cases
 cannot be given a pass/fail at all (they were never verified); for those the
 run still builds and executes the program under both compilers and records
@@ -58,7 +58,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import audit                                    # noqa: E402
 import driver as drv                            # noqa: E402
-import idiom_judge, metrics, validate, tkc_pin  # noqa: E402
+import idiom_judge, metrics, regen_validate, tkc_pin  # noqa: E402
 
 STORY = "131.67"
 CORPUS = os.path.join(os.path.dirname(HERE), "corpus", "regen_v04")
@@ -299,7 +299,7 @@ def scope(specs, man):
         s = specs.get(tid)
         if not s:
             continue
-        if cat == "A-ERR" or validate.is_error_union(validate.spec_return_type(s) or ""):
+        if cat == "A-ERR" or regen_validate.is_error_union(regen_validate.spec_return_type(s) or ""):
             ids.append(tid)
     return sorted(ids)
 
@@ -356,7 +356,7 @@ def main(argv=None):
         # --- NEW (fixed) compiler ----------------------------------------
         os.environ.pop(tkc_pin.ENV_PIN, None)
         pin_new = tkc_pin.pin()
-        pin_new.install(audit, validate, metrics, idiom_judge)
+        pin_new.install(audit, regen_validate, metrics, idiom_judge)
         with pin_new:
             new_rows = sweep_pass(jobs, pin_new, a.workers, "NEW")
         stamp_new = pin_new.stamp()
@@ -369,7 +369,7 @@ def main(argv=None):
             if pin_old.sha256 == stamp_new["tkc_bin_sha"]:
                 raise SystemExit("--old-tkc is the same binary as the pinned tkc; "
                                  "build f55354c^ in a worktree first")
-            pin_old.install(audit, validate, metrics, idiom_judge)
+            pin_old.install(audit, regen_validate, metrics, idiom_judge)
             with pin_old:
                 old_rows = sweep_pass(jobs, pin_old, a.workers, "OLD")
             stamp_old = pin_old.stamp()
@@ -386,7 +386,7 @@ def main(argv=None):
     if cand:
         os.environ.pop(tkc_pin.ENV_PIN, None)
         pin_c = tkc_pin.pin()
-        pin_c.install(audit, validate, metrics, idiom_judge)
+        pin_c.install(audit, regen_validate, metrics, idiom_judge)
         if pin_c.sha256 != stamp_new["tkc_bin_sha"]:
             raise SystemExit("the tkc binary changed since the NEW pass — rerun from scratch")
         with pin_c:
@@ -418,7 +418,7 @@ def main(argv=None):
     for tid in ids:
         spec = specs[tid]
         src = json.load(open(os.path.join(CORPUS, man[tid], tid + ".json")))["tk_source"]
-        ret = validate.spec_return_type(spec) or ""
+        ret = regen_validate.spec_return_type(spec) or ""
         gn = gates(new_rows[tid])
         go = gates(old_rows[tid]) if old_rows else dict(gn, compile=None)
         has_tests = bool(spec.get("test_cases"))
@@ -427,7 +427,7 @@ def main(argv=None):
         verdict, why = (classify(go, gn, has_tests, ee, det if det is not None else True)
                         if old_rows else ("no_differential", ""))
         b = banked.get(tid, {})
-        rt_ok, rt_detail, _, rt_declared = validate.return_type_conforms(spec, src)
+        rt_ok, rt_detail, _, rt_declared = regen_validate.return_type_conforms(spec, src)
         out.append({
             "task_id": tid, "category": man[tid], "task_type": spec.get("task_type"),
             "spec_return": ret, "err_style": err_style(src, ret),

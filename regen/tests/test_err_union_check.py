@@ -11,7 +11,7 @@ import pytest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
-import validate                  # noqa: E402
+import regen_validate                  # noqa: E402
 import err_union_check as euc    # noqa: E402
 import pattern_common as pc      # noqa: E402
 import audit, idiom_judge, metrics, tkc_pin   # noqa: E402
@@ -19,7 +19,7 @@ import audit, idiom_judge, metrics, tkc_pin   # noqa: E402
 # 131.39: pin the compiler once for the module -- a concurrent `make` relinks
 # ~/tk/toke/tkc mid-run (seen while writing these tests: tkc -> toke.bak)
 try:
-    PIN = tkc_pin.pin().install(validate, metrics, idiom_judge, audit)
+    PIN = tkc_pin.pin().install(regen_validate, metrics, idiom_judge, audit)
 except Exception:                                   # no compiler on this machine
     PIN = None
 HAVE_TKC = PIN is not None
@@ -64,49 +64,49 @@ WRAPPED = (GOOD + "f=showparse(num1:str):str{\n  <mt parseint(num1){$ok:v \"\\(v
 
 # ------------------------------------------------------ validate helpers ---
 def test_spec_return_type_prefers_the_v03_signature_then_the_field():
-    assert validate.spec_return_type(SPEC) == "i64!$parseerr"
-    assert validate.spec_return_type({"description": "f=f(a:i64):u64. Then", "output_type": "i64"}) == "u64"
-    assert validate.spec_return_type({"description": "f=g(xs:@(i64)):@(i64)!LookupErr and"}) == "@(i64)!LookupErr"
-    assert validate.spec_return_type({"output_type": "@(i64)!LookupErr"}) == "@(i64)!LookupErr"
-    assert validate.spec_return_type({"description": "no sig here"}) is None
+    assert regen_validate.spec_return_type(SPEC) == "i64!$parseerr"
+    assert regen_validate.spec_return_type({"description": "f=f(a:i64):u64. Then", "output_type": "i64"}) == "u64"
+    assert regen_validate.spec_return_type({"description": "f=g(xs:@(i64)):@(i64)!LookupErr and"}) == "@(i64)!LookupErr"
+    assert regen_validate.spec_return_type({"output_type": "@(i64)!LookupErr"}) == "@(i64)!LookupErr"
+    assert regen_validate.spec_return_type({"description": "no sig here"}) is None
 
 
 def test_declared_return_type_is_depth_aware_and_tolerates_space():
     src = "f=lookup(xs:@(i64);i:i64):@(i64)!$lookuperr{\n <xs\n};\nf=other(a:i64):i64 {\n <a\n};\n"
-    assert validate.declared_return_type(src, "lookup") == "@(i64)!$lookuperr"
-    assert validate.declared_return_type(src, "other") == "i64"
-    assert validate.declared_return_type(src, "missing") is None
-    assert validate.declared_return_type("f=noret(a:i64){<a};", "noret") is None
+    assert regen_validate.declared_return_type(src, "lookup") == "@(i64)!$lookuperr"
+    assert regen_validate.declared_return_type(src, "other") == "i64"
+    assert regen_validate.declared_return_type(src, "missing") is None
+    assert regen_validate.declared_return_type("f=noret(a:i64){<a};", "noret") is None
 
 
 def test_norm_return_type_equates_spellings():
-    n = validate.norm_return_type
+    n = regen_validate.norm_return_type
     assert n("i64!ParseErr") == n("i64!$parseerr") == "i64!parseerr"
     assert n("@(@(i64))!LookupErr") == n("@(@(i64))!$lookuperr") == "@@i64!lookuperr"
     assert n("@(i64)") == "@i64" and n(" str ") == "str" and n(None) is None
-    assert validate.is_error_union("i64!$e") and not validate.is_error_union("str")
+    assert regen_validate.is_error_union("i64!$e") and not regen_validate.is_error_union("str")
 
 
 def test_return_type_conforms_hard_soft_ok_and_allowlist(monkeypatch):
-    ok, detail, soft, decl = validate.return_type_conforms(SPEC, PREFIX + GAMED)
+    ok, detail, soft, decl = regen_validate.return_type_conforms(SPEC, PREFIX + GAMED)
     assert ok is False and decl == "str" and soft is None
     assert detail == "parseint declared `str`, spec `i64!$parseerr` requires an error union"
-    ok, detail, soft, decl = validate.return_type_conforms(SPEC, PREFIX + GOOD)
+    ok, detail, soft, decl = regen_validate.return_type_conforms(SPEC, PREFIX + GOOD)
     assert (ok, detail, soft, decl) == (True, "ok", None, "i64!$parseerr")
-    ok, _, soft, decl = validate.return_type_conforms(SPEC, PREFIX + WIDENED)
+    ok, _, soft, decl = regen_validate.return_type_conforms(SPEC, PREFIX + WIDENED)
     assert ok is True and decl == "u64!$parseerr"
     assert soft == "parseint declared `u64!$parseerr`, spec `i64!$parseerr`"
-    monkeypatch.setattr(validate, "RETURN_TYPE_ALLOWLIST", {"i64!parseerr": {"u64!parseerr"}})
-    ok, detail, soft, _ = validate.return_type_conforms(SPEC, PREFIX + WIDENED)
+    monkeypatch.setattr(regen_validate, "RETURN_TYPE_ALLOWLIST", {"i64!parseerr": {"u64!parseerr"}})
+    ok, detail, soft, _ = regen_validate.return_type_conforms(SPEC, PREFIX + WIDENED)
     assert ok is True and soft is None and detail == "ok"
     # wrapper shape: named target fine, the driver's callee is not -> hard fail
-    ok, detail, soft, decl = validate.return_type_conforms(SPEC, PREFIX + WRAPPED)
+    ok, detail, soft, decl = regen_validate.return_type_conforms(SPEC, PREFIX + WRAPPED)
     assert ok is False and decl == "i64!$parseerr" and soft is None
     assert detail == ("driver callee `showparse` declared `str` (target parseint is `i64!$parseerr`), "
                       "spec `i64!$parseerr` requires an error union")
     # not applicable: no target in the spec / function absent
-    assert validate.return_type_conforms({"description": "print"}, PREFIX + GAMED)[3] is None
-    assert validate.return_type_conforms(SPEC, "f=other(a:i64):i64{<a};")[3] is None
+    assert regen_validate.return_type_conforms({"description": "print"}, PREFIX + GAMED)[3] is None
+    assert regen_validate.return_type_conforms(SPEC, "f=other(a:i64):i64{<a};")[3] is None
 
 
 # --------------------------------------------------- err_union_check pure ---
@@ -334,7 +334,7 @@ def test_dump_ast_matches_text_parser_on_real_sources(tmp_path):
         assert ast is not None and ast["kind"] == "PROGRAM"
         f = euc.ast_functions(ast, src)["parseint"]
         assert f["declared"] == want and f["is_union"] is union
-        assert validate.norm_return_type(validate.declared_return_type(src, "parseint")) == validate.norm_return_type(want)
+        assert regen_validate.norm_return_type(regen_validate.declared_return_type(src, "parseint")) == regen_validate.norm_return_type(want)
     src = PREFIX + GAMED_HELPER
     row = euc.classify(SPEC, src, euc.ast_functions(euc.dump_ast(tkc, src, str(tmp_path)), src))
     assert row["verdict"] == "gamed_err_marker" and row["marker_in"] == ["errstr"] and row["ast_text_agree"] is True

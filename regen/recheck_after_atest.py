@@ -22,7 +22,7 @@ import argparse, glob, json, multiprocessing, os, re, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import audit                                    # noqa: E402
-import idiom_judge, metrics, validate, tkc_pin  # noqa: E402
+import idiom_judge, metrics, regen_validate, tkc_pin  # noqa: E402
 import u64_recheck_131 as u64                   # noqa: E402
 
 CORPUS = os.path.join(os.path.dirname(HERE), "corpus", "regen_v04")
@@ -109,7 +109,7 @@ def main():
     tmpdir = os.path.join(CORPUS, "audit", f"tmp_{args.story}")
     os.makedirs(tmpdir, exist_ok=True)
     jobs = [(tid, os.path.join(CORPUS, man[tid], tid + ".json"), specs[tid], tmpdir) for tid in ids]
-    pinned = tkc_pin.pin().install(audit, validate, metrics, idiom_judge)
+    pinned = tkc_pin.pin().install(audit, regen_validate, metrics, idiom_judge)
     print(f"{len(jobs)} records over {len(bases)} bases, tkc {pinned.version} "
           f"sha {pinned.sha256[:12]}", file=sys.stderr)
     rows = {}

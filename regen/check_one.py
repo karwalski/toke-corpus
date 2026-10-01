@@ -14,9 +14,9 @@ import argparse, json, os, subprocess, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from assemble import assemble                      # noqa: E402
-from validate import tkc_check, signature_conforms  # noqa: E402
+from regen_validate import tkc_check, signature_conforms  # noqa: E402
 from run_shard import run_test_cases               # noqa: E402
-import validate                                    # noqa: E402  (131.39)
+import regen_validate                                    # noqa: E402  (131.39)
 import tkc_pin                                     # noqa: E402  (131.39)
 
 
@@ -31,7 +31,7 @@ def main():
     src = assemble(spec, raw)
 
     # 131.39: exec a private copy of tkc so a `make` mid-check cannot swap the compiler
-    pinned = tkc_pin.pin().install(validate)
+    pinned = tkc_pin.pin().install(regen_validate)
     TKC = pinned.argv0
     with tempfile.NamedTemporaryFile("w", suffix=".tk", delete=False) as f:
         f.write(src)

@@ -34,7 +34,7 @@ def audit_rows():
 def repair_prompt(spec, rec, row):
     """131.74: the test lock is rendered by the GATE'S OWN renderer, through
     the single implementation in build_prompt.expected_stdout_lines
-    (validate.render_expected for full_program, driver.expected_lines for
+    (regen_validate.render_expected for full_program, driver.expected_lines for
     single_function).  Before this story the full_program branch json.dumps'd
     the raw expectation and printed no line-form at all — a worker repairing
     an output mismatch was shown `-> expected "localhost"` and judged against

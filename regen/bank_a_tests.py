@@ -163,8 +163,8 @@ def main():
         s = bank(args.workdir, args.bank_dir, args.provenance, args.dry_run, args.archive_dir,
                  probe=False, verbose=args.verbose)
     else:
-        import validate
-        with tkc_pin.pin().install(validate) as pinned:
+        import regen_validate
+        with tkc_pin.pin().install(regen_validate) as pinned:
             print(f"tkc {pinned.version} sha {pinned.sha256[:12]} (pinned copy)", file=sys.stderr)
             s = bank(args.workdir, args.bank_dir, args.provenance, args.dry_run, args.archive_dir,
                      probe=True, tkc_stamp=pinned.stamp(), verbose=args.verbose)

@@ -49,7 +49,7 @@ sys.path.insert(0, HERE)
 import diff_check as dc                                   # noqa: E402
 import audit                                              # noqa: E402  (131.39: rebind its TKC)
 import run_shard                                          # noqa: E402  (131.39: rebind its TKC)
-import validate                                           # noqa: E402  (131.39: rebind its TKC)
+import regen_validate                                           # noqa: E402  (131.39: rebind its TKC)
 import tkc_pin                                            # noqa: E402  (131.39)
 import driver as drv                                      # noqa: E402
 import idiom_judge                                        # noqa: E402
@@ -672,7 +672,7 @@ def main(argv=None):
     a_dir = os.path.join(corpus, "audit", "a_tests")
     # 131.39: pin the compiler before tool_shas() and before the pool; every
     # result and the summary carry its sha256 (`tkc_bin_sha`)
-    pinned = tkc_pin.pin().install(sys.modules[__name__], dc, validate, metrics, idiom_judge, run_shard, audit)
+    pinned = tkc_pin.pin().install(sys.modules[__name__], dc, regen_validate, metrics, idiom_judge, run_shard, audit)
     shas = tool_shas()
     assert shas[3] == pinned.sha256
     jobs, results, skipped, unknown = [], [], 0, []

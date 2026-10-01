@@ -16,9 +16,9 @@ For each prepped task with a candidate at
   stale guard      solution.tk on disk must still be the file the prompt was
                    prepped from (meta.before.file_sha256)
 
-THE ORACLE IS THE MANIFEST. The `tests` gate is validate.run_stdin_cases:
+THE ORACLE IS THE MANIFEST. The `tests` gate is regen_validate.run_stdin_cases:
 each case's stdout is compared to the manifest's independently authored
-`expected_output` (validate.py:300). This file does NOT import
+`expected_output` (regen_validate.py:300). This file does NOT import
 bank_pattern.diff_check — nor pattern_common, nor pattern_autofix — and makes
 no comparison of any kind against the original program's output. That gate is
 what forced the corpus wave's withdrawal (131.69): where the original is the

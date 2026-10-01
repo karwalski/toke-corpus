@@ -11,9 +11,9 @@ The corpus wave (131.15) had to be withdrawn because its bank gate,
 bank_pattern.diff_check, demands the candidate's stdout be byte-identical to
 the ORIGINAL program's stdout — which makes a correct fix unbankable wherever
 the original is the defect (131.69). The library path is clean of that defect:
-run_shard.validate_one_gates -> validate.run_stdin_cases compares the
+run_shard.validate_one_gates -> regen_validate.run_stdin_cases compares the
 candidate against the manifest's independently authored `expected_output`
-(validate.py:300), never against the original.
+(regen_validate.py:300), never against the original.
 
 To keep it that way, and to make "no original-output comparison exists in this
 path" a one-grep claim, NOTHING on the library path imports pattern_common,
@@ -27,7 +27,7 @@ original's *output* for anything but reporting a delta, stop: that is the
 131.69 defect coming back.
 
 Imports are confined to modules with no differential machinery in them:
-run_shard, validate, metrics, idiom_judge, tkc_pin.
+run_shard, regen_validate, metrics, idiom_judge, tkc_pin.
 
 NOT assemble.sanitize. That helper deletes EVERY "```" run anywhere in the
 text, which silently corrupts a library program that handles markdown —
@@ -57,7 +57,7 @@ if HERE not in sys.path:
 import idiom_judge                                   # noqa: E402
 import metrics                                       # noqa: E402
 import run_shard                                     # noqa: E402
-import validate                                      # noqa: E402
+import regen_validate                                      # noqa: E402
 import tkc_pin                                       # noqa: E402
 from run_shard import validate_one_gates             # noqa: E402
 
@@ -175,7 +175,7 @@ def tkc_bin_sha(tkc=None):
 def pin_tkc(*modules):
     """131.39: pin the compiler once per run, BEFORE any loop/pool. Rebinds TKC
     here and in every sibling module the gates exec. Keep the Pinned alive."""
-    mods = [sys.modules[__name__], validate, metrics, idiom_judge, run_shard]
+    mods = [sys.modules[__name__], regen_validate, metrics, idiom_judge, run_shard]
     for m in modules:
         if m is not None and m not in mods:
             mods.append(m)
@@ -567,7 +567,7 @@ def static_and_test_gates(spec, cand, tmpdir, case_timeout=None):
     """shape -> run_shard.validate_one_gates(lint_gate=True): compile, build,
     the MANIFEST tests gate, idiom, structure, pattern, lint.
 
-    The tests gate is validate.run_stdin_cases: each case's stdout is compared
+    The tests gate is regen_validate.run_stdin_cases: each case's stdout is compared
     to the manifest's `expected_output`. There is no comparison against the
     original program anywhere on this path."""
     res = {"gates": {}, "reason": None, "record": None, "tk_source": None,
@@ -711,7 +711,7 @@ def _perf_pass(binpath, spec, cwd):
         case_cwd = os.path.join(cwd, f"p{i}")
         os.makedirs(case_cwd, exist_ok=True)
         try:
-            validate.materialise_fixtures(tc.get("fixtures"), case_cwd)
+            regen_validate.materialise_fixtures(tc.get("fixtures"), case_cwd)
         except Exception:                             # noqa: BLE001
             return None
         r = _rusage_run(binpath, tc.get("input", ""), case_cwd)

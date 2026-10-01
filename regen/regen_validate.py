@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate a generated toke program and emit a corpus-schema record.
 
-Usage: validate.py --task-json <spec.json> --source <prog.tk> --model <name> [--attempts N]
+Usage: regen_validate.py --task-json <spec.json> --source <prog.tk> --model <name> [--attempts N]
 
 Steps:
   1. tkc --check          (syntax/type check; capture diagnostics JSON)
@@ -31,7 +31,7 @@ def render_expected(val):
     `err:<name>` (driver.render_err — `err:notfound`), the line the driver's
     `$err` arm prints; multi-line strs are split by the callers.
     run_shard.run_test_cases keeps a local copy of the pre-131.44 rule — the
-    one-line hook is `from validate import render_expected` there."""
+    one-line hook is `from regen_validate import render_expected` there."""
     name = drv.err_name(val)
     if name is not None:
         return drv.render_err(name)

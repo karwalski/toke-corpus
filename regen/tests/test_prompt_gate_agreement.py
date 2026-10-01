@@ -2,7 +2,7 @@
 
 The defect this locks out: `build_prompt.format_test_cases` used to dump a test
 case's expectation as raw JSON (`expected output: {"err": "NotFound"}`) while
-the acceptance gate compared stdout against `validate.render_expected`
+the acceptance gate compared stdout against `regen_validate.render_expected`
 (`err:notfound`).  A worker was told to print the harness's error marker and
 was then failed for printing it; `str`, `float`, `list` and `None`
 expectations diverged the same way (`"alice"` vs `alice`, `2.0` vs `2`,
@@ -12,7 +12,7 @@ The invariant, per task type:
 
   full_program     the stdout lines the prompt shows == the `want` list
                    `run_shard.run_test_cases` (and `audit.audit_one`) builds
-                   from `validate.render_expected`
+                   from `regen_validate.render_expected`
   single_function  == `driver.expected_lines`, the list `audit.audit_one`
                    compares the driver-main run against
 
@@ -55,7 +55,7 @@ import driver as drv         # noqa: E402
 import pattern_common as pc  # noqa: E402  (131.74)
 import repair_prep as rp     # noqa: E402  (131.74)
 import run_shard             # noqa: E402
-import validate              # noqa: E402
+import regen_validate              # noqa: E402
 
 # Every expectation shape the corpus actually carries, plus the ones whose
 # JSON spelling differed from the gate's (the 131.72 audit counted, over the
@@ -216,8 +216,8 @@ def test_prompt_uses_the_gates_own_renderers():
     """Anti-drift: build_prompt must hold the SAME function objects the gate
     runs, not a copy of them.  If someone re-implements the rendering here,
     this fails even when the two happen to agree today."""
-    assert build_prompt.render_expected is validate.render_expected
-    assert run_shard.render_expected is validate.render_expected
+    assert build_prompt.render_expected is regen_validate.render_expected
+    assert run_shard.render_expected is regen_validate.render_expected
     assert build_prompt.drv.expected_lines is drv.expected_lines
 
 
@@ -232,8 +232,8 @@ def test_wave_prompts_share_the_one_renderer(mod):
 def test_expected_stdout_lines_delegates(monkeypatch):
     """Behavioural proof of the same thing: poison each gate renderer and the
     prompt must change with it."""
-    monkeypatch.setattr(validate, "render_expected", lambda v: "POISON-FP")
-    monkeypatch.setattr(build_prompt, "render_expected", validate.render_expected)
+    monkeypatch.setattr(regen_validate, "render_expected", lambda v: "POISON-FP")
+    monkeypatch.setattr(build_prompt, "render_expected", regen_validate.render_expected)
     monkeypatch.setattr(drv, "expected_lines", lambda s: ["POISON-SF"])
     fp = _spec("full_program", [{"inputs": ["x"], "expected": 1}])
     sf = _spec("single_function", [{"inputs": ["x"], "expected": 1}])

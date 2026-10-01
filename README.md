@@ -98,7 +98,7 @@ reads `corpus/regen_v04/` requires access to the local data.
 ## Requirements
 
 - Python 3.11+
-- [tkc](https://github.com/karwalski/tkc) 2.8.0 on PATH (the compiler is the root
+- [tkc](https://github.com/karwalski/toke) 2.8.0 on PATH (the compiler is the root
   of trust — records are only banked if tkc accepts them)
 - the `toke` repo checked out beside this one (`~/tk/toke`): `regen/` execs its
   `tkc` (pinned, see `regen/tkc_pin.py`) and imports its
@@ -116,16 +116,15 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -e '.[dev]'
 ```
 
-The tests run as **two** pytest invocations, because `regen/validate.py` and the
-top-level `validate/` package share a module name and cannot be collected in
-one process:
+One pytest run covers every suite, `regen/` included (the regen gate module is
+`regen/regen_validate.py`, so it no longer shadows the top-level `validate/`
+package):
 
 ```sh
-.venv/bin/python -m pytest -q --ignore=regen   # every suite outside regen/
-.venv/bin/python -m pytest -q regen/tests      # the regen harness (slow: builds with tkc)
+.venv/bin/python -m pytest -q    # the whole repo (slow: regen/ builds with tkc)
 ```
 
-Both must pass before a merge.
+It must pass before a merge.
 
 ## Related repos
 
