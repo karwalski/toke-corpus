@@ -47,7 +47,7 @@ SCHEMA_PATH = str(Path(__file__).resolve().parent.parent.parent / "corpus" / "sc
 def _make_entry(
     entry_id: str = "A-A-MTH-0001-abcd1234",
     task_id: str = "A-MTH-0001",
-    tk_source: str = "M=test;\nF=add(a:i64;b:i64):i64{<a+b};",
+    tk_source: str = "m=test;\nf=add(a:i64;b:i64):i64{<a+b};",
 ) -> CorpusEntry:
     """Create a minimal valid CorpusEntry for testing."""
     return CorpusEntry(
@@ -74,7 +74,7 @@ def _make_task_spec(task_id: str = "A-MTH-0001") -> TaskSpec:
         task_id=task_id,
         category="A-MTH",
         description="Add two integers.",
-        expected_signature="F=add(a:i64;b:i64):i64",
+        expected_signature="f=add(a:i64;b:i64):i64",
         difficulty=1,
     )
 
@@ -86,7 +86,7 @@ def _make_compile_result(success: bool = True) -> CompileResult:
         success=success,
         exit_code=0 if success else 1,
         stdout="",
-        stderr="" if success else "error: E4021 type mismatch",
+        stderr="" if success else "error: E4031 type mismatch",
         duration_ms=10.0,
     )
 
@@ -239,7 +239,7 @@ class TestBuildEntry:
         with tempfile.TemporaryDirectory() as tmpdir:
             writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             task = _make_task_spec()
-            toke_src = "M=test;\nF=add(a:i64;b:i64):i64{<a+b};"
+            toke_src = "m=test;\nf=add(a:i64;b:i64):i64{<a+b};"
             tk_tokens = count_tokens(toke_src)
 
             entry = writer.build_entry(
@@ -276,7 +276,7 @@ class TestBuildEntry:
 
             entry = writer.build_entry(
                 task=task,
-                toke_source="M=test;\nF=bad(x:u64):Str{<x};",
+                toke_source="m=test;\nf=bad(x:u64):str{<x};",
                 model_name="test",
                 attempts=1,
                 compile_result=compile_result,
@@ -285,14 +285,14 @@ class TestBuildEntry:
                 tk_tokens=10,
             )
 
-            assert "E4021" in entry.validation.error_codes
+            assert "E4031" in entry.validation.error_codes
 
     def test_build_entry_is_writable(self) -> None:
         """An entry from build_entry can be written to disk without error."""
         with tempfile.TemporaryDirectory() as tmpdir:
             writer = CorpusWriter(corpus_dir=tmpdir, schema_path=SCHEMA_PATH, holdout_task_ids={"HOLDOUT-TEST-001"})
             task = _make_task_spec()
-            toke_src = "M=test;\nF=add(a:i64;b:i64):i64{<a+b};"
+            toke_src = "m=test;\nf=add(a:i64;b:i64):i64{<a+b};"
 
             entry = writer.build_entry(
                 task=task,
