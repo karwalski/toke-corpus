@@ -14,6 +14,11 @@ import argparse, json, re, subprocess, sys, os, tempfile
 import tkc_pin  # noqa: E402  (131.39)
 import driver as drv  # noqa: E402  (131.44: err rendering + paren-aware decls)
 
+_SCRIPTS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.append(_SCRIPTS)
+from program_shape import defined_functions  # noqa: E402  (128.28)
+
 # 131.39: the pinned private copy when TOKE_TKC_PIN is set (a parent harness
 # pinned once), else $TKC, else the ~/tk/toke/tkc symlink. Entry points pin.
 TKC = tkc_pin.default_tkc()
@@ -52,6 +57,9 @@ def has_target_function(src, spec):
     `f=flatten(p:@(@u64)):@u64` counts — the `[^)]*` regexes cannot see it.
     When the description names `f=name(`, that name must be declared; else at
     least one declaration that is neither main nor a domain-context stub.
+    128.28: the target must be DEFINED, not just declared -- a body-less
+    `f=name(...):T;` is a legal extern, so `tkc --check` passes it, and a
+    single_function spec without test cases is never built or run.
     Not applicable (True) for other task types. Hook for run_shard.
     validate_one_gates (131.42 owns that file): after signature_conforms,
         if sig_ok and ttype == "single_function": sig_ok, sig_detail = has_target_function(src, spec)
@@ -60,16 +68,22 @@ def has_target_function(src, spec):
         return True, "n/a: " + spec.get("task_type", "full_program")
     decls = drv.function_decls(src)
     names = [d["name"] for d in decls]
+    defined = set(defined_functions(src))
     want = target_name(spec)
     if want:
-        if want in names:
+        if want in defined:
             return True, "ok"
+        if want in names:
+            return False, f"target function {want} declared without a body"
         return False, f"target function {want} not declared" + \
             (f" (declared: {','.join(n for n in names if n != 'main')})" if names else " (no functions)")
     stubs = drv._stub_names(spec)
     real = [n for n in names if n != "main" and n not in stubs]
+    real_defined = [n for n in real if n in defined]
+    if real_defined:
+        return True, "ok (unnamed target: " + real_defined[-1] + ")"
     if real:
-        return True, "ok (unnamed target: " + real[-1] + ")"
+        return False, "target function declared without a body (" + ",".join(real) + ")"
     return False, "no target function declared (no f= besides main/stubs)"
 
 
