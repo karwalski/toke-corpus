@@ -98,7 +98,7 @@ reads `corpus/regen_v04/` requires access to the local data.
 ## Requirements
 
 - Python 3.11+
-- [tkc](https://github.com/karwalski/tkc) 2.8.0 on PATH (the compiler is the root
+- [tkc](https://github.com/karwalski/toke) 2.8.0 on PATH (the compiler is the root
   of trust — records are only banked if tkc accepts them)
 - the `toke` repo checked out beside this one (`~/tk/toke`): `regen/` execs its
   `tkc` (pinned, see `regen/tkc_pin.py`) and imports its
