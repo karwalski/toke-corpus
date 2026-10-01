@@ -177,120 +177,103 @@ class TestCompilerValidator:
 # ======================================================================
 
 class TestDifferentialTester:
-    """Tests for majority-vote logic in differential testing."""
+    """Phase A contract of validate/diff_test.py (as it has been since 32c0eae).
+
+    toke is compile-only (never executed); the three reference languages run,
+    and the task passes when at least ``min_refs`` of them exit cleanly with
+    non-empty stdout. Reference outputs are NOT compared with each other and
+    ``test_inputs`` is not used. The earlier tests here described a 4-language
+    majority vote that this module has never implemented (131.84c).
+    """
 
     @pytest.fixture
     def tester(self) -> DifferentialTester:
         compiler = CompilerValidator(tkc_path="/usr/local/bin/tkc")
+
+        async def no_toke(src: str, stdin: str = "") -> CompileResult:
+            raise AssertionError("Phase A must not execute toke")
+
+        compiler.run_toke = no_toke
         return DifferentialTester(compiler)
 
+    @staticmethod
+    def _refs(tester: DifferentialTester, py: CompileResult, c: CompileResult,
+              java: CompileResult) -> None:
+        async def rp(src: str, stdin: str = "") -> CompileResult:
+            return py
+
+        async def rc(src: str, stdin: str = "") -> CompileResult:
+            return c
+
+        async def rj(src: str, stdin: str = "") -> CompileResult:
+            return java
+
+        tester.compiler.run_python = rp
+        tester.compiler.run_c = rc
+        tester.compiler.run_java = rj
+
     @pytest.mark.asyncio
-    async def test_all_agree(self, tester: DifferentialTester) -> None:
-        """When all 4 languages produce the same output, test passes."""
-        async def mock_run(src: str, stdin: str = "") -> CompileResult:
-            return _make_compile_result(stdout="42\n", success=True)
-
-        tester.compiler.run_toke = mock_run
-        tester.compiler.run_python = mock_run
-        tester.compiler.run_c = mock_run
-        tester.compiler.run_java = mock_run
-
+    async def test_all_refs_produce_output(self, tester: DifferentialTester) -> None:
+        ok = _make_compile_result(stdout="42\n", success=True)
+        self._refs(tester, ok, ok, ok)
         result = await tester.test("tk", "py", "c", "java", [{"stdin": ""}])
         assert result.passed is True
         assert result.toke_agrees is True
-        assert len(result.languages_agreed) == 4
-
-    @pytest.mark.asyncio
-    async def test_toke_disagrees(self, tester: DifferentialTester) -> None:
-        """When toke produces different output, test fails."""
-        async def run_toke(src: str, stdin: str = "") -> CompileResult:
-            return _make_compile_result(language="toke", stdout="99\n", success=True)
-
-        async def run_other(src: str, stdin: str = "") -> CompileResult:
-            return _make_compile_result(stdout="42\n", success=True)
-
-        tester.compiler.run_toke = run_toke
-        tester.compiler.run_python = run_other
-        tester.compiler.run_c = run_other
-        tester.compiler.run_java = run_other
-
-        result = await tester.test("tk", "py", "c", "java", [{"stdin": ""}])
-        assert result.passed is False
-        assert result.toke_agrees is False
+        assert result.languages_agreed == ["c", "java", "python"]
         assert result.majority_output == "42"
+        assert result.outputs["toke"] == "(compile-only)"
 
     @pytest.mark.asyncio
-    async def test_all_disagree(self, tester: DifferentialTester) -> None:
-        """When no majority exists, task is discarded as ambiguous."""
-        outputs = iter(["1\n", "2\n", "3\n", "4\n"])
-
-        async def run_unique(src: str, stdin: str = "") -> CompileResult:
-            return _make_compile_result(stdout=next(outputs), success=True)
-
-        tester.compiler.run_toke = run_unique
-        tester.compiler.run_python = run_unique
-        tester.compiler.run_c = run_unique
-        tester.compiler.run_java = run_unique
-
-        result = await tester.test("tk", "py", "c", "java", [{"stdin": ""}])
-        assert result.passed is False
-        assert result.discarded_reason == "ambiguous"
-
-    @pytest.mark.asyncio
-    async def test_three_agree_toke_included(
-        self, tester: DifferentialTester,
-    ) -> None:
-        """When 3 of 4 agree and toke is in the majority, test passes."""
-        async def run_majority(src: str, stdin: str = "") -> CompileResult:
-            return _make_compile_result(stdout="42\n", success=True)
-
-        async def run_outlier(src: str, stdin: str = "") -> CompileResult:
-            return _make_compile_result(stdout="99\n", success=True)
-
-        tester.compiler.run_toke = run_majority
-        tester.compiler.run_python = run_majority
-        tester.compiler.run_c = run_majority
-        tester.compiler.run_java = run_outlier
-
+    async def test_two_of_three_is_enough(self, tester: DifferentialTester) -> None:
+        ok = _make_compile_result(stdout="42\n", success=True)
+        bad = _make_compile_result(success=False, exit_code=1)
+        self._refs(tester, ok, ok, bad)
         result = await tester.test("tk", "py", "c", "java", [{"stdin": ""}])
         assert result.passed is True
-        assert result.toke_agrees is True
+        assert result.languages_agreed == ["c", "python"]
+        assert result.outputs["java"] == ""
 
     @pytest.mark.asyncio
-    async def test_no_test_inputs(self, tester: DifferentialTester) -> None:
-        """Empty test inputs should fail with reason."""
-        result = await tester.test("tk", "py", "c", "java", [])
-        assert result.passed is False
-        assert result.discarded_reason == "no test inputs provided"
-
-    @pytest.mark.asyncio
-    async def test_multiple_inputs_all_must_pass(
-        self, tester: DifferentialTester,
-    ) -> None:
-        """Toke must agree on ALL test inputs, not just some."""
-        call_count = 0
-
-        async def run_toke(src: str, stdin: str = "") -> CompileResult:
-            nonlocal call_count
-            call_count += 1
-            # Agree on first input, disagree on second.
-            out = "42\n" if call_count <= 1 else "99\n"
-            return _make_compile_result(language="toke", stdout=out, success=True)
-
-        async def run_other(src: str, stdin: str = "") -> CompileResult:
-            return _make_compile_result(stdout="42\n", success=True)
-
-        tester.compiler.run_toke = run_toke
-        tester.compiler.run_python = run_other
-        tester.compiler.run_c = run_other
-        tester.compiler.run_java = run_other
-
-        result = await tester.test(
-            "tk", "py", "c", "java",
-            [{"stdin": "a"}, {"stdin": "b"}],
-        )
+    async def test_one_of_three_is_insufficient(self, tester: DifferentialTester) -> None:
+        ok = _make_compile_result(stdout="42\n", success=True)
+        bad = _make_compile_result(success=False, exit_code=1)
+        empty = _make_compile_result(stdout="  \n", success=True)
+        self._refs(tester, ok, bad, empty)
+        result = await tester.test("tk", "py", "c", "java", [{"stdin": ""}])
         assert result.passed is False
         assert result.toke_agrees is False
+        assert result.languages_agreed == ["python"]
+        assert result.discarded_reason == "insufficient reference implementations"
+
+    @pytest.mark.asyncio
+    async def test_min_refs_three(self, tester: DifferentialTester) -> None:
+        ok = _make_compile_result(stdout="42\n", success=True)
+        bad = _make_compile_result(success=False, exit_code=1)
+        self._refs(tester, ok, ok, bad)
+        result = await tester.test("tk", "py", "c", "java", [], min_refs=3)
+        assert result.passed is False
+
+    @pytest.mark.asyncio
+    async def test_reference_outputs_are_not_compared(
+        self, tester: DifferentialTester,
+    ) -> None:
+        """Pins a known Phase A limitation (reported under 131.84): three
+        disagreeing reference outputs still pass, and the first one wins."""
+        self._refs(tester,
+                   _make_compile_result(stdout="1\n", success=True),
+                   _make_compile_result(stdout="2\n", success=True),
+                   _make_compile_result(stdout="3\n", success=True))
+        result = await tester.test("tk", "py", "c", "java", [{"stdin": "a"}, {"stdin": "b"}])
+        assert result.passed is True
+        assert result.majority_output == "1"
+
+    @pytest.mark.asyncio
+    async def test_test_inputs_are_not_used(self, tester: DifferentialTester) -> None:
+        ok = _make_compile_result(stdout="42\n", success=True)
+        self._refs(tester, ok, ok, ok)
+        empty = await tester.test("tk", "py", "c", "java", [])
+        many = await tester.test("tk", "py", "c", "java", [{"stdin": "a"}, {"stdin": "b"}])
+        assert empty == many
 
 
 # ======================================================================
