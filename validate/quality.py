@@ -21,6 +21,7 @@ _SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.append(_SCRIPTS)
 from id_disjoint import FAIL, VACUOUS, HoldoutGuard  # noqa: E402  (131.85)
+from program_shape import INTERFACE_TASK_TYPES, bodyless_reason  # noqa: E402  (128.28)
 
 logger = logging.getLogger(__name__)
 
@@ -95,10 +96,26 @@ class QualityScorer:
         python_src: str,
         compile_result: CompileResult,
         diff_result: DiffResult,
+        task_type: str | None = None,
     ) -> QualityScore:
-        """Compute quality score and acceptance decision."""
+        """Compute quality score and acceptance decision.
+
+        ``task_type`` exempts interface (.tki) tasks from the function-body
+        gate; every other record must define at least one function.
+        """
         reasons: list[str] = []
         partial_scores: dict[str, float] = {}
+
+        # ---- Required: the source defines a function (128.28) --------
+        # `tkc --check` accepts a declaration-only module (a body-less `f=`
+        # is an extern), and the differential test never runs toke, so
+        # without this gate a module + type + signature with no body was
+        # accepted as a program (7 A-ERR records reached training data).
+        shape_reason = None
+        if (task_type or "").lower() not in INTERFACE_TASK_TYPES:
+            shape_reason = bodyless_reason(toke_src)
+        if shape_reason:
+            reasons.append(f"not a program: {shape_reason}")
 
         # ---- Required: compiler clean --------------------------------
         compiler_clean = compile_result.success
@@ -165,6 +182,7 @@ class QualityScorer:
             and compiler_clean
             and diff_passed
             and not holdout_rejected
+            and shape_reason is None
         )
 
         return QualityScore(

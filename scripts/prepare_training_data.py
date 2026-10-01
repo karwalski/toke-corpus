@@ -26,6 +26,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from export_guards import ExportGuardError, assert_no_claim_annotations  # 131.63
+from program_shape import check_record  # 128.28
 
 
 # ---------------------------------------------------------------------------
@@ -693,6 +694,12 @@ def main() -> None:
             # Story 10.9.4: hard surface guard — uppercase / == / != / []
             if not tk_source_surface_ok(tk_source):
                 skipped["surface_nonconformant"] += 1
+                continue
+
+            # 128.28: a declaration-only source (no function body) is not a
+            # program; `tkc --check` passes it, so the compile gate cannot.
+            if check_record(entry, tk_source):
+                skipped["no_function_body"] += 1
                 continue
 
             total_loaded += 1
