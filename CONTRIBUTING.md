@@ -13,10 +13,9 @@
 
 ## Testing
 
-Use the repo virtualenv and run both invocations; setup and the reason for
-two runs are in the README, "Running the tests".
+Use the repo virtualenv (setup is in the README, "Running the tests"). One
+invocation runs every suite, regen/ included:
 
-    .venv/bin/python -m pytest -q --ignore=regen
-    .venv/bin/python -m pytest -q regen/tests
+    .venv/bin/python -m pytest -q
 
 All tests must pass before any PR is merged.
