@@ -241,8 +241,9 @@ make build-all
 # Corpus pipeline: unit tests
 cd corpus && python -m pytest tests/
 
-# Corpus pipeline: schema validation
-python corpus/pipeline/validate_schema.py --check-all
+# Corpus pipeline: schema validation. store/writer.py (CorpusWriter) validates
+# every entry it writes against corpus/schema.json; its tests pin that check.
+python -m pytest store/tests/test_store.py
 
 # Tokenizer: evaluation against cl100k_base
 python tokenizer/eval.py --compare cl100k_base
