@@ -66,7 +66,6 @@ rsync -avz --delete \
     --include='validate/***' \
     --include='prompts/***' \
     --include='pipeline/***' \
-    --include='diff_test/***' \
     --include='judge/***' \
     --include='monitor/***' \
     --include='corpus/schema.json' \
@@ -114,7 +113,7 @@ echo "  Working dir     : ${WORK_DIR}"
 echo ""
 echo "  Synced directories:"
 echo "    generator/    dispatch/    trial/       validate/"
-echo "    prompts/      pipeline/    diff_test/   judge/"
+echo "    prompts/      pipeline/    judge/"
 echo "    monitor/      corpus/schema.json        pyproject.toml"
 echo ""
 echo "  Next steps:"

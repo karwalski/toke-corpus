@@ -28,7 +28,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["generator*", "dispatch*", "trial*", "validate*", "correct*", "store*", "pipeline*", "diff_test*", "judge*", "monitor*"]
+include = ["generator*", "dispatch*", "trial*", "validate*", "correct*", "store*", "pipeline*", "judge*", "monitor*"]
 
 [tool.ruff]
 line-length = 100

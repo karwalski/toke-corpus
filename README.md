@@ -74,7 +74,7 @@ the deploy scripts); they are **not** part of the current pipeline.
 | `registry/` | Source registry, corpus tagging, train/holdout split protocol, firewall |
 | `transpile/` / `transform/` | C/Python → toke transpilers; syntax normalisation |
 | `mutate/` / `fuzz/` | Error injection and grammar fuzzing for negative examples |
-| `correct/` / `diff_test/` | Repair loop and differential-testing harness (phase era) |
+| `correct/` | Repair loop (phase era); the differential test is `validate/diff_test.py` |
 | `compose/` / `curriculum/` | Task composition and phase preparation (phase era) |
 | `dispatch/` / `store/` / `trial/` | LLM API dispatch, checkpoint/metrics store, trial runner (phase era) |
 | `scripts/` | One-off audit/repair/canonicalisation scripts |
