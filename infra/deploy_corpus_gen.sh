@@ -98,7 +98,6 @@ rsync -avz --delete \
     --include='correct/***' \
     --include='prompts/***' \
     --include='pipeline/***' \
-    --include='diff_test/***' \
     --include='judge/***' \
     --include='monitor/***' \
     --include='store/***' \
