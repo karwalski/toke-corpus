@@ -66,7 +66,6 @@ Pipeline scripts for corpus generation, validation, transformation, and training
 | `translation_finetune.py` / `eval_translation.py` | Translation fine-tuning data prep |
 | `ifd_selection.py` | IFD-based data selection |
 | `dynamic_packing.py` | Dynamic packing for context window utilization |
-| `tarot_curriculum.py` | TAROT-style test-driven curriculum |
 | `evol_instruct.py` | Evol-Instruct complexity escalation |
 | `reverse_oss_instruct.py` | Reverse OSS-Instruct (corpus→problem descriptions) |
 | `execution_feedback.py` | Execution feedback annotation |
