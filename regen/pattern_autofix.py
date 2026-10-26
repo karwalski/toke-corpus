@@ -86,16 +86,13 @@ def sha256_file(path):
 def tool_shas():
     """(tkc_sha, catalogue_sha, toke_git, tkc_bin_sha): tkc_sha = short sha256
     of the tkc binary (the rescore_131 / pattern_common.tkc_stamp convention —
-    the provenance block's "tkc build sha used to verify"); toke_git = toke
-    HEAD; tkc_bin_sha (131.39) = the full sha256 of the binary actually
+    the provenance block's "tkc build sha used to verify"); toke_git = the
+    commit the binary reports (`--version --json` git_sha, 131.90 — not the
+    toke checkout's HEAD); tkc_bin_sha (131.39) = the full sha256 of the binary actually
     exec'd (the pinned copy once main() pinned)."""
     tkc_bin_sha = tkc_pin.bin_sha(TKC)
     tkc_sha = tkc_bin_sha[:12] if tkc_bin_sha else None
-    try:
-        toke_git = subprocess.run(["git", "-C", TOKE_REPO, "rev-parse", "--short", "HEAD"],
-                                  capture_output=True, text=True, timeout=10).stdout.strip() or None
-    except Exception:
-        toke_git = None
+    toke_git = tkc_pin.build_info(TKC)[0]
     cat_sha = sha256_file(CATALOGUE)[:12] if os.path.exists(CATALOGUE) else None
     return tkc_sha or "unknown", cat_sha or "none", toke_git, tkc_bin_sha
 
@@ -672,7 +669,9 @@ def main(argv=None):
     a_dir = os.path.join(corpus, "audit", "a_tests")
     # 131.39: pin the compiler before tool_shas() and before the pool; every
     # result and the summary carry its sha256 (`tkc_bin_sha`)
-    pinned = tkc_pin.pin().install(sys.modules[__name__], dc, regen_validate, metrics, idiom_judge, run_shard, audit)
+    # 131.90: a banked run refuses a binary that is dirty or cannot name its commit
+    pinned = tkc_pin.pin(require_clean=args.bank).install(
+        sys.modules[__name__], dc, regen_validate, metrics, idiom_judge, run_shard, audit)
     shas = tool_shas()
     assert shas[3] == pinned.sha256
     jobs, results, skipped, unknown = [], [], 0, []

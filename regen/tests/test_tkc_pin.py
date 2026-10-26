@@ -12,7 +12,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 import tkc_pin  # noqa: E402
 
-TWIN = Path(os.path.expanduser("~/tk/toke/scripts/patterns/tkc_pin.py"))
+# TKC_PIN_TWIN lets a branch be checked against an unmerged toke-side twin.
+TWIN = Path(os.environ.get("TKC_PIN_TWIN")
+            or os.path.expanduser("~/tk/toke/scripts/patterns/tkc_pin.py"))
 
 
 def _fake(dirp: Path, name: str, text: str) -> Path:
@@ -109,9 +111,82 @@ def test_stamp_keys(fake_repo):
     with tkc_pin.pin(toke_repo=repo, tkc=link) as p:
         s = p.stamp()
         assert set(s) == {"tkc_bin_sha", "tkc_version", "tkc_path", "tkc_resolved",
-                          "tkc_pinned_copy", "toke_head", "toke_src_dirty"}
+                          "tkc_pinned_copy", "toke_head", "toke_src_dirty",
+                          "tkc_git_sha", "tkc_git_dirty"}
         assert s["tkc_bin_sha"] == p.sha256 and s["tkc_path"] == str(link)
         assert s["toke_src_dirty"] is False
+
+
+def _fake_json(dirp: Path, name: str, payload: str) -> Path:
+    """A fake tkc answering `--version --json` with `payload` (131.90)."""
+    p = dirp / name
+    p.write_text("#!/bin/sh\n"
+                 f"if [ \"$1\" = --version ] && [ \"$2\" = --json ]; then echo '{payload}'; exit 0; fi\n"
+                 "if [ \"$1\" = --version ]; then echo 'fake json'; exit 0; fi\n")
+    p.chmod(p.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    return p
+
+
+@pytest.fixture
+def no_env(monkeypatch):
+    monkeypatch.delenv(tkc_pin.ENV_PIN, raising=False)
+    monkeypatch.delenv("TKC", raising=False)
+
+
+CLEAN = '{"name":"toke","version":"3.1.0","git_sha":"8bb9f63e6e64","git_dirty":false}'
+DIRTY = '{"name":"toke","version":"3.1.0","git_sha":"8bb9f63e6e64","git_dirty":true}'
+
+
+def test_build_info_reads_version_json(tmp_path, no_env):
+    clean = _fake_json(tmp_path, "clean", CLEAN)
+    assert tkc_pin.build_info(clean) == ("8bb9f63e6e64", False)
+    with tkc_pin.pin(toke_repo=tmp_path, tkc=clean) as p:
+        assert p.tkc_git_sha == "8bb9f63e6e64" and p.tkc_git_dirty is False
+        assert p.stamp()["tkc_git_sha"] == "8bb9f63e6e64"
+        assert p.require_clean() is p
+
+
+def test_build_info_unknown_for_old_binary(fake_repo):
+    # negative control: a binary without --version --json reports nothing
+    repo, link, _ = fake_repo
+    assert tkc_pin.build_info(link) == (None, None)
+    assert tkc_pin.build_info(repo / "missing") == (None, None)
+
+
+def test_require_clean_refuses_dirty_and_cleans_up(tmp_path, no_env, monkeypatch):
+    dirty = _fake_json(tmp_path, "dirty", DIRTY)
+    made = []
+    real = tkc_pin.tempfile.mkdtemp
+    monkeypatch.setattr(tkc_pin.tempfile, "mkdtemp", lambda **k: made.append(real(**k)) or made[-1])
+    with pytest.raises(tkc_pin.DirtyPinError, match="dirty"):
+        tkc_pin.pin(toke_repo=tmp_path, tkc=dirty, require_clean=True)
+    assert made and not os.path.exists(made[0])
+    # without require_clean the dirty pin is allowed (dry runs) and says so
+    with tkc_pin.pin(toke_repo=tmp_path, tkc=dirty) as p:
+        assert p.tkc_git_dirty is True
+        with pytest.raises(tkc_pin.DirtyPinError):
+            p.require_clean()
+
+
+def test_require_clean_refuses_unknown(fake_repo):
+    repo, link, _ = fake_repo
+    with pytest.raises(tkc_pin.DirtyPinError, match="does not report"):
+        tkc_pin.pin(toke_repo=repo, tkc=link, require_clean=True)
+
+
+def test_require_clean_on_env_reuse(tmp_path, no_env, monkeypatch):
+    dirty = _fake_json(tmp_path, "dirty", DIRTY)
+    monkeypatch.setenv(tkc_pin.ENV_PIN, str(dirty))
+    with pytest.raises(tkc_pin.DirtyPinError):
+        tkc_pin.pin(toke_repo=tmp_path, tkc=dirty, require_clean=True)
+
+
+def test_cli_require_clean(tmp_path, no_env):
+    dirty = _fake_json(tmp_path, "dirty", DIRTY)
+    r = subprocess.run([sys.executable, os.path.join(os.path.dirname(HERE), "tkc_pin.py"),
+                        "--tkc", str(dirty), "--toke-repo", str(tmp_path), "--require-clean"],
+                       capture_output=True, text=True)
+    assert r.returncode == 3 and "dirty" in r.stderr
 
 
 def test_missing_binary_raises(tmp_path, monkeypatch):
@@ -146,5 +221,6 @@ def test_real_tkc_pins(monkeypatch):
     with tkc_pin.pin() as p:
         assert p.version and p.version.startswith("toke")
         assert len(p.sha256) == 64 and p.toke_head
+        assert p.tkc_git_sha and p.tkc_git_dirty in (True, False)   # 131.90
         r = subprocess.run([p.argv0, "--version"], capture_output=True, text=True)
         assert r.returncode == 0

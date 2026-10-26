@@ -462,7 +462,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
     if args.bank and args.baseline:
         ap.error("--baseline is a dry run; it cannot bank")
-    with lc.pin_tkc(sys.modules[__name__]) as pinned:
+    # 131.90: --bank refuses a binary that is dirty or cannot name its commit
+    with lc.pin_tkc(sys.modules[__name__], require_clean=args.bank) as pinned:
         paths = lc.LibraryPaths(corpus=args.corpus, lib_root=args.lib_root,
                                 workdir=args.workdir, ledger=args.ledger,
                                 shard=args.shard, sweep=args.sweep,

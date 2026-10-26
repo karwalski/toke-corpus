@@ -421,7 +421,9 @@ def main():
     global PIN
     if args.cmd != "stats":
         # 131.39: one private copy for the whole run; stats never execs tkc
-        PIN = tkc_pin.pin().install(sys.modules[__name__], regen_validate, metrics, idiom_judge)
+        # 131.90: `validate` writes banked records, so it refuses a dirty pin
+        PIN = tkc_pin.pin(require_clean=args.cmd == "validate").install(
+            sys.modules[__name__], regen_validate, metrics, idiom_judge)
     try:
         {"prepare": cmd_prepare, "validate": cmd_validate, "stats": cmd_stats}[args.cmd](args)
     finally:
