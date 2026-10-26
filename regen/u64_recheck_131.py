@@ -16,7 +16,7 @@ NO tests because the 129.7 a_tests carry the sampler-mangled spelling:
                    matches the spec type (list for @T, int for integers)
 BEFORE = driver.lit as of 6bb2554 (bare ints); AFTER = current driver.lit.
 """
-import json, multiprocessing, os, re, sys, time
+import argparse, json, multiprocessing, os, re, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -253,5 +253,15 @@ def main(workers=8):
                                                 "newly_failing_task_ids")}, indent=1))
 
 
+def parse_args(argv=None):
+    ap = argparse.ArgumentParser(
+        description="131.40: re-execute every single_function record with an "
+                    "unsigned signature before and after the driver.lit fix. "
+                    "Reads only; banks nothing.")
+    ap.add_argument("workers", nargs="?", type=int, default=8,
+                    help="worker processes (default 8)")
+    return ap.parse_args(argv)
+
+
 if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 8)
+    main(parse_args().workers)
