@@ -108,8 +108,8 @@ class QualityScorer:
 
         # ---- Required: the source defines a function (128.28) --------
         # `tkc --check` accepts a declaration-only module (a body-less `f=`
-        # is an extern), and the differential test never runs toke, so
-        # without this gate a module + type + signature with no body was
+        # is an extern), and the differential test did not run toke before
+        # 131.87, so without this gate a module + type + signature with no body was
         # accepted as a program (7 A-ERR records reached training data).
         shape_reason = None
         if (task_type or "").lower() not in INTERFACE_TASK_TYPES:

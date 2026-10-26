@@ -46,12 +46,16 @@ class CompilerValidator:
         python_path: str = "python3",
         javac_path: str = "javac",
         timeout_s: int = DEFAULT_TIMEOUT_S,
+        toke_build_flags: list[str] | None = None,
     ) -> None:
         self.tkc_path = tkc_path
         self.gcc_path = gcc_path
         self.python_path = python_path
         self.javac_path = javac_path
         self.timeout_s = timeout_s
+        # extra tkc flags for run_toke builds (e.g. ["--allow-all"] for
+        # programs that need capabilities); none by default
+        self.toke_build_flags = list(toke_build_flags or [])
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -229,9 +233,11 @@ class CompilerValidator:
             src_path = self._write_temp(tmpdir, "program.tk", source)
             out_path = os.path.join(tmpdir, "program")
 
-            # Compile to binary.
+            # Compile to binary. 131.87: the documented `--out <path>` form (the
+            # old `--out binary ... -o <path>` worked only because the later
+            # `-o` overrode an output path literally named "binary").
             exit_code, stdout, stderr, ms_compile = await self._run(
-                [self.tkc_path, "--out", "binary", src_path, "-o", out_path],
+                [self.tkc_path, src_path, "--out", out_path, *self.toke_build_flags],
             )
             if exit_code != 0:
                 return CompileResult(
