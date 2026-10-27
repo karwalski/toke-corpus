@@ -2,7 +2,7 @@
 
 Epic 131.10: the judge and the linter are one implementation. `tkc --lint
 --diag-json` (already run by `metrics.lint()`) emits the six 131.9 pattern
-rules (`docs/lint-rules-v1.md`, "Pattern rules"); this module maps those rule
+rules (`docs/compiler/lint-rules-v1.md`, "Pattern rules"); this module maps those rule
 ids to the penalties/weights the 129-era regex judge used and keeps a regex
 only for `hand-rolled-parser`, which needs stdlib knowledge the linter lacks.
 

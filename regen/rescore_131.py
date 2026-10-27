@@ -344,7 +344,7 @@ def write_md(summary, budget, rows):
     L.append("**Why this exists.** Before 131.9 `tkc --lint --diag-json` emitted no JSON, so "
              "`metrics.lint()` returned `[]` on every record and the 129.6 \"lint 0 warnings\" gate was "
              "vacuous; the only idiom signal on the frozen corpus was a regex approximation. This sweep "
-             "scores every frozen record with the real pattern rules (`docs/lint-rules-v1.md`, Pattern "
+             "scores every frozen record with the real pattern rules (`docs/compiler/lint-rules-v1.md`, Pattern "
              "rules) and reports what the new hard gate (`run_shard.py validate`: any pattern-rule "
              "error/warning fails, hints pass, spec style mandates exempt) would reject. It is the "
              "input to 131.13's bucketing; no record was modified.\n")

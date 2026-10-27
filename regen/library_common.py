@@ -70,7 +70,7 @@ TOKE_ROOT = os.environ.get("TOKE_ROOT", os.path.expanduser("~/tk/toke"))
 LIB_ROOT = os.environ.get("TOKE_TEST_PROGRAMS",
                           os.path.expanduser("~/tk/toke-test-programs"))
 CATALOGUE_PATH = os.path.join(TOKE_ROOT, "patterns", "catalogue.json")
-LINT_RULES_DOC = os.path.join(TOKE_ROOT, "docs", "lint-rules-v1.md")
+LINT_RULES_DOC = os.path.join(TOKE_ROOT, "docs", "compiler", "lint-rules-v1.md")
 CARD_PATH = os.path.join(HERE, "syntax_card.md")
 SHARD_PATH = os.path.join(CORPUS, "shards", "library_131.jsonl")
 SWEEP_PATH = os.path.join(CORPUS, "audit", "pattern_sweep.jsonl")

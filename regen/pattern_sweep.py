@@ -72,7 +72,7 @@ BUCKETS = ("EXEMPT", "AUTO", "AGENT", "LEAVE", "REGEN")
 PATTERN_RULES = list(idiom_judge.PATTERN_RULES)
 HAND_PARSER = "hand-rolled-parser"          # judge regex rule (no tkc rule)
 RULES = PATTERN_RULES + [HAND_PARSER]
-# rules whose tkc `fix` is deterministic (docs/lint-rules-v1.md); the
+# rules whose tkc `fix` is deterministic (docs/compiler/lint-rules-v1.md); the
 # string-concat-chain fix is dormant (127.7/127.10) and joins only when armed
 DETERMINISTIC_RULES = {"single-use-let", "discarded-value-result"}
 CONCAT_RULE = "string-concat-chain"
@@ -249,7 +249,7 @@ _VEC_IMPORT = re.compile(r"(?:^|;)\s*i=(\w+):std\.(?:vec|set)\s*(?:;|$)", re.M)
 def vec_handle_receiver(diag, src):
     """True when a discarded-value-result hit's receiver is a std.vec / std.set
     handle (`let x=v.new()` with `i=v:std.vec`) called method-style: those are
-    reference collections that mutate in place (docs/lint-rules-v1.md excludes
+    reference collections that mutate in place (docs/compiler/lint-rules-v1.md excludes
     only the alias form `v.push(x;1)`), so the hit is a suspected linter FP —
     found by this sweep on L-SCI-122 / L-MED-128 (tests pass 2/2)."""
     m = _DVR_RECV.search(diag.get("message") or "")
