@@ -78,7 +78,7 @@ CORPUS = os.environ.get("TOKE_CORPUS_DIR",
                         os.path.expanduser("~/tk/toke-corpus/corpus/regen_v04"))
 TOKE_ROOT = os.environ.get("TOKE_ROOT", os.path.expanduser("~/tk/toke"))
 CATALOGUE_PATH = os.path.join(TOKE_ROOT, "patterns", "catalogue.json")
-LINT_RULES_DOC = os.path.join(TOKE_ROOT, "docs", "lint-rules-v1.md")
+LINT_RULES_DOC = os.path.join(TOKE_ROOT, "docs", "compiler", "lint-rules-v1.md")
 CARD_PATH = os.path.join(HERE, "syntax_card.md")
 WAVE = "agent"
 STORY = "131.15"
