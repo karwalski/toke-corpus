@@ -31,6 +31,14 @@ mode is reported as `mode` ("identity" | "repair") with the `baseline` verdict
 that chose it, so a caller can record "behaviour preserved" separately from
 "behaviour repaired". Default off: every other caller keeps byte-identity.
 
+131.60: a `migrate_fix` record has no spec test cases and usually no main(),
+so it used to be `unverifiable: no main()`. diff_check() now drives one that
+has an a_tests lock (migrate_lock.lock_spec: the phase-2 task id inside its
+MIG id names an A-side base whose a_tests signature the migrated function
+matches) exactly like a single_function record — lock cases, generated
+inputs, python_ref — and reports the lock as `migrate_lock`. Callers that
+prepare programs themselves (pattern_autofix) call migrate_lock.drive_spec.
+
 Verdict: `identical` | `diverged` (first differing input + both outputs) |
 `unverifiable` (reason). Every binary and temp file is removed on exit; each
 run has a timeout. Wall time + peak RSS of every run come from os.wait4
@@ -46,6 +54,7 @@ import tempfile, threading, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import driver as drv                                    # noqa: E402
+import migrate_lock as mlock                            # noqa: E402  (131.60)
 import regen_validate                                         # noqa: E402  (131.39: rebind its TKC)
 import tkc_pin                                          # noqa: E402  (131.39)
 from regen_validate import materialise_fixtures               # noqa: E402
@@ -399,9 +408,13 @@ def ensure_imports(src):
                if decl not in src and re.search(rf"(?<![\w.]){alias}\.\w", src)]
     if not missing:
         return src
-    lines = src.split("\n", 1)
-    if lines[0].startswith("m=") and len(lines) == 2:
-        return lines[0] + "\n" + "\n".join(missing) + "\n" + lines[1]
+    # 131.101: split after the `m=…;` declaration itself, not after the first
+    # line — a record written on ONE line (`m=x;f=…`) otherwise got its
+    # imports in front of `m=` and every driver build failed E2001
+    m = re.match(r"\s*m=[^;]*;[ \t]*\n?", src)
+    if m:
+        head = src[:m.end()].rstrip("\n")
+        return head + "\n" + "\n".join(missing) + "\n" + src[m.end():]
     return "\n".join(missing) + "\n" + src
 
 
@@ -812,6 +825,7 @@ def diff_check(orig_src, cand_src, spec, task_id, workdir=None, a_test=None,
     base = workdir or tempfile.gettempdir()
     os.makedirs(base, exist_ok=True)
     td = tempfile.mkdtemp(prefix="dc_", dir=base)
+    spec, a_test, lock = mlock.drive_spec(spec, orig_src, a_test)     # 131.60
     gen_inputs, gen_why = (None, None)
     if spec.get("task_type") == "single_function":
         gen_inputs, gen_why = generate_inputs(spec, task_id, n_generated)
@@ -823,6 +837,8 @@ def diff_check(orig_src, cand_src, spec, task_id, workdir=None, a_test=None,
                       baseline_aware=baseline_aware)
         if gen_why:
             res["checks"]["generated"] = {"n": 0, "identical": None, "skipped": gen_why}
+        if lock is not None:
+            res["migrate_lock"] = lock
         return res
     finally:
         for p in (porig, pcand):

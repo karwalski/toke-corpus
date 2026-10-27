@@ -1,0 +1,88 @@
+{
+ "story": "131.71",
+ "date": "2026-10-27",
+ "tkc": {
+  "tkc_bin_sha": "5774da8cf5b3314c27aed77db83cd3dfd2a8522dfbad6703e1d6ecacdcad41f4",
+  "tkc_version": "toke 3.1.0 (git 8bb9f63e6e64)",
+  "tkc_path": "/Users/matthew.watt/tk/tmpwork/z73/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/tmpwork/z73/tkc",
+  "tkc_pinned_copy": "/var/folders/gf/4ylkzm4d3bg50537kywj3pph0000gp/T/tkc_pin_pfly600c/tkc",
+  "toke_head": "8bb9f63e6e64ca421943637b4f60e0f8fdb847b5",
+  "toke_src_dirty": false
+ },
+ "scope": "banked single_function records with a map-typed input (driver.map_types)",
+ "records": 29,
+ "same_as_131_67_driver_fail": true,
+ "only_in_131_67": [],
+ "only_in_scope": [],
+ "driver_built": 29,
+ "verdicts": {
+  "pass": 27,
+  "fail": 2
+ },
+ "pass_with_err_case": 26,
+ "pass_task_ids": [
+  "A-ERR-0022v12",
+  "A-ERR-0022v15",
+  "A-ERR-0022v24",
+  "A-ERR-0022v32",
+  "A-ERR-0022v39",
+  "A-ERR-0022v50",
+  "A-ERR-0022v62",
+  "A-ERR-0022v84",
+  "A-ERR-0023v25",
+  "A-ERR-0023v58",
+  "A-ERR-0023v6",
+  "A-ERR-0023v62",
+  "A-ERR-0023v69",
+  "A-ERR-0023v71",
+  "A-ERR-0023v73",
+  "A-ERR-0023v77",
+  "A-ERR-0023v83",
+  "A-ERR-0023v86",
+  "A-ERR-0030v81",
+  "A-ERR-0081v11",
+  "A-ERR-0081v12",
+  "A-ERR-0081v13",
+  "A-ERR-0081v28",
+  "A-ERR-0081v30",
+  "A-ERR-0081v52",
+  "A-ERR-0081v7",
+  "A-ERR-0081v77"
+ ],
+ "fail": [
+  {
+   "task_id": "A-ERR-0023v27",
+   "got": [
+    "-2",
+    "err:emptycollection",
+    "0",
+    "4",
+    "0"
+   ],
+   "want": [
+    "-2",
+    "err:emptycollection",
+    "err:notfound",
+    "4",
+    "0"
+   ]
+  },
+  {
+   "task_id": "A-ERR-0081v20",
+   "got": [
+    "1",
+    "err:parsefailed",
+    "err:parsefailed",
+    "0"
+   ],
+   "want": [
+    "1",
+    "err:parsefailed",
+    "err:parsefailed",
+    "-5"
+   ]
+  }
+ ],
+ "jsonl": "corpus/regen_v04/audit/map_input_recheck_131.71.jsonl"
+}

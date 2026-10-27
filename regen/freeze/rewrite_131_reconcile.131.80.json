@@ -1,0 +1,64 @@
+{
+ "story": "131.80",
+ "date": "2026-10-27",
+ "ledger": "corpus/regen_v04/ledger/rewrite_131.jsonl",
+ "ledger_rows": 562,
+ "waves": {
+  "auto": {
+   "ledger_rows": 424,
+   "status": {
+    "rewritten": 424
+   },
+   "unique_task_ids": 424,
+   "stories": {
+    "(none)": 424
+   },
+   "first_ts": "2026-09-19T02:31:25Z",
+   "last_ts": "2026-09-19T02:31:29Z"
+  },
+  "struct-layout": {
+   "ledger_rows": 138,
+   "status": {
+    "rewritten": 134,
+    "flagged": 4
+   },
+   "unique_task_ids": 137,
+   "stories": {
+    "131.78": 138
+   },
+   "first_ts": "2026-09-20T01:01:18Z",
+   "last_ts": "2026-09-20T01:02:40Z"
+  }
+ },
+ "freeze_tarball": "regen_v04-freeze129.tar.zst",
+ "archive_checked_against_freeze_bytes": 555,
+ "rewritten_records": 556,
+ "rewritten_records_in_regen_v04": 555,
+ "outside_regen_v04": [
+  {
+   "task_id": "MUT-vari-019701-8770d29d",
+   "waves": [
+    "struct-layout",
+    "struct-layout"
+   ],
+   "archived": true
+  }
+ ],
+ "archived_originals": 556,
+ "rewritten_by_more_than_one_wave": [
+  {
+   "task_id": "D-CRY-0012v285",
+   "waves": [
+    "auto",
+    "struct-layout"
+   ]
+  }
+ ],
+ "provenance_block_wave_counts": {
+  "auto": 423,
+  "struct-layout": 132
+ },
+ "problems": [],
+ "problem_counts": {},
+ "ok": true
+}

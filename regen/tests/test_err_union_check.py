@@ -391,3 +391,58 @@ def test_validate_one_gates_return_type_gate(tmp_path):
     rec, ok, reason, gates = run_shard.validate_one_gates(
         sp, 'm=e;\ni=io:std.io;\nf=main():i64{\n  io.println("x");\n  <0\n};\n', d)
     assert gates["return_type"] is None and rec["regen"]["return_type_ok"] is None
+
+
+# ------------------------------------------------------ 131.68 full_program ---
+# modelled on A-ERR-0007v79: the named target is a correct union, a same-arity
+# `str` helper formats its result for main(). A full_program runs its OWN main,
+# so the helper is not a harness wrapper and the record is correct.
+FP_SPEC = dict(SPEC, task_id="A-ERR-9000v2", task_type="full_program", test_cases=[])
+FP_SRC = (PREFIX + GOOD + "f=showparse(num1:str):str{\n  <mt parseint(num1){$ok:v \"\\(v)\";$err:e \"error\"}\n};\n"
+          "f=main():i64{\n  io.println(showparse(\"12\"));\n  io.println(showparse(\"\"));\n  <0\n};\n")
+
+
+def test_return_type_wrapper_rule_is_single_function_only():
+    ok, detail, _soft, decl = regen_validate.return_type_conforms(FP_SPEC, FP_SRC)
+    assert (ok, detail, decl) == (True, "ok", "i64!$parseerr")
+    ok, _d, _s, _decl = regen_validate.return_type_conforms(SPEC, PREFIX + WRAPPED)
+    assert ok is False                                        # the 429-shape still fails
+    ok, _d, _s, _decl = regen_validate.return_type_conforms(FP_SPEC, PREFIX + GAMED)
+    assert ok is False                                        # a non-union target fails in any task type
+
+
+def test_classify_full_program_helper_is_correct():
+    fns = GOOD_FNS + [("showparse", "str", ["\"error\""])]
+    row = euc.classify(FP_SPEC, FP_SRC, euc.ast_functions(_fake_ast(FP_SRC, fns), FP_SRC))
+    assert row["verdict"] == "correct" and row["hard_fail"] is False and row["gaming_shape"] is None
+    assert row["flags"] == ["str_helper_not_wrapper"] and row["callee_return"] == "str"
+
+
+def test_set_story_keeps_131_42_paths_and_names_new_ones():
+    try:
+        euc.set_story("131.68")
+        assert euc.OUT_JSONL.endswith("err_union_check.131.68.jsonl")
+        assert euc.OUT_SUMMARY.endswith("err_union_check_131.68.json")
+    finally:
+        euc.set_story("131.42")
+    assert euc.OUT_JSONL.endswith("err_union_check.jsonl") and euc.STORY == "131.42"
+
+
+def test_route_patch_rows_agent_with_tests_regen_without(tmp_path, monkeypatch):
+    (tmp_path / "audit").mkdir()
+    (tmp_path / "audit" / "pattern_sweep.jsonl").write_text(
+        json.dumps({"task_id": "A-ERR-1v1", "story": "131.13", "bucket": "REGEN", "violations": []}) + "\n")
+    monkeypatch.setattr(euc, "STORY", "131.68")
+    rows = [{"task_id": "A-ERR-1v1", "category": "A-ERR", "task_type": "full_program", "hard_fail": True,
+             "has_tests": False, "verdict": "wrong_return_type", "gaming_shape": "target_returns_str",
+             "target": "f", "declared_return": "str", "spec_return": "i64!$e"},
+            {"task_id": "A-ERR-2v1", "category": "A-ERR", "task_type": "full_program", "hard_fail": True,
+             "has_tests": True, "verdict": "gamed_err_marker", "gaming_shape": "target_returns_str",
+             "target": "g", "declared_return": "str", "spec_return": "i64!$e"},
+            {"task_id": "A-ERR-3v1", "category": "A-ERR", "task_type": "single_function", "hard_fail": True,
+             "has_tests": True, "verdict": "gamed_err_marker"}]
+    res = euc.route_patch_rows(rows, corpus=str(tmp_path), ts=1)
+    assert res["agent_task_ids"] == ["A-ERR-2v1"] and res["regen_task_ids"] == ["A-ERR-1v1"]
+    out = [json.loads(x) for x in open(tmp_path / "audit" / "pattern_sweep.131.68.patch.jsonl")]
+    assert [r["bucket"] for r in out] == ["REGEN", "AGENT"]
+    assert all(r["violations"][-1]["rule"] == euc.PATCH_RULE for r in out)

@@ -166,12 +166,56 @@ _CAST_FLT = ("f32",)
 _UNSIGNED = ("u64", "u32", "u16", "u8", "byte")
 
 
+def map_types(t):
+    """(key, value) types of a normalised map type (`@str:i64` ->
+    ('str', 'i64'); `@str:@(i64)` -> ('str', '@i64')), or None when t is not a
+    map. An element type that itself starts with `@` is an array of arrays or
+    of maps, never a map key, so `@@str:i64` is NOT a map here."""
+    t = _norm_type(t)
+    if not t.startswith("@") or t[1:].startswith("@"):
+        return None
+    inner, depth = t[1:], 0
+    for i, ch in enumerate(inner):
+        depth += (ch == "(") - (ch == ")")
+        if ch == ":" and depth == 0:
+            return _norm_type(inner[:i]).lstrip("$") or None, _norm_type(inner[i + 1:])
+    return None
+
+
+def type_value(t):
+    """`t` written in VALUE position, for a typed-empty map literal: a scalar is
+    `$t` (`$str`, `$i64`), an array `@($T)`, a map `@($K:$V)` (toke 127.226 /
+    C171: `@($str:$i64)` is the empty map of those types; a bare `i64` there is
+    E4033). Raises ValueError for a type it cannot spell."""
+    t = _norm_type(t)
+    mt = map_types(t)
+    if mt:
+        return f"@({type_value(mt[0])}:{type_value(mt[1])})"
+    if t.startswith("@"):
+        return f"@({type_value(t[1:])})"
+    if not re.fullmatch(r"\$?[a-z][a-z0-9]*", t):
+        raise ValueError(f"cannot spell type {t!r} as a value")
+    return "$" + t.lstrip("$")
+
+
 def lit(v, t):
     """Render a spec test-case input as a toke literal of (v03) type t.
     Non-default numeric scalars are wrapped as `(N as T)` (see _CAST_INT);
     array element types recurse, so `@u64` renders `@((1 as u64);(2 as u64))`
-    and `@@u64` nests. Empty arrays render `@()` for every element type."""
+    and `@@u64` nests. Empty arrays render `@()` for every element type.
+    131.71: a map type `@K:V` (spec `@(str:i64)`) takes a JSON object and
+    renders `@("a":1;"b":2)` in the object's key order; an empty object is the
+    typed-empty map `@($str:$i64)` (`@()` types as `@(?)`, E4031). Keys arrive
+    as JSON strings and are rendered through `lit` against the key type."""
     t = _norm_type(t)
+    mt = map_types(t)
+    if mt:
+        if not isinstance(v, dict):
+            raise ValueError(f"map type {t} but non-object input {v!r}")
+        if not v:
+            return type_value(t)
+        kt, vt = mt
+        return "@(" + ";".join(f"{lit(k, kt)}:{lit(x, vt)}" for k, x in v.items()) + ")"
     if t.startswith("@"):
         if not isinstance(v, list):
             raise ValueError(f"array type {t} but non-list input {v!r}")

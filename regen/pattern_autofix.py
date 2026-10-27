@@ -55,6 +55,7 @@ import driver as drv                                      # noqa: E402
 import idiom_judge                                        # noqa: E402
 import manifest_tool                                      # noqa: E402  (131.35)
 import metrics                                            # noqa: E402
+import migrate_lock as mlock                              # noqa: E402  (131.60)
 from audit import load_specs, _BASE, _compare             # noqa: E402
 from run_shard import validate_one_gates, CARD_SHA        # noqa: E402
 
@@ -390,19 +391,23 @@ def autofix_one(job):
         if orig_min is not None and cand_min is not None and cand_min > orig_min:
             res["decision"], res["reason"] = "reject", f"min_bytes_increased:{orig_min}->{cand_min}"
             return res
-        # 5. programs (built once: driver tests, diff, perf)
+        # 5. programs (built once: driver tests, diff, perf). 131.60: a
+        # migrate_fix record with an a_tests lock is driven against it
+        dspec, a_test, lock = mlock.drive_spec(spec, orig, a_test)
+        if lock is not None:
+            res["migrate_lock"] = lock
         gen_inputs, gen_why = (None, None)
-        if spec.get("task_type") == "single_function":
-            gen_inputs, gen_why = dc.generate_inputs(spec, tid, opts.get("n_generated", dc.N_GENERATED))
-        porig = dc.prepare_program(orig, spec, tid, tmp, "orig", gen_inputs)
-        pcand = dc.prepare_program(cand, spec, tid, tmp, "cand", gen_inputs)
-        if spec.get("task_type") == "single_function" and spec.get("test_cases"):
-            t_ok, t_why = driver_tests(pcand, spec, tmp)
+        if dspec.get("task_type") == "single_function":
+            gen_inputs, gen_why = dc.generate_inputs(dspec, tid, opts.get("n_generated", dc.N_GENERATED))
+        porig = dc.prepare_program(orig, dspec, tid, tmp, "orig", gen_inputs)
+        pcand = dc.prepare_program(cand, dspec, tid, tmp, "cand", gen_inputs)
+        if dspec.get("task_type") == "single_function" and dspec.get("test_cases"):
+            t_ok, t_why = driver_tests(pcand, dspec, tmp)
             res["tests"] = {"via": "driver", "ok": t_ok, "reason": t_why,
-                            "from": spec.get("_tests_from", "spec")}
+                            "from": dspec.get("_tests_from", "spec")}
             res["gates"]["tests"] = t_ok
             if t_ok is False:
-                o_ok, o_why = driver_tests(porig, spec, tmp)
+                o_ok, o_why = driver_tests(porig, dspec, tmp)
                 if o_ok is False and o_why == t_why:
                     res["decision"], res["reason"] = "reject", "preexisting:tests:" + str(t_why)
                 else:
@@ -412,7 +417,7 @@ def autofix_one(job):
             res["tests"] = {"via": "main" if spec.get("task_type") != "stdin_program" else "stdin",
                             "ok": gates["tests"], "reason": None, "from": "spec"}
         # 6. differential
-        diff = dc.compare(porig, pcand, spec, tid, tmp, gen_inputs, a_test)
+        diff = dc.compare(porig, pcand, dspec, tid, tmp, gen_inputs, a_test)
         if gen_why:
             diff["checks"]["generated"] = {"n": 0, "identical": None, "skipped": gen_why}
         diff.pop("timings", None)

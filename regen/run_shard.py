@@ -153,7 +153,8 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
     lint — each True/False/None (None = not applicable). `return_type`
     (131.42): an error-union spec return (`T!Err`) must be DECLARED as an
     error union — hard fail; any other spec/declared return difference is
-    the soft flag `regen.return_type_mismatch` (131.43 decides);
+    the soft flag `regen.return_type_mismatch` (131.99 decides). `signature`
+    (131.43): arity AND parameter types (regen_validate.signature_conforms);
     `return_type_gate=False` skips it (A/B proof: regen/err_union_check.py).
     `pattern` (131.10) is a hard gate
     on every path: any 131.9 pattern-rule error/warning rejects (hints pass),
@@ -293,7 +294,7 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
                 "difficulty": spec.get("difficulty"),
                 "signature_ok": sig_ok,
                 # 131.42: return-type gate (hard only for the error-union case) +
-                # soft mismatch flag; 131.43 decides the type-aware signature gate
+                # soft mismatch flag (131.99); 131.43 made `signature` type-aware
                 "return_type_ok": (None if rt_declared is None else rt_ok) if return_type_gate else None,
                 "declared_return_type": rt_declared,
                 "return_type_mismatch": rt_soft,

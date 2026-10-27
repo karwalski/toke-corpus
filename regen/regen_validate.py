@@ -87,21 +87,99 @@ def has_target_function(src, spec):
     return False, "no target function declared (no f= besides main/stubs)"
 
 
+# ----------------------------------------- 131.43: type-aware signature gate ---
+# The gate used to compare parameter COUNTS only, so 209 single_function
+# records were banked declaring `i64`/`@i64` where the spec says `u64`/`@u64`
+# (339 parameter slots; 131.40 reported 252, 43 of them false positives of its
+# `[^)]*` regex). Each parameter type is now compared with the spec's after
+# norm_type, and a declaration may differ only by a LOSSLESS widening listed
+# here: every value of the spec type is a value of the declared type. No
+# frozen record uses one (regen/freeze/signature_gate_131.43.json); a sign
+# change such as `u64` -> `i64` is not a widening and is rejected.
+SIGNATURE_WIDENING = {
+    "i32": frozenset({"i64"}),
+    "u32": frozenset({"u64", "i64"}),
+    "f32": frozenset({"f64"}),
+}
+
+
+def norm_type(t):
+    """Comparison form of a type at every level: whitespace and `$` dropped,
+    lower-cased, `@(T)` -> `@T`, map `@(K:V)` -> `@K:V` with K and V
+    normalised (`@($str:@(i64))` -> `@str:@i64`), `T!E` on both sides."""
+    if t is None:
+        return None
+    t = re.sub(r"\s+", "", t).replace("$", "").lower()
+    depth = 0
+    for i, ch in enumerate(t):
+        depth += (ch == "(") - (ch == ")")
+        if ch == "!" and depth == 0:
+            return norm_type(t[:i]) + "!" + norm_type(t[i + 1:])
+    if t.startswith("@(") and t.endswith(")") and _scan_params(t, 1) == len(t):
+        return norm_type("@" + t[2:-1])
+    if t.startswith("@"):
+        inner, depth = t[1:], 0
+        for i, ch in enumerate(inner):
+            depth += (ch == "(") - (ch == ")")
+            if ch == ":" and depth == 0:
+                return "@" + norm_type(inner[:i]) + ":" + norm_type(inner[i + 1:])
+        return "@" + norm_type(inner)
+    return t
+
+
+def param_type_conforms(want, got):
+    """True when declared parameter type `got` is the spec's `want` (after
+    norm_type) or a SIGNATURE_WIDENING of it, element-wise through `@`."""
+    w, g = norm_type(want), norm_type(got)
+    if w == g:
+        return True
+    while w.startswith("@") and g.startswith("@"):
+        w, g = w[1:], g[1:]
+    return g in SIGNATURE_WIDENING.get(w, ())
+
+
+def _sig_params(text, name=None, require_ret=False):
+    """(name, [param texts]) of the LAST `f=name(...)` in text, paren-aware
+    (`a:@(@u64);b:i64` -> ['a:@(@u64)', 'b:i64']); name=None takes the first
+    signature in text. require_ret keeps only declarations (`):T{` follows),
+    not calls. (None, None) when absent."""
+    if name is None:
+        m = _TARGET.search(text)
+        if not m:
+            return None, None
+        params, _close = drv._scan_params(text, m.end())
+        return m.group(1), params
+    found = None
+    for d in drv.function_decls(text):
+        if d["name"] == name and (d["ret"] is not None or not require_ret):
+            found = d["params"]
+    return name, found
+
+
 def signature_conforms(spec, src):
-    """Check the generated target function matches the spec's arity.
+    """Check the generated target function against the spec's signature.
     Returns (ok, detail). Only enforced when the spec description names a
-    target signature f=name(...)."""
-    m = re.search(r"f=([a-z][a-z0-9]*)\(([^)]*)\)", spec.get("description_v03", "") or spec.get("description", ""))
-    if not m:
+    target signature f=name(...). 131.43: arity AND every parameter type
+    (param_type_conforms); a parameter whose type the spec or the
+    declaration leaves unwritten is compared by count only."""
+    desc = spec.get("description_v03", "") or spec.get("description", "")
+    name, want = _sig_params(desc)
+    if not name or want is None:
         return True, "no target signature in spec"
-    name, params = m.group(1), m.group(2)
-    want_arity = len([p for p in params.split(";") if p.strip()])
-    g = re.search(rf"f={name}\(([^)]*)\)", src)
-    if not g:
+    _n, got = _sig_params(src, name, require_ret=True)
+    if got is None:
+        _n, got = _sig_params(src, name)          # a call only: arity as before
+    if got is None:
         return False, f"function {name} not found in output"
-    got_arity = len([p for p in g.group(1).split(";") if p.strip()])
-    if got_arity != want_arity:
-        return False, f"{name}: expected {want_arity} params, got {got_arity}"
+    if len(got) != len(want):
+        return False, f"{name}: expected {len(want)} params, got {len(got)}"
+    for i, (w, g) in enumerate(zip(want, got)):
+        if ":" not in w or ":" not in g:
+            continue
+        wt, gt = w.split(":", 1)[1].strip(), g.split(":", 1)[1].strip()
+        if not param_type_conforms(wt, gt):
+            return False, (f"{name}: param {i + 1} `{g.strip()}` declared `{gt}`, "
+                           f"spec `{wt}`")
     return True, "ok"
 
 
@@ -111,11 +189,14 @@ def signature_conforms(spec, src):
 # the spec's `T!Err` union: the arity-only signature gate above never looked
 # at the return type. `return_type_conforms` is the gate: an error-union spec
 # return MUST be declared as an error union (hard); any other spec/declared
-# difference is a SOFT flag (`return_type_mismatch`) until 131.43 decides the
-# type-aware signature gate + its widening allowlist.
+# difference is a SOFT flag (`return_type_mismatch`). 131.43 made the
+# PARAMETER types hard (signature_conforms above) and left the return type
+# soft: 172 banked single_function records soft-mismatch today, 50 of them
+# not already routed by 131.43 and several a semantic change (`f64` -> `str`),
+# so hardening it is its own decision (131.99).
 
-# 131.43 fills this: normalised spec return -> set of normalised declared
-# returns accepted as equal (e.g. widening). Empty = exact match only.
+# normalised spec return -> set of normalised declared returns accepted as
+# equal (e.g. widening). Empty = exact match only (131.99 decides).
 RETURN_TYPE_ALLOWLIST = {}
 
 def _scan_params(text, start):
@@ -203,7 +284,7 @@ def return_type_conforms(spec, src):
     hard_ok False only when the spec return is an error union and the
     declared one is not. soft_mismatch is a string when declared != spec
     (normalised, modulo RETURN_TYPE_ALLOWLIST) and the hard case does not
-    apply — recorded, not enforced (131.43). declared is None when the spec
+    apply — recorded, not enforced (131.99). declared is None when the spec
     names no target / the function is absent (gate not applicable)."""
     name = target_name(spec)
     if not name:
@@ -218,8 +299,13 @@ def return_type_conforms(spec, src):
         return False, f"{name} declared `{got}`, spec `{want}` requires an error union", None, got
     # second gaming shape (131.42): the named target is a correct union but a
     # trailing same-arity wrapper (`showvalidate`) returning the marker `str`
-    # is what driver.find_target (last matching decl) actually executes
-    callee = drv.find_target(spec, src)
+    # is what driver.find_target (last matching decl) actually executes.
+    # 131.68: single_function only — that is the one task type the driver
+    # runs. A full_program runs its own main(), so a same-arity str helper
+    # there (`lookup` formatting `safeget`'s result for io.println) is a
+    # correct program, not a wrapper the harness calls: 58 banked
+    # full_program records were rejected for exactly that and none is wrong.
+    callee = drv.find_target(spec, src) if spec.get("task_type") == "single_function" else None
     if is_error_union(want) and callee and callee != name:
         cgot = declared_return_type(src, callee)
         if cgot is not None and not is_error_union(cgot):

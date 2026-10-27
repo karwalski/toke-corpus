@@ -1,0 +1,152 @@
+{
+ "story": "131.83",
+ "date": "2026-10-27",
+ "tkc": {
+  "tkc_bin_sha": "5774da8cf5b3314c27aed77db83cd3dfd2a8522dfbad6703e1d6ecacdcad41f4",
+  "tkc_version": "toke 3.1.0 (git 8bb9f63e6e64)",
+  "tkc_path": "/Users/matthew.watt/tk/tmpwork/z73/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/tmpwork/z73/tkc",
+  "tkc_pinned_copy": "/var/folders/gf/4ylkzm4d3bg50537kywj3pph0000gp/T/tkc_pin_m2mn6yrv/tkc",
+  "toke_head": "8bb9f63e6e64ca421943637b4f60e0f8fdb847b5",
+  "toke_src_dirty": false
+ },
+ "records": 23382,
+ "with_interpolation": 10639,
+ "compile_fail": 129,
+ "in_scope": 8,
+ "in_scope_task_ids": [
+  "A-ERR-0005v22",
+  "A-ERR-0030v80",
+  "A-SRT-0024v13",
+  "A-SRT-0024v16",
+  "A-SRT-0028v34",
+  "A-SRT-0040v6",
+  "MIG-P2-B-D-CFG-0019v320-a68b5018",
+  "MIG-P2-B-D-FIO-0001v373-66cb0b87"
+ ],
+ "in_scope_detail": [
+  {
+   "task_id": "A-ERR-0005v22",
+   "task_type": "full_program",
+   "segments": [
+    "\\(mt safeget(a;1) {$ok:v v;$err:e 0})",
+    "\\(mt safeget(a;5) {$ok:v v;$err:e 0})"
+   ],
+   "error_codes": [
+    "E4031"
+   ]
+  },
+  {
+   "task_id": "A-ERR-0030v80",
+   "task_type": "full_program",
+   "segments": [
+    "\\(resilientlookup(m2;\"a\";99))"
+   ],
+   "error_codes": [
+    "E4031"
+   ]
+  },
+  {
+   "task_id": "A-SRT-0024v13",
+   "task_type": "full_program",
+   "segments": [
+    "\\(linearsearch(a;4 as u64))",
+    "\\(linearsearch(a;7 as u64))"
+   ],
+   "error_codes": [
+    "E4031"
+   ]
+  },
+  {
+   "task_id": "A-SRT-0024v16",
+   "task_type": "full_program",
+   "segments": [
+    "\\(linearsearch(nums;4 as u64))",
+    "\\(linearsearch(nums;5 as u64))",
+    "\\(linearsearch(nums;9 as u64))"
+   ],
+   "error_codes": [
+    "E4031"
+   ]
+  },
+  {
+   "task_id": "A-SRT-0028v34",
+   "task_type": "full_program",
+   "segments": [
+    "\\(binarysearch(data;1 as u64))",
+    "\\(binarysearch(data;4 as u64))",
+    "\\(binarysearch(data;7 as u64))",
+    "\\(binarysearch(data;9 as u64))"
+   ],
+   "error_codes": [
+    "E4031"
+   ]
+  },
+  {
+   "task_id": "A-SRT-0040v6",
+   "task_type": "full_program",
+   "segments": [
+    "\\(kthsmallest(data;1))",
+    "\\(kthsmallest(data;3))",
+    "\\(kthsmallest(data;5))"
+   ],
+   "error_codes": [
+    "E4031"
+   ]
+  },
+  {
+   "task_id": "MIG-P2-B-D-CFG-0019v320-a68b5018",
+   "task_type": "migrate_fix",
+   "segments": [
+    "\\(x.get(k))"
+   ],
+   "error_codes": [
+    "E4031"
+   ]
+  },
+  {
+   "task_id": "MIG-P2-B-D-FIO-0001v373-66cb0b87",
+   "task_type": "migrate_fix",
+   "segments": [
+    "\\(q.get(i))"
+   ],
+   "error_codes": [
+    "E4031"
+   ]
+  }
+ ],
+ "interp_diag_not_banked_accepted": [],
+ "other_compile_fail": 121,
+ "other_compile_fail_codes": {
+  "E4032": 73,
+  "E4031": 30,
+  "W1001": 18,
+  "E4036": 11,
+  "E4026": 5,
+  "E4073": 3,
+  "E4025": 1,
+  "E4033": 1
+ },
+ "jsonl": "corpus/regen_v04/audit/interp_name_check_131.83.jsonl",
+ "routing": {
+  "patch": "corpus/regen_v04/audit/pattern_sweep.131.83.patch.jsonl",
+  "patch_rows": 8,
+  "agent_task_ids": [],
+  "regen_task_ids": [
+   "A-ERR-0005v22",
+   "A-ERR-0030v80",
+   "A-SRT-0024v13",
+   "A-SRT-0024v16",
+   "A-SRT-0028v34",
+   "A-SRT-0040v6",
+   "MIG-P2-B-D-CFG-0019v320-a68b5018",
+   "MIG-P2-B-D-FIO-0001v373-66cb0b87"
+  ],
+  "bucket_before": {
+   "REGEN": 6,
+   "LEAVE": 1,
+   "AUTO": 1
+  },
+  "apply": "cat audit/pattern_sweep.jsonl audit/pattern_sweep.131.42.patch.jsonl audit/pattern_sweep.131.67.patch.jsonl audit/pattern_sweep.131.15.looprebuild.patch.jsonl audit/pattern_sweep.131.43.patch.jsonl audit/pattern_sweep.131.68.patch.jsonl audit/pattern_sweep.131.83.patch.jsonl > audit/pattern_sweep.merged.jsonl"
+ }
+}
