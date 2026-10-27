@@ -13,6 +13,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from audit import audit_one, load_specs           # noqa: E402
 import manifest_tool                              # noqa: E402  (131.35)
+import idiom_judge                                # noqa: E402  (131.75)
+import metrics                                    # noqa: E402  (131.75)
 
 CORPUS = "/Users/matthew.watt/tk/toke-corpus/corpus/regen_v04"
 WD = os.path.join(CORPUS, "work", "repair_129")
@@ -47,9 +49,10 @@ def main():
         gates_ok = (row.get("compile")
                     and not row.get("driver_fail")
                     and (not row.get("executed") or row.get("tests_new"))
-                    and (row.get("idiom") or 1.0) >= 0.6
-                    and (row.get("metrics") or {}).get("max_depth", 0) <= 4
-                    and (row.get("metrics") or {}).get("max_func_bytes", 0) <= 600)
+                    and (row.get("idiom") or 1.0) >= idiom_judge.IDIOM_FLOOR
+                    and (row.get("metrics") or {}).get("max_depth", 0) <= metrics.MAX_DEPTH
+                    and (row.get("metrics") or {}).get("max_func_bytes", 0)
+                    <= metrics.MAX_FUNC_BYTES)
         rec_path = os.path.join(CORPUS, spec["category"], tid + ".json")
         if gates_ok:
             rec = json.load(open(rec_path))

@@ -13,13 +13,15 @@ Emits the full prompt on stdout. Three task types:
   stdin_program   - (131.18) complete program driven by stdin; each test case is
                     one run whose whole stdout must equal expected_output
 """
-import json, sys, os
+import ast, json, sys, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
 import driver as drv                            # noqa: E402  (131.72)
 from regen_validate import render_expected            # noqa: E402  (131.72)
+import idiom_judge                                    # noqa: E402  (131.75)
+import metrics                                        # noqa: E402  (131.75)
 
 # ---------------------------------------------------------------------------
 # 131.72: the prompt MUST ask for exactly what the acceptance gate accepts.
@@ -102,10 +104,62 @@ def format_test_cases(spec):
     return "\n".join(lines)
 
 
+# ---------------------------------------------------------------------------
+# 131.75: state the gates a record must pass. Every number below is read from
+# the code that enforces it (metrics.MAX_DEPTH / MAX_FUNC_BYTES ->
+# run_shard.validate_one_gates; idiom_judge.IDIOM_FLOOR / PATTERN_RULES /
+# PER_RULE_CAP / HAND_PARSER_PENALTY -> idiom_judge.score; HARD_GATE_RULES ->
+# idiom_judge.hard_gate), never typed here: tests/test_prompt_gates.py fails
+# if a literal creeps back in.
+# ---------------------------------------------------------------------------
+
+def gates_block(spec):
+    """The acceptance gates, as the worker should read them, for one spec."""
+    pen = ", ".join(f"{r} -{p:g}" for r, p in idiom_judge.PATTERN_RULES.items())
+    hints = [r for r in idiom_judge.PATTERN_RULES if r not in idiom_judge.HARD_GATE_RULES]
+    lines = [
+        "ACCEPTANCE GATES - the validator rejects the program if any of these fails:",
+        ("  1. it compiles (tkc --check), builds, and every test case prints exactly the "
+         "stdout shown, then exits 0."),
+        (f"  2. control nesting depth <= {metrics.MAX_DEPTH} (if/lp/mt inside one another; "
+         "an `el if` chain counts once, so never nest `el{if(...)}`)."),
+        (f"  3. no function longer than {metrics.MAX_FUNC_BYTES} bytes - split work into "
+         "small named functions."),
+        (f"  4. idiom score >= {idiom_judge.IDIOM_FLOOR:g}: it starts at 1.0 and loses, per "
+         f"hit (at most {idiom_judge.PER_RULE_CAP} per rule), {pen}; a hand-rolled "
+         f"char-by-char parser loop -{idiom_judge.HAND_PARSER_PENALTY:g}."),
+        "  5. pattern lint (tkc --lint) is a hard gate: no "
+        + ", ".join(f"`{r}`" for r in idiom_judge.HARD_GATE_RULES)
+        + " diagnostic at all" + (f" ({', '.join(hints)} are hints and only cost score)."
+                                  if hints else "."),
+    ]
+    exempt = idiom_judge.mandate_exempt_rules(idiom_judge.style_mandate(spec))
+    if exempt:
+        lines.append("  This task's text explicitly asks for that style, so it exempts: "
+                     + ", ".join(exempt) + ".")
+    return "\n".join(lines)
+
+
+def input_types(spec):
+    """131.75: the spec's input types exactly as the gate reads them
+    (driver.effective_input_types). 3,976 A-side specs carry the sampler's
+    split `['@(i64']`, which the gate silently replaces with the types parsed
+    from the description's f=signature -- the prompt must show the same."""
+    s = dict(spec)
+    for k in ("input_types_v03", "input_types"):
+        v = s.get(k)
+        if isinstance(v, str) and v.startswith("["):
+            try:
+                s[k] = ast.literal_eval(v)
+            except (ValueError, SyntaxError):
+                pass
+    return drv.effective_input_types(s)
+
+
 def build(spec, card):
     desc = spec.get("description_v03") or spec.get("description", "")
     ttype = spec.get("task_type", "full_program")
-    sig_in = spec.get("input_types_v03") or spec.get("input_types", [])
+    sig_in = input_types(spec)
     sig_out = spec.get("output_type_v03") or spec.get("output_type", "")
     ctx = spec.get("domain_context_v03") or ""
 
@@ -155,7 +209,8 @@ def build(spec, card):
                 parts.append(f"  case {i}: stdin={json.dumps(tc.get('input', ''))}")
                 parts.append(f"          stdout={json.dumps(tc.get('expected_output', ''))}")
                 if tc.get("fixtures"):
-                    parts.append(f"          fixtures={json.dumps(tc['fixtures'])[:400]}")
+                    # 131.75: never truncated -- the program must handle all of it
+                    parts.append(f"          fixtures={json.dumps(tc['fixtures'])}")
         parts.append("")
         parts.append("Write a COMPLETE toke program: module declaration, imports, the "
                       "function(s), and f=main():i64 that reads stdin, prints exactly the "
@@ -176,6 +231,8 @@ def build(spec, card):
     else:
         raise ValueError(f"unknown task_type {ttype}")
 
+    parts.append("")
+    parts.append(gates_block(spec))
     parts.append("")
     parts.append("Output ONLY raw toke source. No markdown fences, no commentary.")
     return "\n".join(p for p in parts if p is not None)

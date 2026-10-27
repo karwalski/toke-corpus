@@ -233,10 +233,7 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
         exempt = idiom_judge.mandate_exempt_rules(idiom_judge.style_mandate(spec))
         lint_exempt = []
         if struct:
-            if struct["max_depth"] > 4:
-                struct_fail = f"nesting depth {struct['max_depth']} > 4"
-            elif struct["max_func_bytes"] > 600:
-                struct_fail = f"function {struct['max_func_bytes']} bytes > 600"
+            struct_fail = metrics.structure_failure(struct)   # 131.75: one source
             gates["structure"] = not struct_fail
             gates["lint"] = struct.get("lint_warnings", 0) == 0
             # 131.10 hard gate: any pattern-rule error/warning fails (hints

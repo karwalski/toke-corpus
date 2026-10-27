@@ -426,7 +426,7 @@ def sweep_one(job):
             else:
                 lib["max_depth"] = struct.get("max_depth")
                 lib["max_func_bytes"] = struct.get("max_func_bytes")
-                if struct.get("max_depth", 0) > 4 or struct.get("max_func_bytes", 0) > 600:
+                if metrics.structure_failure(struct):
                     fails.append("structure")
             if idiom_new < idiom_judge.IDIOM_FLOOR:
                 fails.append("idiom")

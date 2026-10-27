@@ -24,6 +24,23 @@ import tkc_pin  # (131.39)
 # else the symlink. Every tkc-running function also takes an explicit `tkc=`.
 TKC = tkc_pin.default_tkc()
 CONTROL = {"IF_STMT", "LOOP_STMT", "MATCH_STMT"}
+
+# 129.6 structural hard limits (quality_rubric.md "Structural thresholds",
+# locked 2026-08-12). 131.75: the ONE source for both numbers -- every gate
+# (run_shard, check_repair, bank_repairs, pattern_sweep, pattern_autofix) and
+# every prompt that states them (build_prompt, library_prep) reads these names,
+# so the limit a worker is told and the limit that rejects it cannot drift.
+MAX_DEPTH = 4            # control nesting depth above this fails (el-if chain = 1)
+MAX_FUNC_BYTES = 600     # a function whose AST extent is larger than this fails
+
+
+def structure_failure(struct):
+    """The structural hard-gate failure of an analyse() result, or None."""
+    if (struct.get("max_depth") or 0) > MAX_DEPTH:
+        return f"nesting depth {struct['max_depth']} > {MAX_DEPTH}"
+    if (struct.get("max_func_bytes") or 0) > MAX_FUNC_BYTES:
+        return f"function {struct['max_func_bytes']} bytes > {MAX_FUNC_BYTES}"
+    return None
 PATTERNS_DIR = os.environ.get("TOKE_PATTERNS_DIR",
                               os.path.expanduser("~/tk/toke/scripts/patterns"))
 PROXY_PATH = os.environ.get("TOKE_PROXY") or None

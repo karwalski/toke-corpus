@@ -43,6 +43,12 @@ PATTERN_RULES: dict[str, float] = {
 HAND_PARSER_PENALTY = 0.20
 PER_RULE_CAP = 3
 GATE_SEVERITIES = ("error", "warning")   # hints pass the hard gate
+# 131.75: the PATTERN_RULES tkc emits at a GATE_SEVERITIES severity (toke
+# docs/lint-rules-v1.md). hard_gate() filters on the severity tkc actually
+# emits, so this tuple only feeds the generation prompt (build_prompt); the
+# prompt-gate test checks it against the lint-rules table so it cannot drift.
+HARD_GATE_RULES: tuple[str, ...] = ("mut-flag-if", "flag-soup", "string-concat-chain",
+                                    "discarded-value-result")
 
 # Spec-mandated styles (quality_rubric.md "Exemptions"): a task description
 # that explicitly requires a verbose form exempts the rule it contradicts.
