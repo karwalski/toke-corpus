@@ -13,7 +13,7 @@ Emits the full prompt on stdout. Three task types:
   stdin_program   - (131.18) complete program driven by stdin; each test case is
                     one run whose whole stdout must equal expected_output
 """
-import json, sys, os
+import argparse, json, sys, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -181,9 +181,20 @@ def build(spec, card):
     return "\n".join(p for p in parts if p is not None)
 
 
-def main():
-    src = sys.argv[1]
-    card_path = os.path.join(HERE, "syntax_card.md")
+def parse_args(argv=None):
+    ap = argparse.ArgumentParser(
+        description="Build a worker generation prompt for one task spec; "
+                    "prints it on stdout.")
+    ap.add_argument("spec", help="a spec JSON object, or a path to a file holding one")
+    ap.add_argument("--card", default=os.path.join(HERE, "syntax_card.md"),
+                    help="syntax card to embed (default: regen/syntax_card.md)")
+    return ap.parse_args(argv)
+
+
+def main(argv=None):
+    args = parse_args(argv)
+    src = args.spec
+    card_path = args.card
     if os.path.isfile(src):
         spec = json.load(open(src))
     else:

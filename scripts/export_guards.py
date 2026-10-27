@@ -18,6 +18,18 @@ A *claim annotation* is either
 The patterns are deliberately narrow -- they match claims, not code -- and a
 record is scanned as its full JSON text so a claim in any field counts.
 
+Per-side token counts (131.93, owner decision §4.14). Comparison examples
+carry ``[PYTHON Nt]`` / ``[C Nt]`` / ``[TK Nt]`` count markers. Two counts with
+no guarantee they came from the same tokenizer are the same unsourced ratio
+in two numbers (TEMSpec §6.3), so a row carrying any count marker is blocked
+unless it names ONE tokenizer for all of them, either
+  * row-level: the row is a JSON object with a non-empty string field
+    ``"token_count_tokenizer"`` (it then covers every marker in the row), or
+  * inline: every marker names the same tokenizer, ``[PYTHON 40t cl100k_base]``
+    (a row-level field, when also present, must name the same one).
+Hits: ``unsourced_token_counts`` (no tokenizer named for some marker) and
+``mixed_tokenizer_counts`` (more than one tokenizer named).
+
 CLI
   python3 scripts/export_guards.py FILE.jsonl [FILE.jsonl ...]
   Prints per-file row and offending-row counts; exit 1 if any row carries one.
@@ -43,6 +55,13 @@ CLAIM_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
 )
 
 
+# [LANG Nt] or [LANG Nt <tokenizer>]; LANG is an upper-case language tag.
+COUNT_MARKER = re.compile(
+    r"\[(PYTHON|TK|TOKE|C|CPP|JAVA|JS|JAVASCRIPT|TS|TYPESCRIPT|RUST|GO)\s+\d+t"
+    r"(?:\s+([A-Za-z0-9][A-Za-z0-9_.:/@+-]*))?\]")
+TOKENIZER_FIELD = "token_count_tokenizer"
+
+
 class ExportGuardError(ValueError):
     """Raised when an export would carry a claim annotation."""
 
@@ -50,6 +69,24 @@ class ExportGuardError(ValueError):
 def claim_annotations(text: str) -> list[str]:
     """Names of the claim patterns that occur in ``text`` (empty list = clean)."""
     return [name for name, rx in CLAIM_PATTERNS if rx.search(text)]
+
+
+def count_marker_violations(row: Any) -> list[str]:
+    """131.93: per-side token-count markers must all come from one named tokenizer."""
+    text = _row_text(row)
+    names = [m.group(2) for m in COUNT_MARKER.finditer(text)]
+    if not names:
+        return []
+    field = row.get(TOKENIZER_FIELD) if isinstance(row, dict) else None
+    field = field if isinstance(field, str) and field.strip() else None
+    named = {n for n in names if n}
+    if field is not None:
+        named.add(field.strip())
+    if len(named) > 1:
+        return ["mixed_tokenizer_counts"]
+    if field is None and any(n is None for n in names):
+        return ["unsourced_token_counts"]
+    return []
 
 
 def _row_text(row: Any) -> str:
@@ -62,7 +99,7 @@ def scan_rows(rows: Iterable[Any]) -> tuple[int, list[tuple[int, list[str]]]]:
     bad: list[tuple[int, list[str]]] = []
     for i, row in enumerate(rows):
         n += 1
-        hits = claim_annotations(_row_text(row))
+        hits = claim_annotations(_row_text(row)) + count_marker_violations(row)
         if hits:
             bad.append((i, hits))
     return n, bad
@@ -74,13 +111,22 @@ def assert_no_claim_annotations(rows: Iterable[Any], label: str = "export") -> i
     if bad:
         first = ", ".join(f"row {i}: {'/'.join(h)}" for i, h in bad[:5])
         raise ExportGuardError(
-            f"{label}: {len(bad)} of {n} rows carry a token-ratio/marketing annotation (131.63) -- {first}")
+            f"{label}: {len(bad)} of {n} rows carry a token-ratio/marketing annotation (131.63) "
+            f"or per-side token counts without one named tokenizer (131.93) -- {first}")
     return n
 
 
+def _parse(line: str) -> Any:
+    try:
+        return json.loads(line)
+    except ValueError:
+        return line
+
+
 def scan_jsonl(path: Path) -> tuple[int, list[tuple[int, list[str]]]]:
+    # rows are parsed so a row-level token_count_tokenizer field is seen (131.93)
     with open(path, encoding="utf-8") as f:
-        return scan_rows(line for line in f if line.strip())
+        return scan_rows(_parse(line) for line in f if line.strip())
 
 
 def main(argv: list[str] | None = None) -> int:

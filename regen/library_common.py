@@ -172,21 +172,22 @@ def tkc_bin_sha(tkc=None):
     return tkc_pin.bin_sha(tkc or TKC)
 
 
-def pin_tkc(*modules):
+def pin_tkc(*modules, require_clean=False):
     """131.39: pin the compiler once per run, BEFORE any loop/pool. Rebinds TKC
     here and in every sibling module the gates exec. Keep the Pinned alive."""
     mods = [sys.modules[__name__], regen_validate, metrics, idiom_judge, run_shard]
     for m in modules:
         if m is not None and m not in mods:
             mods.append(m)
-    return tkc_pin.pin().install(*mods)
+    return tkc_pin.pin(require_clean=require_clean).install(*mods)
 
 
 def tkc_stamp(tkc=None, toke_root=TOKE_ROOT):
-    """{tkc_sha, tkc_sha256, tkc_bin_sha, tkc_version, toke_git}. Never raises."""
+    """{tkc_sha, tkc_sha256, tkc_bin_sha, tkc_version, toke_git, tkc_git_dirty}.
+    toke_git is the binary's own `--version --json` git_sha (131.90). Never raises."""
     tkc = tkc or TKC
     out = {"tkc_sha": None, "tkc_sha256": None, "tkc_bin_sha": None,
-           "tkc_version": None, "toke_git": None}
+           "tkc_version": None, "toke_git": None, "tkc_git_dirty": None}
     try:
         out["tkc_sha256"] = sha256_file(tkc)
         out["tkc_sha"] = short(out["tkc_sha256"])
@@ -198,13 +199,10 @@ def tkc_stamp(tkc=None, toke_root=TOKE_ROOT):
         out["tkc_version"] = (r.stdout or r.stderr).strip().splitlines()[0]
     except (OSError, subprocess.TimeoutExpired, IndexError):
         pass
-    try:
-        r = subprocess.run(["git", "-C", toke_root, "rev-parse", "HEAD"],
-                           capture_output=True, text=True, timeout=10)
-        if r.returncode == 0:
-            out["toke_git"] = r.stdout.strip()
-    except (OSError, subprocess.TimeoutExpired):
-        pass
+    # 131.90: the commit the binary reports for itself (`--version --json`),
+    # not the toke checkout's HEAD, which may have moved since the build.
+    # toke_root is kept for callers; it is no longer read.
+    out["toke_git"], out["tkc_git_dirty"] = tkc_pin.build_info(tkc)
     return out
 
 

@@ -12,7 +12,7 @@ nothing. Writes
   corpus/regen_v04/audit/recheck_131.44.jsonl   one row per record
   regen/freeze/recheck_131.44.json              tracked summary
 """
-import json, multiprocessing, os, sys, time
+import argparse, json, multiprocessing, os, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -106,5 +106,14 @@ def main(workers=8):
     print(json.dumps(summary["groups"], indent=1))
 
 
+def parse_args(argv=None):
+    ap = argparse.ArgumentParser(
+        description="131.44: re-execute the records 131.40 left behind on the "
+                    "pinned compiler. Reads only; banks nothing.")
+    ap.add_argument("workers", nargs="?", type=int, default=8,
+                    help="worker processes (default 8)")
+    return ap.parse_args(argv)
+
+
 if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 8)
+    main(parse_args().workers)

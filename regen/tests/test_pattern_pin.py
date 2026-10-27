@@ -134,7 +134,8 @@ def test_autofix_tool_shas_summary_and_bank_one_stamp(fake_tkc, tmp_path, monkey
 
 
 def test_tkc_pin_twin_is_untouched():
-    twin = Path(os.path.expanduser("~/tk/toke/scripts/patterns/tkc_pin.py"))
+    twin = Path(os.environ.get("TKC_PIN_TWIN")
+                or os.path.expanduser("~/tk/toke/scripts/patterns/tkc_pin.py"))
     if not twin.exists():
         pytest.skip("toke checkout absent")
     assert twin.read_bytes() == Path(REGEN, "tkc_pin.py").read_bytes()

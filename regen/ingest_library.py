@@ -24,7 +24,8 @@ Dry-run  : ledger/library_131_dryrun.jsonl — one row per program with the
 Provenance choices (bank mode):
   rewrite131.prev_sha256  sha256 of the solution.tk bytes ingested (there is no
                           prior corpus record for a library program)
-  rewrite131.tkc_sha      `git -C ~/tk/toke rev-parse --short HEAD` at run time
+  rewrite131.tkc_sha      the commit the pinned tkc reports for itself
+                          (`tkc --version --json` git_sha, 131.90)
   rewrite131.catalogue_sha sha256(~/tk/toke/patterns/catalogue.json)[:12]
   rewrite131.card_sha     run_shard.CARD_SHA
   proxy_tokens_*          null until the 131.4 proxy tokenizer is wired
@@ -32,7 +33,7 @@ Provenance choices (bank mode):
   rewrite_131 ledger      status "rewritten" (README vocabulary; reason says
                           "131.18 library ingest") — parked for owner review
 """
-import argparse, hashlib, json, multiprocessing, os, subprocess, sys, time
+import argparse, hashlib, json, multiprocessing, os, sys, time
 from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -56,12 +57,10 @@ def _sha_file(path, n=None):
     return h[:n] if n else h
 
 
-def tool_shas():
-    try:
-        tkc_sha = subprocess.run(["git", "-C", TOKE_REPO, "rev-parse", "--short", "HEAD"],
-                                 capture_output=True, text=True, timeout=10).stdout.strip()
-    except Exception:
-        tkc_sha = None
+def tool_shas(tkc=None):
+    """(tkc_sha, catalogue_sha). tkc_sha is the commit the binary reports
+    (`--version --json` git_sha, 131.90), not the toke checkout's HEAD."""
+    tkc_sha = tkc_pin.build_info(tkc or tkc_pin.default_tkc())[0]
     cat_sha = _sha_file(CATALOGUE, 12) if os.path.exists(CATALOGUE) else None
     return tkc_sha or "unknown", cat_sha or "none"
 
@@ -165,10 +164,12 @@ def cmd_run(args):
         os.unlink(ledger_path)  # dry-run is a report: fresh each time
     workdir = os.path.join(args.outdir, "work", "library_131")
     os.makedirs(workdir, exist_ok=True)
-    shas = tool_shas()
     global PIN
     # 131.39: pin before the pool starts; workers reuse the copy via $TOKE_TKC_PIN
-    PIN = tkc_pin.pin().install(sys.modules[__name__], run_shard, regen_validate, metrics, idiom_judge)
+    # 131.90: a banked run refuses a dirty pin; shas come from the pinned binary
+    PIN = tkc_pin.pin(require_clean=args.bank).install(
+        sys.modules[__name__], run_shard, regen_validate, metrics, idiom_judge)
+    shas = tool_shas(PIN.argv0)
     mode = "BANK" if args.bank else "dry-run"
     print(f"{mode}: {len(specs)} programs, {args.workers} workers, ledger {ledger_path}, "
           f"tkc_sha={shas[0]} catalogue_sha={shas[1]} tkc_bin_sha={PIN.sha256[:12]}", file=sys.stderr)

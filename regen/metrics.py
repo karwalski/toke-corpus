@@ -7,6 +7,17 @@ Epic 129.1; 131.10 added `proxy_tokens` and `lint_pattern_violations` and made
 commit the flag emitted nothing, so `lint()` always returned `[]`).
 
 AST spans are BYTE offsets (see toke/scripts/migrate_eq.py note).
+
+Metric change at 131.31 (recorded by 131.90). Since tkc 131.31 a FUNC_DECL's
+own span runs from `f=` through its closing `}` (before, the widest span of
+the node and its children stopped short of that `}`). `_extent()` takes the widest span
+of a node and its children, so `functions[].bytes` and `max_func_bytes` are
+now exactly the function's source text including the `}`: **+1 byte per
+function** against runs made with an earlier tkc. Consequences: the 600-byte
+function gate (run_shard, check_repair, bank_repairs) is one byte stricter; and
+a byte comparison across the boundary must subtract 1 per function from the
+newer run (or re-run both on one tkc, whose `--version --json` git_sha every
+stamp now carries). regen/tests/test_metrics_extent.py pins the new basis.
 el-if chains do not deepen nesting: an IF_STMT that is a direct child of an
 IF_STMT (not under a STMT_LIST) is the `el if` continuation, same depth.
 
@@ -236,4 +247,5 @@ if __name__ == "__main__":
             m = analyse(p, tkc=pinned.argv0)
             if m is not None:
                 m["tkc_bin_sha"] = pinned.sha256
+                m["tkc_git_sha"] = pinned.tkc_git_sha      # 131.90
             print(p, json.dumps(m, indent=1))

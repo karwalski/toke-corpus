@@ -164,7 +164,8 @@ def main():
                  probe=False, verbose=args.verbose)
     else:
         import regen_validate
-        with tkc_pin.pin().install(regen_validate) as pinned:
+        # 131.90: a real bank refuses a binary that is dirty or cannot name its commit
+        with tkc_pin.pin(require_clean=not args.dry_run).install(regen_validate) as pinned:
             print(f"tkc {pinned.version} sha {pinned.sha256[:12]} (pinned copy)", file=sys.stderr)
             s = bank(args.workdir, args.bank_dir, args.provenance, args.dry_run, args.archive_dir,
                      probe=True, tkc_stamp=pinned.stamp(), verbose=args.verbose)
