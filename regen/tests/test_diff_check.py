@@ -102,6 +102,10 @@ def test_ensure_imports():
     assert "i=s:std.str;" in dc.ensure_imports(stub)
     untouched = "m=harness;\ni=io:std.io;\nf=x(xs:@i64):i64{<xs.len as i64};\n"
     assert dc.ensure_imports(untouched) == untouched            # `xs.len` is not `s.`
+    # 131.101: a one-line record keeps `m=` first (was E2001 in every driver build)
+    one = 'm=arrindexof;f=f(p:@i64):i64{<p.len as i64};f=main():i64{io.println("\\(f(@(1)))");<0};'
+    out = dc.ensure_imports(one)
+    assert out.startswith("m=arrindexof;\ni=io:std.io;\nf=f(") and dc.ensure_imports(out) == out
 
 
 # --------------------------------------------------------- compare mocked ---

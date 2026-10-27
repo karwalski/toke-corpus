@@ -408,9 +408,13 @@ def ensure_imports(src):
                if decl not in src and re.search(rf"(?<![\w.]){alias}\.\w", src)]
     if not missing:
         return src
-    lines = src.split("\n", 1)
-    if lines[0].startswith("m=") and len(lines) == 2:
-        return lines[0] + "\n" + "\n".join(missing) + "\n" + lines[1]
+    # 131.101: split after the `m=…;` declaration itself, not after the first
+    # line — a record written on ONE line (`m=x;f=…`) otherwise got its
+    # imports in front of `m=` and every driver build failed E2001
+    m = re.match(r"\s*m=[^;]*;[ \t]*\n?", src)
+    if m:
+        head = src[:m.end()].rstrip("\n")
+        return head + "\n" + "\n".join(missing) + "\n" + src[m.end():]
     return "\n".join(missing) + "\n" + src
 
 
