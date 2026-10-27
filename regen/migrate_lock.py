@@ -207,7 +207,7 @@ _BOOL_TEXT = {"true": "1", "false": "0"}
 
 
 def bool_render_only(r):
-    """131.99: a lock_fail whose ONLY difference is bool spelling — tkc >= 3.0
+    """131.102: a lock_fail whose ONLY difference is bool spelling — tkc >= 3.0
     interpolates bools as true/false (127.15/127.94) while driver.render_out
     still expects 1/0. Judged only when got/want are complete (<12 lines)."""
     got, want = r.get("got") or [], r.get("want") or []
