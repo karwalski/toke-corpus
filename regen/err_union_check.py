@@ -4,7 +4,7 @@ a_tests err marker by returning it as a hard-coded `str`.
 
 131.40 found 254 A-ERR records across 39 bases that "pass" with
 `<"{'err': 'EmptyCollection'}"` (a `str`) instead of the spec's `T!Err`
-union: the return type drifted (the signature gate is arity-only, 131.43)
+union: the return type drifted (the signature gate was arity-only; 131.43)
 and the driver's line comparison cannot tell a printed union payload from
 a printed string. This tool
   1. parses every target function's DECLARED return type from `tkc
@@ -45,6 +45,17 @@ task_id wins, so plain concatenation is the merge):
 Scope (default): every single_function spec whose category is A-ERR or
 whose return type is an error union. --all-task-types adds full_program /
 stdin_program specs with a union return (blast radius of the hard gate).
+
+131.68 — the full_program half. 131.42 executed (and routed) only
+single_function records, so the same shape in full_program records was never
+looked at. `--story 131.68 --all-task-types --route-patch` writes its OWN
+outputs (err_union_check.131.68.jsonl, regen/freeze/err_union_check_131.68.json)
+so the 131.42 evidence is not overwritten; a full_program hard-fail record is
+BUILT AND RUN (its own main) for the printed-marker evidence; and the
+hard-fail full_program records are routed through route_patch (merged with
+each record's current sweep row, nothing else rewritten): AGENT when the spec
+carries test cases, REGEN (131.16) when it has none — a record with nothing
+to check against cannot be rewritten into correctness.
 """
 import argparse, json, os, random, re, subprocess, sys, tempfile, time
 
@@ -67,6 +78,16 @@ PATCH_PATTERNS = ("err-propagate", "err-default")
 PATCH_RULE = "gamed-err-marker"
 _BASE = re.compile(r"^([A-Z]-[A-Z]+-\d+)v\d+$")
 PROOF_SEED = 131042
+
+
+def set_story(story):
+    """Rebind the per-story output paths (131.42 keeps its original names)."""
+    global STORY, OUT_JSONL, OUT_SUMMARY, REASON
+    STORY = story
+    name = "err_union_check.jsonl" if story == "131.42" else f"err_union_check.{story}.jsonl"
+    OUT_JSONL = os.path.join(CORPUS, "audit", name)
+    OUT_SUMMARY = os.path.join(HERE, "freeze", f"err_union_check_{story}.json")
+    REASON = f"{story} gamed_err_marker"
 
 
 def base_of(tid):
@@ -186,6 +207,36 @@ def execute_tests(spec, src, workdir, name, tkc=None):
             "driver_fail": None}
 
 
+def execute_program(spec, src, workdir, name, tkc=None):
+    """131.68: a full_program record runs its OWN main(). Build and run it and
+    look at what it PRINTS (same contract as execute_tests). None when the
+    source has no main."""
+    if "f=main(" not in src:
+        return None
+    tkc = tkc or regen_validate.TKC
+    tkpath = os.path.join(workdir, name + ".prog.tk")
+    binpath = tkpath + ".bin"
+    with open(tkpath, "w") as f:
+        f.write(src)
+    try:
+        b = subprocess.run([tkc, tkpath, "-o", binpath], capture_output=True, text=True,
+                           errors="replace", timeout=90)
+        if b.returncode != 0:
+            return {"build": False, "printed_marker": None, "got": [], "driver_fail": None}
+        r = subprocess.run([binpath], capture_output=True, text=True, errors="replace", timeout=15)
+        got = r.stdout.splitlines()
+    except subprocess.TimeoutExpired:
+        return {"build": None, "printed_marker": None, "got": [], "driver_fail": "timeout"}
+    finally:
+        for q in (tkpath, binpath):
+            if os.path.exists(q):
+                os.unlink(q)
+    texts = marker_texts(spec)
+    printed = any(ln.strip() in texts or ln.strip().startswith(MARKER) for ln in got)
+    return {"build": True, "exit": r.returncode, "printed_marker": printed, "got": got[:20],
+            "driver_fail": None}
+
+
 def classify(spec, src, funcs, ast_ok=True, exec_result=None):
     """One err_union_check row (without task ids / stamps). `funcs` is
     ast_functions() output, or {} when the AST was unavailable (then the
@@ -193,6 +244,9 @@ def classify(spec, src, funcs, ast_ok=True, exec_result=None):
     execute_tests() output for the hard-fail case (None = not run)."""
     stubs = drv._stub_names(spec)
     callee = drv.find_target(spec, src)                 # what the driver main calls
+    # 131.68: only a single_function record is run through the driver; a
+    # full_program's own main decides what is called (regen_validate agrees)
+    wrapper_applies = spec.get("task_type") == "single_function"
     named = regen_validate.target_name(spec)
     target = named if named and (not funcs or named in funcs) and regen_validate.declared_return_type(src, named) else callee
     want = regen_validate.spec_return_type(spec)
@@ -220,11 +274,19 @@ def classify(spec, src, funcs, ast_ok=True, exec_result=None):
     row["declared_is_union"] = is_union
     # second gaming shape: named target is a union, the driver's callee is not
     callee_union = None
-    if callee and callee != target:
+    if wrapper_applies and callee and callee != target:
         cf = funcs.get(callee)
         cdecl = cf["declared"] if cf and cf["declared"] is not None else regen_validate.declared_return_type(src, callee)
         callee_union = regen_validate.is_error_union(cdecl) if cdecl is not None else None
         row["callee_return"] = cdecl
+    elif not wrapper_applies and callee and callee != target and regen_validate.is_error_union(want):
+        # 131.68 evidence: the shape the old (task-type-blind) wrapper rule
+        # rejected — a same-arity non-union helper the program's own main uses
+        cf = funcs.get(callee)
+        cdecl = cf["declared"] if cf and cf["declared"] is not None else regen_validate.declared_return_type(src, callee)
+        if cdecl is not None and not regen_validate.is_error_union(cdecl):
+            row["callee_return"] = cdecl
+            row["flags"].append("str_helper_not_wrapper")
     # marker literals: in the target or any helper (the gamed records route
     # the marker through an `errstr` helper), never in context stubs / main
     texts = marker_texts(spec)
@@ -323,13 +385,16 @@ def check_all(specs, man, tkc, workdir, all_task_types=False, limit=None, reuse_
         ast = dump_ast(tkc, src, workdir)
         funcs = ast_functions(ast, src) if ast else {}
         row = classify(spec, src, funcs, ast_ok=ast is not None)
-        if row["hard_fail"] and spec.get("task_type") == "single_function":
+        if row["hard_fail"] and spec.get("task_type") in ("single_function", "full_program"):
             # execution evidence for the non-union declarations (the err
-            # marker may be assembled at run time — no literal to find)
-            ex = (reuse_exec or {}).get(tid) or execute_tests(spec, src, workdir, tid, tkc)
+            # marker may be assembled at run time — no literal to find);
+            # 131.68: a full_program runs its own main
+            run = execute_tests if spec.get("task_type") == "single_function" else execute_program
+            ex = (reuse_exec or {}).get(tid) or run(spec, src, workdir, tid, tkc)
             row = classify(spec, src, funcs, ast_ok=ast is not None, exec_result=ex)
         row = {"task_id": tid, "base": base_of(tid), "category": spec.get("category"),
-               "task_type": spec.get("task_type"), "tests_from": spec.get("_tests_from"), **row}
+               "task_type": spec.get("task_type"), "tests_from": spec.get("_tests_from"),
+               "has_tests": bool(spec.get("test_cases")), **row}
         rows.append(row)
         if (i + 1) % 200 == 0:
             print(f"  {i + 1}/{len(ids)}", file=sys.stderr)
@@ -506,6 +571,42 @@ def route(gamed_ids, corpus=CORPUS, sweep_path=None, ts=None):
                       "audit/pattern_sweep.merged.jsonl  (load_bucket: later line per task_id wins)")}
 
 
+def route_patch_rows(rows, corpus=CORPUS, task_types=("full_program",), ts=None):
+    """131.68: route every hard-fail record of task_types through a
+    route_patch patch (pattern_sweep.<STORY>.patch.jsonl): AGENT with the
+    gamed-err-marker violation when the spec has test cases, REGEN (131.16)
+    when it has none. Returns counts; writes only the patch."""
+    import route_patch
+    cur = route_patch.current_rows(corpus, extra=[s for s in route_patch.APPLY_ORDER if s < STORY])
+    out, dest = [], {"AGENT": [], "REGEN": []}
+    for r in rows:
+        if not r["hard_fail"] or r["task_type"] not in task_types:
+            continue
+        bucket = "AGENT" if r.get("has_tests") else "REGEN"
+        shape = r.get("gaming_shape") or "declared non-union"
+        callee = r.get("driver_callee") if shape == "wrapper_returns_str" else r.get("target")
+        reason = (f"{r['verdict']} ({shape}): `{callee}` is declared `{r.get('callee_return') or r.get('declared_return')}` "
+                  f"but the spec return is the error union `{r.get('spec_return')}` — declare the union and "
+                  f"return a real `$err` variant (err-propagate / err-default); do not print or return the "
+                  f"`{{'err': ...}}` marker text anywhere"
+                  + ("" if bucket == "AGENT" else " — no test cases, so this record is regenerated by 131.16 "
+                                                  "rather than rewritten")
+                  + f" (regen/freeze/err_union_check_{STORY}.json)")
+        out.append(route_patch.merge_row(cur.get(r["task_id"]), r["task_id"], STORY, PATCH_RULE, bucket,
+                                         reason, pattern_ids=PATCH_PATTERNS, category=r["category"],
+                                         task_type=r["task_type"], ts=ts))
+        dest[bucket].append(r["task_id"])
+    path = route_patch.write_patch(corpus, STORY, out)
+    return {"patch": os.path.relpath(path, os.path.dirname(HERE)), "patch_rows": len(out),
+            "agent": len(dest["AGENT"]), "regen": len(dest["REGEN"]),
+            "agent_task_ids": sorted(dest["AGENT"]), "regen_task_ids": sorted(dest["REGEN"]),
+            "bucket_before": dict(sorted(
+                {b: sum(1 for x in out if (cur.get(x["task_id"]) or {}).get("bucket") == b)
+                 for b in {(cur.get(x["task_id"]) or {}).get("bucket") for x in out}}.items(),
+                key=lambda kv: str(kv[0]))),
+            "apply": route_patch.apply_command()}
+
+
 # ------------------------------------------------------------------ main ---
 def proof_only():
     """Redo the gate proof against the current run_shard (the check rows are
@@ -531,13 +632,21 @@ def main(argv=None):
                     help="also check full_program/stdin_program specs with a union return")
     ap.add_argument("--no-proof", action="store_true", help="skip the 20+5 gate re-validation")
     ap.add_argument("--route", action="store_true",
-                    help="write agent.txt / agent_reasons.jsonl / the sweep patch")
+                    help="131.42 only: write agent.txt / agent_reasons.jsonl / the sweep patch")
+    ap.add_argument("--story", default="131.42",
+                    help="output naming; 131.68 = the full_program half (own jsonl/summary/patch)")
+    ap.add_argument("--route-patch", action="store_true",
+                    help="131.68: route hard-fail full_program records via route_patch "
+                         "(AGENT with tests, REGEN without); writes only the patch")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--reuse-exec", action="store_true",
                     help="reuse the driver-run evidence of the existing jsonl rows (frozen records)")
     ap.add_argument("--proof-only", action="store_true",
                     help="re-run only the 20+5 gate proof on the existing jsonl rows and merge it into the summary")
     a = ap.parse_args(argv)
+    set_story(a.story)
+    if a.route and STORY != "131.42":
+        ap.error("--route rewrites the 131.42 agent.txt/agent_reasons.jsonl; use --route-patch")
     if a.proof_only:
         return proof_only()
     specs = audit.load_specs(CORPUS)
@@ -549,8 +658,10 @@ def main(argv=None):
     print(f"tkc {pinned.version} sha {pinned.sha256[:12]}", file=sys.stderr)
     with pinned, tempfile.TemporaryDirectory(prefix="err_union_") as tmp:
         reuse = None
-        if a.reuse_exec and os.path.exists(OUT_JSONL):
-            reuse = {r["task_id"]: r["exec"] for r in (json.loads(l) for l in open(OUT_JSONL) if l.strip())
+        # 131.68: a new story's first run reuses the 131.42 driver evidence
+        src_jsonl = OUT_JSONL if os.path.exists(OUT_JSONL) else os.path.join(CORPUS, "audit", "err_union_check.jsonl")
+        if a.reuse_exec and os.path.exists(src_jsonl):
+            reuse = {r["task_id"]: r["exec"] for r in (json.loads(l) for l in open(src_jsonl) if l.strip())
                      if r.get("exec")}
         rows = check_all(specs, man, pinned.argv0, tmp, a.all_task_types, a.limit, reuse)
         for r in rows:
@@ -588,8 +699,20 @@ def main(argv=None):
         if not a.no_proof:
             print("gate proof: 20 unaffected + 5 gamed", file=sys.stderr)
             summary["gate_proof"] = gate_proof(rows, specs, man, tmp)
+        fp = [r for r in rows if r["task_type"] == "full_program"]
+        if fp:
+            summary["full_program"] = {"records": len(fp), **{k: v for k, v in summarise(fp).items() if k != "by_base"},
+                                       "hard_fail": sum(1 for r in fp if r["hard_fail"]),
+                                       "hard_fail_with_tests": sum(1 for r in fp if r["hard_fail"] and r["has_tests"]),
+                                       "hard_fail_task_ids": sorted(r["task_id"] for r in fp if r["hard_fail"]),
+                                       # rejected by the pre-131.68 wrapper rule, correct under it now
+                                       "str_helper_not_wrapper_task_ids": sorted(
+                                           r["task_id"] for r in fp if "str_helper_not_wrapper" in r["flags"]
+                                           and not r["hard_fail"])}
         if a.route:
             summary["routing"] = route(gamed)
+        if a.route_patch:
+            summary["routing"] = route_patch_rows(rows)
     with open(OUT_SUMMARY, "w") as f:
         json.dump(summary, f, indent=1)
     brief = {k: summary[k] for k in ("records_checked", "verdicts", "flags", "gamed_evidence", "gamed_shapes", "gamed_single_function",
@@ -597,8 +720,13 @@ def main(argv=None):
     brief["vs_131_40"] = {k: (v if isinstance(v, int) else len(v)) for k, v in summary["vs_131_40"].items()}
     if "gate_proof" in summary:
         brief["gate_proof"] = {k: summary["gate_proof"][k] for k in ("unaffected_identical", "gamed_now_rejected")}
+    if "full_program" in summary:
+        brief["full_program"] = {k: summary["full_program"][k] for k in ("records", "verdicts", "hard_fail",
+                                                                         "hard_fail_with_tests", "gamed_shapes")}
     if "routing" in summary:
-        brief["routing"] = {k: summary["routing"][k] for k in ("agent_txt_added", "agent_txt_already_present", "patch_rows")}
+        brief["routing"] = {k: summary["routing"][k] for k in ("agent_txt_added", "agent_txt_already_present",
+                                                               "patch_rows", "agent", "regen")
+                            if k in summary["routing"]}
     print(json.dumps(brief, indent=1))
     return summary
 

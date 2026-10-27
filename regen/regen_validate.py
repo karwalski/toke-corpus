@@ -299,8 +299,13 @@ def return_type_conforms(spec, src):
         return False, f"{name} declared `{got}`, spec `{want}` requires an error union", None, got
     # second gaming shape (131.42): the named target is a correct union but a
     # trailing same-arity wrapper (`showvalidate`) returning the marker `str`
-    # is what driver.find_target (last matching decl) actually executes
-    callee = drv.find_target(spec, src)
+    # is what driver.find_target (last matching decl) actually executes.
+    # 131.68: single_function only — that is the one task type the driver
+    # runs. A full_program runs its own main(), so a same-arity str helper
+    # there (`lookup` formatting `safeget`'s result for io.println) is a
+    # correct program, not a wrapper the harness calls: 58 banked
+    # full_program records were rejected for exactly that and none is wrong.
+    callee = drv.find_target(spec, src) if spec.get("task_type") == "single_function" else None
     if is_error_union(want) and callee and callee != name:
         cgot = declared_return_type(src, callee)
         if cgot is not None and not is_error_union(cgot):
