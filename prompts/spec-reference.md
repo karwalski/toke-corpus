@@ -1,253 +1,255 @@
-# toke Phase 2 Specification Reference
+# toke specification reference (v0.4)
 
-toke is a statically typed, compiled language. File extension: `.tk`. No comments. No implicit coercions. One canonical form per construct.
+toke is a statically typed, compiled language designed for LLM code generation.
+Compiler: `tkc`. File extension: `.tk`. No implicit coercions. One canonical form
+per construct. This page condenses the normative spec
+(`toke/docs/spec/toke-spec-v0.4.md`, which amends `toke-spec-v0.3.md`) for use as
+generation context; `regen/syntax_card.md` is the fuller, compiler-verified card.
+Every code block here is compiled by `regen/check_card.py` in
+`regen/tests/test_spec_reference.py`, so it cannot drift from the compiler again.
 
-## Character Set (59 chars)
+## Character set (59 chars)
 
-Lowercase `a-z` (26), digits `0-9` (10), symbols `! " $ % & ( ) * + - . / : ; < = > @ ^ { | } ~` (23). No uppercase letters in source. No `_` in identifiers. Whitespace is non-structural. `^` and `~` are live operators (bitwise XOR and NOT, story 114.8), not reserved; `%` is modulo and `&`/`&&` are bitwise-and and short-circuit-and. The eight printable ASCII characters rejected in structural position (E1003) are the apostrophe, comma, question mark, square brackets, backslash, underscore and backtick. Derived from `src/lexer.c` — see `toke/docs/metrics-baseline.md`.
+Lowercase `a-z` (26), digits `0-9` (10) and 23 symbols: `( ) { } = : . ; + - * / < > ! | " $ @ % & ^ ~`.
+Whitespace separates tokens and is not one of the 59. No uppercase letters in source
+(E2002). No `_` in identifiers (E1003). No comma, `?`, square brackets, backtick,
+apostrophe, or `\` outside a string literal. `^` and `~` are live operators (bitwise
+XOR and NOT, story 114.8), not reserved; `%` is modulo; `&` is bitwise-and and `&&`
+short-circuit-and. Identifiers are lowercase alphanumeric: `maxval`, `idx2`, `isvalid`.
+Derived from `src/lexer.c` — see `toke/docs/metrics-baseline.md` (spec v0.4 §G).
 
 ## Keywords (14)
 
 | Keyword | Role |
 |---------|------|
-| `f` | function declaration (Phase 2 lowercase) |
-| `t` | type declaration |
-| `i` | import declaration |
 | `m` | module declaration |
-| `if` | conditional branch |
-| `el` | else branch |
-| `lp` | loop (only loop construct) |
-| `br` | break from innermost loop |
-| `let` | immutable binding |
-| `mut` | mutable qualifier |
-| `as` | type cast |
-| `rt` | return (long form; `<` is short form) |
+| `i` | import declaration |
+| `t` | type declaration |
+| `f` | function declaration |
+| `let` | binding |
+| `mut` | mutable binding (`let x=mut.0`) |
+| `if` | conditional (statement or expression) |
+| `el` | else branch; `el if` chains |
+| `lp` | loop (the only loop construct) |
+| `br` | break from the innermost loop |
+| `rt` | return (long form; `<` is the short form) |
+| `as` | cast |
 | `mt` | match |
-| `sc` | scope |
+| `sc` | structured-concurrency scope |
 
-`true` and `false` are predefined identifiers, not keywords.
+`true` and `false` are predefined identifiers, not keywords. The grammar is
+backtrack-free with bounded lookahead of up to 3 tokens (spec v0.4 §E).
 
-## Type Sigils (Phase 2)
+## Comments
 
-Phase 2 prefixes all type names with `$` and lowercases them.
+The comment form is `(* ... *)`; comments nest (spec v0.4 §H). `//` and `#` are
+not comments. Generated programs carry no comments at all: write none.
 
-| Phase 1 | Phase 2 | Description |
-|---------|---------|-------------|
-| `i64` | `i64` | signed 64-bit integer |
-| `u64` | `u64` | unsigned 64-bit integer |
-| `f64` | `f64` | IEEE 754 64-bit float |
-| `bool` | `bool` | boolean |
-| `Str` | `$str` | UTF-8 string |
-| `void` | `$void` | no return value |
-| `[T]` | `@(T)` | array of T |
-| `User` | `$user` | user-defined type |
+## Types
 
-Other numeric types: `i8`, `i16`, `i32`, `u8`, `u16`, `u32`, `f32`, `$byte`.
+- Scalars: `i8 i16 i32 i64 u8 u16 u32 u64 f32 f64 bool str void`
+- User structs: `t=$point{x:f64;y:f64};` (type names `$`-prefixed, lowercase)
+- Sum and error types: every variant `$`-prefixed and lowercase: `t=$shape{$circle:f64;$square:f64};`
+- Arrays: `@i64`, `@str`, `@$point`; literals `@(1;2;3)`, empty `@()`
+- Maps: `@(str:i64)`; literals `@("a":1;"b":2)`
+- Error unions: `i64!$matherr` (function return types)
 
-## Operators (precedence low to high)
+Task text may show legacy spellings (`$str`, `@(i64)`, `NotFound`); always write
+`str`, `@i64`, `$notfound`.
 
-1. Match: `expr\|{arms}`
-2. Comparison: `<` `>` `=` (equality, NOT `==`)
-3. Additive: `+` `-`
-4. Multiplicative: `*` `/`
-5. Unary: `-expr` `!expr`
-6. Cast: `expr as type`
-7. Error propagation: `expr!$errvariant`
-8. Call: `func(args)`
-9. Field access: `expr.field`
+## Operators
 
-No `!=`, `<=`, `>=`, `&&`, `||`, `%`, `++`, `--`, `+=`. Use `!(a=b)` for not-equal, `!(a>b)` for less-or-equal, nested `if` for logical AND/OR, `a-a/b*b` for modulo.
+- `=` is binding and assignment only, never comparison (spec v0.4 §B).
+- Comparison: `==` `!=` `<` `>` `<=` `>=`.
+- Logic: `&&` `||` (short-circuit, `||` binds looser than `&&`, both looser than comparison) and unary `!`.
+- Arithmetic: `+ - * / %` (numeric only; `+` also concatenates two arrays). Unary `-`.
+- Bitwise: `& | ^ ~ << >>`.
+- Cast: `x as f64`. Error propagation: `expr!$errtype`.
+- Postfix: call `f(a;b)`, field `p.x`, method `xs.len`; index with `.get`, never brackets.
 
-## File Structure
+## File structure
 
-Declarations must appear in this order: module, imports, types, constants, functions.
+Declarations appear in this order: module, imports, types, functions (E2001
+otherwise). Every file starts with exactly one `m=` line.
 
 ```
-m=mymodule;
-i=http:std.http;
-t=$user{id:u64;name:$str};
-pi=3.14159:f64;
-f=main():i64{ <0 };
-```
-
-## Module Declaration
-
-```
-m=module.path;
-```
-
-Every file starts with exactly one module declaration.
-
-## Import Declaration
-
-```
-i=alias:module.path;
-```
-
-Access via `alias.name`. All imports before types/functions.
-
-## Type Declaration
-
-Struct (lowercase fields):
-```
+m=geom;
+i=io:std.io;
 t=$point{x:f64;y:f64};
+f=norm2(p:$point):f64{<p.x*p.x+p.y*p.y};
+f=main():i64{
+  io.println("\(norm2($point{x:3.0;y:4.0}))");
+  <0
+};
 ```
 
-Sum type / error type (uppercase-initial variant names, with `$` prefix in Phase 2):
-```
-t=$myerr{$notfound:bool;$badinput:$str};
-```
+The grammar also has module constants (`name=literal:type;`, after the types),
+but such a declaration passes `--check` and then fails to build in tkc 3.1.0
+(story 127.310): do not write module constants; use a literal or a function.
 
-## Function Declaration
+Imports are `i=alias:std.module;` and are used as `alias.name(...)`.
 
-```
-f=name(p1:type1;p2:type2):$returntype{ body };
-```
+## Functions
 
-Fallible function with error type:
-```
-f=getuser(id:u64):$user!$usererr{ body };
-```
-
-No body = extern FFI: `f=puts(s:*u8):$void;`
-
-Parameters and arguments separated by `;` (not `,`).
-
-## Bindings and Assignment
+`f=name(p1:type1;p2:type2):rettype{ body };` — parameters and arguments are
+separated by `;`, never `,`. A fallible function returns `T!$errtype`. A declaration
+with no body is an extern: `f=puts(s:*u8):void;`
 
 ```
-let x=42;           immutable
-let x=mut.0;        mutable (mut. prefix after =)
-x=x+1;             reassign mutable
+m=fns;
+f=add(a:i64;b:i64):i64{<a+b};
+f=main():i64{<add(1;2)-3};
 ```
 
-No type annotations on `let`. Types inferred from context.
+## Bindings and assignment
+
+```
+m=binds;
+f=main():i64{
+  let x=42;
+  let n=mut.0;
+  n=n+x;
+  let xs=mut.@(1;2);
+  xs=xs.append(3);
+  <n-42+xs.len-3
+};
+```
+
+`let` is immutable; `let n=mut.0;` is mutable and is the only form that can be
+reassigned. Bindings are block-scoped (spec v0.4 §I). Types are inferred; omit
+annotations.
 
 ## Return
 
-```
-<expr;              short form (preferred)
-rt expr;            long form
-```
+`<expr` is the return (preferred); `rt expr` is the long form. The last statement
+before a closing `}` may omit its `;`.
 
-## Conditionals
+## Conditionals — `if` is an expression
 
 ```
-if(cond){ body };
-if(cond){ body }el{ altbody };
+m=conds;
+f=sign(n:i64):i64{
+  <if(n<0){-1}el if(n>0){1}el{0}
+};
+f=main():i64{
+  let g=if(sign(5)==1){10}el{20};
+  if(g!=10){<1};
+  <0
+};
 ```
 
-No `elif`. Nest: `if(a){...}el{if(b){...}el{...}}`. Condition must be `bool`.
+An expression-`if` requires an `el` branch; both branches yield the same type.
+Chain with `el if`; never nest `el{if(...)}`. Never simulate an `if` with a mut
+flag: bind the expression-`if` instead.
 
-## Loop
-
-```
-lp(let i=0;i<n;i=i+1){ body };
-```
-
-Three parts: init; condition; step. `br;` breaks innermost loop. No `while`, `for`, `foreach`.
-
-## Arrays (Phase 2)
+## Loops
 
 ```
-let a=@(1;2;3);     array literal (Phase 2 uses @() not [])
-a.len               length
-a.get(i)            variable index access
+m=loops;
+f=main():i64{
+  let total=mut.0;
+  lp(let i=0;i<10;i=i+1){
+    if(i==5){br};
+    total=total+i
+  };
+  <total-10
+};
 ```
 
-## Error Handling
+`lp(init;cond;step){...}` is the only loop: no `while`, `for` or `foreach`. `br`
+breaks the innermost loop.
 
-Declare error type:
-```
-t=$myerr{$divzero:bool;$overflow:$str};
-```
+## Match
 
-Fallible return signature:
 ```
-f=divide(a:f64;b:f64):f64!$myerr{ ... };
-```
-
-Propagate errors:
-```
-let val=fallible()!$myerr.$dberr;
+m=matches;
+i=s:std.str;
+f=main():i64{
+  let v=mt s.toint("12") {$ok:n n;$err:e 0};
+  <v-12
+};
 ```
 
-Match on result:
+`mt expr {$variant:binding expr;...}`. Each arm body is a single expression; all
+arms yield the same type unless an arm returns with `<`. Matching is exhaustive.
+
+## Error handling
+
 ```
-result|{
-  $ok:v v;
-  $err:e defaultval
-}
+m=safediv;
+t=$matherr{$divzero:bool;$overflow:bool};
+f=divide(a:i64;b:i64):i64!$matherr{
+  if(b==0){<$matherr{$divzero:true}};
+  <a/b
+};
+f=twice(a:i64;b:i64):i64!$matherr{
+  let q=divide(a;b)!$matherr;
+  <q*2
+};
+f=main():i64{
+  <mt twice(10;5) {$ok:v v-4;$err:e 1}
+};
 ```
 
-Match arms are expressions, not blocks. Exhaustive matching required.
+`expr!$errtype` propagates the error and is valid only inside a function that
+itself returns `T!$errtype`.
 
-## Arena Blocks
+## Arrays and maps
+
+```
+m=colls;
+f=main():i64{
+  let a=mut.@(3;1;2);
+  a=a.set(0;9);
+  let m=mut.@("x":1);
+  m=m.set("y";2);
+  <a.get(0)+a.len+m.get("y")-14
+};
+```
+
+Collections have value semantics: `set` and `append` return a new collection, so
+always reassign the result: `arr=arr.set(i;v)` is correct. Read with `arr.get(i)`, never
+square brackets; the length is the property `arr.len`.
+
+## Strings
+
+```
+m=strs;
+i=io:std.io;
+i=s:std.str;
+f=main():i64{
+  let n=7;
+  let msg="count is \(n)";
+  io.println(msg);
+  <s.len(msg)-10
+};
+```
+
+Build strings by interpolation `"\(expr)"`; `+` does not concatenate strings
+(E4031). String equality is `==`.
+
+## Arena blocks
 
 ```
 {arena
-  ...allocations freed on scope exit...
+  let tmp=@(1;2;3);
 }
 ```
 
-## Common Mistakes
+Allocations inside `{arena ...}` are freed when the block exits; every function
+body is an implicit arena (spec v0.3 §11.14).
 
-1. No comments (`//`, `#`, `/* */` are illegal)
-2. `;` between params/args/array elements, NOT `,`
-3. Return is `<`, not `return`
-4. Equality is `=`, not `==`
-5. Else is `el`, not `else`
-6. Loop is `lp`, not `for`/`while`
-7. String type is `$str`, not `string`/`String`
-8. Mutable: `let x=mut.0`, not `let mut x=0`
-9. No `_` in identifiers
-10. `if` is NOT an expression; cannot assign from it
-11. Phase 2: types prefixed with `$`, arrays use `@()`
+## Common mistakes
 
-## Complete Examples
-
-### Factorial
-```
-m=fact;
-f=factorial(n:i64):i64{
-  if(n<2){<1};
-  <n*factorial(n-1)
-};
-```
-
-### Sum array
-```
-m=arrsum;
-f=sum(arr:@(i64)):i64{
-  let total=mut.0;
-  lp(let i=0;i<arr.len;i=i+1){
-    total=total+arr.get(i)
-  };
-  <total
-};
-```
-
-### Error handling
-```
-m=safediv;
-t=$matherr{$divzero:bool};
-f=divide(a:f64;b:f64):f64!$matherr{
-  if(b=0.0){<$matherr{$divzero:true}};
-  <a/b
-};
-f=safe(a:f64;b:f64):f64{
-  let r=divide(a;b);
-  r|{$ok:v v;$err:e 0.0}
-};
-```
-
-### Struct usage
-```
-m=geo;
-t=$point{x:f64;y:f64};
-f=dist(a:$point;b:$point):f64{
-  let dx=b.x-a.x;
-  let dy=b.y-a.y;
-  <dx*dx+dy*dy
-};
-```
+1. Equality is `==`; a bare `=` in a condition is E2002.
+2. `;` separates parameters, arguments and elements, never `,`.
+3. Return is `<` (or `rt`), not `return`.
+4. Else is `el`, not `else`; chain with `el if`.
+5. Loop is `lp`, not `for` / `while`.
+6. Strings are `str`, arrays `@i64`; not `$str`, `string` or `[i64]`.
+7. A mutable binding puts the `mut.` prefix on the value, as above.
+   `let mut x=0` is WRONG: it draws W2021 and the binding stays immutable.
+8. No `_` in identifiers and no uppercase anywhere.
+9. Match is `mt expr {...}`.
+10. A bare `arr.set(i;v);` statement silently discards the new collection;
+    always reassign: `arr=arr.set(i;v)`.
