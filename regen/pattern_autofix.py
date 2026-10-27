@@ -631,7 +631,8 @@ def summarise(results, opts):
                              for tt in sorted({r.get("task_type") for r in results}, key=str)},
             "thresholds": {"perf_ratio": PERF_RATIO, "perf_wall_ms": PERF_WALL_MS, "perf_rss_kb": PERF_RSS_KB,
                            "perf_runs": opts.get("perf_runs"), "n_generated": opts.get("n_generated"),
-                           "idiom_floor": IDIOM_FLOOR, "max_depth": 4, "max_func_bytes": 600},
+                           "idiom_floor": IDIOM_FLOOR, "max_depth": metrics.MAX_DEPTH,
+                           "max_func_bytes": metrics.MAX_FUNC_BYTES},
             "mode": "bank" if opts.get("bank") else "dry-run"}
 
 

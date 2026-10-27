@@ -42,6 +42,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import library_common as lc                       # noqa: E402
 import idiom_judge                                # noqa: E402
+import metrics                                    # noqa: E402  (131.75)
 
 INSTRUCTION = (
     "REWRITE RULES: behaviour is locked by the MANIFEST, not by the current program — "
@@ -51,8 +52,9 @@ INSTRUCTION = (
     "the same build flags; least tokens — every byte of the --min form counts; no "
     "pattern-lint violations (tkc --lint must report 0 errors AND 0 warnings of any "
     "kind; fixing the hints too is expected unless the task mandate forbids it); the "
-    "--min byte count and the proxy-token count must not grow; nesting depth <= 4 and "
-    "no function over 600 bytes. Write the result to solution.131.tk beside the "
+    "--min byte count and the proxy-token count must not grow; nesting depth <= "
+    f"{metrics.MAX_DEPTH} and no function longer than {metrics.MAX_FUNC_BYTES} bytes. "
+    "Write the result to solution.131.tk beside the "
     "original — never edit solution.tk. At most 3 attempts.")
 
 NUL_INSTRUCTION = (
@@ -123,8 +125,9 @@ def build_prompt(spec, src, ctx):
         lines.append(f"  non-pattern lint warnings on the current source: {b['lint_warnings']} "
                      "(total must be 0 after the rewrite)")
     if b.get("max_depth") is not None:
-        lines.append(f"  current structure: depth {b['max_depth']} (limit 4), largest "
-                     f"function {b.get('max_func_bytes')} bytes (limit 600), idiom "
+        lines.append(f"  current structure: depth {b['max_depth']} (max {metrics.MAX_DEPTH}), "
+                     f"largest function {b.get('max_func_bytes')} bytes "
+                     f"(max {metrics.MAX_FUNC_BYTES}), idiom "
                      f"{b.get('idiom')} (floor {idiom_judge.IDIOM_FLOOR})")
     if lc.bucket_est_saving(row) is not None:
         lines.append(f"  sweep estimate: saving ~{lc.bucket_est_saving(row)} proxy tokens")

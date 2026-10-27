@@ -95,6 +95,8 @@ PRELUDE = {
                                     "let xs=mut.@(3;1;2);", "let out=mut.@(1);",
                                     "let av=@(\"-v\";\"f\");", "let b=true;"],
     "task hygiene": [],
+    # 131.62: prompts/spec-reference.md sections (the card has none of these)
+    "common mistakes": ["let arr=mut.@(1;2;3);", "let i=0;", "let v=9;"],
 }
 IMPORTS = ["i=io:std.io;", "i=s:std.str;", "i=json:std.json;", "i=file:std.file;",
            "i=fmt:std.fmt;"]
@@ -182,6 +184,11 @@ def extract(card_text):
         if not buf:
             start = ln
         buf.append(code)
+        # 131.62: a fence that opens with `m=` is a whole program -- its
+        # constants and functions refer to each other, so it is compiled as
+        # one unit (harness() takes an `m=` fragment as-is) rather than split.
+        if buf[0].startswith("m="):
+            continue
         joined = "\n".join(buf)
         # The card's reference fences list one construct per line with no
         # terminator (`arr.len`, `arr=arr.append(v)`); close on any balanced

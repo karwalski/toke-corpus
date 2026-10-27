@@ -11,6 +11,8 @@ import argparse, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from audit import audit_one                       # noqa: E402
+import idiom_judge                                 # noqa: E402  (131.75)
+import metrics                                     # noqa: E402  (131.75)
 
 CORPUS = "/Users/matthew.watt/tk/toke-corpus/corpus/regen_v04"
 
@@ -43,13 +45,14 @@ def main():
             failures.append("tests: " + str(row.get("reason")))
     if row.get("driver_fail"):
         failures.append("driver: " + row["driver_fail"])
-    if (row.get("idiom") or 1.0) < 0.6:
-        failures.append(f"idiom {row['idiom']} < 0.6: {row.get('idiom_notes')}")
+    if (row.get("idiom") or 1.0) < idiom_judge.IDIOM_FLOOR:
+        failures.append(f"idiom {row['idiom']} < {idiom_judge.IDIOM_FLOOR}: "
+                        f"{row.get('idiom_notes')}")
     m = row.get("metrics") or {}
-    if m.get("max_depth", 0) > 4:
-        failures.append(f"nesting depth {m['max_depth']} > 4")
-    if m.get("max_func_bytes", 0) > 600:
-        failures.append(f"function {m['max_func_bytes']} bytes > 600")
+    if m.get("max_depth", 0) > metrics.MAX_DEPTH:
+        failures.append(f"nesting depth {m['max_depth']} > {metrics.MAX_DEPTH}")
+    if m.get("max_func_bytes", 0) > metrics.MAX_FUNC_BYTES:
+        failures.append(f"function {m['max_func_bytes']} bytes > {metrics.MAX_FUNC_BYTES}")
     if failures:
         print("FAIL " + "; ".join(failures))
         print(json.dumps(row, indent=1)[:1500])
