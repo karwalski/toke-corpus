@@ -1,0 +1,99 @@
+{
+ "story": "131.111",
+ "date": "2026-11-09",
+ "tkc": {
+  "tkc_bin_sha": "d400375946fbae74dac24adc52bbc45bb1d4c94678d6ba0d297aef3c3dd35bb2",
+  "tkc_version": "toke 3.1.0 (git 1f39c2998110)",
+  "tkc_path": "/Users/matthew.watt/tk/archive/pins/tkc-131.103/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/archive/pins/tkc-131.103/toke",
+  "toke_head": "1f39c2998110d4806eee18a6afe2376c31a7e86e",
+  "toke_src_dirty": false,
+  "tkc_git_sha": "1f39c2998110",
+  "tkc_git_dirty": false
+ },
+ "records_checked": 24965,
+ "rc": {
+  "library rc=0": 1578,
+  "library rc=1": 5,
+  "regen rc=0": 23192,
+  "regen rc=1": 190
+ },
+ "banked_failing": {
+  "records": 20,
+  "by_source": {
+   "regen": 20
+  },
+  "records_by_error_code": {
+   "E4031": 20
+  },
+  "records_by_first_error_code": {
+   "E4031": 20
+  },
+  "by_source_task_type_bucket_before": {
+   "regen/full_program/LEAVE": 2,
+   "regen/full_program/REGEN": 16,
+   "regen/single_function/LEAVE": 2
+  },
+  "with_test_cases": 4,
+  "task_ids": [
+   "A-ERR-0022v33",
+   "A-ERR-0022v73",
+   "A-ERR-0023v5",
+   "A-ERR-0030v26",
+   "A-ERR-0081v5",
+   "A-ERR-0081v73",
+   "A-ERR-0081v80",
+   "A-ERR-0081v82",
+   "A-STR-0034v1",
+   "A-STR-0034v44",
+   "A-STR-0034v5",
+   "A-STR-0034v58",
+   "A-STR-0034v60",
+   "A-STR-0034v63",
+   "A-STR-0034v83",
+   "A-STR-0037v38",
+   "A-STR-0092v52",
+   "D-CRY-0002v123",
+   "D-CRY-0002v135",
+   "D-FIO-0018v170"
+  ]
+ },
+ "vs_expected": {
+  "expected_ids": 20,
+  "still_failing": 20,
+  "now_passing": [],
+  "new_failures": []
+ },
+ "routing": {
+  "patch": "audit/pattern_sweep.131.111.patch.jsonl",
+  "rows": 20,
+  "bucket_before_to_after": {
+   "LEAVE->AGENT": 4,
+   "REGEN->REGEN": 16
+  },
+  "rule": "REGEN for the REGEN class (regen A-*/full_program, regenerated whole by 131.16); AGENT for every other record (no regeneration path exists for them: 131.109)"
+ },
+ "earlier_check_routing": {
+  "stories": [
+   "131.106"
+  ],
+  "records_routed": 176,
+  "still_failing": 175,
+  "now_passing": [
+   "A-ERR-0030v39"
+  ]
+ },
+ "gate_after": {
+  "forbidden": [
+   "LEAVE",
+   "EXEMPT",
+   "AUTO"
+  ],
+  "violations": 0,
+  "first": [],
+  "failing_by_bucket": {
+   "AGENT": 57,
+   "REGEN": 138
+  }
+ }
+}
