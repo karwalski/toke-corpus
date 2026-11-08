@@ -66,9 +66,9 @@ def test_lines_equal_float_tolerance():
 
 
 def test_render_ref_lines():
-    assert dc.render_ref_lines(True) == ["1"]
+    assert dc.render_ref_lines(True) == ["true"]                       # 131.102: tkc >= 3.0
     assert dc.render_ref_lines(2.0) == ["2"]
-    assert dc.render_ref_lines([1, "x", False]) == ["1", "x", "0"]
+    assert dc.render_ref_lines([1, "x", False]) == ["1", "x", "false"]
     assert dc.render_ref_lines("a\nb") == ["a", "b"]
     assert dc.render_ref_lines(None) is None
     assert dc.render_ref_lines([[1]]) is None

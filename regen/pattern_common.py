@@ -464,7 +464,7 @@ def expected_output_lines(spec):
     single = ttype == "single_function"
     if single:
         lines = ["The harness appends a main() that calls the target function on each "
-                 "test input and prints one line per result (bool prints as 1/0; an "
+                 "test input and prints one line per result (bool prints as true/false; an "
                  "array result prints one line per element). Your rewrite must make "
                  "these EXACT stdout lines come out, in order:"]
     else:

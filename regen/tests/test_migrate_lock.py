@@ -102,6 +102,9 @@ def test_bool_render_only_is_spelling_and_nothing_else():
     assert not ml.bool_render_only(dict(r, got=["false", "false"]))       # a real wrong answer
     assert not ml.bool_render_only(dict(r, verdict="lock_pass"))
     assert not ml.bool_render_only(dict(r, got=["true"] * 12, want=["1"] * 12))   # truncated: not judged
+    # 131.102: either direction (a pre-3.0 tkc printing 1/0 against true/false expectations)
+    assert ml.bool_render_only(dict(r, got=["1", "0"], want=["true", "false"]))
+    assert not ml.bool_render_only(dict(r, got=["true", "false"], want=["true", "false"]))
 
 
 def test_summarise_splits_lock_fail_and_compile_only():
