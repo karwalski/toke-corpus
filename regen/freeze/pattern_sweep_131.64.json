@@ -1,0 +1,428 @@
+{
+ "story": "131.64",
+ "date": "2026-11-09",
+ "what": "131.13 pattern sweep re-run (pattern_sweep.py run+report, unchanged thresholds) with the integrate compiler, after the nested-if-ladder lint rule shipped; compared with the committed 131.13 output",
+ "tkc": {
+  "tkc_bin_sha": "df845e3c8761c9b59c176b890d8da1a4fa0ff09c26af00ebe9b9a8dcd3e1d3dc",
+  "tkc_version": "toke 3.1.0 (git 9f1eb921111f)",
+  "tkc_path": "/Users/matthew.watt/tk/tmpwork/wt_z91_tkc/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/tmpwork/wt_z91_tkc/toke",
+  "toke_head": "9f1eb921111fef8db7b18bc2b29c23577190d37e",
+  "toke_src_dirty": false,
+  "tkc_git_sha": "9f1eb921111f",
+  "tkc_git_dirty": false
+ },
+ "catalogue_sha": "c42dcc38a16c",
+ "catalogue_entries": 46,
+ "thresholds": {
+  "agent_saving": 3,
+  "concat_fix_armed": false,
+  "preform_exempt": true,
+  "regen_class": "A-*/full_program",
+  "budget_max_over": 0.05,
+  "factor_step": 0.05
+ },
+ "rows": {
+  "new": 24965,
+  "old_131_13": 24965,
+  "merged_routing": 24965,
+  "merged_routing_note": "on-disk audit/pattern_sweep.merged.jsonl (2026-09-19, 25,453 lines) = sweep + 131.42 + 131.67 + 131.15.looprebuild patches only; the 131.43 (209) and 131.83 (8) patches are not yet in it (131.68 is empty). rerun_plus_patches applies all six in the README order.",
+  "sweep_errors": 0,
+  "sweep_error_task_ids": [],
+  "source_changed_since_131_13": 586,
+  "source_unchanged_since_131_13": 24379
+ },
+ "buckets": {
+  "old_131_13": {
+   "regen": {
+    "EXEMPT": 1678,
+    "AUTO": 643,
+    "AGENT": 1197,
+    "LEAVE": 14215,
+    "REGEN": 5649,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 53,
+    "AGENT": 1272,
+    "LEAVE": 258,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 1678,
+    "AUTO": 696,
+    "AGENT": 2469,
+    "LEAVE": 14473,
+    "REGEN": 5649,
+    "records": 24965
+   }
+  },
+  "merged_routing": {
+   "regen": {
+    "EXEMPT": 1637,
+    "AUTO": 638,
+    "AGENT": 1651,
+    "LEAVE": 13807,
+    "REGEN": 5649,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 53,
+    "AGENT": 1272,
+    "LEAVE": 258,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 1637,
+    "AUTO": 691,
+    "AGENT": 2923,
+    "LEAVE": 14065,
+    "REGEN": 5649,
+    "records": 24965
+   }
+  },
+  "rerun": {
+   "regen": {
+    "EXEMPT": 1678,
+    "AUTO": 217,
+    "AGENT": 1203,
+    "LEAVE": 14635,
+    "REGEN": 5649,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 11,
+    "AGENT": 1314,
+    "LEAVE": 258,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 1678,
+    "AUTO": 228,
+    "AGENT": 2517,
+    "LEAVE": 14893,
+    "REGEN": 5649,
+    "records": 24965
+   }
+  },
+  "rerun_minus_old": {
+   "regen": {
+    "EXEMPT": 0,
+    "AUTO": -426,
+    "AGENT": 6,
+    "LEAVE": 420,
+    "REGEN": 0,
+    "records": 0
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": -42,
+    "AGENT": 42,
+    "LEAVE": 0,
+    "REGEN": 0,
+    "records": 0
+   },
+   "all": {
+    "EXEMPT": 0,
+    "AUTO": -468,
+    "AGENT": 48,
+    "LEAVE": 420,
+    "REGEN": 0,
+    "records": 0
+   }
+  },
+  "rerun_minus_merged": {
+   "regen": {
+    "EXEMPT": 41,
+    "AUTO": -421,
+    "AGENT": -448,
+    "LEAVE": 828,
+    "REGEN": 0,
+    "records": 0
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": -42,
+    "AGENT": 42,
+    "LEAVE": 0,
+    "REGEN": 0,
+    "records": 0
+   },
+   "all": {
+    "EXEMPT": 41,
+    "AUTO": -463,
+    "AGENT": -406,
+    "LEAVE": 828,
+    "REGEN": 0,
+    "records": 0
+   }
+  },
+  "rerun_plus_patches": {
+   "regen": {
+    "EXEMPT": 1619,
+    "AUTO": 214,
+    "AGENT": 1842,
+    "LEAVE": 14056,
+    "REGEN": 5651,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 11,
+    "AGENT": 1314,
+    "LEAVE": 258,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 1619,
+    "AUTO": 225,
+    "AGENT": 3156,
+    "LEAVE": 14314,
+    "REGEN": 5651,
+    "records": 24965
+   }
+  },
+  "rerun_plus_patches_minus_merged": {
+   "regen": {
+    "EXEMPT": -18,
+    "AUTO": -424,
+    "AGENT": 191,
+    "LEAVE": 249,
+    "REGEN": 2,
+    "records": 0
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": -42,
+    "AGENT": 42,
+    "LEAVE": 0,
+    "REGEN": 0,
+    "records": 0
+   },
+   "all": {
+    "EXEMPT": -18,
+    "AUTO": -466,
+    "AGENT": 233,
+    "LEAVE": 249,
+    "REGEN": 2,
+    "records": 0
+   }
+  },
+  "patches": [
+   "pattern_sweep.131.42.patch.jsonl",
+   "pattern_sweep.131.67.patch.jsonl",
+   "pattern_sweep.131.15.looprebuild.patch.jsonl",
+   "pattern_sweep.131.43.patch.jsonl",
+   "pattern_sweep.131.68.patch.jsonl",
+   "pattern_sweep.131.83.patch.jsonl"
+  ],
+  "patched_rows": 703
+ },
+ "transitions": {
+  "old_to_rerun_all": {
+   "AUTO->LEAVE": 421,
+   "AUTO->AGENT": 46,
+   "AUTO->EXEMPT": 1,
+   "EXEMPT->AGENT": 1,
+   "LEAVE->AGENT": 1
+  },
+  "old_to_rerun_source_unchanged": {
+   "AUTO->AGENT": 41
+  },
+  "old_to_rerun_source_changed": {
+   "AUTO->LEAVE": 421,
+   "AUTO->AGENT": 5,
+   "AUTO->EXEMPT": 1,
+   "EXEMPT->AGENT": 1,
+   "LEAVE->AGENT": 1
+  },
+  "merged_to_rerun_all": {
+   "AUTO->LEAVE": 421,
+   "AGENT->LEAVE": 408,
+   "AUTO->AGENT": 43,
+   "AGENT->EXEMPT": 41,
+   "AGENT->AUTO": 2,
+   "AUTO->EXEMPT": 1,
+   "EXEMPT->AGENT": 1,
+   "LEAVE->AGENT": 1
+  },
+  "merged_to_rerun_plus_patches": {
+   "AUTO->LEAVE": 418,
+   "LEAVE->AGENT": 168,
+   "AUTO->AGENT": 46,
+   "EXEMPT->AGENT": 19,
+   "AUTO->EXEMPT": 1,
+   "LEAVE->REGEN": 1,
+   "AUTO->REGEN": 1
+  }
+ },
+ "explained": {
+  "old_auto_rows_whose_source_changed": 432,
+  "old_auto_rows_whose_source_changed_note": "the 131.14 auto wave banked these rewrites, so their deterministic hits are gone (AUTO->LEAVE)",
+  "library_auto_to_agent_unused_let": 42,
+  "library_auto_to_agent_unused_let_note": "tkc no longer attaches a fix to these unused-let warnings (127.81/127.82: a lint fix must not change behaviour), so the 131.17 'all lint warnings fixable' AUTO route no longer applies",
+  "library_auto_to_agent_unused_let_ids": [
+   "L-CRY-040",
+   "L-CRY-051",
+   "L-CRY-097",
+   "L-CRY-131",
+   "L-CRY-132",
+   "L-DEV-008",
+   "L-DEV-011",
+   "L-DEV-050",
+   "L-DEV-121",
+   "L-EDU-025",
+   "L-FIN-088",
+   "L-MFG-018",
+   "L-MFG-081",
+   "L-MFG-087",
+   "L-MSG-018",
+   "L-MSG-119",
+   "L-MSG-129",
+   "L-NET-109",
+   "L-NET-111",
+   "L-NET-143",
+   "L-SCI-042",
+   "L-SEC-007",
+   "L-SEC-009",
+   "L-SEC-020",
+   "L-SEC-035",
+   "L-SEC-041",
+   "L-SEC-042",
+   "L-SEC-078",
+   "L-SEC-097",
+   "L-SEC-107",
+   "L-SEC-109",
+   "L-SOC-001",
+   "L-SOC-015",
+   "L-SOC-021",
+   "L-SOC-022",
+   "L-SOC-059",
+   "L-SOC-067",
+   "L-SOC-078",
+   "L-SOC-099",
+   "L-SOC-109",
+   "L-SYS-092",
+   "L-SYS-122"
+  ],
+  "other_auto_to_agent_ids": [
+   "D-DAT-0012v34",
+   "D-DAT-0013v69",
+   "D-FIO-0018v206",
+   "MIG-P2-B-D-CRY-0015v254-a8732b10"
+  ]
+ },
+ "new_agent_vs_merged_by_reason": {
+  "library lint warnings without fix": 42,
+  "gate violation without fix": 3
+ },
+ "violation_hits_by_rule": {
+  "old_131_13": {
+   "single-use-let": 13065,
+   "loop-rebuilds-array": 1482,
+   "string-concat-chain": 2299,
+   "flag-soup": 115,
+   "hand-rolled-parser": 142,
+   "mut-flag-if": 360
+  },
+  "rerun": {
+   "single-use-let": 12606,
+   "loop-rebuilds-array": 1485,
+   "string-concat-chain": 2298,
+   "flag-soup": 115,
+   "hand-rolled-parser": 148,
+   "mut-flag-if": 360
+  }
+ },
+ "nested_if_ladder": {
+  "counted_by_sweep": false,
+  "why_not_counted": "pattern_sweep.py keeps a diagnostic as a violation only when its rule is in idiom_judge.PATTERN_RULES, a fixed dict that does not list nested-if-ladder; the hits land in other_lint, which never moves a regen row's bucket",
+  "hits": {
+   "regen": {
+    "records": 1107,
+    "hits": 1169,
+    "hits_with_fix": 1169,
+    "records_all_fixed": 1107
+   },
+   "library": {
+    "records": 496,
+    "hits": 709,
+    "hits_with_fix": 701,
+    "records_all_fixed": 490
+   }
+  },
+  "records_with_hits_by_rerun_bucket": {
+   "REGEN": 323,
+   "LEAVE": 737,
+   "AGENT": 513,
+   "EXEMPT": 26,
+   "AUTO": 4
+  },
+  "counterfactual": {
+   "rule_as": "pattern cond-elif-chain form b; deterministic when tkc attaches a fix; saving 1 proxy8k per hit (catalogue)",
+   "buckets": {
+    "regen": {
+     "EXEMPT": 1652,
+     "AUTO": 845,
+     "AGENT": 1203,
+     "LEAVE": 14033,
+     "REGEN": 5649,
+     "records": 23382
+    },
+    "library": {
+     "EXEMPT": 0,
+     "AUTO": 24,
+     "AGENT": 1314,
+     "LEAVE": 245,
+     "REGEN": 0,
+     "records": 1583
+    },
+    "all": {
+     "EXEMPT": 1652,
+     "AUTO": 869,
+     "AGENT": 2517,
+     "LEAVE": 14278,
+     "REGEN": 5649,
+     "records": 24965
+    }
+   },
+   "minus_rerun": {
+    "regen": {
+     "EXEMPT": -26,
+     "AUTO": 628,
+     "AGENT": 0,
+     "LEAVE": -602,
+     "REGEN": 0,
+     "records": 0
+    },
+    "library": {
+     "EXEMPT": 0,
+     "AUTO": 13,
+     "AGENT": 0,
+     "LEAVE": -13,
+     "REGEN": 0,
+     "records": 0
+    },
+    "all": {
+     "EXEMPT": -26,
+     "AUTO": 641,
+     "AGENT": 0,
+     "LEAVE": -615,
+     "REGEN": 0,
+     "records": 0
+    }
+   },
+   "transitions": {
+    "LEAVE->AUTO": 615,
+    "EXEMPT->AUTO": 26
+   }
+  }
+ }
+}
