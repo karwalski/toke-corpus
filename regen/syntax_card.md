@@ -1,4 +1,4 @@
-# toke syntax card — tkc 2.8.0 / v0.4 idiom (every rule verified against the compiler)
+# toke syntax card — tkc 3.1.0 / v0.4 idiom (every rule verified against the compiler)
 
 You write programs in toke, a statically typed compiled language for LLM code generation.
 Every program must pass `tkc --check`. Output ONLY toke source code: no explanations, no
@@ -111,18 +111,16 @@ let k=text.len;                            2.8.0+ (127.6/127.7/127.8 fixed)
 unions — consume with mt. Builder for loops:
 `let b=s.builder(); s.add(b;"x"); let r=s.build(b);`
 String equality: `a=="b"` (works for variables too). Arrays keep `.len`/`.get`/`.set`.
-STILL BROKEN — keep these workarounds:
+Rules:
 - never nest concat — interpolate: `"\(a)\(b)\(c)"`.
 - separator FIRST: `s.join("-";parts)` is correct.
-- a bool interpolates as `1`/`0`, never `true`/`false` (127.15) — use `fmt.bool(b)`,
-  but not in a hot loop (127.48).
-- an interpolated literal nested inside another — `"\(tag("\(n)"))"` — passes
-  `--check` and fails the build with E1002 (127.47).
-- an undeclared identifier inside an interpolation passes `--check` and only fails at
-  link time (127.24): the name resolver never sees interpolation segments.
+- a bool interpolates as `true`/`false` (127.15): `"\(b)"` — no helper needed.
+- an interpolated literal nested inside another — `"\(tag("\(n)"))"` — is a compile
+  error (E4073, 127.47): bind the inner string to a `let`, then interpolate that.
 NO LONGER BROKEN, drop the old workarounds: `text.len` on a str (127.8), interpolating
-a method-call result (127.7) or an `s.fields(text)` result (127.9), and strings built by
-interpolation then stored with `arr.append` (127.10) — all correct as of 2026-09-19.
+a method-call result (127.7) or an `s.fields(text)` result (127.9), strings built by
+interpolation then stored with `arr.append` (127.10), and an undeclared name inside an
+interpolation, which `--check` now reports as E3011 (127.24).
 Stdlib arity and argument order are now checked instead of misbehaving at run time:
 `a.concat(x;y)` is a compile error (E4026; it used to drop y, 127.1).
 `s.len()` with no argument is a compile error (E4026).
@@ -139,19 +137,22 @@ let b=a.map(&dbl);    map with a function reference &name (fn must be declared)
 let c=a.filter(&p);   filter; a.fold(0;&fadd) runs now too (127.4)
 let h=a.contains(v);  contains / find / indexof / slice all work (127.11 fixed)
 let t=a.slice(0;n);   slice(start;len)
-m2=m2.set(k;v)        map write — MUST reassign;  m2.get(k) read;  m2.keys key array
-let g=m.contains(k);  map membership; m.getor(k;d) default lookup (127.31/34/41 fixed)
+m2=m2.set(k;v)        map write — MUST reassign;  m2.keys key array
+let x=mt m.get(k) {$ok:v v;$err:e 0};   map read — PREFERRED: m.get(k) is V!$err
+let d=m.getor(k;0);   default lookup: the stored value, else the default
+let g=m.contains(k);  map membership
 let mi=mut.@(1:10);   int-keyed map literals work (127.20/127.35 fixed)
 ```
-STILL BROKEN — keep these workarounds:
+A map lookup can fail: `m.get(k)` is the error union `V!$err` (a missing key is `$err`;
+a stored `0`, `false` or `""` is `$ok`). Consume it with `mt`, with `m.getor(k;0)`, or
+with `!$err` inside a function returning `T!$err`. `m.get(k)+1` is a compile error (E4031),
+and so is any use of a lookup as a plain value: through a let binding, or passed or
+returned where the value type is expected.
+Maps have value semantics like arrays: `let m2=m.set(k;v);` leaves `m` unchanged (127.55).
+Rules:
 - a bare `arr.set(i;v);` or `m2.set(k;v);` statement does NOT mutate: the new
-  collection is discarded silently (127.3). Always reassign: `arr=arr.set(i;v);`.
-- `m.set` mutates the RECEIVER, so `let m2=m.set(k;v);` also changes `m` (127.55) —
-  maps do NOT yet have the value semantics arrays have. Never rely on an unmodified
-  copy of a map; re-read what you need before the set.
-- appending an expression-if-bound str silently appends nothing (127.51):
-  `let ty=if(c){"a"}el{"b"}; a=a+@(ty);` leaves a.len unchanged. Bind the branches to
-  a plain str through a helper call first.
+  collection is discarded, and `tkc --lint` rejects it (discarded-value-result, 127.3).
+  Always reassign: `arr=arr.set(i;v);`.
 - expression-`if` is not accepted as an operand of `+` or a comparison (127.21):
   `let x=1+if(c){2}el{3};` is a compile error. Bind it first, then use the binding.
 Swap inside a sort:
@@ -163,12 +164,14 @@ r=r.set(j+1;tmp);
 ```
 
 ## Std modules (import as `i=alias:std.name;` — call names lowercase, NO underscores)
-io (println, args, readln), str, json (dec + typed accessors str i64 f64 bool arr),
+io (println, print, readln), args (count, get, all — `args.get` returns `str!$argserr`),
+str, json (dec + typed accessors str i64 f64 bool arr; `json.i64`/`json.u64` read only a
+whole JSON integer — `1.5`, `1e3` or a negative u64 is `$err`),
 fmt (bool arr strs f64 pad — bool→"true"/"false", arr/strs join with sep, f64 fixed
 decimals, pad to width),
 csv (parse, reader, next), file (read write append list delete), env (get set),
-time (now fmt since), log (info warn error debug), test (eq neq ok fail),
-crypto (sha256 tohex randombytes ...), process (exec spawn wait), db (open exec query
+time (now format since), log (info warn error debug), test (eq ok fail),
+crypto (sha256 tohex randombytes ...), process (exec spawn wait), db (open exec one many
 close), http, yaml, toon, i18n, vec (new push pop get len), encoding (b64/hex/url).
 Only call stdlib functions listed here or given in the task context; do not invent others.
 USE the stdlib — never hand-roll a JSON/CSV parser or a per-char scan loop when a
@@ -184,7 +187,7 @@ stdlib call exists.
 - Prefer pure stdin/stdout/argv programs; touch files/network/env/subprocess only when
   the task explicitly requires it.
 
-## Patterns — measured canonical forms (catalogue 6dad9e907cfb; 46 entries, 46 provisional)
+## Patterns — measured canonical forms (catalogue c42dcc38a16c; 46 entries, 46 provisional)
 - cond: if: return per branch, never mut flag [cond-bind-if] · el if chain, never nested if/el [cond-elif-chain] · combine tests in one expr-if, no flags [cond-bool-combine]
 - cond: clamp: one el if chain expression [cond-clamp] · bool text: expr-if picks the literal [cond-bool-render]
 - acc: sum: lp into a mut, not reduce [acc-sum] · count-if: lp + if + counter [acc-count-if] · min: xs.sort(&cmp).get(0); big N: lp [acc-min-max]

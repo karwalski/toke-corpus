@@ -83,9 +83,9 @@ f=main():i64{
 };
 ```
 
-The grammar also has module constants (`name=literal:type;`, after the types),
-but such a declaration passes `--check` and then fails to build in tkc 3.1.0
-(story 127.310): do not write module constants; use a literal or a function.
+Module constants (`name=literal:type;`, after the types) work within their own
+module. Reading another module's constant through its import alias does not build
+yet (story 127.310): never reach for a constant across modules.
 
 Imports are `i=alias:std.module;` and are used as `alias.name(...)`.
 
@@ -203,13 +203,21 @@ f=main():i64{
   a=a.set(0;9);
   let m=mut.@("x":1);
   m=m.set("y";2);
-  <a.get(0)+a.len+m.get("y")-14
+  let y=mt m.get("y") {$ok:v v;$err:e 0};
+  <a.get(0)+a.len+y+m.getor("z";0)-14
 };
 ```
 
 Collections have value semantics: `set` and `append` return a new collection, so
 always reassign the result: `arr=arr.set(i;v)` is correct. Read with `arr.get(i)`, never
 square brackets; the length is the property `arr.len`.
+
+A map lookup can fail, so `m.get(k)` is the error union `V!$err`: a missing key is
+`$err`, and a stored `0`, `false` or `""` is `$ok`. Read it with
+`mt m.get(k) {$ok:v ...;$err:e ...}` (the canonical form), with `m.getor(k;0)` for a
+default, or propagate a miss with `!$err` inside a function returning `T!$err`. Using a lookup
+as a plain value, as in `m.get(k)+1`, is a compile error (E4031). Test membership with
+`m.contains(k)`.
 
 ## Strings
 
@@ -251,5 +259,7 @@ body is an implicit arena (spec v0.3 §11.14).
    `let mut x=0` is WRONG: it draws W2021 and the binding stays immutable.
 8. No `_` in identifiers and no uppercase anywhere.
 9. Match is `mt expr {...}`.
-10. A bare `arr.set(i;v);` statement silently discards the new collection;
-    always reassign: `arr=arr.set(i;v)`.
+10. A bare `arr.set(i;v);` statement discards the new collection (`tkc --lint`
+    rejects it); always reassign: `arr=arr.set(i;v)`.
+11. A map lookup is `V!$err`, never a plain `V`: match it with `mt`, or read it
+    with `getor` and a default, as above.

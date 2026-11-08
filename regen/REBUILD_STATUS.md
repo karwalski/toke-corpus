@@ -41,6 +41,12 @@ corrected to spec v0.4 §A/§E/§G. Gated by `regen/check_card.py`).
 Card v2.1 (story 136.72, 2026-09-27): `card_sha` = `c236ef1dff26` — the gate
 was red on main; 127.1/127.5/127.54 moved to NO LONGER BROKEN and the strings
 fence stopped shadowing the `s` alias. Records banked before it carry `627f63c50b94`.
+Card v2.2 (story 131.112, 2026-11-09): `card_sha` = `d8495db38b93` — taught for the
+131.103 pin (toke 3.1.0 1f39c2998110): a map lookup is `V!$err` (127.244), read with
+`mt m.get(k)` / `m.getor(k;d)` / `!$err`; bools interpolate as `true`/`false`; maps
+have value semantics (127.55); the stale 127.51 / 127.24 / 127.47 notes and the
+non-existent `io.args` / `time.fmt` / `test.neq` / `db.query` names are gone. Any
+131.15 wave prep made against `c236ef1dff26` must be re-prepped against this card.
 
 ## Status
 
