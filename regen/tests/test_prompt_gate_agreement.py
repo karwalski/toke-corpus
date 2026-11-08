@@ -158,13 +158,17 @@ def test_whole_spec_agrees(builder, ttype):
 
 @pytest.mark.parametrize("builder", sorted(BUILDERS))
 def test_bool_follows_its_own_gate(builder):
-    """The two gates DISAGREE on bool (full_program `true`, driver `1`), so an
-    agreeing prompt must render bools differently per task type — proof the
-    prompt is delegating per task type rather than picking one renderer.  A
-    single shared renderer cannot pass this, in ANY of the three prompts."""
+    """131.102: both gates now print bools as `true`/`false` (tkc >= 3.0,
+    127.15/127.94); until 2026-11-08 the driver expected `1`. The delegation
+    proof moves to arrays, where the gates still DISAGREE (full_program prints
+    the list on one line, the driver one line per element) — a single shared
+    renderer cannot pass this, in ANY of the three prompts."""
     cases = [{"inputs": [1], "expected": True}]
     assert _prompt_stdout_lines(BUILDERS[builder](_spec("full_program", cases))) == ["true"]
-    assert _prompt_stdout_lines(BUILDERS[builder](_spec("single_function", cases))) == ["1"]
+    assert _prompt_stdout_lines(BUILDERS[builder](_spec("single_function", cases))) == ["true"]
+    arr = [{"inputs": [1], "expected": [1, 2]}]
+    assert _prompt_stdout_lines(BUILDERS[builder](_spec("full_program", arr))) == ["[1, 2]"]
+    assert _prompt_stdout_lines(BUILDERS[builder](_spec("single_function", arr))) == ["1", "2"]
 
 
 @pytest.mark.parametrize("builder", sorted(BUILDERS))

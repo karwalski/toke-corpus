@@ -59,7 +59,7 @@ def repair_prompt(spec, rec, row):
         if single:
             lines.append("The validation harness appends a main() that calls your target "
                          "function on each test input and prints one line per result "
-                         "(bool prints as 1/0; an array result prints one line per "
+                         "(bool prints as true/false; an array result prints one line per "
                          "element). Your fix must make these EXACT stdout lines come "
                          "out, in order:")
         else:

@@ -5,8 +5,15 @@ test_cases can finally execute: main() calls the target function on each test
 input and prints one line per result value.
 
 Printing uses interpolation, so the comparator must use THESE renderings
-(probe-verified on tkc 2.8.0): bool -> 1/0, integral float -> int, array
-returns -> one printed line per element.
+(probe-verified on tkc 3.1.0 `4967af13`, 2026-11-08): bool -> true/false,
+integral float -> int, array returns -> one printed line per element.
+
+131.102: bools were 1/0 up to tkc 2.8.0. Owner decision 127.15 made `\\(b)`
+print true/false; 127.94 implemented it for scalars and 127.194 for bool
+array elements and bool receiver methods, so every driver shape (scalar,
+@bool, bool!$err ok arm, @bool!$err, `s.contains(...)`) now prints
+true/false. A pre-3.0 tkc (e.g. the 131.73 pin, `toke 2.8.0`) still prints
+1/0 and therefore fails every bool expectation — re-pin before banking.
 """
 import re
 from assemble import assemble
@@ -241,7 +248,7 @@ def lit(v, t):
 def render_out(v):
     """One printed line as the driver's interpolation will render the value."""
     if isinstance(v, bool):
-        return "1" if v else "0"
+        return "true" if v else "false"          # 131.102: tkc >= 3.0 (127.15/127.94)
     if isinstance(v, float) and v == int(v):
         return str(int(v))
     return str(v)

@@ -207,13 +207,19 @@ _BOOL_TEXT = {"true": "1", "false": "0"}
 
 
 def bool_render_only(r):
-    """131.102: a lock_fail whose ONLY difference is bool spelling — tkc >= 3.0
-    interpolates bools as true/false (127.15/127.94) while driver.render_out
-    still expects 1/0. Judged only when got/want are complete (<12 lines)."""
+    """131.60/131.102: a lock_fail whose ONLY difference is bool spelling
+    (true/false vs 1/0, in either direction). Up to 2026-11-08 driver.render_out
+    expected 1/0 while tkc >= 3.0 prints true/false (127.15/127.94); render_out
+    now matches tkc >= 3.0, so under a current compiler this should find none —
+    a hit means the compiler and the driver disagree again (e.g. a pre-3.0 pin).
+    Judged only when got/want are complete (<12 lines)."""
     got, want = r.get("got") or [], r.get("want") or []
     if r.get("verdict") != "lock_fail" or len(want) >= 12 or len(got) >= 12:
         return False
-    return got != want and [_BOOL_TEXT.get(x, x) for x in got] == want
+
+    def norm(xs):
+        return [_BOOL_TEXT.get(x, x) for x in xs]
+    return got != want and norm(got) == norm(want)
 
 
 def summarise(rows, stamp, auto):
