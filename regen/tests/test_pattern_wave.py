@@ -397,6 +397,21 @@ def test_prep_max_batches_defers(corpus):
     assert not os.path.exists(paths.sub("batches", "batch_001.json"))
 
 
+def test_prep_skips_library_rows_by_default(corpus):
+    """Z95: the merged routing carries library AGENT rows (131.17's wave)."""
+    lib = corpus["root"] / "with_library.jsonl"
+    with open(corpus["bucket"]) as f:
+        rows = [json.loads(line) for line in f]
+    rows = rows[:2] + [dict(rows[2], source="library")]
+    lib.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    paths = pc.Paths(corpus=corpus["dir"], workdir=str(corpus["root"] / "work" / "src"),
+                     ledger=str(corpus["root"] / "empty_ledger.jsonl"))
+    assert pattern_prep.prepare(paths, str(lib))["prepared"] == 2
+    paths = pc.Paths(corpus=corpus["dir"], workdir=str(corpus["root"] / "work" / "src_all"),
+                     ledger=str(corpus["root"] / "empty_ledger.jsonl"))
+    assert pattern_prep.prepare(paths, str(lib), skip_source=None)["prepared"] == 3
+
+
 def test_perf_gate_decides_on_the_clock(tmp_path):
     """131.100: the one input that used to flip test_wave_end_to_end. Same
     record, same binaries: an equal clock passes the perf gate, a candidate

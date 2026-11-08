@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """Epic 131.15 — prepare the agent pattern-rewrite wave (AGENT bucket).
 
-Input: audit/pattern_sweep.jsonl (131.13) rows with bucket == AGENT. Output,
+Input: audit/pattern_sweep.merged.jsonl rows with bucket == AGENT, minus
+`source: library` rows (Z95: the merged routing = the 131.64 re-run sweep + every routing
+patch, rebuilt by route_merge.py; the bare 131.13 pattern_sweep.jsonl lacks
+every patch, and its library rows belong to 131.17's library_prep). Output,
 under work/pattern_131/ (the 129 repair-wave layout, so the workflow and the
 check/bank scripts share one contract):
   specs/<tid>.json     spec (with a_tests-injected test cases)
@@ -158,10 +161,13 @@ def _clear_stale_batches(batch_dir, keep):
 
 def prepare(paths, bucket_path, bucket_name="AGENT", max_batches=pc.MAX_BATCHES,
             limit=None, embed_card=True, specs=None, catalogue=None, rule_texts=None,
-            only=None):
+            only=None, skip_source="library"):
     """Prep the wave. Returns the manifest dict (also written to
-    workdir/manifest.json)."""
+    workdir/manifest.json). Rows whose sweep `source` is `skip_source` are
+    dropped (library rows are 131.17's wave); None keeps every row."""
     rows = pc.load_bucket(bucket_path, bucket_name)
+    if skip_source:
+        rows = {t: r for t, r in rows.items() if r.get("source") != skip_source}
     if only:
         rows = {t: r for t, r in rows.items() if t in set(only)}
     specs = specs if specs is not None else load_specs(paths.corpus)
@@ -267,7 +273,9 @@ def prepare(paths, bucket_path, bucket_name="AGENT", max_batches=pc.MAX_BATCHES,
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--bucket", default=os.path.join(pc.CORPUS, "audit", "pattern_sweep.jsonl"))
+    ap.add_argument("--bucket", default=None,
+                    help="default <corpus>/audit/pattern_sweep.merged.jsonl (route_merge.py output)")
+    ap.add_argument("--skip-source", default="library", help="sweep row source to leave out ('' = none)")
     ap.add_argument("--bucket-name", default="AGENT")
     ap.add_argument("--corpus", default=pc.CORPUS)
     ap.add_argument("--workdir", default=None, help="default <corpus>/work/pattern_131")
@@ -287,8 +295,9 @@ def main(argv=None):
                          catalogue=args.catalogue, card=args.card)
         print(f"pattern_prep: tkc {pinned.version} sha256 {pinned.sha256[:12]} (pinned copy {pinned.path})",
               file=sys.stderr)
-        m = prepare(paths, args.bucket, args.bucket_name, args.max_batches, args.limit,
-                    not args.no_embed_card, only=args.only)
+        bucket = args.bucket or os.path.join(args.corpus, "audit", "pattern_sweep.merged.jsonl")
+        m = prepare(paths, bucket, args.bucket_name, args.max_batches, args.limit,
+                    not args.no_embed_card, only=args.only, skip_source=args.skip_source or None)
     print(json.dumps({k: v for k, v in m.items() if k not in ("deferred_task_ids", "unbanked_task_ids")}))
     if m["unbanked_candidates"]:
         print(f"WARNING: {m['unbanked_candidates']} gen/pat_*.tk candidates were already on disk "
