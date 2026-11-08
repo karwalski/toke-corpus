@@ -34,7 +34,7 @@ story's routing. Until 2026-11-09 they were applied with
 **Since Z95 the merged routing is built by `regen/route_merge.py`** (no `cat`):
 the 131.64 re-run sweep (`audit/pattern_sweep.131.64.jsonl`, sha256
 `b8e0f969…`) with every patch REPLAYED in this order — 131.42, 131.67,
-131.15.looprebuild, 131.43, 131.68, 131.83, 131.106, 131.105 — each adding only
+131.15.looprebuild, 131.43, 131.68, 131.83, 131.106, 131.105, 131.111 — each adding only
 its own violation, bucket and reason to the fresh row (REGEN sticky for the
 A-*/full_program class). `route_merge.py --check` proves the file on disk is
 that build; `pattern_prep.py` now reads it by default. The previous merged
@@ -44,14 +44,21 @@ file is kept as `audit/pattern_sweep.merged.20260919.jsonl`.
 |---|---|
 | `route_merge_131.15.json` | Z95: the merged routing — base sweep sha, each patch file (rows, sha, origin), per-patch replay counts, buckets re-run vs merged, transitions, and the REGEN rows outside the A-*/full_program class (no regeneration wave: 131.109). Tool: `regen/route_merge.py [--check]`. |
 | `check_routing_131.106.json` | 131.106: `tkc --check` over all 24,965 live sources with the pinned integrate tkc; every banked record that fails is routed (REGEN for the A-*/full_program class, AGENT otherwise) via `audit/pattern_sweep.131.106.patch.jsonl`, with its diagnostics in the reason; gate result after routing. Tool: `regen/check_routing_131_106.py run|route|gate [--live]`; rows `corpus/regen_v04/audit/check_routing_131.106.jsonl`. The gate test is `regen/tests/test_check_routing_131_106.py`. |
+| `check_routing_131.111.json` | 131.111 (2026-11-09): the same check on the 131.103 corpus pin (toke 3.1.0 `1f39c2998110`, sha256 `d4003759…`). 195 banked records fail (regen 190, library 5). The 20 that are new since 131.106 are exactly the 127.244 `m.get(k)` E4031 set (A-STR 9, A-ERR 8, D-CRY 2, D-FIO 1). `route --story 131.111` routes only those 20 (`audit/pattern_sweep.131.111.patch.jsonl`: REGEN->REGEN 16, LEAVE->AGENT 4). The 131.106 patch is left unchanged. A-ERR-0030v39 from 131.106 now passes (banked compile-only by 136.72). Gate after routing: 0 violations. |
 
 131.105's three records (`A-ARR-0017v41`, `D-CFG-0018v98`, `D-FIO-0002v99`)
 are routed to AGENT by `regen/route_131_105.py` (`audit/pattern_sweep.131.105.patch.jsonl`),
 the reason naming the archived original to restore the `let` from.
 
-Rebuild sequence (each step builds the routing it needs in memory from the
-patches before it): `check_routing_131_106.py run` → `check_routing_131_106.py route`
-→ `route_131_105.py` → `route_merge.py` → `check_routing_131_106.py gate`.
+Rebuild sequence. The patches on disk are the record, and `route_merge.py`
+rebuilds the merged file from them (`--check` proves it). The original build
+order was `check_routing_131_106.py run` → `route` → `route_131_105.py` →
+`route_merge.py` → `gate`. To route new failures after a checker change
+(131.111), do not re-run the plain 131.106 `route`, which would fold them into
+the 131.106 patch. Instead run `check_routing_131_106.py run` →
+`route --story <next CHECK_STORIES entry>` → `route_merge.py` → `gate`. A later
+story routes only the failures no earlier check-routing patch covered. `run`
+and `gate --live` default to the corpus pin (`regen/corpus_pin.py`, 131.103).
 
 Byte snapshot: `~/tk/archive/toke-corpus-regen_v04-freeze129-20260819/` (local
 archive, see its `MANIFEST.md`). Git tag: `freeze-129-20260819`.

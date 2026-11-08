@@ -37,12 +37,22 @@ error (131.14 rejects them as `preexisting:compile`).
          regen/tests/test_check_routing_131_106.py runs the same gate over the
          on-disk rows.
 
-Summary -> regen/freeze/check_routing_131.106.json. Reads records; writes
+Summary -> regen/freeze/check_routing_<story>.json. Reads records; writes
 nothing under corpus/regen_v04/<CAT>/.
+
+Later checker changes (131.111). When a newer tkc rejects more banked
+records, route them under that story: `route --story 131.111` writes
+audit/pattern_sweep.131.111.patch.jsonl holding ONLY the failing records that
+no earlier check-routing patch (CHECK_STORIES before it) routed, so the
+131.106 patch stays the record of what 131.106 found. route_merge.PATCHES
+replays it after 131.105.
+
+--tkc defaults to the corpus pin (corpus_pin.default_tkc(): $TKC, else
+~/tk/archive/pins/tkc-131.103/tkc, else ~/tk/toke/tkc).
 
 Usage (toke-corpus root):
   python3 regen/check_routing_131_106.py run   [--tkc PATH] [--toke-repo DIR] [--jobs 2]
-  python3 regen/check_routing_131_106.py route
+  python3 regen/check_routing_131_106.py route [--story 131.111 --compare IDS]
   python3 regen/route_merge.py                 # rebuild merged with the new patch
   python3 regen/check_routing_131_106.py gate  [--live --tkc PATH]
 """
@@ -54,10 +64,12 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import corpus_pin
 import route_merge
 import route_patch
 import tkc_pin
@@ -67,7 +79,15 @@ RULE = "does-not-compile"
 CORPUS = route_merge.CORPUS
 FORBIDDEN = ("LEAVE", "EXEMPT", "AUTO")           # buckets that cannot fix a compile failure
 ROWS_NAME = f"check_routing_{STORY}.jsonl"
-SUMMARY = os.path.join(HERE, "freeze", f"check_routing_{STORY}.json")
+# every story that routes --check failures with this tool, in route_merge order
+CHECK_STORIES = ("131.106", "131.111")
+
+
+def summary_path(story=STORY):
+    return os.path.join(HERE, "freeze", f"check_routing_{story}.json")
+
+
+SUMMARY = summary_path()
 TS = 1794182400                                   # 2026-11-09T00:00:00Z: fixed so the patch is reproducible
 
 
@@ -197,7 +217,7 @@ def decide(row):
     return "REGEN" if in_regen_class(row) else "AGENT"
 
 
-def reason_for(r, tkc_desc, tests=True):
+def reason_for(r, tkc_desc, tests=True, story=STORY):
     errs = r.get("errors") or []
     if not errs:
         what = r.get("error") or f"exit {r.get('rc')}"
@@ -209,16 +229,17 @@ def reason_for(r, tkc_desc, tests=True):
             "`tkc --check` with every printed line unchanged"
             + ("" if tests else " (no test cases: keep the program's logic exactly, change only what the "
                "diagnostic names)")
-            + " (regen/freeze/check_routing_131.106.json)")
+            + f" (regen/freeze/check_routing_{story}.json)")
 
 
-def route_rows(fail, cur, specs, tkc_desc, ts=TS):
+def route_rows(fail, cur, specs, tkc_desc, ts=TS, story=STORY):
     out, dest = [], collections.Counter()
     for tid in sorted(fail):
         r = fail[tid]
         base = cur.get(tid)
         bucket = decide(r)
-        row = route_patch.merge_row(base, tid, STORY, RULE, bucket, reason_for(r, tkc_desc, has_tests(tid, r, specs)),
+        row = route_patch.merge_row(base, tid, story, RULE, bucket,
+                                    reason_for(r, tkc_desc, has_tests(tid, r, specs), story),
                                     category=r.get("category"), task_type=r.get("task_type"), ts=ts)
         row.setdefault("source", r.get("source"))
         out.append(row)
@@ -226,10 +247,30 @@ def route_rows(fail, cur, specs, tkc_desc, ts=TS):
     return out, dest
 
 
-def merged_before(corpus):
+def merged_before(corpus, story=STORY):
     """Current routing without this story's patch (and anything after it)."""
-    _, merged, _, _ = route_merge.build(corpus, patches=_patches_upto(STORY, include=False))
+    _, merged, _, _ = route_merge.build(corpus, patches=_patches_upto(story, include=False))
     return merged
+
+
+def routed_earlier(corpus, story):
+    """task_ids an earlier check-routing story already routed (its patch on disk)."""
+    ids = set()
+    for s in CHECK_STORIES[:CHECK_STORIES.index(story)]:
+        ids |= set(route_merge.read_rows(route_patch.patch_path(corpus, s)))
+    return ids
+
+
+def read_compare(path):
+    """Expected failing ids: a Z91 check_delta_summary.json (127.304) or a text
+    file with one id per line (Z92's corpus_mapget_ids.txt; a MANIFEST `id`
+    prefix such as `P3-` is dropped)."""
+    if path.endswith(".json"):
+        with open(path) as f:
+            return json.load(f)["preexisting_fail_both"]["task_ids"]
+    with open(path) as f:
+        ids = [x.strip() for x in f if x.strip()]
+    return [x.split("-", 1)[1] if x.startswith("P") and x[1:2].isdigit() and "-" in x else x for x in ids]
 
 
 def _patches_upto(story, include):
@@ -250,8 +291,10 @@ def gate(check_rows, merged):
 
 
 # -------------------------------------------------------------- summary ---
-def summarise(meta, rows, cur, patch, dest, specs, merged_after=None, compare_ids=None):
-    fail = failing(rows)
+def summarise(meta, rows, cur, patch, dest, specs, merged_after=None, compare_ids=None,
+              story=STORY, earlier=()):
+    fail_all = failing(rows)
+    fail = {t: r for t, r in fail_all.items() if t not in set(earlier)}
     codes = collections.Counter()
     first = collections.Counter()
     for r in fail.values():
@@ -264,10 +307,11 @@ def summarise(meta, rows, cur, patch, dest, specs, merged_after=None, compare_id
     z91 = None
     if compare_ids is not None:
         ids = set(compare_ids)
-        z91 = {"z91_ids": len(ids), "still_failing": len(ids & set(fail)),
+        z91 = {"expected_ids": len(ids), "still_failing": len(ids & set(fail)),
                "now_passing": sorted(ids - set(fail)), "new_failures": sorted(set(fail) - ids)}
     out = {
-        "story": STORY,
+        "story": story,
+        "date": time.strftime("%Y-%m-%d", time.gmtime(TS)),
         "tkc": meta.get("tkc"),
         "records_checked": len(rows),
         "rc": dict(collections.Counter(f"{r['source']} rc={r.get('rc')}" for r in rows.values())),
@@ -278,17 +322,24 @@ def summarise(meta, rows, cur, patch, dest, specs, merged_after=None, compare_id
                            "by_source_task_type_bucket_before": dict(sorted(by_class.items())),
                            "with_test_cases": sum(1 for t in fail if (specs.get(t) or {}).get("test_cases")),
                            "task_ids": sorted(fail)},
-        "vs_z91": z91,
-        "routing": {"patch": f"audit/pattern_sweep.{STORY}.patch.jsonl", "rows": len(patch),
+        "vs_expected": z91,
+        "routing": {"patch": f"audit/pattern_sweep.{story}.patch.jsonl", "rows": len(patch),
                     "bucket_before_to_after": {f"{a}->{b}": n for (a, b), n in sorted(dest.items(), key=str)},
                     "rule": "REGEN for the REGEN class (regen A-*/full_program, regenerated whole by 131.16); "
                             "AGENT for every other record (no regeneration path exists for them: 131.109)"},
     }
+    if earlier:
+        stale = sorted(set(earlier) - set(fail_all))
+        out["earlier_check_routing"] = {
+            "stories": [s for s in CHECK_STORIES[:CHECK_STORIES.index(story)]],
+            "records_routed": len(set(earlier)),
+            "still_failing": len(set(earlier) & set(fail_all)),
+            "now_passing": stale}
     if merged_after is not None:
         bad = gate(rows, merged_after)
         out["gate_after"] = {"forbidden": list(FORBIDDEN), "violations": len(bad), "first": bad[:20],
                              "failing_by_bucket": dict(collections.Counter(
-                                 (merged_after.get(t) or {}).get("bucket") for t in fail))}
+                                 (merged_after.get(t) or {}).get("bucket") for t in fail_all))}
     return out
 
 
@@ -296,16 +347,18 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("cmd", choices=("run", "route", "gate"))
     ap.add_argument("--corpus", default=CORPUS)
-    ap.add_argument("--tkc", default=None)
+    ap.add_argument("--tkc", default=None, help="default: corpus_pin.default_tkc() (the 131.103 pin)")
     ap.add_argument("--toke-repo", default=None)
     ap.add_argument("--jobs", type=int, default=2)
     ap.add_argument("--live", action="store_true", help="gate: re-run the check first")
-    ap.add_argument("--summary", default=SUMMARY)
+    ap.add_argument("--story", default=STORY, choices=CHECK_STORIES,
+                    help="route: the story routing the failures (a later one routes only new failures)")
+    ap.add_argument("--summary", default=None, help="default regen/freeze/check_routing_<story>.json")
     ap.add_argument("--compare", default=None,
-                    help="route: Z91 check_delta_summary.json (127.304) to compare the failing set with")
+                    help="route: expected failing ids (Z91 check_delta_summary.json, or one id per line)")
     a = ap.parse_args(argv)
     if a.cmd == "run" or (a.cmd == "gate" and a.live):
-        stamp, _ = run_check(a.corpus, a.tkc, a.toke_repo, a.jobs)
+        stamp, _ = run_check(a.corpus, a.tkc or corpus_pin.default_tkc(), a.toke_repo, a.jobs)
         print(json.dumps({"rows": rows_path(a.corpus), "tkc": stamp.get("tkc_version")}))
         if a.cmd == "run":
             return 0
@@ -313,18 +366,18 @@ def main(argv=None):
     if a.cmd == "route":
         import audit
         specs = audit.load_specs(a.corpus)
-        cur = merged_before(a.corpus)
+        story = a.story
+        cur = merged_before(a.corpus, story)
         tkc = meta.get("tkc") or {}
         desc = f"{tkc.get('tkc_version')} (bin {str(tkc.get('tkc_bin_sha'))[:12]})"
-        patch, dest = route_rows(failing(rows), cur, specs, desc)
-        path = route_patch.write_patch(a.corpus, STORY, patch)
-        _, merged_after, _, _ = route_merge.build(a.corpus, patches=_patches_upto(STORY, include=True))
-        ids = None
-        if a.compare:
-            with open(a.compare) as f:
-                ids = json.load(f)["preexisting_fail_both"]["task_ids"]
-        s = summarise(meta, rows, cur, patch, dest, specs, merged_after, ids)
-        with open(a.summary, "w") as f:
+        earlier = routed_earlier(a.corpus, story)
+        fail = {t: r for t, r in failing(rows).items() if t not in earlier}
+        patch, dest = route_rows(fail, cur, specs, desc, story=story)
+        path = route_patch.write_patch(a.corpus, story, patch)
+        _, merged_after, _, _ = route_merge.build(a.corpus, patches=_patches_upto(story, include=True))
+        ids = read_compare(a.compare) if a.compare else None
+        s = summarise(meta, rows, cur, patch, dest, specs, merged_after, ids, story, earlier)
+        with open(a.summary or summary_path(story), "w") as f:
             json.dump(s, f, indent=1)
             f.write("\n")
         print(json.dumps({"patch": path, "rows": len(patch), "dest": s["routing"]["bucket_before_to_after"],

@@ -1,6 +1,9 @@
 """131.106: banked records that fail `tkc --check` are routed to a wave that
 fixes them, and the gate that keeps it so. 131.105: the three RT003->RT002
-records are routed to the AGENT wave."""
+records are routed to the AGENT wave. 131.111: a later story routes only the
+failures no earlier check-routing patch covered. 131.103: the gate runs on
+the corpus pin by default."""
+import json
 import os
 import sys
 
@@ -8,6 +11,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import check_routing_131_106 as cr
+import corpus_pin
 import route_131_105 as r105
 import route_merge as rm
 import tkc_pin
@@ -82,6 +86,51 @@ def test_route_131_105_targets_the_three_records_with_the_archive_path():
         assert "RT003" in r["bucket_reason"] and r["violations"][-1]["rule"] == r105.RULE
 
 
+def test_check_stories_replay_in_route_merge_order():
+    stories = [s for s, _ in rm.PATCHES]
+    assert all(s in stories for s in cr.CHECK_STORIES)
+    assert [s for s in stories if s in cr.CHECK_STORIES] == list(cr.CHECK_STORIES)
+    assert cr.CHECK_STORIES[0] == cr.STORY
+
+
+def test_routed_earlier_reads_only_earlier_check_patches(tmp_path):
+    (tmp_path / "audit").mkdir()
+    for story, ids in (("131.106", ["a", "b"]), ("131.111", ["c"])):
+        (tmp_path / "audit" / f"pattern_sweep.{story}.patch.jsonl").write_text(
+            "".join(json.dumps(_cur(t, "AGENT", story)) + "\n" for t in ids))
+    assert cr.routed_earlier(str(tmp_path), "131.106") == set()
+    assert cr.routed_earlier(str(tmp_path), "131.111") == {"a", "b"}
+
+
+def test_later_story_routes_only_new_failures_and_names_itself():
+    fail = {"old": _chk("old", 1), "new": _chk("new", 1)}
+    earlier = {"old", "gone"}
+    new = {t: r for t, r in fail.items() if t not in earlier}
+    rows, _ = cr.route_rows(new, {"new": _cur("new", "LEAVE")}, {}, "toke 3.1.0 (bin d400)", story="131.111")
+    assert [r["task_id"] for r in rows] == ["new"]
+    r = rows[0]
+    assert r["story"] == "131.111" and r["bucket"] == "AGENT"
+    assert r["bucket_reason"].startswith("131.111: banked as accepted but does not compile on toke 3.1.0")
+    assert r["bucket_reason"].endswith("(regen/freeze/check_routing_131.111.json)")
+    s = cr.summarise({}, fail, {"new": _cur("new", "LEAVE")}, rows, {}, {}, merged_after={},
+                     compare_ids=["new"], story="131.111", earlier=earlier)
+    assert s["banked_failing"]["task_ids"] == ["new"]
+    assert s["vs_expected"] == {"expected_ids": 1, "still_failing": 1, "now_passing": [], "new_failures": []}
+    assert s["earlier_check_routing"] == {"stories": ["131.106"], "records_routed": 2,
+                                          "still_failing": 1, "now_passing": ["gone"]}
+    assert s["gate_after"]["violations"] == 2          # merged_after={} routes neither failure
+
+
+def test_read_compare_takes_json_or_id_lines(tmp_path):
+    t = tmp_path / "ids.txt"
+    t.write_text("P3-A-STR-0034v1\nP3-D-CRY-0002v123\n\nMIG-P2-A-A-STR-0055v32-1ae5d17f\nA-ERR-0001v1\n")
+    assert cr.read_compare(str(t)) == ["A-STR-0034v1", "D-CRY-0002v123",
+                                       "MIG-P2-A-A-STR-0055v32-1ae5d17f", "A-ERR-0001v1"]
+    j = tmp_path / "z91.json"
+    j.write_text(json.dumps({"preexisting_fail_both": {"task_ids": ["x"]}}))
+    assert cr.read_compare(str(j)) == ["x"]
+
+
 # ----------------------------------------------- the gate over real data ---
 ROWS = cr.rows_path(rm.CORPUS)
 MERGED = os.path.join(rm.CORPUS, "audit", "pattern_sweep.merged.jsonl")
@@ -96,7 +145,7 @@ def test_no_failing_banked_record_is_routed_leave_exempt_or_auto():
     too slow for this suite) — the test says so instead of passing on stale
     rows."""
     meta, rows = cr.read_check(ROWS)
-    want = os.environ.get("TKC") or os.path.expanduser("~/tk/toke/tkc")
+    want = corpus_pin.default_tkc()
     have = (meta.get("tkc") or {}).get("tkc_bin_sha")
     cur = tkc_pin.bin_sha(want) if os.path.exists(want) else None
     if cur and have != cur:
