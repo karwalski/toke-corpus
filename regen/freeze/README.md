@@ -21,12 +21,37 @@ ledger + provenance schemas every Epic 131 rewrite wave must follow.
 | `rewrite_131_reconcile.131.80.json` | 131.80: `ledger/rewrite_131.jsonl` reconciled against `audit/replaced/131/` (bytes checked against the freeze-129 tarball), the freeze manifest, `MANIFEST.jsonl` and each record's `regen.rewrite131` block — per-wave counts for AUDIT_131. Tool: `regen/reconcile_rewrite_131.py`. |
 | `migrate_lock_131.60.json` | 131.60: every `migrate_fix` record given a test lock where one exists (route (a): the A-side base named inside the MIG id has an execution-verified a_tests file whose signature a declared function matches) and the ORIGINAL run against it; every other record is listed as compile-only (route (c), stated explicitly). Route (b) is unavailable by construction. Of 2,226 migrate_fix records (tkc 3.1.0 `5774da8c`): lock_pass 485, lock_fail 310 (159 of them differ ONLY in bool spelling, `true` vs the driver's stale `1` — 131.102; 151 genuinely wrong), driver_fail 8, own main() 24, compile-only 1,399 (1,355 D-side/N-series with no a_tests bank, 43 signature mismatch, 1 ambiguous target). AUTO bucket (211): 50 / 45 (23 bool-only) / 2 / 1 / 113. Tool: `regen/migrate_lock.py --census` (library `lock_spec` / `drive_spec`, used by `diff_check` and `pattern_autofix`); rows `corpus/regen_v04/audit/migrate_lock_131.60.jsonl`. |
 | `interp_name_check_131.83.json` | 131.83: every banked-accepted record whose `tkc --check` diagnostic lies inside an interpolation segment (segments were neither name-resolved nor type-checked before toke 127.24). Tool: `regen/interp_name_check_131_83.py [--route]`; rows `corpus/regen_v04/audit/interp_name_check_131.83.jsonl`, patch `audit/pattern_sweep.131.83.patch.jsonl`. |
+| `pattern_sweep_131.64.json` | 131.64: the 131.13 sweep re-run after the `nested-if-ladder` lint rule shipped (tkc 3.1.0 `9f1eb921`, catalogue `c42dcc38a16c`, thresholds unchanged), compared with the 131.13 output and the merged routing. Buckets 131.13 → re-run (all 24,965): AUTO 696 → 228, AGENT 2,469 → 2,517, LEAVE 14,473 → 14,893, EXEMPT 1,678 and REGEN 5,649 unchanged. The moves are the 131.14 auto wave (432 AUTO rows whose source changed) and 42 library rows whose `unused-let` warnings lost their fix (127.81/127.82); **`nested-if-ladder` moves nothing**: 1,107 regen + 496 library records carry 1,878 ladder hits, but `idiom_judge.PATTERN_RULES` does not list the rule, so the sweep files them under `other_lint`. Counterfactual with the rule counted as `cond-elif-chain` form b (deterministic when fixed): 641 rows move LEAVE/EXEMPT → AUTO, AGENT unchanged. Tool: `regen/pattern_sweep_131_64.py` over a `pattern_sweep.py run`/`report` into a read-only corpus mirror. |
 
 Routing patches (131.43 / 131.68 / 131.83, `regen/route_patch.py`) are built
 from each record's CURRENT sweep row (`audit/pattern_sweep.merged.jsonl` plus
 the earlier patches of this list), so applying them never drops another
-story's routing. Apply after the patches already merged:
-`cat audit/pattern_sweep.jsonl audit/pattern_sweep.131.42.patch.jsonl audit/pattern_sweep.131.67.patch.jsonl audit/pattern_sweep.131.15.looprebuild.patch.jsonl audit/pattern_sweep.131.43.patch.jsonl audit/pattern_sweep.131.68.patch.jsonl audit/pattern_sweep.131.83.patch.jsonl > audit/pattern_sweep.merged.jsonl`.
+story's routing. Until 2026-11-09 they were applied with
+`cat audit/pattern_sweep.jsonl audit/pattern_sweep.131.42.patch.jsonl audit/pattern_sweep.131.67.patch.jsonl audit/pattern_sweep.131.15.looprebuild.patch.jsonl audit/pattern_sweep.131.43.patch.jsonl audit/pattern_sweep.131.68.patch.jsonl audit/pattern_sweep.131.83.patch.jsonl > audit/pattern_sweep.merged.jsonl`
+— but the on-disk merged file was never rebuilt after 131.43 and 131.83, and
+`cat` after a newer sweep would restore the older sweep's rows.
+
+**Since Z95 the merged routing is built by `regen/route_merge.py`** (no `cat`):
+the 131.64 re-run sweep (`audit/pattern_sweep.131.64.jsonl`, sha256
+`b8e0f969…`) with every patch REPLAYED in this order — 131.42, 131.67,
+131.15.looprebuild, 131.43, 131.68, 131.83, 131.106, 131.105 — each adding only
+its own violation, bucket and reason to the fresh row (REGEN sticky for the
+A-*/full_program class). `route_merge.py --check` proves the file on disk is
+that build; `pattern_prep.py` now reads it by default. The previous merged
+file is kept as `audit/pattern_sweep.merged.20260919.jsonl`.
+
+| File | What |
+|---|---|
+| `route_merge_131.15.json` | Z95: the merged routing — base sweep sha, each patch file (rows, sha, origin), per-patch replay counts, buckets re-run vs merged, transitions, and the REGEN rows outside the A-*/full_program class (no regeneration wave: 131.109). Tool: `regen/route_merge.py [--check]`. |
+| `check_routing_131.106.json` | 131.106: `tkc --check` over all 24,965 live sources with the pinned integrate tkc; every banked record that fails is routed (REGEN for the A-*/full_program class, AGENT otherwise) via `audit/pattern_sweep.131.106.patch.jsonl`, with its diagnostics in the reason; gate result after routing. Tool: `regen/check_routing_131_106.py run|route|gate [--live]`; rows `corpus/regen_v04/audit/check_routing_131.106.jsonl`. The gate test is `regen/tests/test_check_routing_131_106.py`. |
+
+131.105's three records (`A-ARR-0017v41`, `D-CFG-0018v98`, `D-FIO-0002v99`)
+are routed to AGENT by `regen/route_131_105.py` (`audit/pattern_sweep.131.105.patch.jsonl`),
+the reason naming the archived original to restore the `let` from.
+
+Rebuild sequence (each step builds the routing it needs in memory from the
+patches before it): `check_routing_131_106.py run` → `check_routing_131_106.py route`
+→ `route_131_105.py` → `route_merge.py` → `check_routing_131_106.py gate`.
 
 Byte snapshot: `~/tk/archive/toke-corpus-regen_v04-freeze129-20260819/` (local
 archive, see its `MANIFEST.md`). Git tag: `freeze-129-20260819`.

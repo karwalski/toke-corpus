@@ -149,3 +149,51 @@ def test_u64_driver_compiles_and_runs():
         assert b.returncode == 0, b.stdout + b.stderr
         r = subprocess.run([os.path.join(d, "u")], capture_output=True, text=True, timeout=15)
         assert r.returncode == 0 and r.stdout.splitlines() == drv.expected_lines(SPEC)
+
+
+# ------------------------------------------------------- 131.102: bools ---
+def test_render_out_bool_is_true_false():
+    # tkc >= 3.0 interpolates bools as true/false (owner decision 127.15,
+    # implemented 127.94 / 127.194); the driver's comparator must agree
+    assert drv.render_out(True) == "true" and drv.render_out(False) == "false"
+    assert drv.render_out(1) == "1" and drv.render_out(0) == "0"          # ints untouched
+    assert drv.render_out(2.0) == "2" and drv.render_out(2.5) == "2.5"
+    spec = {"test_cases": [{"inputs": [1], "expected": True},
+                           {"inputs": [2], "expected": [True, False, True]},
+                           {"inputs": [3], "expected": 0}]}
+    assert drv.expected_lines(spec) == ["true", "true", "false", "true", "0"]
+
+
+# Every printing shape append_main emits for a bool result: scalar, @bool
+# (array element), a bool receiver method (s.contains), and both err-union ok
+# arms. 127.94 fixed the scalar; 127.194 the array element and the receiver
+# method — so all of them must print what render_out says.
+_BOOL_SHAPES = [
+    ("isev", "f=isev(n:i64):bool{<n%2==0};", ["i64"], "bool", [[2], [3]], [True, False]),
+    ("flags", "f=flags(n:i64):@bool{<@(n>0;n<0;n==0)};", ["i64"], "@bool", [[1]], [[True, False, False]]),
+    ("hasx", "i=s:std.str;\nf=hasx(t:str):bool{<s.contains(t;\"x\")};", ["str"], "bool",
+     [["axb"], ["ab"]], [True, False]),
+    ("chk", "t=$e{$bad:bool};\nf=chk(n:i64):bool!$e{if(n<0){<$e{$bad:true}};<n>5};", ["i64"], "bool!$e",
+     [[7], [2]], [True, False]),
+    ("chka", "t=$e{$bad:bool};\nf=chka(n:i64):@bool!$e{if(n<0){<$e{$bad:true}};<@(n>5;n<5)};", ["i64"],
+     "@bool!$e", [[7]], [[True, False]]),
+]
+
+
+@pytest.mark.skipif(not HAVE_TKC, reason="tkc not available")
+@pytest.mark.parametrize("name,body,in_t,out_t,ins,exp", _BOOL_SHAPES, ids=[s[0] for s in _BOOL_SHAPES])
+def test_bool_shapes_print_what_render_out_expects(name, body, in_t, out_t, ins, exp):
+    spec = {"task_id": "A-CND-0001v1", "task_type": "single_function", "input_types": in_t,
+            "output_type": out_t, "description": f"Write f={name}(...).",
+            "test_cases": [{"inputs": i, "expected": e} for i, e in zip(ins, exp)]}
+    out, err = drv.append_main(spec, "m=harness;\ni=io:std.io;\n" + body + "\n")
+    assert err is None, err
+    with tempfile.TemporaryDirectory() as d:
+        tk = os.path.join(d, name + ".tk")
+        with open(tk, "w") as f:
+            f.write(out)
+        b = subprocess.run([TKC, tk, "-o", os.path.join(d, name)], capture_output=True, text=True,
+                           timeout=90, check=False)
+        assert b.returncode == 0, b.stdout + b.stderr
+        r = subprocess.run([os.path.join(d, name)], capture_output=True, text=True, timeout=15, check=False)
+        assert r.returncode == 0 and r.stdout.splitlines() == drv.expected_lines(spec)

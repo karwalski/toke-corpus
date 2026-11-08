@@ -66,7 +66,7 @@ def expected_stdout_lines(spec, tc):
                       audit.audit_one) — one line, split on embedded newlines
       single_function driver.expected_lines (audit.audit_one via
                       driver.append_main) — array results are one line per
-                      element and bools print 1/0, not true/false
+                      element and bools print true/false (tkc >= 3.0, 131.102)
 
     Single source of truth: this function delegates, it never formats."""
     if spec.get("task_type", "full_program") == "single_function":
@@ -84,7 +84,7 @@ def format_test_cases(spec):
     if single:
         head = ("Test cases. You write no main(): the harness appends one that calls the "
                 "target function on each input in order and prints one line per result "
-                "(bool prints 1/0; an array result prints one line per element). Your "
+                "(bool prints true/false; an array result prints one line per element). Your "
                 "function must make these EXACT stdout lines come out, in order:")
     else:
         head = ("Test cases. main() must exercise these inputs IN ORDER and print, with "

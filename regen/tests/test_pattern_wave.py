@@ -8,6 +8,16 @@ or $TKC) — the whole wave is exercised for real: prep -> worker candidates ->
 check_pattern -> bank --dry-run (writes nothing) -> bank --bank (records,
 ledger, manifest stamp, replaced archive, retry/tier2 queues, .done) ->
 re-prep idempotency -> exhausted retry.
+
+131.100: the Tier-1 perf gate compares WALL time (ratio > 1.5 and > +5 ms).
+These programs run in ~2 ms of CPU but 20-70 ms of wall on a loaded machine,
+so a scheduler stall on one side used to fail a correct rewrite
+(rewritten 3 -> 2, failed 3 -> 4) and the counts depended on machine load.
+The wave fixture therefore runs every binary for real (stdout, exit, RSS all
+real) but reads the wall clock from a fixed value; the perf gate's own
+thresholds are unit-tested with mocked runs in test_pattern_autofix.py, and
+test_perf_gate_decides_on_the_clock below shows a slow clock still fails the
+gate.
 """
 import hashlib, json, os, sys
 
@@ -86,6 +96,32 @@ def _row(k):
             "perf_sensitive": k in PERF_SENSITIVE, "bucket": "AGENT"}
 
 
+FIXED_WALL_MS = 10.0
+
+
+def _clocked(real_measured, real_rusage, cand_wall_ms=FIXED_WALL_MS, orig_wall_ms=FIXED_WALL_MS):
+    """131.100: wrappers around diff_check.run_measured and
+    pattern_common._rusage_run that run the binary for real but report a fixed
+    wall time ("cand" binaries get cand_wall_ms, everything else orig_wall_ms)."""
+    def wall(binary):
+        return cand_wall_ms if "cand" in os.path.basename(str(binary)) else orig_wall_ms
+
+    def measured(binary, *a, **k):
+        r = real_measured(binary, *a, **k)
+        return dict(r, wall_ms=wall(binary))
+
+    def rusage(binpath, *a, **k):
+        r = real_rusage(binpath, *a, **k)
+        return None if r is None else (wall(binpath), r[1])
+    return measured, rusage
+
+
+def _fix_clock(mp, **kw):
+    measured, rusage = _clocked(pc.diff_check.run_measured, pc._rusage_run, **kw)
+    mp.setattr(pc.diff_check, "run_measured", measured)
+    mp.setattr(pc, "_rusage_run", rusage)
+
+
 # 131.39: the modules pin_tkc() rebinds; the fixture restores them after the wave
 _PIN_MODS = tuple(m for m in (pc, pc.regen_validate, pc.metrics, pc.idiom_judge, pc.run_shard, pc.audit,
                               pc.diff_check, pc._autofix_mod) if m is not None)
@@ -96,7 +132,8 @@ def corpus(tmp_path_factory):
     saved = {m: m.TKC for m in _PIN_MODS}
     # 131.39: one pinned binary for the whole wave, as every script's main()
     # does -- a `make` in ~/tk/toke while this runs must not change the judge
-    with pc.pin_tkc() as pinned:
+    with pc.pin_tkc() as pinned, pytest.MonkeyPatch.context() as mp:
+        _fix_clock(mp)                                  # 131.100: load cannot flip a verdict
         yield _build_corpus(tmp_path_factory, pinned)
     for m, v in saved.items():
         m.TKC = v
@@ -358,3 +395,38 @@ def test_prep_max_batches_defers(corpus):
     assert m["batches"] == 1 and m["prepared"] == 20 and m["deferred"] == N - 20
     assert len(m["deferred_task_ids"]) == N - 20
     assert not os.path.exists(paths.sub("batches", "batch_001.json"))
+
+
+def test_prep_skips_library_rows_by_default(corpus):
+    """Z95: the merged routing carries library AGENT rows (131.17's wave)."""
+    lib = corpus["root"] / "with_library.jsonl"
+    with open(corpus["bucket"]) as f:
+        rows = [json.loads(line) for line in f]
+    rows = rows[:2] + [dict(rows[2], source="library")]
+    lib.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    paths = pc.Paths(corpus=corpus["dir"], workdir=str(corpus["root"] / "work" / "src"),
+                     ledger=str(corpus["root"] / "empty_ledger.jsonl"))
+    assert pattern_prep.prepare(paths, str(lib))["prepared"] == 2
+    paths = pc.Paths(corpus=corpus["dir"], workdir=str(corpus["root"] / "work" / "src_all"),
+                     ledger=str(corpus["root"] / "empty_ledger.jsonl"))
+    assert pattern_prep.prepare(paths, str(lib), skip_source=None)["prepared"] == 3
+
+
+def test_perf_gate_decides_on_the_clock(tmp_path):
+    """131.100: the one input that used to flip test_wave_end_to_end. Same
+    record, same binaries: an equal clock passes the perf gate, a candidate
+    3x slower by > 5 ms fails it — so the wave's (3,1,3,1) can only become
+    (2,1,4,1) through the clock, which the wave fixture now fixes."""
+    assert pc.diff_check is not None
+    spec, orig, cand = _spec(0), _src(0, "flag"), _src(0, "canonical")
+    with pytest.MonkeyPatch.context() as mp:
+        _fix_clock(mp)
+        dp = pc.diff_and_perf(spec, orig, cand, str(tmp_path), task_id=_tid(0))
+    assert dp["diff"]["verdict"] is True and dp["perf"]["verdict"] == "pass" and dp["perf"]["ratio"] == 1.0
+    with pytest.MonkeyPatch.context() as mp:
+        _fix_clock(mp, cand_wall_ms=3 * FIXED_WALL_MS)
+        dp = pc.diff_and_perf(spec, orig, cand, str(tmp_path), task_id=_tid(0))
+    assert dp["diff"]["verdict"] is True and dp["perf"]["verdict"] == "fail" and dp["perf"]["ratio"] == 3.0
+    res = {"gates": {}, "reason": None}
+    pc.perf_gate(res, dp["perf"])
+    assert res["gates"]["perf"] is False and res["reason"].startswith("perf: tier-1")

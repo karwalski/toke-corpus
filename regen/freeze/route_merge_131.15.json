@@ -1,0 +1,204 @@
+{
+ "story": "131.15 (prep: routing before the wave; Z95)",
+ "what": "audit/pattern_sweep.merged.jsonl rebuilt by regen/route_merge.py: the 131.64 re-run sweep with every routing patch replayed in README order (delta violations + bucket + reason; REGEN sticky). Replaces the 2026-09-19 merged file, which was the 131.13 sweep + 131.42 + 131.67 + 131.15.looprebuild only (backed up as audit/pattern_sweep.merged.20260919.jsonl).",
+ "base_sweep": {
+  "file": "pattern_sweep.131.64.jsonl",
+  "sha256": "b8e0f969f66f4d288b5cd43b56d1b61563287e179a0746543bdfcff0fa8d4dff",
+  "rows": 24965,
+  "made_by": "Z91 131.64 re-run, tkc 3.1.0 9f1eb921 (regen/freeze/pattern_sweep_131.64.json)"
+ },
+ "origin_sweep_131_13": {
+  "file": "pattern_sweep.jsonl",
+  "sha256": "2985813a3ba08af4a331e02dfbcf5b1864c550f1069164991be08e7ea240312a"
+ },
+ "patches": [
+  {
+   "story": "131.42",
+   "file": "pattern_sweep.131.42.patch.jsonl",
+   "origin": "pattern_sweep.jsonl",
+   "present": true,
+   "rows": 429,
+   "sha256": "cbdd257717374cb60fe8d78db52a13563a1f12bb1d6eac864973245394fb1b9f"
+  },
+  {
+   "story": "131.67",
+   "file": "pattern_sweep.131.67.patch.jsonl",
+   "origin": "pattern_sweep.jsonl",
+   "present": true,
+   "rows": 56,
+   "sha256": "ee86391089f9ad5190743f2026ec58b0f148d95f71851ad184e8a04e4158c23a"
+  },
+  {
+   "story": "131.15.looprebuild",
+   "file": "pattern_sweep.131.15.looprebuild.patch.jsonl",
+   "origin": "pattern_sweep.jsonl",
+   "present": true,
+   "rows": 3,
+   "sha256": "fa9aa601168fceb49a05b4c06357053d862fd67a937d2ae166c10147517e6418"
+  },
+  {
+   "story": "131.43",
+   "file": "pattern_sweep.131.43.patch.jsonl",
+   "origin": "pattern_sweep.jsonl",
+   "present": true,
+   "rows": 209,
+   "sha256": "2d1c1d766f7246872f9942f6f1749327dc564e9a4bcbe3b74d724e8438cbad33"
+  },
+  {
+   "story": "131.68",
+   "file": "pattern_sweep.131.68.patch.jsonl",
+   "origin": "pattern_sweep.jsonl",
+   "present": true,
+   "rows": 0,
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+   "story": "131.83",
+   "file": "pattern_sweep.131.83.patch.jsonl",
+   "origin": "pattern_sweep.jsonl",
+   "present": true,
+   "rows": 8,
+   "sha256": "3740ec18140ab9316c428f2cf7da81d9428585640b5fc4b52a887df0fc993fa1"
+  },
+  {
+   "story": "131.106",
+   "file": "pattern_sweep.131.106.patch.jsonl",
+   "origin": "pattern_sweep.131.64.jsonl",
+   "present": true,
+   "rows": 176,
+   "sha256": "33446f09007672263cbd751094be0f086d76ef30a85a240aa21b04c923ac5bfd"
+  },
+  {
+   "story": "131.105",
+   "file": "pattern_sweep.131.105.patch.jsonl",
+   "origin": "pattern_sweep.131.64.jsonl",
+   "present": true,
+   "rows": 3,
+   "sha256": "43460e978ff9f067adcaa67a59f64e8e11bffeaec239f6fe8122b460368793dd"
+  }
+ ],
+ "replay": {
+  "131.42": {
+   "rows": 429,
+   "moved": 395,
+   "LEAVE->AGENT": 354,
+   "AUTO->AGENT": 2,
+   "EXEMPT->AGENT": 39,
+   "same_bucket": 34,
+   "AGENT->AGENT": 34
+  },
+  "131.67": {
+   "rows": 56,
+   "moved": 56,
+   "LEAVE->AGENT": 54,
+   "EXEMPT->AGENT": 2
+  },
+  "131.15.looprebuild": {
+   "rows": 3,
+   "same_bucket": 3,
+   "AGENT->AGENT": 3
+  },
+  "131.43": {
+   "rows": 209,
+   "moved": 188,
+   "LEAVE->AGENT": 170,
+   "EXEMPT->AGENT": 18,
+   "same_bucket": 21,
+   "AGENT->AGENT": 21
+  },
+  "131.68": {},
+  "131.83": {
+   "rows": 8,
+   "same_bucket": 6,
+   "REGEN->REGEN": 6,
+   "moved": 2,
+   "LEAVE->REGEN": 1,
+   "AUTO->REGEN": 1
+  },
+  "131.106": {
+   "rows": 176,
+   "same_bucket": 130,
+   "REGEN->REGEN": 123,
+   "moved": 46,
+   "LEAVE->AGENT": 36,
+   "AGENT->AGENT": 7,
+   "AUTO->AGENT": 8,
+   "REGEN->AGENT": 2
+  },
+  "131.105": {
+   "rows": 3,
+   "moved": 3,
+   "LEAVE->AGENT": 3
+  }
+ },
+ "buckets": {
+  "rerun": {
+   "regen": {
+    "EXEMPT": 1678,
+    "AUTO": 217,
+    "AGENT": 1203,
+    "LEAVE": 14635,
+    "REGEN": 5649,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 11,
+    "AGENT": 1314,
+    "LEAVE": 258,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 1678,
+    "AUTO": 228,
+    "AGENT": 2517,
+    "LEAVE": 14893,
+    "REGEN": 5649,
+    "records": 24965
+   }
+  },
+  "merged": {
+   "regen": {
+    "EXEMPT": 1619,
+    "AUTO": 206,
+    "AGENT": 1891,
+    "LEAVE": 14017,
+    "REGEN": 5649,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 11,
+    "AGENT": 1314,
+    "LEAVE": 258,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 1619,
+    "AUTO": 217,
+    "AGENT": 3205,
+    "LEAVE": 14275,
+    "REGEN": 5649,
+    "records": 24965
+   }
+  }
+ },
+ "transitions_rerun_to_merged": {
+  "LEAVE->AGENT": 618,
+  "EXEMPT->AGENT": 59,
+  "AUTO->AGENT": 11
+ },
+ "regen_outside_regen_class": {
+  "records": 0,
+  "note": "REGEN rows that are not A-*/full_program: 131.16 regenerates the A-*/full_program class; these need its shard to take the merged REGEN bucket, not the class rule (131.109)",
+  "by_category_prefix": {},
+  "task_ids": []
+ },
+ "merged_file": {
+  "path": "corpus/regen_v04/audit/pattern_sweep.merged.jsonl",
+  "rows": 24965,
+  "sha256": "f36538cc7f50682ee9c94678c50f457db645d614d51b5558e92a781f5db7281c"
+ }
+}
