@@ -1,12 +1,11 @@
 {
  "banked": true,
  "by_status": {
-  "flagged": 1,
   "not_in_class": 2,
-  "rewritten": 3
+  "rewritten": 1
  },
- "candidates": 6,
- "generated": "2026-09-27T09:02:37Z",
+ "candidates": 3,
+ "generated": "2026-11-08T20:50:30Z",
  "records": [
   {
    "codes_before": [],
@@ -22,65 +21,15 @@
     "E4033"
    ],
    "exit": 0,
-   "new_source_sha256": "638270eb4c6edbd54f2c0a410e5edb0c968dc6e1165eed6293ca14cf87ba8855",
+   "new_source_sha256": "3af9dbdb632f2e1ba79ccca1ff43aa54ebed059bd1eae4b15efb8be993b992da",
    "output_check": "no_baseline",
-   "path": "A-ERR/A-ERR-0030v31.json",
-   "prev_source_sha256": "091cf5e720aa9a3f61e85e442cefb1ff604e2272c236322c7d64bb4684d09bf5",
-   "rewrites": 1,
-   "status": "rewritten",
-   "stderr_tail": "",
-   "stdout": "1\n99\n0\n",
-   "task_id": "A-ERR-0030v31",
-   "task_type": "full_program"
-  },
-  {
-   "build_tail": "6_d24ib2v9/A-ERR-0030v39.tk\",\"pos\":{\"offset\":397,\"line\":14,\"col\":4},\"span_start\":397,\"span_end\":397,\"context\":[],\"expected\":\"\",\"got\":\"\",\"fix\":\"annotate the matched value with its sum type, or match it in a function that takes it as a typed parameter; a match of 3 or more arms needs the type to dispatch on\",\"source_line\":\"  <mt lookup(left;key) {$ok:v v;$notfound:e fallback;$emptycollection:e 0}\"}\n",
-   "codes_after": [],
-   "codes_before": [
-    "E4033",
-    "E4033"
-   ],
    "path": "A-ERR/A-ERR-0030v39.json",
-   "reason": "checks clean, does not build",
-   "rewrites": 1,
-   "status": "flagged",
-   "task_id": "A-ERR-0030v39",
-   "task_type": "full_program"
-  },
-  {
-   "codes_after": [],
-   "codes_before": [
-    "E4033",
-    "E4033"
-   ],
-   "exit": 0,
-   "new_source_sha256": "5356e9fa1505832f22e9a8978c63fe683279a916a3b433491a62b746aed5a549",
-   "output_check": "no_baseline",
-   "path": "A-ERR/A-ERR-0030v77.json",
-   "prev_source_sha256": "cd77faef0c56b58d21e84bce060ceb1301337a04a42e77efdd3852a5ef111685",
+   "prev_source_sha256": "dc543358fbc376f7d8f3093e8da13afa34165a28ef96414c131e3c422c30f477",
    "rewrites": 1,
    "status": "rewritten",
    "stderr_tail": "",
    "stdout": "1\n99\n0\n",
-   "task_id": "A-ERR-0030v77",
-   "task_type": "full_program"
-  },
-  {
-   "codes_after": [],
-   "codes_before": [
-    "E4033",
-    "E4033"
-   ],
-   "exit": 0,
-   "new_source_sha256": "142ed7fe6ad0add89b8b3c9e759cf9cd458b4444c67accbec4f8e2e2d352941c",
-   "output_check": "no_baseline",
-   "path": "A-STR/A-STR-0034v18.json",
-   "prev_source_sha256": "f58c9f44a1a90ff5f2635cd06dcc18f4e91236d96bbc08c4ae331b7ee7717658",
-   "rewrites": 1,
-   "status": "rewritten",
-   "stderr_tail": "",
-   "stdout": "2\n1\n",
-   "task_id": "A-STR-0034v18",
+   "task_id": "A-ERR-0030v39",
    "task_type": "full_program"
   },
   {
@@ -94,9 +43,9 @@
  "scanned": 23382,
  "story": "136.72",
  "tkc": {
-  "sha256": "475e39c05473614edf6a33e4e6985f3bd2934d6dc193685d3679915c49a302f6",
-  "toke_head": "6396596fc34485dd51aa4191b8c73c7a196cff83",
+  "sha256": "530718b5ef52e4a5f3d0fdadd2db8c1309a7e0a5dd40a701a355245d3f84be83",
+  "toke_head": "26ceff97918fdf36d198c8388deb77b2deb8ae72",
   "toke_src_dirty": false,
-  "version": "toke 3.0.0"
+  "version": "toke 3.1.0 (git 26ceff97918f)"
  }
 }
