@@ -12,8 +12,10 @@ integral float -> int, array returns -> one printed line per element.
 print true/false; 127.94 implemented it for scalars and 127.194 for bool
 array elements and bool receiver methods, so every driver shape (scalar,
 @bool, bool!$err ok arm, @bool!$err, `s.contains(...)`) now prints
-true/false. A pre-3.0 tkc (e.g. the 131.73 pin, `toke 2.8.0`) still prints
-1/0 and therefore fails every bool expectation — re-pin before banking.
+true/false. A pre-3.0 tkc (e.g. the retired 131.73 pin, `toke 2.8.0`) still
+prints 1/0 and therefore fails every bool expectation. Bank on the 131.103 pin
+(`corpus_pin.TKC`, toke 3.1.0 `1f39c2998110`), whose self-test checks
+`\\(true)` -> true.
 """
 import re
 from assemble import assemble
