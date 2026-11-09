@@ -95,12 +95,13 @@ def test_check_stories_replay_in_route_merge_order():
 
 def test_routed_earlier_reads_only_earlier_check_patches(tmp_path):
     (tmp_path / "audit").mkdir()
-    for story, ids in (("131.106", ["a", "b"]), ("131.111", ["c"])):
+    for story, ids in (("131.106", ["a", "b"]), ("131.111", ["c"]), ("131.114", ["d"])):
         (tmp_path / "audit" / f"pattern_sweep.{story}.patch.jsonl").write_text(
             "".join(json.dumps(_cur(t, "AGENT", story)) + "\n" for t in ids))
     assert cr.routed_earlier(str(tmp_path), "131.106") == set()
     assert cr.routed_earlier(str(tmp_path), "131.111") == {"a", "b"}
     assert cr.routed_earlier(str(tmp_path), "131.114") == {"a", "b", "c"}   # 138.22 past the pin
+    assert cr.routed_earlier(str(tmp_path), "131.117") == {"a", "b", "c", "d"}   # 127.342 past the pin
 
 
 def test_later_story_routes_only_new_failures_and_names_itself():

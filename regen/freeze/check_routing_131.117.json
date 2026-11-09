@@ -1,0 +1,200 @@
+{
+ "story": "131.117",
+ "date": "2026-11-09",
+ "tkc": {
+  "tkc_bin_sha": "cb49330dbd15f34dd5ac788f22a5ec4a065e58223cb35c800f89257ab6d275c5",
+  "tkc_version": "toke 3.1.0 (git 799b43394a48)",
+  "tkc_path": "/Users/matthew.watt/tk/tmpwork/wt_z146_tkc/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/tmpwork/wt_z146_tkc/toke",
+  "toke_head": "799b43394a481be86e4206ac4df1530ca58af31b",
+  "toke_src_dirty": false,
+  "tkc_git_sha": "799b43394a48",
+  "tkc_git_dirty": false
+ },
+ "records_checked": 24965,
+ "rc": {
+  "library rc=0": 1570,
+  "library rc=1": 13,
+  "regen rc=0": 23189,
+  "regen rc=1": 193
+ },
+ "banked_failing": {
+  "records": 8,
+  "by_source": {
+   "library": 8
+  },
+  "records_by_error_code": {
+   "E4031": 8
+  },
+  "records_by_first_error_code": {
+   "E4031": 8
+  },
+  "by_source_task_type_bucket_before": {
+   "library/stdin_program/AGENT": 8
+  },
+  "with_test_cases": 8,
+  "task_ids": [
+   "L-CRY-134",
+   "L-DAT-046",
+   "L-DAT-127",
+   "L-MSG-031",
+   "L-MSG-044",
+   "L-MSG-070",
+   "L-MSG-096",
+   "L-MSG-103"
+  ]
+ },
+ "vs_expected": {
+  "expected_ids": 8,
+  "still_failing": 8,
+  "now_passing": [],
+  "new_failures": []
+ },
+ "routing": {
+  "patch": "audit/pattern_sweep.131.117.patch.jsonl",
+  "rows": 8,
+  "bucket_before_to_after": {
+   "AGENT->AGENT": 8
+  },
+  "rule": "REGEN for the REGEN class (regen A-*/full_program, regenerated whole by 131.16); AGENT for every other record (no regeneration path exists for them: 131.109)"
+ },
+ "earlier_check_routing": {
+  "stories": [
+   "131.106",
+   "131.111",
+   "131.114"
+  ],
+  "records_routed": 199,
+  "still_failing": 198,
+  "now_passing": [
+   "A-ERR-0030v39"
+  ]
+ },
+ "gate_after": {
+  "forbidden": [
+   "LEAVE",
+   "EXEMPT",
+   "AUTO"
+  ],
+  "violations": 0,
+  "first": [],
+  "failing_by_bucket": {
+   "AGENT": 68,
+   "REGEN": 138
+  }
+ },
+ "vs_131_103_pin": {
+  "pin_rows": "check_routing_131.106.jsonl as Z117 left it (the 131.111 run on the pin toke 3.1.0 1f39c2998110, bin d400375946fb)",
+  "pin_rows_sha256": "aad0175736e1404f262fc3a4ba070c2ca87d0778790746d1a0abc4007f330fc3",
+  "pin_banked_failing": 195,
+  "this_run_banked_failing": 206,
+  "new_failures_routed_earlier": {
+   "131.114": [
+    "D-WEB-0013v248",
+    "D-WEB-0013v55",
+    "MIG-P2-B-D-WEB-0013v245-892bb48c"
+   ]
+  },
+  "new_failures": [
+   {
+    "task_id": "L-CRY-134",
+    "code": "E4031",
+    "lines": [
+     58,
+     59,
+     64,
+     81
+    ],
+    "cause": "toke 127.342 (a std [T] return reaching a typed array or str destination is judged; toke fix/z145-std-array-ret-typed 799b4339, not yet merged to toke main)"
+   },
+   {
+    "task_id": "L-DAT-046",
+    "code": "E4031",
+    "lines": [
+     51
+    ],
+    "cause": "toke 127.342 (a std [T] return reaching a typed array or str destination is judged; toke fix/z145-std-array-ret-typed 799b4339, not yet merged to toke main)"
+   },
+   {
+    "task_id": "L-DAT-127",
+    "code": "E4031",
+    "lines": [
+     50
+    ],
+    "cause": "toke 127.342 (a std [T] return reaching a typed array or str destination is judged; toke fix/z145-std-array-ret-typed 799b4339, not yet merged to toke main)"
+   },
+   {
+    "task_id": "L-MSG-031",
+    "code": "E4031",
+    "lines": [
+     4,
+     10,
+     13,
+     14,
+     15,
+     19
+    ],
+    "cause": "toke 127.342 (a std [T] return reaching a typed array or str destination is judged; toke fix/z145-std-array-ret-typed 799b4339, not yet merged to toke main)"
+   },
+   {
+    "task_id": "L-MSG-044",
+    "code": "E4031",
+    "lines": [
+     83,
+     84,
+     85
+    ],
+    "cause": "toke 127.342 (a std [T] return reaching a typed array or str destination is judged; toke fix/z145-std-array-ret-typed 799b4339, not yet merged to toke main)"
+   },
+   {
+    "task_id": "L-MSG-070",
+    "code": "E4031",
+    "lines": [
+     31
+    ],
+    "cause": "toke 127.342 (a std [T] return reaching a typed array or str destination is judged; toke fix/z145-std-array-ret-typed 799b4339, not yet merged to toke main)"
+   },
+   {
+    "task_id": "L-MSG-096",
+    "code": "E4031",
+    "lines": [
+     12
+    ],
+    "cause": "toke 127.342 (a std [T] return reaching a typed array or str destination is judged; toke fix/z145-std-array-ret-typed 799b4339, not yet merged to toke main)"
+   },
+   {
+    "task_id": "L-MSG-103",
+    "code": "E4031",
+    "lines": [
+     17,
+     19
+    ],
+    "cause": "toke 127.342 (a std [T] return reaching a typed array or str destination is judged; toke fix/z145-std-array-ret-typed 799b4339, not yet merged to toke main)"
+   }
+  ],
+  "now_passing": [],
+  "both_failing_with_changed_diagnostics": 0,
+  "note": "The 8 are the library copies of toke-test-programs solutions fixed by 136.82 (toke-test-programs fix/z146-byte-helpers); their helpers bind a std [byte] (s.bytes, cr.sha256, enc.hexdecode) to @i64. Under the 135.18 compact [byte] layout that is a byte block read as i64 elements, so 127.342 rejects it. The pin accepts them; the next re-pin must use a compiler with 127.342."
+ },
+ "files": {
+  "patch_sha256": "40e64eebf4d5c5f94b9f7a3e6e942b20e6c4c7a1c20503230a94a6993f48c3e5",
+  "merged_sha256": "dd32ba69eb243878fdb94d978eb7f921c790ccb4c97b6a18a7e8c73bc0998886",
+  "merged_rows_changed": [
+   "L-CRY-134",
+   "L-DAT-046",
+   "L-DAT-127",
+   "L-MSG-031",
+   "L-MSG-044",
+   "L-MSG-070",
+   "L-MSG-096",
+   "L-MSG-103"
+  ],
+  "earlier_patches_byte_unchanged": [
+   "131.105",
+   "131.106",
+   "131.111",
+   "131.114"
+  ],
+  "run_rows": "audit/check_routing_131.117.z145_799b4339.jsonl (the run's rows; check_routing_131.106.jsonl was restored to the pin's rows afterwards, unchanged corpus: 0 source_sha256 differences)"
+ }
+}

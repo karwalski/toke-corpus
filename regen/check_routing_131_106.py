@@ -49,6 +49,10 @@ no earlier check-routing patch (CHECK_STORIES before it) routed, so the
 replays it after 131.105. 131.114 (2026-11-09) did the same for the three
 records toke 138.22 (expression-if tails must agree, past the 131.103 pin)
 newly rejects; its check ran with a tkc built from toke main 034332b8.
+131.117 (2026-11-10) routed the eight library records toke 127.342 (a std
+[byte] return reaching an @i64 destination is E4031, past the pin) newly
+rejects; its check ran with a tkc built from toke 799b4339
+(fix/z145-std-array-ret-typed, on top of the 135.18 compact [byte] layout).
 
 --tkc defaults to the corpus pin (corpus_pin.default_tkc(): $TKC, else
 ~/tk/archive/pins/tkc-131.103/tkc, else ~/tk/toke/tkc).
@@ -83,7 +87,7 @@ CORPUS = route_merge.CORPUS
 FORBIDDEN = ("LEAVE", "EXEMPT", "AUTO")           # buckets that cannot fix a compile failure
 ROWS_NAME = f"check_routing_{STORY}.jsonl"
 # every story that routes --check failures with this tool, in route_merge order
-CHECK_STORIES = ("131.106", "131.111", "131.114")
+CHECK_STORIES = ("131.106", "131.111", "131.114", "131.117")
 
 
 def summary_path(story=STORY):
