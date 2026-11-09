@@ -221,7 +221,7 @@
  },
  "regen_outside_regen_class": {
   "records": 0,
-  "note": "REGEN rows that are not A-*/full_program: 131.16 regenerates the A-*/full_program class; these need its shard to take the merged REGEN bucket, not the class rule (131.109)",
+  "note": "REGEN rows that are not A-*/full_program. 131.16 regenerates only the A-*/full_program class, so every router routes a record outside it to AGENT (route_patch.route_bucket, 131.109) and regen/tests/test_route_merge.py fails if this is ever non-zero",
   "by_category_prefix": {},
   "task_ids": []
  },

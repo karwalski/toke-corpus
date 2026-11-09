@@ -35,3 +35,19 @@ def test_route_reason_names_the_real_diagnostic(tmp_path):
     reason = out[0]["bucket_reason"]
     assert "E4031" in reason and "not declared" not in reason
     assert out[0]["violations"][-1]["rule"] == inc.RULE == "interp-segment-unchecked"
+
+
+def test_route_no_tests_outside_regen_class_goes_agent(tmp_path):
+    """131.109: the two 131.83 MIG records (migrate_fix, no tests) went REGEN,
+    a dead end since 131.16 regenerates only A-*/full_program."""
+    (tmp_path / "audit").mkdir()
+    (tmp_path / "audit" / "pattern_sweep.jsonl").write_text(
+        json.dumps({"task_id": "MIG-X-1", "story": "131.13", "bucket": "LEAVE", "violations": []}) + "\n")
+    hit = {"error_code": "E3011", "message": "undeclared", "segment": "\\(n)"}
+    rows = [{"task_id": "MIG-X-1", "in_scope": True, "in_interpolation": [hit]}]
+    specs = {"MIG-X-1": {"category": "D-CFG", "task_type": "migrate_fix", "test_cases": []}}
+    res = inc.route(rows, str(tmp_path), specs, ts=1)
+    assert res["agent_task_ids"] == ["MIG-X-1"] and res["regen_task_ids"] == []
+    patch = (tmp_path / "audit" / "pattern_sweep.131.83.patch.jsonl").read_text()
+    out = [json.loads(x) for x in patch.splitlines()]
+    assert out[0]["bucket"] == "AGENT" and "131.109" in out[0]["bucket_reason"]

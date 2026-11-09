@@ -20,8 +20,10 @@ so it can be repaired before the re-freeze, and routes it:
      compiler_exit_code 0) and now fails with a diagnostic whose offset lies
      inside an interpolation segment of a string literal;
   3. --route: AGENT (131.15) when the spec carries test cases — the rewrite
-     fixes the segment and the test lock proves it; REGEN when
-     it has none, since there is nothing to check a rewrite against.
+     fixes the segment and the test lock proves it. Without test cases:
+     REGEN for the A-*/full_program class (131.16 regenerates it), AGENT for
+     anything else, which 131.16 cannot regenerate (route_patch.route_bucket,
+     131.109).
 
 Every other compile failure is counted (by error code), not routed: it is not
 this defect. Reads records; writes nothing under corpus/regen_v04/<CAT>/.
@@ -143,7 +145,9 @@ def route(rows, corpus, specs, ts=None):
         if not r.get("in_scope"):
             continue
         spec = specs.get(r["task_id"]) or {}
-        bucket = "AGENT" if spec.get("test_cases") else "REGEN"
+        tests = bool(spec.get("test_cases"))
+        bucket = route_patch.route_bucket({"source": "regen", "category": spec.get("category"),
+                                           "task_type": spec.get("task_type") or r.get("task_type")}, tests)
         names = ", ".join(sorted({h["segment"] for h in r["in_interpolation"]}))
         h = r["in_interpolation"][0]
         reason = (f"accepted record that no longer compiles: inside the interpolation {names} "
@@ -152,7 +156,7 @@ def route(rows, corpus, specs, ts=None):
                   f"fix the expression in the segment (declare the binding, or pass arguments of "
                   f"the declared parameter types), so the program compiles and prints what its "
                   f"test lock expects"
-                  + ("" if bucket == "AGENT" else "; no test cases, so it is regenerated rather than rewritten")
+                  + ("" if tests else "; " + route_patch.no_tests_note(bucket))
                   + f" (regen/freeze/interp_name_check_{STORY}.json)")
         out.append(route_patch.merge_row(cur.get(r["task_id"]), r["task_id"], STORY, RULE, bucket, reason,
                                          category=spec.get("category"), task_type=spec.get("task_type"),

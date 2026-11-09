@@ -129,3 +129,41 @@ REAL = os.path.join(rm.CORPUS, "audit", "pattern_sweep.merged.jsonl")
 def test_on_disk_merged_is_the_reproducible_build():
     """The merged file the 131.15 prep reads is exactly route_merge's output."""
     assert rm.main(["--corpus", rm.CORPUS, "--check", "--summary", ""]) == 0
+
+
+# ---- 131.109: REGEN only for the REGEN class, in every router and in the merge ---
+def test_route_bucket_regen_only_for_the_class_without_tests():
+    a_full = {"source": "regen", "category": "A-ERR", "task_type": "full_program"}
+    assert route_patch.route_bucket(a_full, has_tests=False) == "REGEN"
+    assert route_patch.route_bucket(a_full, has_tests=True) == "AGENT"
+    for other in ({"source": "regen", "category": "D-CFG", "task_type": "migrate_fix"},
+                  {"source": "regen", "category": "D-ERR", "task_type": "full_program"},
+                  {"source": "regen", "category": "A-ERR", "task_type": "single_function"},
+                  {"source": "library", "category": "A-ERR", "task_type": "full_program"}):
+        assert route_patch.route_bucket(other, has_tests=False) == "AGENT", other
+    assert rm.regen_class is route_patch.regen_class
+    assert "131.109" in route_patch.no_tests_note("AGENT") and "131.16" in route_patch.no_tests_note("REGEN")
+
+
+def test_regen_outside_class_detects_a_dead_end_row(tmp_path):
+    """The detector the on-disk gate below relies on: a patch that routes a
+    migrate_fix record REGEN surfaces in regen_outside_class and the summary."""
+    old = [_row("m", "LEAVE", task_type="migrate_fix")]
+    new = [_row("m", "LEAVE", task_type="migrate_fix")]
+    p = route_patch.merge_row(old[0], "m", "131.83", "interp-segment-unchecked", "REGEN", "x", ts=1)
+    corpus = _corpus(tmp_path, old, new, {"131.83": [p]})
+    base, merged, stats, files = rm.build(corpus, patches=(("131.83", rm.OLD_SWEEP),))
+    assert rm.regen_outside_class(merged) == ["m"]
+    s = rm.summary(corpus, base, merged, stats, files, None)
+    assert s["regen_outside_regen_class"]["records"] == 1
+
+
+@pytest.mark.skipif(not os.path.exists(os.path.join(rm.CORPUS, "audit", rm.NEW_SWEEP)),
+                    reason="on-disk corpus (gitignored) not present")
+def test_on_disk_routing_has_no_regen_row_outside_the_class():
+    """131.109 gate: route_merge over the real patches must produce 0 REGEN rows
+    outside A-*/full_program (131.16 would never regenerate them)."""
+    _, merged, _, _ = rm.build(rm.CORPUS)
+    assert rm.regen_outside_class(merged) == []
+    with open(rm.SUMMARY) as f:
+        assert json.load(f)["regen_outside_regen_class"]["records"] == 0
