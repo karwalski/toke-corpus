@@ -111,4 +111,4 @@ reads `corpus/regen_v04/` requires access to the local data.
 
 ## Licence
 
-Apache 2.0.
+Apache 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

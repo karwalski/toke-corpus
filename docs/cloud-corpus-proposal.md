@@ -1,7 +1,7 @@
 # Proposal: Cloud-Based Corpus Phase A Generation
 
 **Date:** 2026-03-29
-**Author:** Matt Watt
+**Author:** Matthew Watt
 **Status:** Draft
 **Target:** 50,000 Phase A corpus programs in ≤5 days, cloud-only
 
