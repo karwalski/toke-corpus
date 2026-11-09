@@ -42,6 +42,12 @@ from typing import Any
 
 import yaml
 
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from generator.prompt_render import render_task_template  # noqa: E402  (131.115)
+
 LOG = logging.getLogger("regenerate")
 
 # ---------------------------------------------------------------------------
@@ -116,9 +122,23 @@ def load_prompts(cfg: dict[str, Any]) -> dict[str, str]:
 
 
 def build_prompt(task: dict[str, Any], templates: dict[str, str]) -> str:
-    """Assemble the generation prompt for a task."""
+    """Assemble the generation prompt for a task.
+
+    ``generate_toke.md`` is a ``str.format`` template, so it is rendered with
+    the task's fields through the shared renderer that ``main.py`` and
+    ``trial/runner.py`` use (story 131.115); sent raw, the model would see
+    ``{category}`` placeholders and doubled ``{{ }}`` braces. The system
+    prompt is plain markdown with literal single braces and is not rendered.
+    A curriculum task here carries only an ID, category and seed, so the
+    description and signature fall back to those when the task has none.
+    """
     system = templates.get("system", templates.get("system_base", ""))
-    generate = templates.get("generate_toke", "")
+    generate = render_task_template(
+        templates.get("generate_toke", ""),
+        category=task["category"],
+        task_description=task.get("description") or f"{task['task_id']} (seed {task['seed']})",
+        expected_signature=task.get("expected_signature") or "unspecified",
+    )
     return f"{system}\n\n{generate}\n\nTask: {task['task_id']}\nSeed: {task['seed']}"
 
 

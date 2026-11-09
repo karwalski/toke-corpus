@@ -24,6 +24,7 @@ from pathlib import Path
 
 from dispatch.base import GenerateResult, ProviderClient
 from generator.curriculum import CurriculumGenerator, TaskSpec
+from generator.prompt_render import render_task_template
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +127,8 @@ def _format_prompt(
     template: str, spec: TaskSpec
 ) -> str:
     """Fill the generation template with task-specific values."""
-    return template.format(
+    return render_task_template(
+        template,
         category=spec.category,
         task_description=spec.description,
         expected_signature=spec.expected_signature,

@@ -37,6 +37,7 @@ from dispatch.xai import XAIClient
 from dispatch.pool import PoolConfig, PoolManager
 from generator.curriculum import CATEGORIES, CurriculumGenerator, TaskSpec
 from generator.curriculum_v2 import ALL_CATEGORIES, CurriculumGeneratorV2, TaskSpecV2
+from generator.prompt_render import render_task_template
 from store.checkpoint import Checkpoint
 from store.metrics import MetricsCollector
 from store.writer import CorpusWriter, count_tokens
@@ -183,7 +184,8 @@ def build_providers(
 
 def format_toke_prompt(template: str, task: TaskSpec) -> str:
     """Format the toke generation prompt for a task."""
-    return template.format(
+    return render_task_template(
+        template,
         category=task.category,
         task_description=task.description,
         expected_signature=task.expected_signature,
@@ -192,7 +194,8 @@ def format_toke_prompt(template: str, task: TaskSpec) -> str:
 
 def format_ref_prompt(template: str, task: TaskSpec) -> str:
     """Format a reference implementation prompt (Python/C/Java)."""
-    return template.format(
+    return render_task_template(
+        template,
         category=task.category,
         task_description=task.description,
         expected_signature=task.expected_signature,
@@ -201,7 +204,8 @@ def format_ref_prompt(template: str, task: TaskSpec) -> str:
 
 def format_tests_prompt(template: str, task: TaskSpec) -> str:
     """Format the test inputs generation prompt."""
-    return template.format(
+    return render_task_template(
+        template,
         category=task.category,
         task_description=task.description,
         expected_signature=task.expected_signature,
