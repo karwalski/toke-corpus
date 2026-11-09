@@ -45,7 +45,9 @@ records, route them under that story: `route --story 131.111` writes
 audit/pattern_sweep.131.111.patch.jsonl holding ONLY the failing records that
 no earlier check-routing patch (CHECK_STORIES before it) routed, so the
 131.106 patch stays the record of what 131.106 found. route_merge.PATCHES
-replays it after 131.105.
+replays it after 131.105. 131.114 (2026-11-09) did the same for the three
+records toke 138.22 (expression-if tails must agree, past the 131.103 pin)
+newly rejects; its check ran with a tkc built from toke main 034332b8.
 
 --tkc defaults to the corpus pin (corpus_pin.default_tkc(): $TKC, else
 ~/tk/archive/pins/tkc-131.103/tkc, else ~/tk/toke/tkc).
@@ -80,7 +82,7 @@ CORPUS = route_merge.CORPUS
 FORBIDDEN = ("LEAVE", "EXEMPT", "AUTO")           # buckets that cannot fix a compile failure
 ROWS_NAME = f"check_routing_{STORY}.jsonl"
 # every story that routes --check failures with this tool, in route_merge order
-CHECK_STORIES = ("131.106", "131.111")
+CHECK_STORIES = ("131.106", "131.111", "131.114")
 
 
 def summary_path(story=STORY):

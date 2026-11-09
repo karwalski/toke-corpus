@@ -100,6 +100,7 @@ def test_routed_earlier_reads_only_earlier_check_patches(tmp_path):
             "".join(json.dumps(_cur(t, "AGENT", story)) + "\n" for t in ids))
     assert cr.routed_earlier(str(tmp_path), "131.106") == set()
     assert cr.routed_earlier(str(tmp_path), "131.111") == {"a", "b"}
+    assert cr.routed_earlier(str(tmp_path), "131.114") == {"a", "b", "c"}   # 138.22 past the pin
 
 
 def test_later_story_routes_only_new_failures_and_names_itself():

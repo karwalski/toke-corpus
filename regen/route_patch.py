@@ -23,7 +23,7 @@ replays every patch over the 131.64 re-run sweep instead of `cat`-ing them
 after the 131.13 sweep (a later full row would restore stale sweep data).
 Its PATCHES list is the apply order of record; it begins with BASE_PATCHES +
 APPLY_ORDER (regen/tests/test_route_merge.py holds them together) and adds
-131.106, 131.105 and 131.111. apply_command() is kept for the summaries that cite it.
+131.106, 131.105, 131.111 and 131.114. apply_command() is kept for the summaries that cite it.
 """
 import json
 import os
