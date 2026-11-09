@@ -35,7 +35,7 @@ BASE = {"task_id": "A-SRT-0001", "category": "A-SRT", "description":
 
 def _prompt(**kw):
     spec = dict(BASE, **kw)
-    return build_prompt.build(spec, "CARD")
+    return build_prompt.build(spec, "# toke syntax card - tkc 9.8.7 / v9.6 idiom\nCARD")
 
 
 @pytest.mark.parametrize("ttype,extra", [

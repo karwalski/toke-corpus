@@ -113,6 +113,34 @@ HELPERS = ["f=dbl(x:i64):i64{<x*2};", "f=cmp(a:i64;b:i64):i64{<a-b};",
 TYPED_ARGS = [(re.compile(r"\bfmt\.bool\(([a-z][a-z0-9]*)\)"), "let {}=true;")]
 
 
+# 131.113: the card's first line names the compiler and idiom it is verified
+# against ("# toke syntax card — tkc 3.1.0 / v0.4 idiom ..."). Prompt builders
+# take their version words from here instead of hard-coding a number that
+# goes stale (pattern_prep / library_prep / build_prompt said 2.8.0 long after
+# the card moved to 3.1.0).
+CARD_HEADER = re.compile(r"\btkc (\d+\.\d+\.\d+) / (v\d+\.\d+) idiom\b")
+
+
+def card_versions(card_text=None):
+    """(tkc version, idiom) from the card's header line, e.g. ("3.1.0", "v0.4").
+    card_text None reads the default card. Raises ValueError when the header
+    does not name them -- a card without them cannot say what it is verified on."""
+    if card_text is None:
+        with open(CARD, encoding="utf-8") as f:
+            card_text = f.read()
+    head = card_text.lstrip().split("\n", 1)[0]
+    m = CARD_HEADER.search(head)
+    if not m:
+        raise ValueError(f"syntax card header names no 'tkc X.Y.Z / vN.M idiom': {head[:120]!r}")
+    return m.group(1), m.group(2)
+
+
+def card_toolchain(card_text=None):
+    """The prompt wording for the card's toolchain: 'toke 3.1.0 (v0.4 idiom)'."""
+    tkc, idiom = card_versions(card_text)
+    return f"toke {tkc} ({idiom} idiom)"
+
+
 def sec_key(heading):
     h = re.sub(r"[^a-z0-9 ]", " ", heading.lower()).split()
     return " ".join(h[:3])

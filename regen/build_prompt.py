@@ -22,6 +22,7 @@ import driver as drv                            # noqa: E402  (131.72)
 from regen_validate import render_expected            # noqa: E402  (131.72)
 import idiom_judge                                    # noqa: E402  (131.75)
 import metrics                                        # noqa: E402  (131.75)
+from check_card import card_versions                  # 131.113
 
 # ---------------------------------------------------------------------------
 # 131.72: the prompt MUST ask for exactly what the acceptance gate accepts.
@@ -216,7 +217,8 @@ def build(spec, card):
                       "function(s), and f=main():i64 that reads stdin, prints exactly the "
                       "expected output with io.println, and returns 0.")
     elif ttype == "migrate_fix":
-        parts.append("TASK: migrate legacy toke source to current v0.3 syntax (tkc 2.8.0).")
+        tkc_v, idiom = card_versions(card)            # 131.113: the card's own header
+        parts.append(f"TASK: migrate legacy toke source to current {idiom} syntax (tkc {tkc_v}).")
         parts.append("")
         parts.append("Legacy source (compiled under an older toke; now fails):")
         parts.append(spec["legacy_source"])
