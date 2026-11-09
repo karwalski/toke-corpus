@@ -55,7 +55,7 @@ def test_generate_prompt_fills_task(gen: ConstraintGenerator) -> None:
 
 def test_generate_prompt_includes_spec_reference(gen: ConstraintGenerator) -> None:
     prompt = gen.generate_prompt("any task", "error_propagation")
-    assert "toke Phase 2 Specification Reference" in prompt
+    assert "# toke specification reference (v0.4)" in prompt
 
 
 def test_generate_prompt_unknown_constraint_raises(gen: ConstraintGenerator) -> None:

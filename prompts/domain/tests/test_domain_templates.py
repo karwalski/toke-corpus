@@ -257,7 +257,7 @@ class TestPromptGeneration:
     ) -> None:
         tasks = gen.generate("WEB", 1, seed=42)
         prompt = gen.to_prompt(tasks[0])
-        assert "toke Phase 2 Specification Reference" in prompt
+        assert "# toke specification reference (v0.4)" in prompt
 
     def test_to_prompt_includes_description(
         self, gen: DomainStratifiedGenerator
