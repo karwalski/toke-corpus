@@ -34,7 +34,7 @@ story's routing. Until 2026-11-09 they were applied with
 **Since Z95 the merged routing is built by `regen/route_merge.py`** (no `cat`):
 the 131.64 re-run sweep (`audit/pattern_sweep.131.64.jsonl`, sha256
 `b8e0f969…`) with every patch REPLAYED in this order — 131.42, 131.67,
-131.15.looprebuild, 131.43, 131.68, 131.83, 131.106, 131.105, 131.111 — each adding only
+131.15.looprebuild, 131.43, 131.68, 131.83, 131.106, 131.105, 131.111, 131.114 — each adding only
 its own violation, bucket and reason to the fresh row (REGEN sticky for the
 A-*/full_program class). `route_merge.py --check` proves the file on disk is
 that build; `pattern_prep.py` now reads it by default. The previous merged
@@ -45,6 +45,7 @@ file is kept as `audit/pattern_sweep.merged.20260919.jsonl`.
 | `route_merge_131.15.json` | Z95: the merged routing — base sweep sha, each patch file (rows, sha, origin), per-patch replay counts, buckets re-run vs merged, transitions, and the REGEN rows outside the A-*/full_program class (no regeneration wave: 131.109). Tool: `regen/route_merge.py [--check]`. |
 | `check_routing_131.106.json` | 131.106: `tkc --check` over all 24,965 live sources with the pinned integrate tkc; every banked record that fails is routed (REGEN for the A-*/full_program class, AGENT otherwise) via `audit/pattern_sweep.131.106.patch.jsonl`, with its diagnostics in the reason; gate result after routing. Tool: `regen/check_routing_131_106.py run|route|gate [--live]`; rows `corpus/regen_v04/audit/check_routing_131.106.jsonl`. The gate test is `regen/tests/test_check_routing_131_106.py`. |
 | `check_routing_131.111.json` | 131.111 (2026-11-09): the same check on the 131.103 corpus pin (toke 3.1.0 `1f39c2998110`, sha256 `d4003759…`). 195 banked records fail (regen 190, library 5). The 20 that are new since 131.106 are exactly the 127.244 `m.get(k)` E4031 set (A-STR 9, A-ERR 8, D-CRY 2, D-FIO 1). `route --story 131.111` routes only those 20 (`audit/pattern_sweep.131.111.patch.jsonl`: REGEN->REGEN 16, LEAVE->AGENT 4). The 131.106 patch is left unchanged. A-ERR-0030v39 from 131.106 now passes (banked compile-only by 136.72). Gate after routing: 0 violations. |
+| `check_routing_131.114.json` | 131.114 (2026-11-09): the same check with a tkc built from toke main `034332b8` (sha256 `3ce61294…`), **past the 131.103 pin**. 198 banked records fail (regen 193, library 5). Against the pin's rows exactly 3 are new and none now pass: `D-WEB-0013v248`, `D-WEB-0013v55`, `MIG-P2-B-D-WEB-0013v245-892bb48c`, all E4011 "if branches have inconsistent types: 'str' vs 'str!$err'" from toke 138.22 (an expression-`if` hid a map `.get` result). 138.21/138.26/138.33 reject no banked record. `route --story 131.114` routes the 3 (`audit/pattern_sweep.131.114.patch.jsonl`: LEAVE->AGENT 2, EXEMPT->AGENT 1); the earlier patches are byte-unchanged and the merged routing changed in those 3 rows only. Gate after routing: 0 violations. **These rejections come from compiler changes past the 131.103 pin, so the next re-pin (before the 131.15 wave) must use a compiler that has them** (138.22 at least), or the wave's bank would accept rewrites main rejects. |
 
 131.105's three records (`A-ARR-0017v41`, `D-CFG-0018v98`, `D-FIO-0002v99`)
 are routed to AGENT by `regen/route_131_105.py` (`audit/pattern_sweep.131.105.patch.jsonl`),
@@ -56,7 +57,11 @@ order was `check_routing_131_106.py run` → `route` → `route_131_105.py` →
 `route_merge.py` → `gate`. To route new failures after a checker change
 (131.111), do not re-run the plain 131.106 `route`, which would fold them into
 the 131.106 patch. Instead run `check_routing_131_106.py run` →
-`route --story <next CHECK_STORIES entry>` → `route_merge.py` → `gate`. A later
+`route --story <next CHECK_STORIES entry>` → `route_merge.py` → `gate`. A check past the pin
+(131.114) passes `--tkc` and `--toke-repo` for a tkc built from toke main. `run` writes
+`check_routing_131.106.jsonl` (its `_meta` names the tkc); 131.114 kept those rows as
+`audit/check_routing_131.114.main034332b8.jsonl` and put the pin's rows back, so the
+on-disk gate test (which skips when the rows' tkc is not `$TKC`) runs on the pin. A later
 story routes only the failures no earlier check-routing patch covered. `run`
 and `gate --live` default to the corpus pin (`regen/corpus_pin.py`, 131.103).
 

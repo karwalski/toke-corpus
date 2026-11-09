@@ -1,0 +1,122 @@
+{
+ "story": "131.114",
+ "date": "2026-11-09",
+ "tkc": {
+  "tkc_bin_sha": "3ce6129417d68a77d62d492806f86373526f47e3eb6f9e9b3b8ca05fc1d17348",
+  "tkc_version": "toke 3.1.0 (git 034332b8842a)",
+  "tkc_path": "/Users/matthew.watt/tk/tmpwork/wt_z117_tkc/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/tmpwork/wt_z117_tkc/toke",
+  "toke_head": "034332b8842a7a8903e5eef5e5e1ac6f79654bfe",
+  "toke_src_dirty": false,
+  "tkc_git_sha": "034332b8842a",
+  "tkc_git_dirty": false
+ },
+ "records_checked": 24965,
+ "rc": {
+  "library rc=0": 1578,
+  "library rc=1": 5,
+  "regen rc=0": 23189,
+  "regen rc=1": 193
+ },
+ "banked_failing": {
+  "records": 3,
+  "by_source": {
+   "regen": 3
+  },
+  "records_by_error_code": {
+   "E4011": 3
+  },
+  "records_by_first_error_code": {
+   "E4011": 3
+  },
+  "by_source_task_type_bucket_before": {
+   "regen/full_program/EXEMPT": 1,
+   "regen/migrate_fix/LEAVE": 1,
+   "regen/single_function/LEAVE": 1
+  },
+  "with_test_cases": 2,
+  "task_ids": [
+   "D-WEB-0013v248",
+   "D-WEB-0013v55",
+   "MIG-P2-B-D-WEB-0013v245-892bb48c"
+  ]
+ },
+ "vs_expected": {
+  "expected_ids": 3,
+  "still_failing": 3,
+  "now_passing": [],
+  "new_failures": []
+ },
+ "routing": {
+  "patch": "audit/pattern_sweep.131.114.patch.jsonl",
+  "rows": 3,
+  "bucket_before_to_after": {
+   "EXEMPT->AGENT": 1,
+   "LEAVE->AGENT": 2
+  },
+  "rule": "REGEN for the REGEN class (regen A-*/full_program, regenerated whole by 131.16); AGENT for every other record (no regeneration path exists for them: 131.109)"
+ },
+ "earlier_check_routing": {
+  "stories": [
+   "131.106",
+   "131.111"
+  ],
+  "records_routed": 196,
+  "still_failing": 195,
+  "now_passing": [
+   "A-ERR-0030v39"
+  ]
+ },
+ "gate_after": {
+  "forbidden": [
+   "LEAVE",
+   "EXEMPT",
+   "AUTO"
+  ],
+  "violations": 0,
+  "first": [],
+  "failing_by_bucket": {
+   "AGENT": 60,
+   "REGEN": 138
+  }
+ },
+ "vs_131_103_pin": {
+  "pin_rows": "check_routing_131.106.jsonl as Z104 left it (131.111 run on the pin toke 3.1.0 1f39c2998110, bin d400375946fb); copy kept in local scratch",
+  "pin_rows_sha256": "aad0175736e1404f262fc3a4ba070c2ca87d0778790746d1a0abc4007f330fc3",
+  "pin_banked_failing": 195,
+  "main_banked_failing": 198,
+  "new_failures": [
+   {
+    "task_id": "D-WEB-0013v248",
+    "code": "E4011",
+    "line": 7,
+    "cause": "toke 138.22 (expression-if tails must agree; merged to toke main ac823595)"
+   },
+   {
+    "task_id": "D-WEB-0013v55",
+    "code": "E4011",
+    "line": 9,
+    "cause": "toke 138.22 (expression-if tails must agree; merged to toke main ac823595)"
+   },
+   {
+    "task_id": "MIG-P2-B-D-WEB-0013v245-892bb48c",
+    "code": "E4011",
+    "line": 8,
+    "cause": "toke 138.22 (expression-if tails must agree; merged to toke main ac823595)"
+   }
+  ],
+  "now_passing": [],
+  "both_failing_with_changed_diagnostics": 0,
+  "note": "138.21/138.26 (std handle/record arguments judged) and 138.33 (mt $ok over a std record typed) reject no banked record. These rejections come from compiler changes past the 131.103 pin: the next re-pin (before the 131.15 wave) must use a compiler that has them."
+ },
+ "files": {
+  "patch_sha256": "36ae7dae15cce7d7af637f9491c24f35eee89a853c75ca852d3a50621012f1ba",
+  "merged_sha256": "1dcc4411fbab0f406c399689cf358393492e10ad5fb7e286f3273c128460f904",
+  "merged_rows_changed": [
+   "D-WEB-0013v248",
+   "D-WEB-0013v55",
+   "MIG-P2-B-D-WEB-0013v245-892bb48c"
+  ],
+  "main_rows": "audit/check_routing_131.114.main034332b8.jsonl (the run's rows; check_routing_131.106.jsonl was restored to the pin's rows afterwards, unchanged corpus: 0 source_sha256 differences)"
+ }
+}
