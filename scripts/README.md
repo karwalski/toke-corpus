@@ -18,6 +18,7 @@ Pipeline scripts for corpus generation, validation, transformation, and training
 | `generate_manifest.py` | Generates MANIFEST.jsonl joining corpus with scores and complexity |
 | `extract_imports.py` | Extracts imported_modules and flags unresolved imports |
 | `curate_tokenizer_set.py` | Curates mutation-free programs for tokenizer training |
+| `restamp_tokenizer_disjointness.py` | Re-stamps a frozen tokenizer manifest's holdout disjointness as PASS / FAIL / VACUOUS (131.92) |
 | `validate_training_format.py` | Validates chat-format training data (role structure, surface checks) |
 
 ## Corpus Generation (used during corpus expansion, not routine)
