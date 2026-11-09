@@ -41,6 +41,7 @@ import argparse, glob, json, os, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import library_common as lc                       # noqa: E402
+from check_card import card_toolchain             # 131.113
 import idiom_judge                                # noqa: E402
 import metrics                                    # noqa: E402  (131.75)
 
@@ -74,8 +75,9 @@ def build_prompt(spec, src, ctx):
     row = ctx.get("row") or {}
     rule_texts = ctx.get("rule_texts") or {}
     libd = spec.get("library") or {}
+    toolchain = ctx.get("toolchain") or card_toolchain(ctx.get("card"))
     lines = [f"LIBRARY PATTERN REWRITE ({spec.get('category')}, {libd.get('category')}/"
-             f"{libd.get('id')}): the toke 2.8.0 program below passes its manifest "
+             f"{libd.get('id')}): the {toolchain} program below passes its manifest "
              "tests but uses verbose / anti-pattern forms flagged by the Epic 131 "
              "pattern sweep. Rewrite it in the canonical forms.",
              "",
@@ -148,7 +150,7 @@ def build_prompt(spec, src, ctx):
               "", f"Write your rewrite to: {ctx.get('candidate_path')}",
               "", "Current source:", src.rstrip("\n"), ""]
     if ctx.get("card"):
-        lines += ["", "---", "SYNTAX CARD (the only authoritative toke 2.8.0 spec; "
+        lines += ["", "---", f"SYNTAX CARD (the only authoritative {toolchain} spec; "
                   f"sha {ctx.get('card_sha')}):", "", ctx["card"]]
     return "\n".join(lines) + "\n"
 
@@ -203,6 +205,7 @@ def prepare(paths, max_batches=lc.MAX_BATCHES, limit=None, embed_card=True,
     ledger = lc.read_ledger(paths.ledger)
     card = open(paths.card, encoding="utf-8").read()
     card_sha = lc.short(lc.sha256_text(card))
+    toolchain = card_toolchain(card)                # 131.113: from the card header, not hard-coded
     tkc = lc.tkc_stamp(paths.tkc, paths.toke_root)
     for d in ("specs", "meta", "prompts", "batches"):
         os.makedirs(paths.sub(d), exist_ok=True)
@@ -256,6 +259,7 @@ def prepare(paths, max_batches=lc.MAX_BATCHES, limit=None, embed_card=True,
                    "exempt": exempt, "exempt_hit": exempt_hit, "entries": entries,
                    "before": before, "attempts": attempts, "prev_reason": prev_reason,
                    "card": card if embed_card else None, "card_sha": card_sha,
+                   "toolchain": toolchain,
                    "rule_texts": rule_texts, "row": row, "toke_root": paths.toke_root,
                    "nul_carve_out": nul, "candidate_path": cand_path}
             with open(paths.sub("specs", tid + ".json"), "w") as f:

@@ -96,7 +96,16 @@ PRELUDE = {
                                     "let av=@(\"-v\";\"f\");", "let b=true;"],
     "task hygiene": [],
     # 131.62: prompts/spec-reference.md sections (the card has none of these)
-    "common mistakes": ["let arr=mut.@(1;2;3);", "let i=0;", "let v=9;"],
+    "common mistakes": ["let arr=mut.@(1;2;3);", "let i=0;", "let v=9;",
+                        # 131.113: prompts/system.md, system_base.md
+                        "let m=@(\"a\":1);", "let k=\"a\";", "let n=mut.0;", "let c=true;",
+                        "let x=\"12\";"],
+    # 131.113: prompts/system_base.md sections
+    "syntax essentials": ["let n=mut.0;", "let c=true;", "let a=1;", "let b=2;",
+                          "let arr=@(1;2;3);", "let i=0;"],
+    "type casting rules": ["let arr=@(1;2;3);", "let i=0;", "let n=3;"],
+    # 131.113: prompts/generate_toke.md has no `##` headings (rendered with .format first)
+    "preamble": ["let n=mut.0;", "let arr=mut.@(1;2);", "let v=3;"],
 }
 IMPORTS = ["i=io:std.io;", "i=s:std.str;", "i=json:std.json;", "i=file:std.file;",
            "i=fmt:std.fmt;"]
@@ -111,6 +120,34 @@ HELPERS = ["f=dbl(x:i64):i64{<x*2};", "f=cmp(a:i64;b:i64):i64{<a-b};",
 # takes a bool). The strings prelude binds `b` as a str for that section's fence,
 # and tkc rejects `fmt.bool(<str>)` with E4031, so the span gets its own binding.
 TYPED_ARGS = [(re.compile(r"\bfmt\.bool\(([a-z][a-z0-9]*)\)"), "let {}=true;")]
+
+
+# 131.113: the card's first line names the compiler and idiom it is verified
+# against ("# toke syntax card — tkc 3.1.0 / v0.4 idiom ..."). Prompt builders
+# take their version words from here instead of hard-coding a number that
+# goes stale (pattern_prep / library_prep / build_prompt said 2.8.0 long after
+# the card moved to 3.1.0).
+CARD_HEADER = re.compile(r"\btkc (\d+\.\d+\.\d+) / (v\d+\.\d+) idiom\b")
+
+
+def card_versions(card_text=None):
+    """(tkc version, idiom) from the card's header line, e.g. ("3.1.0", "v0.4").
+    card_text None reads the default card. Raises ValueError when the header
+    does not name them -- a card without them cannot say what it is verified on."""
+    if card_text is None:
+        with open(CARD, encoding="utf-8") as f:
+            card_text = f.read()
+    head = card_text.lstrip().split("\n", 1)[0]
+    m = CARD_HEADER.search(head)
+    if not m:
+        raise ValueError(f"syntax card header names no 'tkc X.Y.Z / vN.M idiom': {head[:120]!r}")
+    return m.group(1), m.group(2)
+
+
+def card_toolchain(card_text=None):
+    """The prompt wording for the card's toolchain: 'toke 3.1.0 (v0.4 idiom)'."""
+    tkc, idiom = card_versions(card_text)
+    return f"toke {tkc} ({idiom} idiom)"
 
 
 def sec_key(heading):

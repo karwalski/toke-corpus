@@ -143,9 +143,13 @@ def counts(rows):
     return out
 
 
-def regen_class(row):
-    return (row.get("source") == "regen" and (row.get("category") or "").startswith("A-")
-            and row.get("task_type") == "full_program")
+regen_class = route_patch.regen_class          # the shared class rule (131.109)
+
+
+def regen_outside_class(rows):
+    """task_ids routed REGEN outside the REGEN class: 131.16 has no path for
+    them, so every router must send them to AGENT (131.109). Must be []."""
+    return sorted(t for t, r in rows.items() if r.get("bucket") == "REGEN" and not regen_class(r))
 
 
 def build(corpus, patches=PATCHES):
@@ -177,7 +181,7 @@ def summary(corpus, base, merged, stats, files, out_path):
     audit = os.path.join(corpus, "audit")
     trans = collections.Counter(f"{base[t]['bucket']}->{merged[t]['bucket']}" for t in merged
                                 if base[t]["bucket"] != merged[t]["bucket"])
-    regen_off_class = sorted(t for t, r in merged.items() if r["bucket"] == "REGEN" and not regen_class(r))
+    regen_off_class = regen_outside_class(merged)
     return {
         "story": "131.15 (prep: routing before the wave; Z95)",
         "what": "audit/pattern_sweep.merged.jsonl rebuilt by regen/route_merge.py: the 131.64 re-run sweep "
@@ -194,8 +198,9 @@ def summary(corpus, base, merged, stats, files, out_path):
         "transitions_rerun_to_merged": dict(sorted(trans.items(), key=lambda kv: -kv[1])),
         "regen_outside_regen_class": {
             "records": len(regen_off_class),
-            "note": "REGEN rows that are not A-*/full_program: 131.16 regenerates the A-*/full_program class; "
-                    "these need its shard to take the merged REGEN bucket, not the class rule (131.109)",
+            "note": "REGEN rows that are not A-*/full_program. 131.16 regenerates only the A-*/full_program "
+                    "class, so every router routes a record outside it to AGENT (route_patch.route_bucket, "
+                    "131.109) and regen/tests/test_route_merge.py fails if this is ever non-zero",
             "by_category_prefix": dict(collections.Counter(t.split("-")[0] for t in regen_off_class)),
             "task_ids": regen_off_class},
         "merged_file": {"path": "corpus/regen_v04/audit/pattern_sweep.merged.jsonl", "rows": len(merged),

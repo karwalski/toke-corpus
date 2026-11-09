@@ -6,7 +6,12 @@ This template shows how to include the spec reference in training and inference 
 
 ## Template
 
-```
+The prompt below is text, not toke (a `text` fence: the compile gate skips it and
+builds only the toke programs inside it). `{example1_code}` and
+`{example2_code}` are complete toke programs taken from the gated examples in
+`prompts/system.md`.
+
+```text
 <system>
 You are an expert toke programmer. toke is a statically typed, compiled language designed for LLM code generation.
 
@@ -21,14 +26,10 @@ Expected signature: {expected_signature}
 Here are examples of correct toke programs:
 
 Example 1 — {example1_description}:
-```
 {example1_code}
-```
 
 Example 2 — {example2_description}:
-```
 {example2_code}
-```
 
 Output ONLY the toke source code. No explanations, no markdown fences, no comments.
 </user>
@@ -44,7 +45,7 @@ Output ONLY the toke source code. No explanations, no markdown fences, no commen
    - Arithmetic/math tasks: use factorial, sum array examples
    - Error handling tasks: use safediv, lookup examples
    - Data structure tasks: use struct, array reversal examples
-   - String tasks: use repeatStr, isEmpty examples
+   - String tasks: use repeatstr, isempty examples
 
 3. **Example selection strategy:**
    - Pick examples that demonstrate the specific constructs needed (loops, error handling, structs)
@@ -62,38 +63,43 @@ Output ONLY the toke source code. No explanations, no markdown fences, no commen
 
 ## Concrete Example
 
-```
+Every toke program in this prompt is built and run by
+`regen/tests/test_phase_prompts.py` with the corpus compiler pin (131.113).
+
+```text
 <system>
 You are an expert toke programmer. toke is a statically typed, compiled language designed for LLM code generation.
 
-# toke Phase 2 Specification Reference
+# toke specification reference (v0.4)
 [... spec-reference.md content ...]
 </system>
 
 <user>
 Write a toke program that finds the index of the first occurrence of a value in an array, returning an error if not found.
 
-Expected signature: f=findidx(arr:@(i64);val:i64):i64!$lookuperr
+Expected signature: f=findidx(arr:@i64;val:i64):i64!$lookuperr
 
 Here are examples of correct toke programs:
 
 Example 1 — Sum an array:
 m=arrsum;
-f=sum(arr:@(i64)):i64{
+f=sum(arr:@i64):i64{
   let total=mut.0;
   lp(let i=0;i<arr.len;i=i+1){
     total=total+arr.get(i)
   };
   <total
 };
+f=main():i64{<sum(@(1;2;3))-6};
 
 Example 2 — Safe division with error handling:
 m=safediv;
 t=$matherr{$divzero:bool};
 f=divide(a:f64;b:f64):f64!$matherr{
-  if(b=0.0){<$matherr{$divzero:true}};
+  if(b==0.0){<$matherr{$divzero:true}};
   <a/b
 };
+f=main():i64{<mt divide(1.0;0.0) {$ok:v 1;$err:e 0}};
 
 Output ONLY the toke source code. No explanations, no markdown fences, no comments.
 </user>

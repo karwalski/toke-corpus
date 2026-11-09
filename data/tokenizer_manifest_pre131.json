@@ -1195,9 +1195,195 @@
   "benchmark_ids_n": 1138,
   "baseline_ids_file": "/Users/matthew.watt/tk/toke-tokenizer/data/baseline_sample_ids_v04.txt",
   "baseline_ids_n": 2000,
-  "disjoint_benchmark": true,
-  "disjoint_baseline": true,
-  "family_disjoint_train": true
+  "disjoint_benchmark": "VACUOUS",
+  "disjoint_baseline": "PASS",
+  "family_disjoint_train": "PASS",
+  "disjointness_checks": [
+   {
+    "check": "holdout_records_vs_benchmark",
+    "left_n": 1131,
+    "right_n": 1138,
+    "left_shapes": {
+     "A-A-9a9": 499,
+     "A-A9-A-A-A-9a9-9a9a9": 104,
+     "A-A9-A-A-A-9a9-9a9": 89,
+     "A-A9-A-A-A-9a9-9a9a": 68,
+     "A-9": 64,
+     "A-A9-A-A-A-9a9-a9a9": 59,
+     "A-A9-A-A-A-9a9-a9a9a": 38,
+     "A-A9-A-A-A-9a9-a9a9a9": 38
+    },
+    "right_shapes": {
+     "9": 974,
+     "AaAa/9": 164
+    },
+    "shared_shapes": [],
+    "left_comparable": 0,
+    "right_comparable": 0,
+    "overlap_n": 0,
+    "overlap_examples": [],
+    "status": "VACUOUS",
+    "reason": "the two sides share no id shape, so they cannot intersect by construction (left ['A-9', 'A-A-9', 'A-A-9a9', 'A-A-A-A-9a9-9a'] vs right ['9', 'AaAa/9'])"
+   },
+   {
+    "check": "holdout_families_vs_benchmark",
+    "left_n": 661,
+    "right_n": 1138,
+    "left_shapes": {
+     "A-A9-A-A-A-9a9-9a9a9": 104,
+     "A-A9-A-A-A-9a9-9a9": 89,
+     "A-A9-A-A-A-9a9-9a9a": 68,
+     "A-9": 64,
+     "A-A9-A-A-A-9a9-a9a9": 59,
+     "A-A-9": 39,
+     "A-A9-A-A-A-9a9-a9a9a": 38,
+     "A-A9-A-A-A-9a9-a9a9a9": 38
+    },
+    "right_shapes": {
+     "9": 974,
+     "AaAa/9": 164
+    },
+    "shared_shapes": [],
+    "left_comparable": 0,
+    "right_comparable": 0,
+    "overlap_n": 0,
+    "overlap_examples": [],
+    "status": "VACUOUS",
+    "reason": "the two sides share no id shape, so they cannot intersect by construction (left ['A-9', 'A-A-9', 'A-A-A-A-9a9-9a', 'A-A-A-A-9a9-9a9'] vs right ['9', 'AaAa/9'])"
+   },
+   {
+    "check": "holdout_records_vs_baseline",
+    "left_n": 1131,
+    "right_n": 2000,
+    "left_shapes": {
+     "A-A-9a9": 499,
+     "A-A9-A-A-A-9a9-9a9a9": 104,
+     "A-A9-A-A-A-9a9-9a9": 89,
+     "A-A9-A-A-A-9a9-9a9a": 68,
+     "A-9": 64,
+     "A-A9-A-A-A-9a9-a9a9": 59,
+     "A-A9-A-A-A-9a9-a9a9a": 38,
+     "A-A9-A-A-A-9a9-a9a9a9": 38
+    },
+    "right_shapes": {
+     "A-A-9a9": 1772,
+     "A-A9-A-A-A-9a9-9a9a9": 45,
+     "A-A9-A-A-A-9a9-9a9": 27,
+     "A-A9-A-A-A-9a9-9a9a": 26,
+     "A-A9-A-A-A-9a9-a9a9": 25,
+     "A-A-9": 19,
+     "A-A9-A-A-A-9a9-9a9a9a": 16,
+     "A-A9-A-A-A-9a9-a9a9a": 14
+    },
+    "shared_shapes": [
+     "A-A-9",
+     "A-A-9a9",
+     "A-A-A-A-9a9-9a9",
+     "A-A-A-A-9a9-9a9a9",
+     "A-A-A-A-9a9-9a9a9a9",
+     "A-A-A-A-9a9-a9",
+     "A-A-A-A-9a9-a9a9",
+     "A-A-A-A-9a9-a9a9a9",
+     "A-A9-A-A-A-9a9-9",
+     "A-A9-A-A-A-9a9-9a",
+     "A-A9-A-A-A-9a9-9a9",
+     "A-A9-A-A-A-9a9-9a9a",
+     "A-A9-A-A-A-9a9-9a9a9",
+     "A-A9-A-A-A-9a9-9a9a9a",
+     "A-A9-A-A-A-9a9-9a9a9a9",
+     "A-A9-A-A-A-9a9-a9",
+     "A-A9-A-A-A-9a9-a9a",
+     "A-A9-A-A-A-9a9-a9a9",
+     "A-A9-A-A-A-9a9-a9a9a",
+     "A-A9-A-A-A-9a9-a9a9a9",
+     "A-A9-A-A-A-9a9-a9a9a9a9"
+    ],
+    "left_comparable": 1045,
+    "right_comparable": 1999,
+    "overlap_n": 0,
+    "overlap_examples": [],
+    "status": "PASS",
+    "reason": "disjoint over 1045/1131 left and 1999/2000 right comparable ids"
+   },
+   {
+    "check": "holdout_families_vs_train_families",
+    "left_n": 661,
+    "right_n": 3723,
+    "left_shapes": {
+     "A-A9-A-A-A-9a9-9a9a9": 104,
+     "A-A9-A-A-A-9a9-9a9": 89,
+     "A-A9-A-A-A-9a9-9a9a": 68,
+     "A-9": 64,
+     "A-A9-A-A-A-9a9-a9a9": 59,
+     "A-A-9": 39,
+     "A-A9-A-A-A-9a9-a9a9a": 38,
+     "A-A9-A-A-A-9a9-a9a9a9": 38
+    },
+    "right_shapes": {
+     "A-9": 1298,
+     "A-A-9": 775,
+     "A-A9-A-A-A-9a9-9a9a9": 289,
+     "A-A9-A-A-A-9a9-9a9": 270,
+     "A-A9-A-A-A-9a9-a9a9": 201,
+     "A-A9-A-A-A-9a9-9a9a": 193,
+     "A-A9-A-A-A-9a9-9a9a9a": 117,
+     "A-A9-A-A-A-9a9-a9a9a": 115
+    },
+    "shared_shapes": [
+     "A-9",
+     "A-A-9",
+     "A-A-A-A-9a9-9a9",
+     "A-A-A-A-9a9-9a9a",
+     "A-A-A-A-9a9-9a9a9",
+     "A-A-A-A-9a9-9a9a9a",
+     "A-A-A-A-9a9-9a9a9a9",
+     "A-A-A-A-9a9-a9",
+     "A-A-A-A-9a9-a9a9",
+     "A-A-A-A-9a9-a9a9a",
+     "A-A-A-A-9a9-a9a9a9",
+     "A-A9-A-A-A-9-9a9a",
+     "A-A9-A-A-A-9a9-9",
+     "A-A9-A-A-A-9a9-9a",
+     "A-A9-A-A-A-9a9-9a9",
+     "A-A9-A-A-A-9a9-9a9a",
+     "A-A9-A-A-A-9a9-9a9a9",
+     "A-A9-A-A-A-9a9-9a9a9a",
+     "A-A9-A-A-A-9a9-9a9a9a9",
+     "A-A9-A-A-A-9a9-9a9a9a9a",
+     "A-A9-A-A-A-9a9-a9",
+     "A-A9-A-A-A-9a9-a9a",
+     "A-A9-A-A-A-9a9-a9a9",
+     "A-A9-A-A-A-9a9-a9a9a",
+     "A-A9-A-A-A-9a9-a9a9a9",
+     "A-A9-A-A-A-9a9-a9a9a9a",
+     "A-A9-A-A-A-9a9-a9a9a9a9"
+    ],
+    "left_comparable": 659,
+    "right_comparable": 3704,
+    "overlap_n": 0,
+    "overlap_examples": [],
+    "status": "PASS",
+    "reason": "disjoint over 659/661 left and 3704/3723 right comparable ids"
+   }
+  ]
+ },
+ "disjointness_restamp": {
+  "story": "131.92",
+  "date": "2026-11-08",
+  "why": "written before 131.22a: the booleans below were asserted, not checked. The benchmark ids (bare integers, HumanEval/N) share no id shape with corpus ids, so that check is VACUOUS -- it could not have failed. Owner decision 4.12 (re-stamp the pre131 manifest). Re-stamped by scripts/restamp_tokenizer_disjointness.py from this manifest's records; nothing else changed. Real benchmark disjointness waits on BENCH-128's id list (128.1a) and the v04 --strict-disjoint run (131.22).",
+  "prior": {
+   "disjoint_benchmark": true,
+   "disjoint_baseline": true,
+   "family_disjoint_train": true
+  },
+  "benchmark_ids_sha256": "45f09b6ef5a07da72ef5fbcb1f08be0dcfddb9d06d210171dcd73c18289d2efa",
+  "baseline_ids_sha256": "d83702ea2ed6c5fa4fc258e75ac6afc5507f27a202842484c02b95c19583ea4c",
+  "checks": [
+   "VACUOUS holdout_records_vs_benchmark: the two sides share no id shape, so they cannot intersect by construction (left ['A-9', 'A-A-9', 'A-A-9a9', 'A-A-A-A-9a9-9a'] vs right ['9', 'AaAa/9'])",
+   "VACUOUS holdout_families_vs_benchmark: the two sides share no id shape, so they cannot intersect by construction (left ['A-9', 'A-A-9', 'A-A-A-A-9a9-9a', 'A-A-A-A-9a9-9a9'] vs right ['9', 'AaAa/9'])",
+   "PASS    holdout_records_vs_baseline: disjoint over 1045/1131 left and 1999/2000 right comparable ids",
+   "PASS    holdout_families_vs_train_families: disjoint over 659/661 left and 3704/3723 right comparable ids"
+  ]
  },
  "stub_prefix_report": {
   "prefix": "m=harness;i=io:std.io;",

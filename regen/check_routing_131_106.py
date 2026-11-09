@@ -24,7 +24,8 @@ error (131.14 rejects them as `preexisting:compile`).
            AGENT  everything else. 131.42/131.68/131.83 sent records WITHOUT
                   test cases to REGEN, but 131.16 regenerates only the class
                   above, so for a migrate_fix or D-side record REGEN is a dead
-                  end (131.109). The 131.15 bank (check_pattern) and the 131.17
+                  end (131.109; those routers now share this rule through
+                  route_patch.route_bucket). The 131.15 bank (check_pattern) and the 131.17
                   bank (bank_library) compile and build every candidate and
                   run its tests when the spec has them, so a banked rewrite
                   is guaranteed to pass --check; compile-only records get the
@@ -205,10 +206,7 @@ def has_tests(tid, row, specs):
     return bool((specs.get(tid) or {}).get("test_cases"))
 
 
-def in_regen_class(row):
-    """pattern_sweep's REGEN carve-out: regen-source A-*/full_program."""
-    return (row.get("source") == "regen" and (row.get("category") or "").startswith("A-")
-            and row.get("task_type") == "full_program")
+in_regen_class = route_patch.regen_class        # pattern_sweep's REGEN carve-out (shared, 131.109)
 
 
 def decide(row):

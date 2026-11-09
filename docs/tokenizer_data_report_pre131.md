@@ -184,7 +184,7 @@ oversize (first 15): `AIA-127` (6120 bytes > 4096), `AIA-128` (4101 bytes > 4096
 - fraction 0.05 of records, seed 131
 - families 4,384, holdout families 661, holdout records 1,131
 - protected (ineligible) ids: benchmark `/Users/matthew.watt/tk/toke-corpus/data/holdout_task_ids.txt` (1,138 ids), 131.20 baseline `/Users/matthew.watt/tk/toke-tokenizer/data/baseline_sample_ids_v04.txt` (2,000 ids)
-- asserted: disjoint from benchmark ids = True, disjoint from baseline ids = True, no family split across train/holdout = True
+- asserted: disjoint from benchmark ids = VACUOUS, disjoint from baseline ids = PASS, no family split across train/holdout = PASS (re-stamped 2026-11-08, 131.92: VACUOUS = the operands cannot intersect, so the check proves nothing; the original run asserted True for all three)
 
 | stratum (category|difficulty) | families | eligible | protected | records | goal | holdout fam | holdout rec |
 |---|--:|--:|--:|--:|--:|--:|--:|

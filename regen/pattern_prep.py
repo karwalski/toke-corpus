@@ -31,6 +31,7 @@ import argparse, glob, json, os, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import pattern_common as pc                       # noqa: E402
+from check_card import card_toolchain             # 131.113
 from audit import load_specs                      # noqa: E402
 
 # 131.42: the 429 gamed A-ERR records. Their prompt must carry this verbatim —
@@ -59,7 +60,8 @@ def build_prompt(spec, src, ctx):
     ttype = spec.get("task_type", "full_program")
     row = ctx.get("row") or {}
     rule_texts = ctx.get("rule_texts") or {}
-    lines = [f"PATTERN REWRITE TASK ({spec.get('category')}, {ttype}): the toke 2.8.0 "
+    toolchain = ctx.get("toolchain") or card_toolchain(ctx.get("card"))
+    lines = [f"PATTERN REWRITE TASK ({spec.get('category')}, {ttype}): the {toolchain} "
              "program below is CORRECT (it passes its tests) but uses verbose / "
              "anti-pattern forms flagged by the Epic 131 pattern sweep. Rewrite it "
              "in the canonical forms.",
@@ -128,7 +130,7 @@ def build_prompt(spec, src, ctx):
     lines += pc.expected_output_lines(spec)
     lines += ["", INSTRUCTION, "", "Current source:", src.rstrip("\n"), ""]
     if ctx.get("card"):
-        lines += ["", "---", "SYNTAX CARD (the only authoritative toke 2.8.0 spec; "
+        lines += ["", "---", f"SYNTAX CARD (the only authoritative {toolchain} spec; "
                   f"sha {ctx.get('card_sha')}):", "", ctx["card"]]
     return "\n".join(lines) + "\n"
 
@@ -176,6 +178,7 @@ def prepare(paths, bucket_path, bucket_name="AGENT", max_batches=pc.MAX_BATCHES,
     ledger = pc.read_ledger(paths.ledger)
     card = open(paths.card, encoding="utf-8").read()
     card_sha = pc.short(pc.sha256_text(card))
+    toolchain = card_toolchain(card)                # 131.113: from the card header, not hard-coded
     tkc = pc.tkc_stamp(paths.tkc, paths.toke_root)   # 131.39: one stamp for every meta row + the manifest
     for d in ("specs", "meta", "prompts", "batches", "gen"):
         os.makedirs(paths.sub(d), exist_ok=True)
@@ -223,6 +226,7 @@ def prepare(paths, bucket_path, bucket_name="AGENT", max_batches=pc.MAX_BATCHES,
                    "exempt": exempt, "exempt_hit": exempt_hit, "entries": entries,
                    "before": before, "attempts": attempts, "prev_reason": prev_reason,
                    "card": card if embed_card else None, "card_sha": card_sha,
+                   "toolchain": toolchain,
                    "rule_texts": rule_texts, "row": row, "toke_root": paths.toke_root}
             with open(paths.sub("specs", tid + ".json"), "w") as f:
                 json.dump(spec, f)

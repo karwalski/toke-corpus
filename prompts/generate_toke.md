@@ -8,32 +8,35 @@ Generate a toke program for the following task.
 
 **Rules:**
 - Output ONLY the toke source code. No explanations, no markdown fences, no comments.
-- The program must start with `M=` module declaration.
-- Parameters and arguments use `;` as separator, NOT `,`.
-- Array elements use `;` as separator: `@(1;2;3)`.
+- The program must start with the `m=name;` module declaration, then imports, types, functions in that order.
+- Parameters, arguments and array elements use `;` as separator, NOT `,`: `@(1;2;3)`.
 - Return with `<`, not `return`.
-- Conditionals: `if(cond){{...}}` / `if(cond){{...}}el{{...}}`
-- Mutable bindings: `let x=mut.0;` (NOT `let mut x=0` or `mut x:i64=0`)
-- No type annotations on let bindings: `let x=42` not `let x:i64=42`
-- Loops: `lp(let i=0;i<n;i=i+1){{...}}` — MUST have exactly 3 semicolon-separated parts: init;condition;update. No while-style loops.
-- No `%` modulo operator. Compute modulo as `a-a/b*b`.
-- Equality comparison: `=` (not `==`). No `!=`, `<=`, `>=` operators. Use `!(a>b)` instead of `a<=b`. Use `!(a<b)` instead of `a>=b`. Use `!(a=b)` instead of `a!=b`.
-- No `&&` or `||` operators. For AND: nest ifs — `if(a){{if(b){{...}}}}`. For OR: use a flag — `let zor=mut.false;if(a){{zor=true}};if(b){{zor=true}};if(zor){{...}}`.
-- String type: `$str` (not `string`, `String`, or `Str`)
-- No comments of any kind (`//`, `#`, `/* */` are all illegal).
-- Loop: `lp` NOT `for` or `while`. There is no `for` or `while` keyword.
-- Else: `el` NOT `else`. For else-if chains: `if(a){{...}}el{{if(b){{...}}el{{...}}}}`
-- Boolean values: `true`/`false` (lowercase only, NOT `True`/`False`)
-- No `++`, `--`, `+=`, `-=` operators. Write `i=i+1` instead.
-- `if` is NOT an expression. You CANNOT write `let x=if(cond){{a}}el{{b}}`. Instead: `let x=mut.0; if(cond){{x=a}}el{{x=b}};`
-- No underscore `_` in any identifier. `_idx`, `_tmp`, `_` are all illegal. Use `idx`, `tmp`, `zz`.
-- Error handling rules:
-  - Error types are struct-like: `T=MyErr{{Variant:bool}};`
-  - Error union return type: `F=f():T!MyErr{{...}};`
-  - Return an error: `<MyErr{{Variant:true}};`
-  - Propagate errors with `!`: `let val=fallibleCall()!MyErr;`
-  - Match on error results: `result|{{Ok:v expr;Err:e expr}}`
-  - Match arm bodies are single EXPRESSIONS — `result|{{Ok:v v;Err:e 0}}`. NO blocks `{{...}}` inside match arms, NO `<` inside match arms, NO statements.
-  - If you need multiple statements for a match result, compute them BEFORE the match and store in a mutable variable.
-  - Error variant field names start with uppercase: `T=MyErr{{BadInput:bool}};` not `T=MyErr{{badInput:bool}};`
+- `if` is an expression: `let g=if(n>90){{1}}el if(n>80){{2}}el{{3}};`. Chain with `el if`.
+- Mutable bindings: `let n=mut.0;` (NOT `let mut n=0`); reassign with `n=n+1;`.
+- No type annotations on let bindings: types are inferred.
+- Loops: `lp(let i=0;i<n;i=i+1){{...}}` — exactly init;condition;update. There is no `for` or `while`.
+- Comparison: `==` `!=` `<` `>` `<=` `>=`. A single `=` in a condition is a compile error.
+- Logic: `&&` `||` `!`. Modulo: `%`.
+- Types: `i64` `u64` `f64` `bool` `str`; arrays `@i64`; type names are `$`-prefixed: `t=$point{{x:i64;y:i64}};`.
+- No uppercase letters and no `_` anywhere in identifiers. Booleans are `true`/`false`.
+- No `++`, `--`, `+=`, `-=` operators.
+- Strings are built by interpolation `"\(a)\(b)"`; `+` does not concatenate strings.
+- `set` and `append` return a new collection, so always reassign: `arr=arr.append(v);`.
+- Error handling: error types are sum types with `$`-prefixed variants; a fallible function returns `T!$errtype`; `!$errtype` propagates only inside a function that itself returns `T!$errtype`; match a result with `mt`. Match arm bodies are single EXPRESSIONS (no blocks or statements); an arm may early-return with `<`:
+
+```
+m=errs;
+i=s:std.str;
+t=$myerr{{$badinput:bool}};
+f=parse(x:str):i64!$myerr{{
+  <mt s.toint(x) {{$ok:n n;$err:e <$myerr{{$badinput:true}}}}
+}};
+f=twice(x:str):i64!$myerr{{
+  let v=parse(x)!$myerr;
+  <v*2
+}};
+f=main():i64{{
+  <mt twice("21") {{$ok:v v-42;$err:e 1}}
+}};
+```
 - The program must be complete and compilable.
