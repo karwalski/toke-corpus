@@ -25,6 +25,18 @@ Proxy tokenizer: `scripts/patterns/count_tokens.py` in the toke repo
 (TOKE_PATTERNS_DIR overrides the directory; TOKE_PROXY pins the artefact,
 default = latest `patterns/proxy/proxy8k-*.json`). Loaded lazily once per
 process; `proxy_tokens` is None when the tokenizer cannot be loaded.
+
+Lanes (131.50): `lane_tokens()` / `analyse(..., lanes=True)` / `metrics.py
+--lanes` add the o200k, superword8k and bytepatch lanes, computed by the SAME
+toke module (`count_tokens.Counter(lanes=True)`, reached through the same
+PATTERNS_DIR import as the proxy) -- no lane code lives in this repo.  Each
+lane comes with its TEMSpec section 6.3 fields (metric type, tokenizer,
+toke_trained, baseline, N) from `count_tokens.temspec_fields`, so a lane count
+copied out of here carries what a published claim must state.  Opt-in: lanes
+are measurements, never gates, and the default record shape is unchanged.  A
+lane whose artefact or cache is absent is null with its reason (the toke
+module's SKIP text naming how to get it); a toke checkout that predates 131.50
+gives no lanes and says so.  No lane number is stored in this repo.
 """
 import json, os, subprocess, sys
 
@@ -59,6 +71,8 @@ os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")   # fork-safe under Poo
 
 _counter = None
 _counter_err = None
+_lane_counter = None        # 131.50: a second Counter, lanes=True
+_lane_err = None
 BUDGET_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "freeze", "proxy_budget_v04.json")
 _budget = None
 
@@ -131,14 +145,61 @@ def proxy_counter():
     if _counter is not None or _counter_err is not None:
         return _counter
     try:
-        if PATTERNS_DIR not in sys.path:
-            sys.path.insert(0, PATTERNS_DIR)
-        import count_tokens                       # noqa: E402  (toke repo)
+        count_tokens = _count_tokens_module()
         _counter = count_tokens.Counter(PROXY_PATH, external=False)
     except Exception as e:                        # missing repo / artefact / tokenizers
         _counter_err = f"{type(e).__name__}: {e}"
         _counter = None
     return _counter
+
+
+def _count_tokens_module():
+    """toke's scripts/patterns/count_tokens.py, imported from PATTERNS_DIR (the
+    one copy of the proxy and lane code; never vendored here)."""
+    if PATTERNS_DIR not in sys.path:
+        sys.path.insert(0, PATTERNS_DIR)
+    import count_tokens                           # noqa: E402  (toke repo)
+    return count_tokens
+
+
+def lane_counter():
+    """count_tokens.Counter(lanes=True) (proxy8k + the 131.50 lanes, no other
+    external tokenizer), or None with the reason in `_lane_err` -- including a
+    toke checkout whose count_tokens predates the lanes."""
+    global _lane_counter, _lane_err
+    if _lane_counter is not None or _lane_err is not None:
+        return _lane_counter
+    try:
+        ct = _count_tokens_module()
+        if not hasattr(ct, "LANES") or not hasattr(ct, "temspec_fields"):
+            raise RuntimeError(f"count_tokens at {PATTERNS_DIR} predates the 131.50 lanes "
+                               "(no LANES/temspec_fields); update the toke checkout")
+        _lane_counter = ct.Counter(PROXY_PATH, external=False, lanes=True)
+    except Exception as e:  # noqa: BLE001  -- missing repo / artefact / old checkout
+        _lane_err = f"{type(e).__name__}: {e}"
+        _lane_counter = None
+    return _lane_counter
+
+
+def lane_tokens(min_text):
+    """131.50 lanes for the string-masked --min text (whole program):
+    {"lanes": {lane: int|None}, "temspec": {lane: TEMSpec 6.3 fields},
+     "unavailable": {lane: reason}, "artefacts": {lane: file name|None}},
+    or None when min_text is None.  When the lane code cannot be loaded at
+    all, every lane is None and `error` says why."""
+    if min_text is None:
+        return None
+    c = lane_counter()
+    if c is None:
+        return {"lanes": None, "temspec": None, "unavailable": None, "artefacts": None,
+                "error": _lane_err}
+    ct = _count_tokens_module()
+    r = c.measure_snippet(min_text)
+    lanes = tuple(ct.LANES)
+    return {"lanes": {k: (r.get("lanes") or {}).get(k) for k in lanes},
+            "temspec": {k: ct.temspec_fields(k, 1) for k in lanes},
+            "unavailable": {k: v for k, v in (r.get("unavailable") or {}).items() if k in lanes},
+            "artefacts": r.get("lane_artefacts")}
 
 
 def proxy_tokens(min_text):
@@ -223,11 +284,12 @@ def _func_name(fn_node):
     return None
 
 
-def analyse(path, src=None, tkc=None):
+def analyse(path, src=None, tkc=None, lanes=False):
     """Per-file structural metrics. Returns None when the AST is unavailable
     (caller should have compile-checked first). `src`: the file's text, if the
     caller already has it (saves a read for the stub-prefix check). `tkc`: binary
-    to exec (131.39; default the module TKC, i.e. the pinned copy when set)."""
+    to exec (131.39; default the module TKC, i.e. the pinned copy when set).
+    `lanes`: also measure the 131.50 token lanes (key "lanes", see lane_tokens)."""
     ast = dump_ast(path, tkc=tkc)
     if ast is None:
         return None
@@ -245,7 +307,7 @@ def analyse(path, src=None, tkc=None):
     walk(ast)
     mn = min_form(path, tkc=tkc)
     li = lint(path, src, tkc=tkc)
-    return {
+    out = {
         "func_count": len(funcs),
         "functions": funcs,
         "max_depth": max((f["depth"] for f in funcs), default=0),
@@ -256,12 +318,18 @@ def analyse(path, src=None, tkc=None):
         "lint_warnings": sum(1 for d in li if d.get("severity") == "warning"),
         "lint_pattern_violations": pattern_violations(li),
     }
+    if lanes:
+        out["lanes"] = lane_tokens(mn)              # 131.50 (opt-in, never a gate)
+    return out
 
 
 if __name__ == "__main__":
+    argv = sys.argv[1:]
+    want_lanes = "--lanes" in argv                      # 131.50
+    argv = [a for a in argv if a != "--lanes"]
     with tkc_pin.pin() as pinned:                       # 131.39
-        for p in sys.argv[1:]:
-            m = analyse(p, tkc=pinned.argv0)
+        for p in argv:
+            m = analyse(p, tkc=pinned.argv0, lanes=want_lanes)
             if m is not None:
                 m["tkc_bin_sha"] = pinned.sha256
                 m["tkc_git_sha"] = pinned.tkc_git_sha      # 131.90
