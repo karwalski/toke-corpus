@@ -41,6 +41,20 @@ DEFAULT_COMPLEXITY = ROOT / "data" / "corpus_complexity_dedup.jsonl"
 DEFAULT_OUTPUT_DIR = ROOT / "data"
 
 
+# Corpus records excluded from training prep by owner decision, matched on the
+# record's "id". Story 135.34 / toke/docs/owner-decisions-2026-10-01.md 4.5:
+# this legacy phase2 BIFI record carries tkc 0.1.0's retired W1010
+# advice-as-fix string in references.diagnostic. Keep in step with toke-model
+# finetune/prepare_data.py EXCLUDED_RECORD_IDS.
+EXCLUDED_RECORD_IDS: frozenset[str] = frozenset({
+    "BIFI-missing_semicolon-21952-7371771c",
+})
+
+
+def is_excluded(entry: dict) -> bool:
+    """True if the owner has excluded this record from training prep (135.34)."""
+    return entry.get("id") in EXCLUDED_RECORD_IDS
+
 def load_config(path: Path) -> dict:
     with open(path) as f:
         return yaml.safe_load(f)
@@ -630,6 +644,11 @@ def main() -> None:
 
             entry_id = entry.get("id", "")
             entry["category"] = category  # ensure category is set
+
+            # 135.34: owner-excluded records never reach the quality gate.
+            if is_excluded(entry):
+                skipped["owner_excluded"] += 1
+                continue
 
             # --- Quality gate checks ---
 
