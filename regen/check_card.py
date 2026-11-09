@@ -96,7 +96,16 @@ PRELUDE = {
                                     "let av=@(\"-v\";\"f\");", "let b=true;"],
     "task hygiene": [],
     # 131.62: prompts/spec-reference.md sections (the card has none of these)
-    "common mistakes": ["let arr=mut.@(1;2;3);", "let i=0;", "let v=9;"],
+    "common mistakes": ["let arr=mut.@(1;2;3);", "let i=0;", "let v=9;",
+                        # 131.113: prompts/system.md, system_base.md
+                        "let m=@(\"a\":1);", "let k=\"a\";", "let n=mut.0;", "let c=true;",
+                        "let x=\"12\";"],
+    # 131.113: prompts/system_base.md sections
+    "syntax essentials": ["let n=mut.0;", "let c=true;", "let a=1;", "let b=2;",
+                          "let arr=@(1;2;3);", "let i=0;"],
+    "type casting rules": ["let arr=@(1;2;3);", "let i=0;", "let n=3;"],
+    # 131.113: prompts/generate_toke.md has no `##` headings (rendered with .format first)
+    "preamble": ["let n=mut.0;", "let arr=mut.@(1;2);", "let v=3;"],
 }
 IMPORTS = ["i=io:std.io;", "i=s:std.str;", "i=json:std.json;", "i=file:std.file;",
            "i=fmt:std.fmt;"]

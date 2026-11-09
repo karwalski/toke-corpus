@@ -1,307 +1,320 @@
 # toke Language Reference
 
-toke is a statically typed, compiled language designed for LLM code generation. It compiles to native binaries. There are no comments, no implicit coercions, and exactly one syntactic form for each construct.
+toke is a statically typed, compiled language designed for LLM code generation. It compiles to native binaries. No implicit coercions, and one canonical form for each construct. This page is the phase-era generators' system prompt (main.py, trial/runner.py, scripts/regenerate.py); `regen/syntax_card.md` is the fuller, compiler-verified card. Every code block and statement here is compiled by `regen/check_card.py` in `regen/tests/test_phase_prompts.py` against the corpus compiler pin (131.113).
 
 ## Character Set
 
-80 ASCII characters. No Unicode identifiers. No comments (`//`, `/* */`, `#` are all illegal).
+59 characters: lowercase `a-z`, digits `0-9` and 23 symbols. No uppercase letters anywhere in source (E2002). No `_` in identifiers (E1003). No commas outside string literals. Generated programs carry no comments.
 
-## Module Structure
+## File Structure
 
-Every file starts with `M=name;`. Declarations must appear in order: module, imports, types, constants, functions.
+Every file starts with exactly one `m=name;` line. Declarations appear in this order: module, imports, types, functions (E2001 otherwise).
 
 ```
-M=name;
-I=alias:path.to.mod;
-T=TypeName{field1:Type1;field2:Type2};
-PI=3.14159:f64;
-F=funcName(p1:Type1;p2:Type2):RetType{body};
+m=geo;
+i=io:std.io;
+t=$point{x:i64;y:i64};
+f=norm2(p:$point):i64{<p.x*p.x+p.y*p.y};
+f=main():i64{
+  io.println("\(norm2($point{x:3;y:4}))");
+  <0
+};
 ```
 
 ## Types
 
-Primitives: `i64`, `u64`, `f64`, `bool`, `$str`, `$void`
-Arrays: `@(T)` — literal: `@(1;2;3)` (semicolons, not commas)
-Maps: `@(K:V)` — literal: `@("a":1;"b":2)`
-Error unions: `T!ErrType`
-Structs: `T=Point{x:i64;y:i64};`
-Pointers: `*T` (FFI extern declarations only)
+Scalars: `i64`, `u64`, `f64`, `bool`, `str`, `void` (also `i8`..`i32`, `u8`..`u32`, `f32`)
+Arrays: `@i64` — literal: `@(1;2;3)` (semicolons, not commas), empty `@()`
+Maps: `@(str:i64)` — literal: `@("a":1;"b":2)`
+Error unions: `i64!$matherr` (function return types)
+Structs: `t=$point{x:i64;y:i64};` — type names are `$`-prefixed and lowercase
+Sum and error types: every variant `$`-prefixed: `t=$shape{$circle:f64;$square:f64};`
 
 ## Functions
 
-```
-F=name(param1:Type1;param2:Type2):ReturnType{body};
-```
-
-Parameters separated by `;` (not `,`).
-Function call arguments also separated by `;`: `add(a;b)`.
-No body = extern FFI declaration: `F=puts(s:*u8):$void;`
+`f=name(p1:type1;p2:type2):rettype{body};` — parameters and arguments are separated by `;`, never `,`: `add(a;b)`. A declaration with no body is an extern: `f=puts(s:*u8):void;`
 
 ## Statements
 
-Variable binding (immutable): `let x=42;`
-Variable binding (mutable): `let x=mut.42;`
-Assignment: `x=expr;`
-Return: `<expr;` (the `<` character, not the word `return`)
-Break: `br;`
+```
+m=stmts;
+f=main():i64{
+  let x=42;
+  let n=mut.0;
+  n=n+x;
+  lp(let i=0;i<10;i=i+1){
+    if(i==3){br};
+    n=n+1
+  };
+  <n-45
+};
+```
+
+`let` is immutable; `let n=mut.0;` is mutable and is the only binding that can be reassigned. Return is `<expr` (or the long form `rt expr`). `br` breaks the innermost loop.
 
 ## Conditionals
 
+`if` is an expression: bind or return it directly. Chain with `el if`.
+
 ```
-if(condition){body};
-if(condition){body}el{altBody};
+m=conds;
+f=sign(n:i64):i64{
+  <if(n<0){-1}el if(n>0){1}el{0}
+};
+f=main():i64{
+  let g=if(sign(5)==1){10}el{20};
+  if(g!=10){<1};
+  <0
+};
 ```
 
-The keyword is `if`. The else keyword is `el` (two characters). There is no `elif` — nest `if` inside `el`.
+An expression-`if` requires an `el` branch, and both branches yield the same type.
 
 ## Loops
 
-```
-lp(init;condition;step){body};
-```
-
-One loop construct. No `while`, `for`, or `foreach`. Example:
-
-```
-lp(let i=0;i<n;i=i+1){body};
-```
+`lp(init;cond;step){body};` is the only loop: there is no `while`, `for` or `foreach`.
 
 ## Match
 
-Pattern match on values using pipe-brace syntax:
-
 ```
-expr|{
-  Pattern1:binding1 body1;
-  Pattern2:binding2 body2
-}
+m=matches;
+i=s:std.str;
+f=main():i64{
+  let v=mt s.toint("12") {$ok:n n;$err:e 0};
+  <v-12
+};
 ```
 
-For error results: `expr|{Ok:v handleV;Err:e handleE}`
+`mt expr {$variant:binding expr;...}`. Each arm body is a single expression; all arms yield the same type unless an arm returns with `<`. Matching is exhaustive.
 
 ## Error Handling
 
-Error types are sum types: `T=MyErr{Variant1:bool;Variant2:$str};`
-Return type declares failure: `F=f():T!MyErr{...};`
-Propagate with `!`: `let val=fallibleCall()!MyErr;`
-Return an error: `<MyErr{Variant1:true};`
-Match for recovery: `result|{Ok:v v;Err:e defaultVal}`
+```
+m=errs;
+t=$matherr{$divzero:bool};
+f=divide(a:i64;b:i64):i64!$matherr{
+  if(b==0){<$matherr{$divzero:true}};
+  <a/b
+};
+f=twice(a:i64;b:i64):i64!$matherr{
+  let q=divide(a;b)!$matherr;
+  <q*2
+};
+f=main():i64{
+  <mt twice(10;5) {$ok:v v-4;$err:e 1}
+};
+```
+
+`expr!$errtype` propagates the error and is valid only inside a function that itself returns `T!$errtype`.
 
 ## Operators
 
-Arithmetic: `+`, `-`, `*`, `/`
-Comparison: `<`, `>`, `=` (equality). There is NO `!=`, `<=`, or `>=` operator.
-Logical: There are NO `&&` or `||` operators. Use nested `if` for compound conditions.
-Cast: `expr as Type`
-Field access: `expr.field`
-Error propagation: `expr!ErrType`
-Unary negation: `-expr`
-
-Note: `=` is equality in expressions and binding in declarations (context-dependent).
+Arithmetic: `+`, `-`, `*`, `/`, `%` (numeric only; `+` also concatenates two arrays)
+Comparison: `==`, `!=`, `<`, `>`, `<=`, `>=`. A single `=` is binding and assignment only.
+Logic: `&&`, `||` (short-circuit) and unary `!`
+Cast: `expr as type`. Field access: `p.x`. Error propagation: `expr!$errtype`.
+Strings are built by interpolation `"\(expr)"`; `+` does not concatenate strings (E4031).
 
 ## Examples
 
 ### Example 1 — Absolute value
 
 ```
-M=abs;
-F=abs(x:i64):i64{
-  if(x<0){< -x};
-  <x
+m=absval;
+f=abs(x:i64):i64{
+  <if(x<0){-x}el{x}
 };
+f=main():i64{<abs(-3)-3};
 ```
 
 ### Example 2 — Sum an array
 
 ```
-M=arrsum;
-F=sum(arr:@(i64)):i64{
+m=arrsum;
+f=sum(arr:@i64):i64{
   let total=mut.0;
   lp(let i=0;i<arr.len;i=i+1){
-    total=total+arr.get(i);
+    total=total+arr.get(i)
   };
   <total
 };
+f=main():i64{<sum(@(1;2;3))-6};
 ```
 
 ### Example 3 — Factorial
 
 ```
-M=fact;
-F=factorial(n:i64):i64{
+m=fact;
+f=factorial(n:i64):i64{
   if(n<2){<1};
   <n*factorial(n-1)
 };
+f=main():i64{<factorial(5)-120};
 ```
 
 ### Example 4 — Fibonacci
 
 ```
-M=fib;
-F=fib(n:i64):i64{
+m=fib;
+f=fib(n:i64):i64{
   if(n<2){<n};
   <fib(n-1)+fib(n-2)
 };
+f=main():i64{<fib(10)-55};
 ```
 
 ### Example 5 — Safe division with error handling
 
 ```
-M=safediv;
-T=MathErr{DivByZero:bool};
-F=divide(a:f64;b:f64):f64!MathErr{
-  if(b=0.0){<MathErr{DivByZero:true}};
+m=safediv;
+t=$matherr{$divzero:bool};
+f=divide(a:f64;b:f64):f64!$matherr{
+  if(b==0.0){<$matherr{$divzero:true}};
   <a/b
 };
-F=safeMath(a:f64;b:f64):f64{
-  let r=divide(a;b);
-  r|{
-    Ok:v v;
-    Err:e 0.0
-  }
+f=safemath(a:f64;b:f64):f64{
+  <mt divide(a;b) {$ok:v v;$err:e 0.0}
 };
+f=main():i64{<if(safemath(1.0;0.0)==0.0){0}el{1}};
 ```
 
 ### Example 6 — Find maximum in array
 
 ```
-M=findmax;
-F=max(arr:@(i64)):i64{
+m=findmax;
+f=max(arr:@i64):i64{
   let m=mut.arr.get(0);
   lp(let i=1;i<arr.len;i=i+1){
-    if(arr.get(i)>m){m=arr.get(i)};
+    if(arr.get(i)>m){m=arr.get(i)}
   };
   <m
 };
+f=main():i64{<max(@(3;9;2))-9};
 ```
 
 ### Example 7 — Struct usage
 
 ```
-M=geo;
-T=Point{x:f64;y:f64};
-F=dist(a:Point;b:Point):f64{
+m=geo;
+t=$point{x:f64;y:f64};
+f=dist2(a:$point;b:$point):f64{
   let dx=b.x-a.x;
   let dy=b.y-a.y;
-  <(dx*dx+dy*dy)
+  <dx*dx+dy*dy
+};
+f=main():i64{
+  let d=dist2($point{x:0.0;y:0.0};$point{x:3.0;y:4.0});
+  <if(d==25.0){0}el{1}
 };
 ```
-
-
 
 ### Example 8 — String length check
 
 ```
-M=strlen;
-F=isEmpty(s:$str):bool{
-  <s.len=0 as u64
+m=strlen;
+f=isempty(text:str):bool{
+  <text.len==0
 };
+f=main():i64{<if(isempty("")){0}el{1}};
 ```
 
 ### Example 9 — Array reversal
 
 ```
-M=rev;
-F=reverse(arr:@(i64)):@(i64){
-  let result=mut.@();
+m=rev;
+f=reverse(arr:@i64):@i64{
+  let out=mut.@();
   let n=arr.len;
   lp(let i=0;i<n;i=i+1){
-    let idx=n-1-i;
-    result=result+@(arr.get(idx));
+    out=out.append(arr.get(n-1-i))
   };
-  <result
+  <out
 };
+f=main():i64{<reverse(@(1;2;3)).get(0)-3};
 ```
 
-### Example 10 — Nested conditionals (no && or ||)
+### Example 10 — Compound conditions
 
 ```
-M=range;
-F=inRange(x:i64;lo:i64;hi:i64):bool{
-  let r=mut.false;
-  if(!(x<lo)){if(!(x>hi)){r=true}};
-  <r
+m=range;
+f=inrange(x:i64;lo:i64;hi:i64):bool{
+  <x>=lo&&x<=hi
 };
+f=main():i64{<if(inrange(5;1;9)&&!inrange(0;1;9)){0}el{1}};
 ```
 
-### Example 11 — Modulo without % operator
+### Example 11 — Modulo
 
 ```
-M=modop;
-F=isEven(n:i64):bool{
-  let rem=n-n/2*2;
-  <rem=0
+m=modop;
+f=iseven(n:i64):bool{
+  <n%2==0
 };
+f=main():i64{<if(iseven(4)){0}el{1}};
 ```
 
 ### Example 12 — Sorting (bubble sort)
 
 ```
-M=bsort;
-F=sort(arr:@(i64)):@(i64){
+m=bsort;
+f=sort(arr:@i64):@i64{
   let a=mut.arr;
   let n=a.len;
   lp(let i=0;i<n;i=i+1){
     lp(let j=0;j<n-1-i;j=j+1){
       if(a.get(j)>a.get(j+1)){
         let tmp=a.get(j);
-        a.set(j;a.get(j+1));
-        a.set(j+1;tmp);
-      };
-    };
+        a=a.set(j;a.get(j+1));
+        a=a.set(j+1;tmp)
+      }
+    }
   };
   <a
 };
+f=main():i64{<sort(@(3;1;2)).get(0)-1};
 ```
 
-### Example 13 — String building character by character
+### Example 13 — String building
 
 ```
-M=repeat;
-F=repeatStr(s:$str;n:i64):$str{
-  let result=mut."";
+m=repeat;
+f=repeatstr(text:str;n:i64):str{
+  let out=mut."";
   lp(let i=0;i<n;i=i+1){
-    result=result+s;
+    out="\(out)\(text)"
   };
-  <result
+  <out
 };
+f=main():i64{<repeatstr("ab";3).len-6};
 ```
 
 ### Example 14 — Error handling with match
 
 ```
-M=lookup;
-T=LookupErr{NotFound:bool};
-F=findIdx(arr:@(i64);val:i64):i64!LookupErr{
+m=lookup;
+t=$lookuperr{$notfound:bool};
+f=findidx(arr:@i64;val:i64):i64!$lookuperr{
   lp(let i=0;i<arr.len;i=i+1){
-    if(arr.get(i)=val){<i}
+    if(arr.get(i)==val){<i}
   };
-  <LookupErr{NotFound:true}
+  <$lookuperr{$notfound:true}
 };
-F=findOrDefault(arr:@(i64);val:i64;default:i64):i64{
-  let r=findIdx(arr;val);
-  r|{
-    Ok:v v;
-    Err:e default
-  }
+f=findordefault(arr:@i64;val:i64;dflt:i64):i64{
+  <mt findidx(arr;val) {$ok:v v;$err:e dflt}
 };
+f=main():i64{<findordefault(@(4;5);5;-1)-1};
 ```
 
 ## Common Mistakes
 
-1. **No comments.** Do not write `//`, `/* */`, or `#`. There is no comment syntax.
-2. **Semicolons between parameters, not commas.** `F=f(a:i64;b:i64)` not `F=f(a:i64,b:i64)`.
-3. **Semicolons between arguments, not commas.** `f(x;y)` not `f(x,y)`.
-4. **Semicolons between array elements.** `@(1;2;3)` not `@(1,2,3)`.
-5. **Return is `<`, not `return`.** Write `<42` not `return 42`.
-6. **String type is `$str`**, not `string`, `String`, `str`, or `Str`.
-7. **Else is `el`**, not `else`. Write `if(c){a}el{b}`.
-8. **No `while` or `for`.** Use `lp(init;cond;step){body}`.
-9. **Module declaration is required.** Every file starts with `M=name;`.
-10. **Equality is `=` in expressions.** Write `if(x=0)` not `if(x==0)`.
-11. **No snake_case keywords.** All keywords are short: `if`, `el`, `lp`, `br`, `let`, `mut`, `as`, `rt`.
-12. **Mutable bindings use `let x=mut.expr`**, not `mut x=expr`. The `mut.` prefix goes after `=`.
-13. **No type annotations on let bindings.** Write `let x=42` not `let x:i64=42`. Types are inferred.
-14. **Loop init uses `let`.** `lp(let i=0;i<n;i=i+1)` not `lp(mut i:i64=0;...)`.
-15. **No `!=`, `<=`, `>=`, `&&`, or `||` operators.** Only `<`, `>`, `=` for comparison. Use nested `if` for compound conditions.
-16. **Constants have no `C=` prefix.** Write `PI=3.14159:f64;` not `C=PI 3.14159;`.
+1. **Equality is `==`.** A bare `=` in a condition is a compile error (E2002).
+2. **Semicolons separate parameters, arguments and array elements**, never commas.
+3. **Return is `<`**, not `return`.
+4. **Else is `el`**, not `else`; chain with `el if`.
+5. **No `while` or `for`.** The only loop is `lp(init;cond;step){body}`.
+6. **Strings are `str`, arrays `@i64`**, not `$str`, `string` or `[i64]`.
+7. **Mutable bindings put `mut.` on the value**: `let x=mut.0;`.
+8. **No uppercase and no `_`** in identifiers or keywords. Type names are `$`-prefixed: `$point`.
+9. **Collections have value semantics.** `set` and `append` return a new collection, so always reassign: `arr=arr.set(i;v);` is the correct form.
+10. **A map lookup is `V!$err`**: read it with `let v=mt m.get(k) {$ok:x x;$err:e 0};` or with `let v=m.getor(k;0);`.
+11. **No string `+`.** Build strings with interpolation `"\(a)\(b)"`.
