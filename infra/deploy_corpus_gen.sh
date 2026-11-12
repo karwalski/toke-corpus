@@ -13,7 +13,7 @@ set -euo pipefail
 #
 # Required environment variables (or export before running):
 #   CORPUS_EC2_HOST — hostname or IP of the corpus generation EC2 instance
-#   SSH_KEY         — path to the SSH private key (e.g. ~/.ssh/mumbai.pem)
+#   SSH_KEY         — path to the SSH private key (e.g. ~/.ssh/<your-key>)
 #   SSH_USER        — SSH username (default: ubuntu)
 
 # --------------------------------------------------------------------------
