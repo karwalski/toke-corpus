@@ -1,6 +1,6 @@
 # toke-corpus
 
-Corpus generation and audit pipeline for [toke](https://github.com/karwalski/toke-spec)
+Corpus generation and audit pipeline for [toke](https://github.com/karwalski/toke)
 training data. This repo produces, validates, and quality-audits the corpus of
 task-description → toke-source records used to fine-tune toke code models.
 
@@ -27,8 +27,8 @@ and nowhere else.*
 ## Current pipeline: v0.4 regen (`regen/`)
 
 The **live** pipeline is the v0.4 regeneration harness in `regen/`. It rebuilt the
-corpus in current v0.4 / tkc 2.8.0 syntax using agent workers, replacing the older
-Gate 2 corpus (of which only ~21% still compiled under tkc 2.8.0).
+corpus in v0.4 syntax (generated under tkc 2.8.0) using agent workers, replacing the
+older v0.3 Gate 2 corpus, which predates v0.4's breaking syntax changes.
 
 Key pieces:
 
@@ -36,16 +36,27 @@ Key pieces:
 - `regen/driver.py`, `regen/check_one.py` — per-task generate/self-check loop
   (tkc `--check` + build + run test cases)
 - `regen/audit.py`, `regen/audit_library.py` — Epic 129 quality-audit tooling
-- `regen/syntax_card.md` — the **only** authoritative tkc 2.8.0 syntax spec used by
-  workers; sha-stamped (`card_sha`, probe-verified against the compiler). All other
-  syntax docs are stale by comparison.
+- `regen/syntax_card.md` — the **only** authoritative syntax spec used by workers
+  (card v2, tkc 3.1.0 / v0.4 idiom); sha-stamped (`card_sha`, gated by
+  `regen/check_card.py`, probe-verified against the compiler). All other syntax docs
+  are stale by comparison.
+- `regen/tkc_pin.py` — pins one tkc binary for the life of a run and stamps its sha
+  into every output
+- `regen/pattern_sweep.py` — the Epic 131 pattern/conformance sweep that buckets every
+  record for the rewrite waves
 - `regen/REBUILD_STATUS.md` — plan, per-shard status, and operating procedure
+- `regen/freeze/` — freeze summaries and the Epic 131 recheck ledgers
 
-Status: **generation complete** — 23,382 / 23,826 records accepted (98.14%) across
-all 12 shards, every shard clearing the 85% acceptance gate. Accepted records are
-banked in `corpus/regen_v04/` (~23.4k records, **gitignored, local-only**). An
-**Epic 129 quality audit** of the banked corpus is in progress (see recent
-`audit(129.x)` commits).
+Status: **generation complete, rewrite waves not yet run.** All 12 shards were
+generated, every shard clearing the 85% acceptance gate, and the accepted records are
+banked in `corpus/regen_v04/` (**gitignored, local-only**). The Epic 129 quality audit
+froze them on 2026-08-19 as `129-freeze-2026-08-19`, 23,382 records
+(`regen/AUDIT_129.md`; the count is `corpus_records_v04_frozen` in
+[`docs/metrics-baseline.md`](https://github.com/karwalski/toke/blob/main/docs/metrics-baseline.md)).
+Epic 131 has reopened that freeze for pattern rewrites: the conformance sweep (131.13)
+has run, but the agent rewrite wave (131.15) is prepared and **held** — it has not run —
+so the corpus is not re-frozen and is not v0.4-canonical yet. Status lives in the toke
+tracker, [`docs/progress.md`](https://github.com/karwalski/toke/blob/main/docs/progress.md).
 
 Acceptance is never delegated to workers: `run_shard.py validate` independently
 re-compiles, checks signature conformance, and re-runs test cases for every record
@@ -98,8 +109,9 @@ reads `corpus/regen_v04/` requires access to the local data.
 ## Requirements
 
 - Python 3.11+
-- [tkc](https://github.com/karwalski/toke) 2.8.0 on PATH (the compiler is the root
-  of trust — records are only banked if tkc accepts them)
+- [tkc](https://github.com/karwalski/toke) (toke 3.1.0, the version the syntax card is
+  verified against; the compiler is the root of trust — records are only banked if tkc
+  accepts them)
 - the `toke` repo checked out beside this one (`~/tk/toke`): `regen/` execs its
   `tkc` (pinned, see `regen/tkc_pin.py`) and imports its
   `scripts/patterns/count_tokens.py`
@@ -130,8 +142,9 @@ It must pass before a merge.
 
 - **toke / tkc** — the language spec and reference compiler; root of trust for the
   whole chain
-- **toke-model** — consumes this corpus for fine-tuning
-- **toke-eval** — benchmark tasks and hidden test cases
+- **toke-models** (local checkout `toke-model`) — consumes this corpus for fine-tuning
+- **toke-eval** — benchmark tasks and evaluation harness; its held-out tests are never
+  read by anything in this repository
 - **toke-tokenizer** — BPE tokenizer training and evaluation
 
 ## Licence
