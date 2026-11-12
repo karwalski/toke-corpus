@@ -817,10 +817,14 @@ def main() -> None:
     parser.add_argument("--region", default="us-east-1", help="AWS region")
 
     # SSH-SageMaker options
-    parser.add_argument("--ssh-host", default="3.107.90.156", help="SSH bastion host for SageMaker")
-    parser.add_argument("--ssh-key", default=os.path.expanduser("~/.ssh/toke-console.pem"),
-                        help="SSH private key path")
-    parser.add_argument("--ssh-user", default="admin", help="SSH username")
+    # Host and key are not committed (public repo): pass them or set
+    # TOKE_SSH_BASTION_HOST / TOKE_SSH_BASTION_KEY / TOKE_SSH_BASTION_USER.
+    parser.add_argument("--ssh-host", default=os.environ.get("TOKE_SSH_BASTION_HOST"),
+                        help="SSH bastion host for SageMaker (env TOKE_SSH_BASTION_HOST)")
+    parser.add_argument("--ssh-key", default=os.environ.get("TOKE_SSH_BASTION_KEY"),
+                        help="SSH private key path (env TOKE_SSH_BASTION_KEY)")
+    parser.add_argument("--ssh-user", default=os.environ.get("TOKE_SSH_BASTION_USER", "admin"),
+                        help="SSH username (env TOKE_SSH_BASTION_USER, default admin)")
 
     # API options
     parser.add_argument("--api-url", default=None, help="API base URL")
@@ -838,6 +842,11 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+    if args.backend == "ssh-sagemaker" and not (args.ssh_host and args.ssh_key):
+        parser.error("--backend ssh-sagemaker needs --ssh-host and --ssh-key "
+                     "(or TOKE_SSH_BASTION_HOST and TOKE_SSH_BASTION_KEY)")
+    if args.ssh_key:
+        args.ssh_key = os.path.expanduser(args.ssh_key)
 
     # Setup logging
     level = logging.DEBUG if args.verbose else logging.INFO

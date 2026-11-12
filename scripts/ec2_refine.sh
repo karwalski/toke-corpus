@@ -29,9 +29,10 @@
 
 set -euo pipefail
 
-EC2_HOST="${EC2_CORPUS_HOST:-3.111.50.47}"
+# Host and key are not committed (public repo): set them in the environment.
+EC2_HOST="${EC2_CORPUS_HOST:-}"
 EC2_USER="${EC2_CORPUS_USER:-ubuntu}"
-EC2_KEY="${EC2_CORPUS_KEY:-$HOME/.ssh/mumbai.pem}"
+EC2_KEY="${EC2_CORPUS_KEY:-}"
 EC2_DIR="/home/ubuntu/toke-corpus"
 
 SSH="ssh -i $EC2_KEY -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST"
@@ -42,6 +43,14 @@ REPO_DIR="$(dirname "$SCRIPT_DIR")"
 
 cmd="${1:-help}"
 shift || true
+
+case "$cmd" in
+  upload|run|status|download)
+    if [ -z "$EC2_HOST" ] || [ -z "$EC2_KEY" ]; then
+      echo "ERROR: set EC2_CORPUS_HOST and EC2_CORPUS_KEY (see: $0 help)" >&2
+      exit 2
+    fi ;;
+esac
 
 case "$cmd" in
   upload)
@@ -127,9 +136,9 @@ case "$cmd" in
     echo "  download  — Pull results back"
     echo ""
     echo "Environment:"
-    echo "  EC2_CORPUS_HOST  (default: 3.111.50.47)"
+    echo "  EC2_CORPUS_HOST  (required) instance address, e.g. 203.0.113.10"
     echo "  EC2_CORPUS_USER  (default: ubuntu)"
-    echo "  EC2_CORPUS_KEY   (default: ~/.ssh/mumbai.pem)"
+    echo "  EC2_CORPUS_KEY   (required) SSH private key path, e.g. ~/.ssh/<your-key>"
     echo "  ANTHROPIC_API_KEY — must be set on EC2 (export before run)"
     ;;
 esac
