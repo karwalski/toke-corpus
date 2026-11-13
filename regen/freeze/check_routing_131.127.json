@@ -1,0 +1,87 @@
+{
+ "story": "131.127",
+ "date": "2026-11-09",
+ "tkc": {
+  "tkc_bin_sha": "ed4e4701d3311c0e5c808af694a23791327c3b0c397730b93a9ca563d4a2351c",
+  "tkc_version": "toke 3.1.0 (git 893db8f037e5)",
+  "tkc_path": "/Users/matthew.watt/tk/toke/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/toke/toke",
+  "toke_head": "893db8f037e5c688a06bec5d025673ad89ddda2b",
+  "toke_src_dirty": true,
+  "tkc_git_sha": "893db8f037e5",
+  "tkc_git_dirty": false
+ },
+ "records_checked": 24965,
+ "rc": {
+  "library rc=0": 1578,
+  "library rc=1": 5,
+  "regen rc=0": 23186,
+  "regen rc=1": 196
+ },
+ "banked_failing": {
+  "records": 4,
+  "by_source": {
+   "regen": 4
+  },
+  "records_by_error_code": {
+   "E4034": 4
+  },
+  "records_by_first_error_code": {
+   "E4034": 4
+  },
+  "by_source_task_type_bucket_before": {
+   "regen/full_program/REGEN": 4
+  },
+  "with_test_cases": 0,
+  "task_ids": [
+   "A-CND-0042v30",
+   "A-CND-0051v36",
+   "A-STR-0070v57",
+   "A-STR-0091v32"
+  ]
+ },
+ "vs_expected": null,
+ "routing": {
+  "patch": "audit/pattern_sweep.131.127.patch.jsonl",
+  "rows": 4,
+  "bucket_before_to_after": {
+   "REGEN->REGEN": 4
+  },
+  "rule": "REGEN for the REGEN class (regen A-*/full_program, regenerated whole by 131.16); AGENT for every other record (no regeneration path exists for them: 131.109)"
+ },
+ "earlier_check_routing": {
+  "stories": [
+   "131.106",
+   "131.111",
+   "131.114",
+   "131.117"
+  ],
+  "records_routed": 207,
+  "still_failing": 197,
+  "now_passing": [
+   "A-ERR-0030v39",
+   "A-ERR-0093v53",
+   "L-CRY-134",
+   "L-DAT-046",
+   "L-DAT-127",
+   "L-MSG-031",
+   "L-MSG-044",
+   "L-MSG-070",
+   "L-MSG-096",
+   "L-MSG-103"
+  ]
+ },
+ "gate_after": {
+  "forbidden": [
+   "LEAVE",
+   "EXEMPT",
+   "AUTO"
+  ],
+  "violations": 0,
+  "first": [],
+  "failing_by_bucket": {
+   "AGENT": 60,
+   "REGEN": 141
+  }
+ }
+}

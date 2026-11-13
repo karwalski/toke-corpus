@@ -30,7 +30,8 @@ fresh sweep row.
 
 Origins. The six 2026-09 patches (131.42, 131.67, 131.15.looprebuild, 131.43,
 131.68, 131.83) were built on the 131.13 sweep (`audit/pattern_sweep.jsonl`).
-Patches written after this tool (131.106, 131.105, 131.111, 131.114, 131.117) are built with
+Patches written after this tool (131.106, 131.105, 131.111, 131.114, 131.117,
+131.127) are built with
 route_patch.merge_row on the merged file this tool writes, whose rows come
 from the 131.64 re-run — their origin is that sweep.
 
@@ -59,7 +60,7 @@ NEW_SWEEP = "pattern_sweep.131.64.jsonl"          # 131.64 re-run (Z91, tkc 9f1e
 PATCHES = (("131.42", OLD_SWEEP), ("131.67", OLD_SWEEP), ("131.15.looprebuild", OLD_SWEEP),
            ("131.43", OLD_SWEEP), ("131.68", OLD_SWEEP), ("131.83", OLD_SWEEP),
            ("131.106", NEW_SWEEP), ("131.105", NEW_SWEEP), ("131.111", NEW_SWEEP),
-           ("131.114", NEW_SWEEP), ("131.117", NEW_SWEEP))
+           ("131.114", NEW_SWEEP), ("131.117", NEW_SWEEP), ("131.127", NEW_SWEEP))
 SUMMARY = os.path.join(HERE, "freeze", "route_merge_131.15.json")
 
 
