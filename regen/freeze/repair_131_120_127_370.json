@@ -1,0 +1,267 @@
+{
+ "banked": true,
+ "by_status": {
+  "rewritten": 5
+ },
+ "generated": "2026-11-13T03:16:00Z",
+ "records": [
+  {
+   "defect": "record error type built as a sum (`$lookuperr{$emptycollection:true}`): E4077 since toke 127.365; on main it built a record with one slot written",
+   "edits": 1,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [],
+    "~/tk/tmpwork/wt_int1113b/toke": [
+     "E4077:L5",
+     "E4077:L6",
+     "E4077:L8"
+    ],
+    "~/tk/toke/toke": []
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 6,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "3\n"
+    },
+    "~/tk/tmpwork/wt_int1113b/toke": {
+     "check": [],
+     "probe": {
+      "cases": 6,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "3\n"
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 6,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "3\n"
+    }
+   },
+   "new_source_sha256": "3dee58c12226a2eb5ecbc11461492ce9ce5421839c4cb19d572da87408c9400e",
+   "output_check": "unchanged",
+   "path": "A-ERR/A-ERR-0087v19.json",
+   "prev_source_sha256": "153b60147c95481ae5cba925b68843f2ef391ca141da588ad7e681a3068fb1eb",
+   "status": "rewritten",
+   "story": "131.120",
+   "task_id": "A-ERR-0087v19"
+  },
+  {
+   "defect": "record error type built as a sum (`$matherr{$overflow:...}`): E4077 since toke 127.365; and an @i64 interpolated into a string, E4032 since toke 3.1.0 (it printed a pointer when it built)",
+   "edits": 2,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [
+     "E4032:L15"
+    ],
+    "~/tk/tmpwork/wt_int1113b/toke": [
+     "E4077:L8",
+     "E4032:L15"
+    ],
+    "~/tk/toke/toke": [
+     "E4032:L15"
+    ]
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 4,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "2\n4\n6\n"
+    },
+    "~/tk/tmpwork/wt_int1113b/toke": {
+     "check": [],
+     "probe": {
+      "cases": 4,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "2\n4\n6\n"
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 4,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "2\n4\n6\n"
+    }
+   },
+   "new_source_sha256": "7e316f6400a11d6d1700325771b827997801c8dc4b62fb5cd8be67bc8874387a",
+   "output_check": "repaired",
+   "path": "A-ERR/A-ERR-0093v53.json",
+   "prev_source_sha256": "70da833037234a105bbb0c8b9019571b91cc588a2c78dc103fa59728ee822c2d",
+   "status": "rewritten",
+   "story": "131.120",
+   "task_id": "A-ERR-0093v53"
+  },
+  {
+   "defect": "str indexed with `.get(i)`: E4031 once toke 127.364 types the receiver; built on main it exits RT003 (index 121382024472940 out of bounds) before printing",
+   "edits": 2,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [],
+    "~/tk/tmpwork/wt_int1113b/toke": [
+     "E4031:L14",
+     "E4031:L18"
+    ],
+    "~/tk/toke/toke": []
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 28,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "true\nfalse\ntrue\n"
+    },
+    "~/tk/tmpwork/wt_int1113b/toke": {
+     "check": [],
+     "probe": {
+      "cases": 28,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "true\nfalse\ntrue\n"
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 28,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "true\nfalse\ntrue\n"
+    }
+   },
+   "new_source_sha256": "d9dbd84c5ce6d90627d8df70cb3332e94c7c7146fdb6ac83bb4c656fd7b0671d",
+   "output_check": "repaired",
+   "path": "A-STR/A-STR-0037v9.json",
+   "prev_source_sha256": "c216ed83362f60b2640d6424e06f82c7f5a450773f48dd44d6766209702f7fdb",
+   "status": "rewritten",
+   "story": "127.370",
+   "task_id": "A-STR-0037v9"
+  },
+  {
+   "defect": "str indexed with `.get(0)`: E4031 once toke 127.364 types the receiver",
+   "edits": 1,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [],
+    "~/tk/tmpwork/wt_int1113b/toke": [
+     "E4031:L6"
+    ],
+    "~/tk/toke/toke": []
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 25,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/tmpwork/wt_int1113b/toke": {
+     "check": [],
+     "probe": {
+      "cases": 25,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 25,
+      "exit": 0,
+      "mismatch": 0
+     }
+    }
+   },
+   "new_source_sha256": "0cefba18397074678e492569dd87dba09cd3f1dd0708632ff1747e3d91e92419",
+   "output_check": "probe",
+   "path": "D-CRY/MIG-P2-B-D-CRY-0015v280-52b9c01c.json",
+   "prev_source_sha256": "36744ba2c315a9eb7d15a2c3fe960e65a1806d979d9cda8e58e533b6410aa6b5",
+   "status": "rewritten",
+   "story": "127.370",
+   "task_id": "MIG-P2-B-D-CRY-0015v280-52b9c01c"
+  },
+  {
+   "defect": "str indexed with `.get(j)`: E4031 once toke 127.364 types the receiver; built on main it never found the `:` and returned \"\" for every input",
+   "edits": 1,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [],
+    "~/tk/tmpwork/wt_int1113b/toke": [
+     "E4031:L7"
+    ],
+    "~/tk/toke/toke": []
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 27,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/tmpwork/wt_int1113b/toke": {
+     "check": [],
+     "probe": {
+      "cases": 27,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 27,
+      "exit": 0,
+      "mismatch": 0
+     }
+    }
+   },
+   "new_source_sha256": "000a3fe5c24e012903fc8af3be5ce9c48a218ff9db8575316fd79880566cbc0a",
+   "output_check": "repaired",
+   "path": "D-WEB/MIG-P2-B-D-WEB-0024v247-1525170f.json",
+   "prev_source_sha256": "a6ffaada7a1628d24cb122ca0204f813eead107d94f843765bb4e24453c3a065",
+   "status": "rewritten",
+   "story": "127.370",
+   "task_id": "MIG-P2-B-D-WEB-0024v247-1525170f"
+  }
+ ],
+ "stories": [
+  "131.120",
+  "127.370"
+ ],
+ "tkcs": [
+  {
+   "sha256": "b08ed13acda261ad4558d5642b3d834cddd874cd7c1660e0a54aee53c39c3add",
+   "tkc": "~/tk/tmpwork/wt_int1113b/toke",
+   "version": "toke 3.1.0 (git c0a8bee7f361)"
+  },
+  {
+   "sha256": "778fbc106dd4494abcbd76352b6cd8b074e6cc67ef60d61c6f4e5d37f8ff0240",
+   "tkc": "~/tk/toke/toke",
+   "version": "toke 3.1.0 (git e528566b95b7)"
+  },
+  {
+   "sha256": "d400375946fbae74dac24adc52bbc45bb1d4c94678d6ba0d297aef3c3dd35bb2",
+   "tkc": "~/tk/archive/pins/tkc-131.103/toke",
+   "version": "toke 3.1.0 (git 1f39c2998110)"
+  }
+ ]
+}

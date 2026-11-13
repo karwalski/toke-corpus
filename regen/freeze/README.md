@@ -79,7 +79,7 @@ earlier lines.
 | Field | Type | Meaning |
 |---|---|---|
 | `task_id` | string | record id, e.g. `A-ARR-0001v24` |
-| `wave` | `auto` \| `agent` \| `regen` \| `library` \| `struct-layout` | which Epic 131 wave touched it (`struct-layout` = the 131.78 repair, which also carries `story`) |
+| `wave` | `auto` \| `agent` \| `regen` \| `library` \| `struct-layout` \| `check-repair` | which Epic 131 wave touched it (`struct-layout` = the 131.78 repair, `check-repair` = the 131.120/127.370 repair of records a newer checker rejects; both also carry `story`) |
 | `status` | `rewritten` \| `unchanged` \| `failed` \| `skipped` \| `flagged` | outcome of this attempt (`flagged` = 131.78 found no valid repair; no bytes changed) |
 | `reason` | string | why (pattern ids fixed, lint rule, or failure summary) |
 | `attempts` | int | cumulative attempts for this task_id in this wave |
@@ -91,6 +91,10 @@ Count rewrites from THIS ledger, not from `regen.rewrite131`: a record rewritten
 by two waves keeps only the later provenance block (131.80: `D-CRY-0012v285`,
 auto then struct-layout, so the blocks say auto 423 where the ledger says 424).
 Repairs outside Epic 131 keep their own ledger (`ledger/repair_136.jsonl`, 136.72).
+A repair of a record that is already in this ledger, or whose file is still its
+freeze-129 bytes, stays HERE whatever epic files the story, so the record keeps one
+sha chain: `repair_131_120_127_370.py` (131.120 + 127.370, 2026-11-13, five records,
+`wave: "check-repair"`; summary `repair_131_120_127_370.json`).
 
 Originals of every rewritten record go to `corpus/regen_v04/audit/replaced/131/<task_id>.tk`
 (new subdir — the flat `audit/replaced/` holds the 2,618 129-era originals and
