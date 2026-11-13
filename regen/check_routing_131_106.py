@@ -53,6 +53,10 @@ newly rejects; its check ran with a tkc built from toke main 034332b8.
 [byte] return reaching an @i64 destination is E4031, past the pin) newly
 rejects; its check ran with a tkc built from toke 799b4339
 (fix/z145-std-array-ret-typed, on top of the 135.18 compact [byte] layout).
+131.127 (2026-11-14, toke story 127.432) routed the records toke 127.430 (a
+field read other than .len on a str is E4034 at --check, as the build already
+reported) newly rejects: `"b".upper` without parentheses, never buildable;
+its check ran with ~/tk/toke/tkc on toke main (afb8641c or later).
 
 --tkc defaults to the corpus pin (corpus_pin.default_tkc(): $TKC, else
 ~/tk/archive/pins/tkc-131.103/tkc, else ~/tk/toke/tkc).
@@ -87,7 +91,7 @@ CORPUS = route_merge.CORPUS
 FORBIDDEN = ("LEAVE", "EXEMPT", "AUTO")           # buckets that cannot fix a compile failure
 ROWS_NAME = f"check_routing_{STORY}.jsonl"
 # every story that routes --check failures with this tool, in route_merge order
-CHECK_STORIES = ("131.106", "131.111", "131.114", "131.117")
+CHECK_STORIES = ("131.106", "131.111", "131.114", "131.117", "131.127")
 
 
 def summary_path(story=STORY):

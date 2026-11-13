@@ -99,6 +99,14 @@
    "present": true,
    "rows": 8,
    "sha256": "40e64eebf4d5c5f94b9f7a3e6e942b20e6c4c7a1c20503230a94a6993f48c3e5"
+  },
+  {
+   "story": "131.127",
+   "file": "pattern_sweep.131.127.patch.jsonl",
+   "origin": "pattern_sweep.131.64.jsonl",
+   "present": true,
+   "rows": 4,
+   "sha256": "e86fceb21b74f349c0bb98762ec262b8431c0b3386174a1c509cb7722f4b81e7"
   }
  ],
  "replay": {
@@ -171,6 +179,11 @@
    "rows": 8,
    "same_bucket": 8,
    "AGENT->AGENT": 8
+  },
+  "131.127": {
+   "rows": 4,
+   "same_bucket": 4,
+   "REGEN->REGEN": 4
   }
  },
  "buckets": {
@@ -241,6 +254,6 @@
  "merged_file": {
   "path": "corpus/regen_v04/audit/pattern_sweep.merged.jsonl",
   "rows": 24965,
-  "sha256": "dd32ba69eb243878fdb94d978eb7f921c790ccb4c97b6a18a7e8c73bc0998886"
+  "sha256": "faf1a987d8a80be496d6bb443ecf58894a3561f39c4be0b125d37a369e4ee0bb"
  }
 }
