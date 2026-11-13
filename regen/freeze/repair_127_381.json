@@ -1,0 +1,83 @@
+{
+ "banked": true,
+ "by_status": {
+  "rewritten": 1
+ },
+ "generated": "2026-11-13T06:59:16Z",
+ "records": [
+  {
+   "defect": "str indexed with `.get(i)`: E4031 once toke 127.371 types split results; built on the corpus pin / toke main `\"127\".get(1)` is 1, not 50, so solve(\"127.0.0.1\") returned false",
+   "edits": 1,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [],
+    "~/tk/tmpwork/wt_int1113c/toke": [
+     "E4031:L11"
+    ],
+    "~/tk/toke/toke": []
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 50,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/tmpwork/wt_int1113c/toke": {
+     "check": [],
+     "probe": {
+      "cases": 50,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 50,
+      "exit": 0,
+      "mismatch": 0
+     }
+    }
+   },
+   "new_source_sha256": "b642753f94da93fd5b4c6d65ec86ce69711b1f67de4617c46b9edf7bc537fdfb",
+   "output_check": "repaired",
+   "path": "D-NET/MIG-P2-B-D-NET-0009v329-08e7c1a7.json",
+   "prev_source_sha256": "d3ab449442c2da2e2b98d2ae11a21794cd2edc2c1151edf251e24903d0c8ed46",
+   "probe_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "exit": 0,
+     "mismatch": 8
+    },
+    "~/tk/toke/toke": {
+     "exit": 0,
+     "mismatch": 8
+    }
+   },
+   "status": "rewritten",
+   "story": "127.381",
+   "task_id": "MIG-P2-B-D-NET-0009v329-08e7c1a7"
+  }
+ ],
+ "stories": [
+  "127.381"
+ ],
+ "tkcs": [
+  {
+   "sha256": "cc621a226d6d5161b6a4f3864bcc9dc9801ade46b52c8dae15d34a066a218a8b",
+   "tkc": "~/tk/tmpwork/wt_int1113c/toke",
+   "version": "toke 3.1.0 (git 97feb1c4ac9f)"
+  },
+  {
+   "sha256": "58bd3374e6da3f42617caf607bffe0518b99fe8f4b187242a95b0c00972fcfd5",
+   "tkc": "~/tk/toke/toke",
+   "version": "toke 3.1.0 (git a78b7de93b0b)"
+  },
+  {
+   "sha256": "d400375946fbae74dac24adc52bbc45bb1d4c94678d6ba0d297aef3c3dd35bb2",
+   "tkc": "~/tk/archive/pins/tkc-131.103/toke",
+   "version": "toke 3.1.0 (git 1f39c2998110)"
+  }
+ ]
+}
