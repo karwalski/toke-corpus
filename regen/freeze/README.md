@@ -57,8 +57,8 @@ the reason naming the archived original to restore the `let` from.
 Size gates for correctness repairs (131.108, register 4.1 (a)). The 131.15
 and 131.17 banks waive the `--min` bytes and proxy-token gates for a row whose
 merged `patches` include a story in `regen/size_gate_waiver.CORRECTNESS_SET`
-(regen: 131.42, 131.43, 131.67, 131.105, 131.106, 131.111, 131.114; library:
-131.106, 131.117), and bank `size_gate_note: waived(<story>)` and `size_delta`
+(regen: 131.42, 131.43, 131.67, 131.105, 131.106, 131.111, 131.114, and
+131.99 by register 4.3 (a); library: 131.106, 131.117), and bank `size_gate_note: waived(<story>)` and `size_delta`
 in the record's `rewrite131` provenance and the ledger line. Every other row
 keeps both gates. `library_prep` takes its row set from the 131.13 sweep
 (no `patches`), so it looks each row's `patches` up by task_id in
