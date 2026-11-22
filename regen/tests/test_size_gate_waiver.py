@@ -156,3 +156,65 @@ def test_wave_banks_a_growing_repair_only_when_routed_by_the_set(tmp_path):
     finally:
         for m, v in saved.items():
             m.TKC = v
+
+
+# ------------------------------------------------- the library wave (131.17) ---
+import test_library_wave as _lw
+
+world = _lw.world        # the synthetic library tree (test_library_wave), reused
+
+# lint-clean, passes the manifest, and LARGER than test_library_wave.ORIG
+LIB_BIGGER = ('m=echo;i=io:std.io;i=s:std.str;f=main():$i64{let t=s.trim(io.readln());'
+              'if(s.len(t)==0){io.println("empty");<0};if(s.len(t)>0){io.println(t);<0};<0}\n')
+
+
+@pytest.mark.skipif(not os.path.exists(lc.TKC), reason="tkc not built")
+def test_default_library_prep_keys_the_waiver_to_the_merged_routing(world):
+    """The default --sweep is the 131.13 sweep, whose rows carry no `patches`.
+    Prep looks each row's patches up in the merged routing by task_id, for the
+    waiver key only: the prepped set is unchanged, a 131.117 row is waived, a
+    row routed by a story outside the set (or not routed) keeps both gates."""
+    import bank_library
+    import library_prep
+    import test_library_wave as lw
+
+    paths, specs = world
+    assert paths.sweep.endswith("pattern_sweep.jsonl")
+    assert paths.routing.endswith("pattern_sweep.merged.jsonl")
+    routed = [{**lw._row(tid), "patches": patches}
+              for tid, patches in (("L-TST-001", ["131.117"]), ("L-TST-002", ["131.83"]),
+                                   ("L-TST-777", ["131.117"]))]   # L-TST-777: not in the sweep
+    routed.append({**lw._row("A-CND-900", source="regen"), "patches": ["131.105"]})
+    with open(paths.routing, "w") as f:
+        f.writelines(json.dumps(r) + "\n" for r in routed)
+    m = library_prep.prepare(paths, embed_card=False)
+    assert m["prepared"] == 3, "the routing file must not change the prepped set"
+    meta = {t: _json(paths.sub("meta", t + ".json")) for t in ("L-TST-001", "L-TST-002", "L-TST-003")}
+    assert meta["L-TST-001"]["patches"] == ["131.117"]
+    assert meta["L-TST-001"]["size_gate_waiver"] == ["131.117"]
+    assert meta["L-TST-002"]["size_gate_waiver"] == []
+    assert meta["L-TST-003"]["patches"] == [] and meta["L-TST-003"]["size_gate_waiver"] == []
+    assert not os.path.exists(paths.sub("meta", "L-TST-777.json"))
+    assert "size gates waived(131.117)" in _text(paths.sub("prompts", "L-TST-001.txt"))
+    assert "the rewrite must be <= both" in _text(paths.sub("prompts", "L-TST-002.txt"))
+
+    for tid in ("L-TST-001", "L-TST-002"):
+        lw._cand(paths, tid, specs, LIB_BIGGER)
+    bank_library.run(paths, bank=False, run_perf=False, only=["L-TST-001", "L-TST-002"])
+    ev0 = _json(paths.sub("dryrun", "L-TST-001.json"))
+    ev1 = _json(paths.sub("dryrun", "L-TST-002.json"))
+    assert ev0["verdict"] == "rewritten", ev0["reason"]
+    assert ev0["size_gate_note"] == "waived(131.117)" and ev0["size_delta"]["min_bytes"] > 0
+    assert ev1["verdict"] != "rewritten" and ev1["reason"].startswith("min_bytes:"), ev1
+
+
+def test_routing_lookup_is_by_task_id_and_source(tmp_path):
+    p = tmp_path / "merged.jsonl"
+    p.write_text(json.dumps({"task_id": "L-X-1", "source": "library", "patches": ["131.106"]}) + "\n"
+                 + json.dumps({"task_id": "A-X-1", "source": "regen", "patches": ["131.106"]}) + "\n")
+    r = lc.load_routing_patches(str(p))
+    assert r == {"L-X-1": ["131.106"]}
+    assert lc.row_patches({"task_id": "L-X-1"}, r) == ["131.106"]
+    assert lc.row_patches({"task_id": "L-X-2", "patches": ["131.117"]}, r) == ["131.117"]
+    assert lc.row_patches({"task_id": "L-X-3"}, r) == []
+    assert lc.load_routing_patches(str(tmp_path / "missing.jsonl")) == {}

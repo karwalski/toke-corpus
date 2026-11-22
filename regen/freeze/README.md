@@ -59,7 +59,10 @@ merged `patches` include a story in `regen/size_gate_waiver.CORRECTNESS_SET`
 (regen: 131.42, 131.43, 131.67, 131.105, 131.106, 131.111, 131.114; library:
 131.106, 131.117), and bank `size_gate_note: waived(<story>)` and `size_delta`
 in the record's `rewrite131` provenance and the ledger line. Every other row
-keeps both gates. `size_gate_waiver_131.108.json` re-runs the 131.105 restore
+keeps both gates. `library_prep` takes its row set from the 131.13 sweep
+(no `patches`), so it looks each row's `patches` up by task_id in
+`audit/pattern_sweep.merged.jsonl` (`--routing`) for the waiver key only; the
+13 library correctness rows are waived on a default prep. `size_gate_waiver_131.108.json` re-runs the 131.105 restore
 measurement: all three restores (+8 `--min` bytes each) now bank in a dry run;
 toke-corpus main rejects all three on `min_bytes`.
 

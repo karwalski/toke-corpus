@@ -119,13 +119,16 @@ class LibraryPaths:
 
     def __init__(self, corpus=CORPUS, lib_root=LIB_ROOT, workdir=None, ledger=None,
                  shard=None, sweep=None, catalogue=CATALOGUE_PATH, card=CARD_PATH,
-                 toke_root=TOKE_ROOT, tkc=None):
+                 toke_root=TOKE_ROOT, tkc=None, routing=None):
         self.corpus = corpus
         self.lib_root = lib_root
         self.workdir = workdir or os.path.join(corpus, "work", "library_rewrite_131")
         self.ledger = ledger or os.path.join(corpus, "ledger", "rewrite_131_library.jsonl")
         self.shard = shard or os.path.join(corpus, "shards", "library_131.jsonl")
         self.sweep = sweep or os.path.join(corpus, "audit", "pattern_sweep.jsonl")
+        # 131.108: the merged routing (route_merge.py), read ONLY for each row's
+        # `patches` (the size-gate waiver key) — never for row selection.
+        self.routing = routing or os.path.join(corpus, "audit", "pattern_sweep.merged.jsonl")
         self.catalogue = catalogue
         self.card = card
         self.toke_root = toke_root
@@ -237,6 +240,37 @@ def load_sweep(path=None, bucket="AGENT", source="library"):
             continue
         rows[r["task_id"]] = r                  # later line wins (resumable sweeps append)
     return rows
+
+
+def load_routing_patches(path, source="library"):
+    """131.108: {task_id: patches} from the merged routing for one source.
+
+    The wave's row set comes from the sweep (131.13 by default), whose rows
+    carry no `patches`; the size-gate waiver is keyed to the merged routing,
+    so prep looks each row's patches up here by task_id. This never adds or
+    drops a row. A missing file gives {} (every row keeps both gates)."""
+    out = {}
+    if not path or not os.path.exists(path):
+        return out
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            r = json.loads(line)
+            if source and r.get("source") != source:
+                continue
+            out[r["task_id"]] = list(r.get("patches") or [])
+    return out
+
+
+def row_patches(row, routing):
+    """The patches that key the waiver: the merged routing's when it has the
+    row, else the row's own (a merged sweep passed as --sweep)."""
+    tid = (row or {}).get("task_id")
+    if tid in routing:
+        return list(routing[tid])
+    return list((row or {}).get("patches") or [])
 
 
 def wave_rows(sweep_path=None, shard_path=None, bucket="AGENT", source="library"):
