@@ -381,7 +381,8 @@ def write_md(summary, budget, rows):
     L.append("| rule | severity | penalty | records hit | total hits | fixable hits | hard-fail gross | "
              "mandate-exempt | hard-fail net |\n|---|---|---|---|---|---|---|---|---|")
     sev = {"mut-flag-if": "warning", "flag-soup": "warning", "string-concat-chain": "warning",
-           "single-use-let": "hint", "discarded-value-result": "error", "loop-rebuilds-array": "hint"}
+           "single-use-let": "hint", "discarded-value-result": "error", "loop-rebuilds-array": "hint",
+           "nested-if-ladder": "hint"}
     for ru in RULES:
         L.append(f"| `{ru}` | {sev[ru]} | −{summary['penalties'][ru]:.2f} | "
                  f"{T['hits_records_by_rule'].get(ru, 0):,} | {T['hits_total_by_rule'].get(ru, 0):,} | "

@@ -115,7 +115,8 @@ def test_style_mandate_exempts_the_contradicted_rule_only():
     diags = [diag("mut-flag-if", "warning"), diag("discarded-value-result", "error")]
     fail = ij.hard_gate(diags, ex)
     assert [d["rule"] for d in fail] == ["discarded-value-result"]   # never exempt
-    assert ij.mandate_exempt_rules("Use nested if/el blocks for the control flow.") == ()
+    # 131.107: the nested-if/el mandate now exempts exactly the ladder rule
+    assert ij.mandate_exempt_rules("Use nested if/el blocks for the control flow.") == ("nested-if-ladder",)
     assert ij.mandate_exempt_rules(None) == ()
     assert ij.style_mandate({"description": "no variant clause"}) is None
 

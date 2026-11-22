@@ -35,7 +35,8 @@ located in that prefix — `unused-import` on 74/200 sampled records — are
 dropped in `metrics.lint()`), and the **spec style mandate** below
 (`idiom_judge.MANDATE_EXEMPTIONS`: "…mutable binding…" exempts `mut-flag-if`,
 `flag-soup`, `loop-rebuilds-array`; "…helper variable…" exempts
-`single-use-let`; "…loop to compute the result…" exempts `loop-rebuilds-array`).
+`single-use-let`; "…loop to compute the result…" exempts `loop-rebuilds-array`;
+"…nested if/el blocks…" exempts `nested-if-ladder`, 131.107).
 `discarded-value-result` is never exempt: the discarded value is a bug.
 Exempted rules that actually fired are recorded in `regen.lint_exempt`.
 
