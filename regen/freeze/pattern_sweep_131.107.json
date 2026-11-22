@@ -1,0 +1,255 @@
+{
+ "story": "131.107",
+ "date": "2026-11-23",
+ "what": "pattern_sweep.py run over a read-only corpus mirror with nested-if-ladder wired in as a pattern rule (cond-elif-chain b, deterministic, judge 0.02, 'nested if/el blocks' mandate exemption); compared with the Z91 131.64 re-run (regen/freeze/pattern_sweep_131.64.json). Routing only: no record, bucket file or merged routing file was rewritten.",
+ "tkc": {
+  "tkc_bin_sha": "baa818304772161a6468b6b52a2363d8e2852e43129aa368c296bc321568fc30",
+  "tkc_version": "toke 3.2.0 (git 0558545d5b78)",
+  "tkc_path": "/Users/matthew.watt/tk/tmpwork/z233/bin/tkc",
+  "tkc_resolved": "/Users/matthew.watt/tk/tmpwork/z233/bin/toke",
+  "toke_head": "88c8fe6290086134a5bc0e08bfa8420c0374a35b",
+  "toke_src_dirty": false,
+  "tkc_git_sha": "0558545d5b78",
+  "tkc_git_dirty": false
+ },
+ "catalogue_sha": "01211376909d",
+ "catalogue_entries": 46,
+ "rows": {
+  "rerun": 24965,
+  "z91": 24965,
+  "errors": 0,
+  "source_unchanged_since_z91": 24946
+ },
+ "nested_if_ladder": {
+  "hits_by_scope": {
+   "regen": {
+    "records": 1107,
+    "violation_hits": 504,
+    "deterministic_hits": 504,
+    "exempt_hits_style_mandate": 665,
+    "exempt_hits_other": 0
+   },
+   "library": {
+    "records": 496,
+    "violation_hits": 709,
+    "deterministic_hits": 701,
+    "exempt_hits_style_mandate": 0,
+    "exempt_hits_other": 0
+   }
+  },
+  "records_with_hits_by_bucket": {
+   "regen": {
+    "REGEN": 323,
+    "EXEMPT": 382,
+    "AUTO": 248,
+    "AGENT": 42,
+    "LEAVE": 112
+   },
+   "library": {
+    "AGENT": 471,
+    "AUTO": 13,
+    "LEAVE": 12
+   }
+  },
+  "hits_left_in_other_lint": 0
+ },
+ "buckets": {
+  "z91": {
+   "regen": {
+    "EXEMPT": 1678,
+    "AUTO": 217,
+    "AGENT": 1203,
+    "LEAVE": 14635,
+    "REGEN": 5649,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 11,
+    "AGENT": 1314,
+    "LEAVE": 258,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 1678,
+    "AUTO": 228,
+    "AGENT": 2517,
+    "LEAVE": 14893,
+    "REGEN": 5649,
+    "records": 24965
+   }
+  },
+  "rerun": {
+   "regen": {
+    "EXEMPT": 2034,
+    "AUTO": 387,
+    "AGENT": 1204,
+    "LEAVE": 14108,
+    "REGEN": 5649,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 19,
+    "AGENT": 1314,
+    "LEAVE": 250,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 2034,
+    "AUTO": 406,
+    "AGENT": 2518,
+    "LEAVE": 14358,
+    "REGEN": 5649,
+    "records": 24965
+   }
+  },
+  "rerun_minus_z91": {
+   "regen": {
+    "EXEMPT": 356,
+    "AUTO": 170,
+    "AGENT": 1,
+    "LEAVE": -527,
+    "REGEN": 0,
+    "records": 0
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 8,
+    "AGENT": 0,
+    "LEAVE": -8,
+    "REGEN": 0,
+    "records": 0
+   },
+   "all": {
+    "EXEMPT": 356,
+    "AUTO": 178,
+    "AGENT": 1,
+    "LEAVE": -535,
+    "REGEN": 0,
+    "records": 0
+   }
+  }
+ },
+ "transitions_z91_to_rerun": {
+  "LEAVE->EXEMPT": 382,
+  "LEAVE->AUTO": 233,
+  "AUTO->LEAVE": 81,
+  "EXEMPT->AUTO": 26,
+  "LEAVE->AGENT": 1
+ },
+ "transitions_z91_to_rerun_source_unchanged": {
+  "LEAVE->EXEMPT": 382,
+  "LEAVE->AUTO": 233,
+  "AUTO->LEAVE": 81,
+  "EXEMPT->AUTO": 26
+ },
+ "z91_counterfactual_rows": {
+  "rows": 641,
+  "transitions_z91_to_rerun": {
+   "LEAVE->EXEMPT": 382,
+   "LEAVE->AUTO": 233,
+   "EXEMPT->AUTO": 26
+  }
+ },
+ "merged_routing_if_rebuilt_on_this_sweep": {
+  "note": "route_merge.replay over this sweep with every PATCHES entry, in memory; the on-disk audit/pattern_sweep.merged.jsonl (base: 131.64 re-run) is unchanged",
+  "buckets_on_disk": {
+   "regen": {
+    "EXEMPT": 1618,
+    "AUTO": 206,
+    "AGENT": 1898,
+    "LEAVE": 14011,
+    "REGEN": 5649,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 11,
+    "AGENT": 1314,
+    "LEAVE": 258,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 1618,
+    "AUTO": 217,
+    "AGENT": 3212,
+    "LEAVE": 14269,
+    "REGEN": 5649,
+    "records": 24965
+   }
+  },
+  "buckets_rebuilt": {
+   "regen": {
+    "EXEMPT": 1957,
+    "AUTO": 376,
+    "AGENT": 1899,
+    "LEAVE": 13501,
+    "REGEN": 5649,
+    "records": 23382
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 19,
+    "AGENT": 1314,
+    "LEAVE": 250,
+    "REGEN": 0,
+    "records": 1583
+   },
+   "all": {
+    "EXEMPT": 1957,
+    "AUTO": 395,
+    "AGENT": 3213,
+    "LEAVE": 13751,
+    "REGEN": 5649,
+    "records": 24965
+   }
+  },
+  "rebuilt_minus_on_disk": {
+   "regen": {
+    "EXEMPT": 339,
+    "AUTO": 170,
+    "AGENT": 1,
+    "LEAVE": -510,
+    "REGEN": 0,
+    "records": 0
+   },
+   "library": {
+    "EXEMPT": 0,
+    "AUTO": 8,
+    "AGENT": 0,
+    "LEAVE": -8,
+    "REGEN": 0,
+    "records": 0
+   },
+   "all": {
+    "EXEMPT": 339,
+    "AUTO": 178,
+    "AGENT": 1,
+    "LEAVE": -518,
+    "REGEN": 0,
+    "records": 0
+   }
+  },
+  "transitions_on_disk_to_rebuilt": {
+   "LEAVE->EXEMPT": 363,
+   "LEAVE->AUTO": 225,
+   "AUTO->LEAVE": 71,
+   "EXEMPT->AUTO": 24,
+   "LEAVE->AGENT": 1
+  }
+ },
+ "rows_file": {
+  "path": "corpus/regen_v04/audit/pattern_sweep.131.107.jsonl (untracked corpus data)",
+  "sha256": "10f5bc338d154cca1b3342c02c53c7ab60f9105f4e9cba5060ea85667581649f",
+  "made_by": "pattern_sweep.py run+report (unchanged thresholds, --no-write-budget) over a read-only mirror; 6 workers, 649 s"
+ },
+ "explained": {
+  "ladder_rows": "the 641 Z91 counterfactual rows: 382 LEAVE->EXEMPT (mandate 'Use nested if/el blocks for the control flow.'), 233 LEAVE->AUTO, 26 EXEMPT->AUTO; regen hits 1,169 = 504 violations (all deterministic) + 665 mandate-exempt; library 709 violations (701 deterministic)",
+  "auto_to_leave_81": "not ladder: source unchanged since Z91, but tkc 0558545d no longer attaches the single-use-let fix on these hits (toke 131.59: single-use-let inlines only an identically typed value), so they are fix-less hints",
+  "leave_to_agent_1": "source changed since Z91 (a banked rewrite); hand-rolled-parser judge regex"
+ }
+}

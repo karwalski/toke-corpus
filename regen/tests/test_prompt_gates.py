@@ -109,6 +109,23 @@ def test_hard_gate_rules_match_the_lint_rule_table():
     assert gated == idiom_judge.HARD_GATE_RULES
 
 
+def test_every_pattern_rule_in_the_lint_table_is_judged_and_swept():
+    """131.107: nested-if-ladder shipped in tkc (131.64) as a pattern rule but
+    the judge and sweep enumerate their rules by hand, so it routed nowhere.
+    Every rule the table marks `(pattern rule` must be in PATTERN_RULES and
+    have a pattern_sweep.RULE_PATTERNS entry, so the next one fails here."""
+    import pattern_sweep
+    path = next((p for p in LINT_RULES if os.path.exists(p)), None)
+    if path is None:
+        pytest.skip("no toke checkout beside toke-corpus")
+    with open(path, encoding="utf-8") as f:
+        rows = re.findall(r"^\| `([a-z-]+)` \| (?:error|warning|hint) \|([^\n]*)$", f.read(), re.MULTILINE)
+    table = {r for r, desc in rows if "(pattern rule" in desc}
+    assert table, "lint-rules table lost its (pattern rule) markers"
+    assert table == set(idiom_judge.PATTERN_RULES)
+    assert table <= set(pattern_sweep.RULE_PATTERNS)
+
+
 def test_split_input_types_are_shown_as_the_gate_reads_them():
     out = _prompt(task_type="full_program")
     want = drv.effective_input_types(dict(BASE, input_types=["@(i64"]))

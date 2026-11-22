@@ -35,7 +35,7 @@ Bucket protocol (thresholds are CLI parameters, recorded in the summary):
           pre-form / 127.33 linter FP / harness stub prefix).
   AUTO    >= 1 net violation and every net violation carries a deterministic
           `fix` from tkc (single-use-let inline, discarded-value-result
-          receiver; the string-concat-chain fix is dormant — never AUTO unless
+          receiver, nested-if-ladder el-if join (131.107); the string-concat-chain fix is dormant — never AUTO unless
           --concat-fix-armed).
   AGENT   any net error/warning violation without a deterministic fix, OR
           est_saving_tokens >= --agent-saving (3), OR perf_sensitive.
@@ -74,7 +74,8 @@ HAND_PARSER = "hand-rolled-parser"          # judge regex rule (no tkc rule)
 RULES = PATTERN_RULES + [HAND_PARSER]
 # rules whose tkc `fix` is deterministic (docs/compiler/lint-rules-v1.md); the
 # string-concat-chain fix is dormant (127.7/127.10) and joins only when armed
-DETERMINISTIC_RULES = {"single-use-let", "discarded-value-result"}
+# nested-if-ladder joins by owner decision 4.2 (131.107)
+DETERMINISTIC_RULES = {"single-use-let", "discarded-value-result", "nested-if-ladder"}
 CONCAT_RULE = "string-concat-chain"
 REGEN_CLASS = ("A-", "full_program")       # category prefix, task_type
 _A_REGEN = re.compile(r"^A-")
@@ -94,6 +95,7 @@ RULE_PATTERNS = {
     "single-use-let": [("fn-chain-vs-let", "b")],
     "loop-rebuilds-array": [("iter-map", "b"), ("iter-filter", "b")],
     "discarded-value-result": [],          # value-semantics bug; no catalogue form
+    "nested-if-ladder": [("cond-elif-chain", "b")],   # 131.107: form b is the el{if} ladder
     HAND_PARSER: [("parse-json", "b")],
 }
 ALT_PATTERNS = {                           # same rule, other catalogue entries (informational)
@@ -412,7 +414,7 @@ def sweep_one(job):
         row["hard_fail_gross"] = sorted(set(row["hard_fail_net"]) | {
             e["rule"] for e in exemptions if e["reason"] != "stub_prefix"
             and e["rule"] in idiom_judge.PATTERN_RULES
-            and e["rule"] not in ("single-use-let", "loop-rebuilds-array")})
+            and e["rule"] not in ("single-use-let", "loop-rebuilds-array", "nested-if-ladder")})
         idiom_new, notes = idiom_judge.score(src, diags)
         row["idiom_score_new"] = round(idiom_new, 4)
         lib = None
@@ -873,7 +875,7 @@ def write_md(S, rows):
     L.append("Protocol: **REGEN** = A-side `full_program` (no test lock; regenerated once with card v2 by "
              "131.16 — never rewritten; the bucket the row would otherwise take is kept in `would_bucket`). "
              "**EXEMPT** = ≥ 1 hit, all exempt. **AUTO** = every net violation carries a deterministic tkc "
-             "`fix` (`single-use-let` inline, `discarded-value-result` receiver; the concat fix is dormant). "
+             "`fix` (`single-use-let` inline, `discarded-value-result` receiver, `nested-if-ladder` el-if join; the concat fix is dormant). "
              "**AGENT** = a gate (error/warning) violation without a fix, or est. saving ≥ "
              f"{th['agent_saving']} proxy tokens, or a perf-sensitive pattern. **LEAVE** = 0 net violations, "
              "or only fix-less hints below the saving threshold and not perf-flagged. Library rows also go to "

@@ -1,8 +1,8 @@
 """Idiom judge — scores idiomatic toke from the compiler's own pattern rules.
 
 Epic 131.10: the judge and the linter are one implementation. `tkc --lint
---diag-json` (already run by `metrics.lint()`) emits the six 131.9 pattern
-rules (`docs/compiler/lint-rules-v1.md`, "Pattern rules"); this module maps those rule
+--diag-json` (already run by `metrics.lint()`) emits the 131.9 pattern rules
+(and 131.64's `nested-if-ladder`, wired in by 131.107) (`docs/compiler/lint-rules-v1.md`, "Pattern rules"); this module maps those rule
 ids to the penalties/weights the 129-era regex judge used and keeps a regex
 only for `hand-rolled-parser`, which needs stdlib knowledge the linter lacks.
 
@@ -39,6 +39,10 @@ PATTERN_RULES: dict[str, float] = {
     "discarded-value-result": 0.20,
     "loop-rebuilds-array": 0.05,
     "single-use-let": 0.02,
+    # 131.107 (owner register 4.2, 2026-11-15): the 131.64 rule, catalogue
+    # cond-elif-chain form b; a hint, so it only costs score — the hint band,
+    # as single-use-let (it is token- and runtime-tied with form a).
+    "nested-if-ladder": 0.02,
 }
 HAND_PARSER_PENALTY = 0.20
 PER_RULE_CAP = 3
@@ -58,6 +62,9 @@ MANDATE_EXEMPTIONS: dict[str, tuple[str, ...]] = {
     "mutable binding": ("mut-flag-if", "flag-soup", "loop-rebuilds-array"),
     "helper variable": ("single-use-let",),
     "loop to compute the result": ("loop-rebuilds-array",),
+    # 131.107: "Use nested if/el blocks for the control flow." asks for the ladder
+    # (382 of the 641 rows the rule would route; quality_rubric.md Exemptions)
+    "nested if/el blocks": ("nested-if-ladder",),
 }
 
 _WS = r"[ \t\r\n]*"
