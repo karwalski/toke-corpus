@@ -259,6 +259,11 @@ def gen_main(spec, src, inputs):
     target = drv.find_target(spec, src2)
     if not target:
         return None, "no target function found"
+    # 131.137: like driver.append_main, the printing form follows the target's
+    # DECLARED return type. A `T!$err` result is matched before it is printed:
+    # interpolating the union itself is E4031 since toke 127.319.
+    decl_ret = drv.declared_return_type(src2, target)
+    is_err = bool(decl_ret and "!" in decl_ret)
     calls = []
     for k, ins in enumerate(inputs):
         try:
@@ -267,7 +272,12 @@ def gen_main(spec, src, inputs):
             return None, f"input {k}: {e}"
         call = f"{target}({args})"
         calls.append(f'io.println("#{k}")')
-        if ret == "@str":
+        if is_err:
+            c, err = drv._err_call(src2, decl_ret, call, k)
+            if err:
+                return None, err
+            calls.append(c)
+        elif ret == "@str":
             calls.append(f"let r{k}={call};"
                          f"lp(let x{k}=0;x{k}<r{k}.len;x{k}=x{k}+1){{io.println(r{k}.get(x{k}))}}")
         elif ret.startswith("@"):
