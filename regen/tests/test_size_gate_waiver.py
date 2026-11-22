@@ -36,9 +36,10 @@ def test_selftest():
 
 
 def test_declared_set_is_the_owner_answer():
-    """Register 4.1 (a), recorded 2026-11-15. Changing it needs an owner decision."""
+    """Register 4.1 (a), recorded 2026-11-15, plus 131.99 (register 4.3 (a)).
+    Changing it needs an owner decision."""
     assert sgw.CORRECTNESS_SET["regen"] == ("131.42", "131.43", "131.67", "131.105", "131.106",
-                                            "131.111", "131.114")
+                                            "131.111", "131.114", "131.99")
     assert sgw.CORRECTNESS_SET["library"] == ("131.106", "131.117")
     assert set(sgw.CORRECTNESS_SET) == {"regen", "library"}
 
