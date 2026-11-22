@@ -1,0 +1,110 @@
+{
+ "story": "131.108",
+ "register": "owner-decisions-2026-11-12 item 4.1 (a), recorded 2026-11-15",
+ "what": "Re-run of the 131.105 restore measurement (Z95) with the 131.108 waiver: pattern_prep --only the three 131.105 records (scratch workdir, merged routing sha faf1a987d8a8), candidate = the archived original audit/replaced/131/<tid>.tk (the faithful restore of `let n=<x>.len;`), then check_pattern and bank_pattern --dry-run. Nothing was banked.",
+ "tkc": {
+  "version": "toke 3.2.0 (git 0558545d5b78)",
+  "bin_sha256": "baa818304772161a6468b6b52a2363d8e2852e43129aa368c296bc321568fc30",
+  "source": "integration worktree tmpwork/wt_inta (toke integrate/wave-a-1122 b1333d8c), copied, not rebuilt"
+ },
+ "result": {
+  "candidates": 3,
+  "rewritten": 3,
+  "unchanged": 0,
+  "failed": 0,
+  "skipped": 0,
+  "banked_rate": 1.0,
+  "behaviour_preserved": 3
+ },
+ "negative_control": "toke-corpus main 0956578 check_pattern on the same workdir and candidates: FAIL min_bytes: 84 > 76, 279 > 271, 244 > 236 before (all three rejected by construction)",
+ "note": "Byte counts are on tkc 3.2.0 (integration); Z95 measured 77->85, 272->280, 237->245 on tkc 3.1.0 b56e8ca0 \u2014 the same +8 each.",
+ "records": [
+  {
+   "task_id": "A-ARR-0017v41",
+   "verdict": "rewritten",
+   "size_gate_note": "waived(131.105)",
+   "size_delta": {
+    "min_bytes": 8,
+    "proxy_tokens": 1
+   },
+   "min_bytes_before": 76,
+   "min_bytes_after": 84,
+   "proxy_tokens_before": 7,
+   "proxy_tokens_after": 8,
+   "diff_mode": "identity",
+   "gates": {
+    "shape": true,
+    "compile": true,
+    "signature": true,
+    "build": true,
+    "tests": true,
+    "idiom": true,
+    "structure": true,
+    "pattern": true,
+    "lint_other": true,
+    "min_bytes": null,
+    "proxy_tokens": null,
+    "diff": true,
+    "perf": true
+   }
+  },
+  {
+   "task_id": "D-CFG-0018v98",
+   "verdict": "rewritten",
+   "size_gate_note": "waived(131.105)",
+   "size_delta": {
+    "min_bytes": 8,
+    "proxy_tokens": 1
+   },
+   "min_bytes_before": 271,
+   "min_bytes_after": 279,
+   "proxy_tokens_before": 17,
+   "proxy_tokens_after": 18,
+   "diff_mode": "identity",
+   "gates": {
+    "shape": true,
+    "compile": true,
+    "signature": true,
+    "build": true,
+    "tests": true,
+    "idiom": true,
+    "structure": true,
+    "pattern": true,
+    "lint_other": true,
+    "min_bytes": null,
+    "proxy_tokens": null,
+    "diff": true,
+    "perf": true
+   }
+  },
+  {
+   "task_id": "D-FIO-0002v99",
+   "verdict": "rewritten",
+   "size_gate_note": "waived(131.105)",
+   "size_delta": {
+    "min_bytes": 8,
+    "proxy_tokens": 0
+   },
+   "min_bytes_before": 236,
+   "min_bytes_after": 244,
+   "proxy_tokens_before": 15,
+   "proxy_tokens_after": 15,
+   "diff_mode": "identity",
+   "gates": {
+    "shape": true,
+    "compile": true,
+    "signature": true,
+    "build": true,
+    "tests": true,
+    "idiom": true,
+    "structure": true,
+    "pattern": true,
+    "lint_other": true,
+    "min_bytes": null,
+    "proxy_tokens": null,
+    "diff": true,
+    "perf": true
+   }
+  }
+ ]
+}

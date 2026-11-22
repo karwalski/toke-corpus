@@ -21,7 +21,9 @@ the originals pass their tests) then holds every other line.
 Known obstacle: the faithful restore is +8 `--min` bytes on each record
 (A-ARR-0017v41 77->85, D-CFG-0018v98 272->280, D-FIO-0002v99 237->245), and
 the 131.15 size gates (`--min` and proxy tokens <= before) reject any growth.
-Story 131.108 owns that; until it lands these three will be rejected.
+Story 131.108 waives both gates for rows routed by a correctness story, 131.105
+included (regen/size_gate_waiver.py), so the restores bank with
+`size_gate_note: waived(131.105)` (regen/freeze/size_gate_waiver_131.108.json).
 
 Usage (toke-corpus root, after check_routing_131_106.py route):
   python3 regen/route_131_105.py && python3 regen/route_merge.py

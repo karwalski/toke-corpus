@@ -53,6 +53,16 @@ file is kept as `audit/pattern_sweep.merged.20260919.jsonl`.
 are routed to AGENT by `regen/route_131_105.py` (`audit/pattern_sweep.131.105.patch.jsonl`),
 the reason naming the archived original to restore the `let` from.
 
+Size gates for correctness repairs (131.108, register 4.1 (a)). The 131.15
+and 131.17 banks waive the `--min` bytes and proxy-token gates for a row whose
+merged `patches` include a story in `regen/size_gate_waiver.CORRECTNESS_SET`
+(regen: 131.42, 131.43, 131.67, 131.105, 131.106, 131.111, 131.114; library:
+131.106, 131.117), and bank `size_gate_note: waived(<story>)` and `size_delta`
+in the record's `rewrite131` provenance and the ledger line. Every other row
+keeps both gates. `size_gate_waiver_131.108.json` re-runs the 131.105 restore
+measurement: all three restores (+8 `--min` bytes each) now bank in a dry run;
+toke-corpus main rejects all three on `min_bytes`.
+
 Rebuild sequence. The patches on disk are the record, and `route_merge.py`
 rebuilds the merged file from them (`--check` proves it). The original build
 order was `check_routing_131_106.py run` → `route` → `route_131_105.py` →
