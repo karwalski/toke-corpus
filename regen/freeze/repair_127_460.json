@@ -1,0 +1,241 @@
+{
+ "banked": true,
+ "by_status": {
+  "rewritten": 4
+ },
+ "generated": "2026-11-22T14:26:02Z",
+ "records": [
+  {
+   "defect": "array `==` (`if(val==other)`): E4031 since toke 138.20; before it, an address / C-string compare of the array blocks; on the corpus pin @(1.0;2.0)==@(3.0;4.0) was true, so main printed 1 2",
+   "edits": 2,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [],
+    "~/tk/tmpwork/Z227/bin/tkc-inta": [
+     "E4031:L4"
+    ],
+    "~/tk/toke/toke": [
+     "E4031:L4"
+    ]
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "1\n2\n3\n4\n"
+    },
+    "~/tk/tmpwork/Z227/bin/tkc-inta": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "1\n2\n3\n4\n"
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     },
+     "stdout": "1\n2\n3\n4\n"
+    }
+   },
+   "new_source_sha256": "d2dc245a79a45444115537045ffb65c496863052bf39f6f124229f1df7a89114",
+   "output_check": "repaired",
+   "path": "A-ARR/A-ARR-0033v2.json",
+   "prev_source_sha256": "38ea2f5d73654a4242bcb0d448db9233a584494b3dd6f44bca415045be64ccf0",
+   "probe_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "exit": 0,
+     "mismatch": 20,
+     "stdout": "1\n2\n"
+    }
+   },
+   "status": "rewritten",
+   "story": "127.460",
+   "task_id": "A-ARR-0033v2"
+  },
+  {
+   "defect": "array `==` (`if(val==other)`): E4031 since toke 138.20; before it, an address / C-string compare of the array blocks",
+   "edits": 2,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [],
+    "~/tk/tmpwork/Z227/bin/tkc-inta": [
+     "E4031:L5"
+    ],
+    "~/tk/toke/toke": [
+     "E4031:L5"
+    ]
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/tmpwork/Z227/bin/tkc-inta": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     }
+    }
+   },
+   "new_source_sha256": "9c7c448b17b9a23d92dc8e8ed958bc7704a04ef7bdd2ed4755053a1e08559c8d",
+   "output_check": "repaired",
+   "path": "A-ARR/A-ARR-0090v2.json",
+   "prev_source_sha256": "670618569b9517567c236d0e9dccc23a5f1b0a21bd93367e0f0592ab3277460d",
+   "probe_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "exit": 0,
+     "mismatch": 1
+    }
+   },
+   "status": "rewritten",
+   "story": "127.460",
+   "task_id": "A-ARR-0090v2"
+  },
+  {
+   "defect": "array `==` (`if(val==other)`): E4031 since toke 138.20; before it, an address / C-string compare of the array blocks",
+   "edits": 2,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [],
+    "~/tk/tmpwork/Z227/bin/tkc-inta": [
+     "E4031:L3"
+    ],
+    "~/tk/toke/toke": [
+     "E4031:L3"
+    ]
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/tmpwork/Z227/bin/tkc-inta": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     }
+    }
+   },
+   "new_source_sha256": "7cf023e24bf6f15d39c8e4cda1d650fc1604159f6fd6f245522476c49deac133",
+   "output_check": "repaired",
+   "path": "A-ARR/MIG-P2-A-A-ARR-0010v2-32c4964b.json",
+   "prev_source_sha256": "f32da8bade4f0c8ab4ef55dfbe2a99f20e0778c00e080a0f147739bc73b12264",
+   "probe_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "exit": 0,
+     "mismatch": 4
+    }
+   },
+   "status": "rewritten",
+   "story": "127.460",
+   "task_id": "MIG-P2-A-A-ARR-0010v2-32c4964b"
+  },
+  {
+   "defect": "array `==` (`if(val==other)`): E4031 since toke 138.20; before it, an address / C-string compare of the array blocks; the guard compared the input with a copy of itself, so it was always taken and the function returned its input unreversed",
+   "edits": 1,
+   "errors_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": [],
+    "~/tk/tmpwork/Z227/bin/tkc-inta": [
+     "E4031:L1"
+    ],
+    "~/tk/toke/toke": [
+     "E4031:L1"
+    ]
+   },
+   "gates": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/tmpwork/Z227/bin/tkc-inta": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     }
+    },
+    "~/tk/toke/toke": {
+     "check": [],
+     "probe": {
+      "cases": 32,
+      "exit": 0,
+      "mismatch": 0
+     }
+    }
+   },
+   "new_source_sha256": "8193b9aefacb1aa7f57725bdbd3d2caeb9eec84e6aa23fe98c7ddd8d5fc08014",
+   "output_check": "repaired",
+   "path": "A-ARR/MIG-P2-A-A-ARR-0027v2-803f9d89.json",
+   "prev_source_sha256": "dcc06cd848cbfd544cbff1b7d49dce28fe9e4f9ce846cc4d4f51de29e14325ab",
+   "probe_before": {
+    "~/tk/archive/pins/tkc-131.103/toke": {
+     "exit": 0,
+     "mismatch": 22
+    }
+   },
+   "status": "rewritten",
+   "story": "127.460",
+   "task_id": "MIG-P2-A-A-ARR-0027v2-803f9d89"
+  }
+ ],
+ "stories": [
+  "127.460"
+ ],
+ "tkcs": [
+  {
+   "sha256": "baa818304772161a6468b6b52a2363d8e2852e43129aa368c296bc321568fc30",
+   "tkc": "~/tk/tmpwork/Z227/bin/tkc-inta",
+   "version": "toke 3.2.0 (git 0558545d5b78)"
+  },
+  {
+   "sha256": "6818cb60a853e37f3d49e96265b1b0596c0ddf3a00b93e7683620d854f98ba00",
+   "tkc": "~/tk/toke/toke",
+   "version": "toke 3.2.0 (git a26e1e7bcdf7)"
+  },
+  {
+   "sha256": "d400375946fbae74dac24adc52bbc45bb1d4c94678d6ba0d297aef3c3dd35bb2",
+   "tkc": "~/tk/archive/pins/tkc-131.103/toke",
+   "version": "toke 3.1.0 (git 1f39c2998110)"
+  }
+ ]
+}
