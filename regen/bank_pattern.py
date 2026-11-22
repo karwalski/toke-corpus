@@ -6,6 +6,9 @@ are never trusted). For each work/pattern_131/gen/pat_<task_id>.tk:
                        idiom >= floor -> structure -> pattern lint net 0
                        (exemptions honoured) -> non-pattern lint <= before ->
                        --min bytes <= before -> proxy tokens <= before
+                       (both n/a, recorded `size_gate_note: waived(<story>)`
+                       + size_delta, when the row's merged patches are in
+                       size_gate_waiver.CORRECTNESS_SET — 131.108)
   main-thread gates    differential (131.14 diff_check; n/a for not-executable
                        records) -> Tier-1 perf (median of 3, flag iff ratio >
                        1.5 AND delta > 5 ms / 1 MB) -> Tier-2 flag recorded
@@ -96,6 +99,9 @@ def evaluate(paths, tid, tmp, meta=None):
                     "idiom": res.get("idiom"), "max_depth": res.get("max_depth"),
                     "lint_other_warnings": res.get("lint_other_warnings")}
     out["lint_exempt"] = res.get("lint_exempt") or []
+    if res.get("size_gate_note"):                     # 131.108: waived for a correctness-set row
+        out["size_gate_note"] = res["size_gate_note"]
+        out["size_delta"] = res.get("size_delta")
     out["pattern_hits"] = res.get("pattern_hits") or []
     out["hints"] = [d.get("rule") for d in res.get("hints") or []]
     worker_fail = [k for k in WORKER_GATES if res["gates"].get(k) is False]
@@ -190,6 +196,10 @@ def bank_one(paths, ev, meta, manifest, shas, now):
         "proxy_tokens_after": (ev.get("after") or {}).get("proxy_tokens"),
         "min_bytes_before": (ev.get("before") or {}).get("min_bytes"),
         "min_bytes_after": (ev.get("after") or {}).get("min_bytes"),
+        # 131.108: `waived(<story>)` when the row's merged patches are in the
+        # declared correctness set (size_gate_waiver.CORRECTNESS_SET), else None
+        "size_gate_note": ev.get("size_gate_note"),
+        "size_delta": ev.get("size_delta"),
         "perf": {"tier": str(perf.get("tier", "1")), "ratio": perf.get("ratio"),
                  "verdict": perf.get("verdict", "n/a")},
         "tier2_pending": bool(ev.get("tier2_flag")),
@@ -209,6 +219,9 @@ def bank_one(paths, ev, meta, manifest, shas, now):
     entry = {"task_id": tid, "wave": pc.WAVE, "status": "rewritten", "reason": ev["reason"],
              "attempts": ev.get("attempts", 1), "prev_sha256": ev["prev_sha256"],
              "new_sha256": pc.sha256_file(rec_path), "ts": now, "tkc_bin_sha": ev.get("tkc_bin_sha")}
+    if ev.get("size_gate_note"):                      # 131.108
+        entry["size_gate_note"] = ev["size_gate_note"]
+        entry["size_delta"] = ev.get("size_delta")
     pc.append_ledger(paths.ledger, entry)
     return entry
 

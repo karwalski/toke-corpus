@@ -130,7 +130,8 @@ def evaluate(paths, tid, tmp, meta=None, spec=None, baseline=False, run_perf=Tru
     res = lc.static_and_test_gates(spec, cand_text, tmp)
     lc.apply_exemptions(res, meta.get("exempt") or [])
     lc.lint_net_gate(res, before)
-    lc.size_gates(res, before, nul_carve_out=nul)
+    lc.size_gates(res, before, nul_carve_out=nul,
+                  waiver=lc.size_gate_waiver.waiver_stories(meta, source="library"))  # 131.108
     out["gates"] = res["gates"]
     out["reason"] = res.get("reason")
     out["after"] = {"min_bytes": res.get("min_bytes"), "proxy_tokens": res.get("proxy_tokens"),
@@ -141,6 +142,8 @@ def evaluate(paths, tid, tmp, meta=None, spec=None, baseline=False, run_perf=Tru
     out["lint_exempt"] = res.get("lint_exempt") or []
     if res.get("size_gate_note"):
         out["size_gate_note"] = res["size_gate_note"]
+    if res.get("size_delta"):                         # 131.108
+        out["size_delta"] = res["size_delta"]
     out["pattern_hits"] = [{k: d.get(k) for k in ("rule", "severity", "line")}
                            for d in res.get("pattern_hits") or []]
     out["hints"] = sorted({d.get("rule") for d in res.get("hints") or []})
@@ -230,6 +233,10 @@ def provenance(ev, meta, shas, now):
         "size_gates": {"min_bytes": ev["gates"].get("min_bytes"),
                        "proxy_tokens": ev["gates"].get("proxy_tokens"),
                        "note": lc.NUL_CARVE_REASON if ev.get("nul_carve_out") else None},
+        # 131.108: `waived(<story>)` for a row in the declared correctness set
+        "size_gate_note": (ev.get("size_gate_note")
+                           if not ev.get("nul_carve_out") else None),
+        "size_delta": ev.get("size_delta"),
         "library": {"id": libd.get("id"), "category": libd.get("category"),
                     "manifest": libd.get("manifest"), "title": libd.get("title"),
                     "source_program": ev.get("solution_path")},

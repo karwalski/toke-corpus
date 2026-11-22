@@ -50,7 +50,8 @@ INSTRUCTION = ("REWRITE RULES: behaviour identical (same printed output for ever
                "(tkc --lint pattern rules must report 0 errors/warnings; fixing the "
                "hints too is expected unless the task mandate forbids it; add no new "
                "lint warnings of any kind); the --min byte count and proxy-token "
-               "count must not grow. Self-check with check_pattern.py; at most 3 attempts.")
+               "count must not grow (unless the size line above says the size gates "
+               "are waived for a correctness repair). Self-check with check_pattern.py; at most 3 attempts.")
 
 
 def build_prompt(spec, src, ctx):
@@ -119,8 +120,14 @@ def build_prompt(spec, src, ctx):
                         "after banking, keep the hot path the catalogue prescribes"
                         if row.get("perf_sensitive") else ""))
     b = ctx.get("before") or {}
-    lines.append(f"  current size: --min {b.get('min_bytes')} bytes, proxy tokens "
-                 f"{b.get('proxy_tokens')} — the rewrite must be <= both.")
+    waived = pc.size_gate_waiver.waiver_stories(row)              # 131.108
+    if waived:
+        lines.append(f"  current size: --min {b.get('min_bytes')} bytes, proxy tokens "
+                     f"{b.get('proxy_tokens')} — size gates {pc.size_gate_waiver.note(waived)}: this is "
+                     "a correctness repair, so the fix may grow the program; add nothing else.")
+    else:
+        lines.append(f"  current size: --min {b.get('min_bytes')} bytes, proxy tokens "
+                     f"{b.get('proxy_tokens')} — the rewrite must be <= both.")
     if ctx["entries"]:
         lines += ["", "Canonical forms (pattern catalogue, only the entries for the "
                       "flagged rules):", ""]
@@ -238,6 +245,8 @@ def prepare(paths, bucket_path, bucket_name="AGENT", max_batches=pc.MAX_BATCHES,
                     "patterns": [e["id"] for e in entries],
                     "perf_sensitive": bool(row.get("perf_sensitive")),
                     "est_saving": pc.bucket_est_saving(row), "bucket_source": row.get("source"),
+                    "patches": list(row.get("patches") or []),             # 131.108: merged routing
+                    "size_gate_waiver": list(pc.size_gate_waiver.waiver_stories(row)),
                     "violations": row.get("violations") or [], "attempts": attempts,
                     "prev_reason": prev_reason, "card_sha": card_sha,
                     "catalogue_sha": cat["sha"], "lint_before": struct.get("lint") if struct else None,

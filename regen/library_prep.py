@@ -22,6 +22,10 @@ Output, under corpus/regen_v04/work/library_rewrite_131/:
 Excluded (127.64, a compiler regression handled separately): L-GAZ-117
 (deterministic segfault) and L-DEV-123 (E4031) on the pinned tkc.
 
+Size-gate waiver (131.108): each row's `patches` (the waiver key) are looked
+up by task_id in audit/pattern_sweep.merged.jsonl (--routing), because the
+131.13 sweep rows carry none. That lookup never adds or drops a row.
+
 Carved out (131.32): the four raw-NUL programs keep their prompt but their
 `before` size baseline is marked corrupt (`tkc --min` truncates at the NUL),
 so bank_library's <=-before gates are n/a for them. Their prompt carries the
@@ -136,6 +140,11 @@ def build_prompt(spec, src, ctx):
     if ctx.get("nul_carve_out"):
         lines.append("  current size: NOT MEASURABLE (131.32 raw NUL truncates --min) — "
                      "the size gates are n/a for this program.")
+    elif ctx.get("waiver"):                                                    # 131.108
+        lines.append(f"  current size: --min {b.get('min_bytes')} bytes, proxy tokens "
+                     f"{b.get('proxy_tokens')} — size gates "
+                     f"{lc.size_gate_waiver.note(ctx['waiver'])}: "
+                     "this is a correctness repair, so the fix may grow the program; add nothing else.")
     else:
         lines.append(f"  current size: --min {b.get('min_bytes')} bytes, proxy tokens "
                      f"{b.get('proxy_tokens')} — the rewrite must be <= both.")
@@ -210,6 +219,7 @@ def prepare(paths, max_batches=lc.MAX_BATCHES, limit=None, embed_card=True,
     for d in ("specs", "meta", "prompts", "batches"):
         os.makedirs(paths.sub(d), exist_ok=True)
     retry = read_retry_queue(paths.sub("retry_queue.jsonl"))
+    routing = lc.load_routing_patches(getattr(paths, "routing", None))   # 131.108: waiver key only
     skipped = {"done": 0, "exhausted": 0, "no_spec": 0, "no_solution": 0}
     todo, unbanked, carved = [], [], []
     with tempfile.TemporaryDirectory(prefix="library_prep_") as tmp:
@@ -255,13 +265,16 @@ def prepare(paths, max_batches=lc.MAX_BATCHES, limit=None, embed_card=True,
             cand_path = paths.candidate(libd.get("category"), libd.get("id"))
             if os.path.exists(cand_path):
                 unbanked.append(tid)                  # bank BEFORE re-prepping
+            patches = lc.row_patches(row, routing)
+            waiver = lc.size_gate_waiver.waiver_stories(
+                {"patches": patches}, source="library")
             ctx = {"must": must, "hints": hints, "sweep_only": sweep_only,
                    "exempt": exempt, "exempt_hit": exempt_hit, "entries": entries,
                    "before": before, "attempts": attempts, "prev_reason": prev_reason,
                    "card": card if embed_card else None, "card_sha": card_sha,
                    "toolchain": toolchain,
                    "rule_texts": rule_texts, "row": row, "toke_root": paths.toke_root,
-                   "nul_carve_out": nul, "candidate_path": cand_path}
+                   "nul_carve_out": nul, "candidate_path": cand_path, "waiver": waiver}
             with open(paths.sub("specs", tid + ".json"), "w") as f:
                 json.dump(spec, f)
             struct = before.pop("struct", None)
@@ -275,6 +288,9 @@ def prepare(paths, max_batches=lc.MAX_BATCHES, limit=None, embed_card=True,
                     "exempt_hit": exempt_hit, "patterns": [e["id"] for e in entries],
                     "est_saving": lc.bucket_est_saving(row),
                     "violations": row.get("violations") or [],
+                    "bucket_source": row.get("source"),
+                    "patches": patches,                       # 131.108: merged routing, by task_id
+                    "size_gate_waiver": list(waiver),
                     "nul_carve_out": nul, "attempts": attempts,
                     "prev_reason": prev_reason, "card_sha": card_sha,
                     "catalogue_sha": cat["sha"],
@@ -322,6 +338,9 @@ def main(argv=None):
     ap.add_argument("--corpus", default=lc.CORPUS)
     ap.add_argument("--lib-root", default=lc.LIB_ROOT)
     ap.add_argument("--sweep", default=None, help="default <corpus>/audit/pattern_sweep.jsonl")
+    ap.add_argument("--routing", default=None,
+                    help="merged routing read only for each row's patches (the 131.108 "
+                         "size-gate waiver key); default <corpus>/audit/pattern_sweep.merged.jsonl")
     ap.add_argument("--shard", default=None, help="default <corpus>/shards/library_131.jsonl")
     ap.add_argument("--workdir", default=None, help="default <corpus>/work/library_rewrite_131")
     ap.add_argument("--ledger", default=None,
@@ -338,7 +357,7 @@ def main(argv=None):
     with lc.pin_tkc(sys.modules[__name__]) as pinned:
         paths = lc.LibraryPaths(corpus=args.corpus, lib_root=args.lib_root,
                                 workdir=args.workdir, ledger=args.ledger,
-                                shard=args.shard, sweep=args.sweep,
+                                shard=args.shard, sweep=args.sweep, routing=args.routing,
                                 catalogue=args.catalogue, card=args.card)
         print(f"library_prep: tkc {pinned.version} sha256 {pinned.sha256[:12]} "
               f"(pinned copy {pinned.path})", file=sys.stderr)
