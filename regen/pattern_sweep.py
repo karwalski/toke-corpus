@@ -51,6 +51,11 @@ flagged non-canonical form - proxy8k of its canonical form), floored at 0 per
 violation. perf_sensitive = a matched entry has a `hot_path` or its canonical
 form is expected-worse at runtime than a sibling form (Tier-2 territory).
 
+Page shapes (131.135). The four substitutions the pre-132.15 spec page
+prescribed (`!(a==b)`, `!(a>b)`, nested `if` for `&&`, `a-a/b*b`) have no tkc
+rule; every row records them in `page_shapes` [{rule, n, sample}], and with
+--page-shapes-armed each hit is also a fix-less warning violation (AGENT).
+
 Records, library sources, MANIFEST.jsonl and every ledger are read-only here.
 """
 import argparse, collections, glob, hashlib, json, multiprocessing, os, re, statistics, sys, time
@@ -58,6 +63,7 @@ import argparse, collections, glob, hashlib, json, multiprocessing, os, re, stat
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import idiom_judge                                # noqa: E402
+import measure_131_62                             # noqa: E402  (131.135: the four page shapes)
 import metrics                                    # noqa: E402
 import tkc_pin                                    # noqa: E402  (131.39)
 
@@ -71,7 +77,19 @@ BATCH_SIZE = 20
 BUCKETS = ("EXEMPT", "AUTO", "AGENT", "LEAVE", "REGEN")
 PATTERN_RULES = list(idiom_judge.PATTERN_RULES)
 HAND_PARSER = "hand-rolled-parser"          # judge regex rule (no tkc rule)
-RULES = PATTERN_RULES + [HAND_PARSER]
+# 131.135: the four substitutions the pre-132.15 prompts/spec-reference.md
+# prescribed (`!(a==b)` for !=, `!(a>b)` for <=, nested `if` for &&,
+# `a-a/b*b` for %). Neither tkc lint nor a catalogue entry sees them, so the
+# sweep matches them itself with the 131.62 (a) detectors (one definition,
+# regen/measure_131_62.py) over string-blanked source. They are always
+# recorded in the row's `page_shapes`; they become violations (and so move a
+# bucket) only with --page-shapes-armed, because whether to route them at all
+# is the open owner question 131.62 (b). There is no catalogue form and no
+# deterministic fix, so an armed hit is a fix-less warning: the AGENT path.
+PAGE_RULES = {"page-neq": "neq_emulation", "page-le-ge": "le_ge_emulation",
+              "page-mod": "mod_emulation", "page-nested-if-and": "nested_if_and"}
+PAGE_MANDATE = {"page-nested-if-and": ("nested if",)}    # a mandate that asks for the shape
+RULES = PATTERN_RULES + [HAND_PARSER] + list(PAGE_RULES)
 # rules whose tkc `fix` is deterministic (docs/compiler/lint-rules-v1.md); the
 # string-concat-chain fix is dormant (127.7/127.10) and joins only when armed
 # nested-if-ladder joins by owner decision 4.2 (131.107)
@@ -97,6 +115,7 @@ RULE_PATTERNS = {
     "discarded-value-result": [],          # value-semantics bug; no catalogue form
     "nested-if-ladder": [("cond-elif-chain", "b")],   # 131.107: form b is the el{if} ladder
     HAND_PARSER: [("parse-json", "b")],
+    **{r: [] for r in PAGE_RULES},          # 131.135: no catalogue form for these
 }
 ALT_PATTERNS = {                           # same rule, other catalogue entries (informational)
     "mut-flag-if": ["cond-elif-chain", "cond-clamp", "cond-bool-render"],
@@ -264,6 +283,44 @@ def vec_handle_receiver(diag, src):
     return bool(pat.search(src))
 
 
+# ---------------------------------------------------------- page shapes ---
+def page_shape_hits(src):
+    """131.135: [{rule, n, sample}] for each of the four page-prescribed
+    shapes in `src` (string literals blanked; nested-if-and is matched on the
+    whitespace-free code, exactly as measure_131_62.features does)."""
+    code = measure_131_62.code_only(src)
+    flat = re.sub(r"\s+", "", code)
+    out = []
+    for rule, key in PAGE_RULES.items():
+        rx = measure_131_62.WORKAROUNDS[key]
+        text = flat if key == "nested_if_and" else code
+        n = sum(1 for _ in rx.finditer(text))
+        if n:
+            out.append({"rule": rule, "n": n, "sample": measure_131_62.first_line(text, rx)[:120]})
+    return out
+
+
+def page_shape_violations(hits, mandate, armed):
+    """(violations, exemptions) for page_shape_hits() output. Nothing unless
+    `armed`; a style mandate that asks for the shape exempts it. A migrate_fix
+    pre-form is NOT exempt: carrying the legacy shape over is exactly how the
+    page's teaching reached the corpus (131.62 a)."""
+    if not armed:
+        return [], []
+    m = (mandate or "").lower()
+    viol, ex = [], []
+    for h in hits:
+        if any(k in m for k in PAGE_MANDATE.get(h["rule"], ())):
+            ex.extend({"rule": h["rule"], "reason": "style_mandate", "span": None, "pattern_id": None}
+                      for _ in range(h["n"]))
+            continue
+        viol.extend({"rule": h["rule"], "severity": "warning", "span": None, "line": None,
+                     "pattern_id": None, "flagged_form": None, "fix": False, "deterministic": False,
+                     "saving": 0, "message": "pre-132.15 spec-page shape: " + h["sample"][:80],
+                     "via": "sweep-regex"} for _ in range(h["n"]))
+    return viol, ex
+
+
 # --------------------------------------------------------------- bucket ---
 def classify(violations, exemptions, est_saving, perf_sensitive, thresholds,
              regen_class=False, library=None):
@@ -394,6 +451,11 @@ def sweep_one(job):
                                "pattern_id": pid, "flagged_form": form, "fix": False,
                                "deterministic": False, "saving": pattern_saving(cat, pid, form),
                                "message": "judge regex: lp scanning charat/charcode + slice", "via": "judge-regex"})
+        # 131.135: the four pre-132.15 spec-page shapes (always recorded)
+        row["page_shapes"] = page_shape_hits(src)
+        pv, pe = page_shape_violations(row["page_shapes"], mandate, opts.get("page_shapes_armed"))
+        violations.extend(pv)
+        exemptions.extend(pe)
         row["other_lint"] = [{"rule": d.get("rule"), "severity": d.get("severity"), "span": d.get("span"),
                               "fix": bool(d.get("fix"))}
                              for d in diags if d.get("rule") not in idiom_judge.PATTERN_RULES]
@@ -530,7 +592,8 @@ def build_jobs(args, done):
 
 def thresholds_of(args):
     return {"agent_saving": args.agent_saving, "concat_fix_armed": bool(args.concat_fix_armed),
-            "preform_exempt": bool(args.preform_exempt), "regen_class": "A-*/full_program",
+            "preform_exempt": bool(args.preform_exempt),
+            "page_shapes_armed": bool(getattr(args, "page_shapes_armed", False)), "regen_class": "A-*/full_program",
             "budget_max_over": args.budget_max_over, "factor_step": args.factor_step}
 
 
@@ -553,7 +616,8 @@ def cmd_run(args):
     tkc_sha = pinned.sha256
     cat = load_catalogue(args.catalogue)
     opts = {"tmpdir": tmpdir, "catalogue": args.catalogue, "thresholds": thresholds_of(args),
-            "concat_fix_armed": bool(args.concat_fix_armed), "preform_exempt": bool(args.preform_exempt)}
+            "concat_fix_armed": bool(args.concat_fix_armed), "preform_exempt": bool(args.preform_exempt),
+            "page_shapes_armed": bool(args.page_shapes_armed)}
     print(f"sweeping {len(jobs)} ({len(done)} already done), {args.workers} workers, "
           f"tkc {pinned.version} sha256 {tkc_sha[:12]} (pinned copy {pinned.path}), "
           f"catalogue {cat['sha']} ({cat['n']} entries)", file=sys.stderr)
@@ -671,7 +735,10 @@ def agg(rows):
     other_fix = collections.Counter()
     perf_pat = collections.Counter()
     det_hits = collections.Counter()
+    page = collections.Counter()
     for r in rows:
+        for h in r.get("page_shapes") or []:
+            page[h["rule"]] += 1
         seen_g, seen_n, seen_p = set(), set(), set()
         for v in r.get("violations") or []:
             hits_gross[v["rule"]] += 1
@@ -727,6 +794,8 @@ def agg(rows):
         "exemptions_by_rule": dict(ex_rule.most_common()),
         "other_lint_by_rule": dict(other.most_common()),
         "other_lint_fixable_by_rule": dict(other_fix),
+        "page_shape_records_by_rule": {ru: page[ru] for ru in PAGE_RULES if page[ru]},
+        "page_shape_records": sum(1 for r in rows if r.get("page_shapes")),
         "perf_sensitive_records": sum(1 for r in rows if r.get("perf_sensitive")),
         "perf_sensitive_by_pattern": dict(perf_pat.most_common()),
         "est_saving_by_bucket": sav,
@@ -1018,6 +1087,12 @@ def write_md(S, rows):
              "(not gated on the shard path; gated for library ingest): "
              + (", ".join(f"`{k}` {v:,} ({T['other_lint_fixable_by_rule'].get(k, 0):,} fixable)"
                           for k, v in T["other_lint_by_rule"].items()) or "none") + ".\n")
+    L.append("Pre-132.15 spec-page shapes (131.135; sweep regex, no tkc rule; "
+             + ("routed as fix-less warnings (swept with --page-shapes-armed)"
+                if any(T["hits_net_by_rule"].get(r) for r in PAGE_RULES)
+                else "recorded in `page_shapes` only, routing nothing") + "): "
+             + (", ".join(f"`{k}` {v:,} records" for k, v in T.get("page_shape_records_by_rule", {}).items())
+                or "none") + f" ({T.get('page_shape_records', 0):,} records in all).\n")
     L.append("## Samples per rule\n")
     for ru, ids in S["samples_by_rule"].items():
         L.append(f"- `{ru}`: " + ", ".join(f"`{i}`" for i in ids))
@@ -1044,6 +1119,9 @@ def main():
                     help="treat the string-concat-chain fix as deterministic (TKC_LINT_CONCAT_FIX armed)")
     ap.add_argument("--preform-exempt", dest="preform_exempt", action="store_true", default=True)
     ap.add_argument("--no-preform-exempt", dest="preform_exempt", action="store_false")
+    ap.add_argument("--page-shapes-armed", action="store_true",
+                    help="131.135: route the four pre-132.15 spec-page shapes as fix-less warnings "
+                         "(AGENT path); default: recorded in page_shapes only (owner question 131.62 b)")
     ap.add_argument("--budget-max-over", type=float, default=0.05, help="max share of records over budget")
     ap.add_argument("--factor-step", type=float, default=0.05)
     ap.add_argument("--factor", type=float, help="force the budget factor instead of searching")

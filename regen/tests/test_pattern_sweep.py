@@ -168,3 +168,49 @@ def test_vec_handle_receiver_suspected_fp():
     d = {"message": "result discarded — write `a=a.push(...)` (a bare call never mutates)"}
     assert not ps.vec_handle_receiver(d, src)
     assert not ps.vec_handle_receiver({"message": "x"}, src)
+
+
+# ---------------------------------------------------------- page shapes ---
+# 131.135: the four substitutions the pre-132.15 spec page prescribed
+PAGE_SRC = ("m=x;\n"
+            "f=g(a:i64;b:i64):i64{\n"
+            "  if(!(a==b)){<1};\n"
+            "  if(!(a>b)){<2};\n"
+            "  if(a>0){\n    if(b>0){<3}\n  };\n"
+            "  <a-a/b*b\n};\n")
+CLEAN_SRC = ('m=x;\nf=g(a:i64;b:i64):i64{\n  if(a!=b&&a<=b){<1};\n'
+             '  let s="!(a==b) a-a/b*b";\n  <a%b\n};\n')
+
+
+def test_page_shape_hits_finds_the_four_shapes():
+    hits = {h["rule"]: h for h in ps.page_shape_hits(PAGE_SRC)}
+    assert set(hits) == set(ps.PAGE_RULES)
+    assert all(h["n"] == 1 for h in hits.values())
+    assert "!(a==b)" in hits["page-neq"]["sample"]
+
+
+def test_page_shape_hits_ignore_the_idiomatic_forms_and_strings():
+    assert ps.page_shape_hits(CLEAN_SRC) == []
+
+
+def test_page_shapes_route_nothing_unless_armed():
+    hits = ps.page_shape_hits(PAGE_SRC)
+    assert ps.page_shape_violations(hits, None, armed=False) == ([], [])
+    viol, ex = ps.page_shape_violations(hits, None, armed=True)
+    assert ex == [] and {v["rule"] for v in viol} == set(ps.PAGE_RULES)
+    assert all(v["severity"] == "warning" and not v["deterministic"] and v["saving"] == 0 for v in viol)
+    b, why, _ = ps.classify(viol, ex, 0, False, TH)
+    assert b == "AGENT" and why.startswith("gate violation without fix")
+
+
+def test_page_shape_nested_if_mandate_is_exempt():
+    hits = ps.page_shape_hits(PAGE_SRC)
+    viol, ex = ps.page_shape_violations(hits, "Use nested if/el blocks for the control flow.", armed=True)
+    assert [e["rule"] for e in ex] == ["page-nested-if-and"]
+    assert ex[0]["reason"] == "style_mandate"
+    assert "page-nested-if-and" not in {v["rule"] for v in viol}
+
+
+def test_page_shape_detectors_are_the_131_62_ones():
+    import measure_131_62 as m62
+    assert set(ps.PAGE_RULES.values()) == set(m62.PAGE_PRESCRIBED)
