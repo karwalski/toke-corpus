@@ -32,8 +32,11 @@ STORY = "131.108"
 
 # The declared set (register 4.1 (a), recorded 2026-11-15), keyed by the
 # merged row's `source`. A story appears here only by owner decision.
+# 131.99 joins the regen set by register 4.3 (a): its return-type mismatches
+# go through a route_merge patch "that joins the 4.1 correctness set".
 CORRECTNESS_SET = {
-    "regen": ("131.42", "131.43", "131.67", "131.105", "131.106", "131.111", "131.114"),
+    "regen": ("131.42", "131.43", "131.67", "131.105", "131.106", "131.111", "131.114",
+              "131.99"),
     "library": ("131.106", "131.117"),
 }
 
@@ -81,7 +84,8 @@ def apply(res, before, stories):
 def selftest():
     """Holds the constant to the owner's answer and the key to `patches`."""
     assert CORRECTNESS_SET == {
-        "regen": ("131.42", "131.43", "131.67", "131.105", "131.106", "131.111", "131.114"),
+        "regen": ("131.42", "131.43", "131.67", "131.105", "131.106", "131.111", "131.114",
+                  "131.99"),
         "library": ("131.106", "131.117"),
     }, CORRECTNESS_SET
     # keyed to the merged patches, scoped by source

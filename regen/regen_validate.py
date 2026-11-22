@@ -191,13 +191,24 @@ def signature_conforms(spec, src):
 # return MUST be declared as an error union (hard); any other spec/declared
 # difference is a SOFT flag (`return_type_mismatch`). 131.43 made the
 # PARAMETER types hard (signature_conforms above) and left the return type
-# soft: 172 banked single_function records soft-mismatch today, 50 of them
-# not already routed by 131.43 and several a semantic change (`f64` -> `str`),
-# so hardening it is its own decision (131.99).
+# soft: 172 banked single_function records soft-mismatched, 50 of them not
+# already routed by 131.43 and several a semantic change (`f64` -> `str`).
+# 131.99 (owner register 2026-11-12 item 4.3 (a)): the return type is now an
+# EXACT match (norm_return_type) plus the allowlist below; every other
+# difference is a hard `return_type:` reject.
 
-# normalised spec return -> set of normalised declared returns accepted as
-# equal (e.g. widening). Empty = exact match only (131.99 decides).
-RETURN_TYPE_ALLOWLIST = {}
+# normalised spec return -> normalised declared returns accepted in its place.
+# Only these two entries, scalar and whole-type (not inside `@`, not inside
+# an error union), each justified by identical stdout: the value of the spec
+# type is printed the same when the function declares the wider integer
+# (regen/freeze/return_type_gate_131.99.json runs the differential test,
+# record as banked vs the same record re-typed to the spec, on every banked
+# record that uses one). `f32` -> `f64` is NOT listed (the owner's answer
+# leaves it out; unlike SIGNATURE_WIDENING).
+RETURN_TYPE_ALLOWLIST = {
+    "i32": frozenset({"i64"}),
+    "u32": frozenset({"u64", "i64"}),
+}
 
 def _scan_params(text, start):
     """Index just past the `)` that closes the parameter list opened at
@@ -280,12 +291,13 @@ def is_error_union(t):
 
 
 def return_type_conforms(spec, src):
-    """131.42 gate. Returns (hard_ok, detail, soft_mismatch, declared).
-    hard_ok False only when the spec return is an error union and the
-    declared one is not. soft_mismatch is a string when declared != spec
-    (normalised, modulo RETURN_TYPE_ALLOWLIST) and the hard case does not
-    apply — recorded, not enforced (131.99). declared is None when the spec
-    names no target / the function is absent (gate not applicable)."""
+    """131.42 gate, hardened by 131.99. Returns (hard_ok, detail,
+    soft_mismatch, declared). hard_ok False when the spec return is an error
+    union and the declared one is not (131.42), or when the declared return
+    differs from the spec's (normalised) and is not a RETURN_TYPE_ALLOWLIST
+    widening (131.99). soft_mismatch is always None since 131.99 (kept in the
+    tuple for callers). declared is None when the spec names no target / the
+    function is absent (gate not applicable)."""
     name = target_name(spec)
     if not name:
         return True, "no target signature in spec", None, None
@@ -313,8 +325,8 @@ def return_type_conforms(spec, src):
                            f"spec `{want}` requires an error union", None, got)
     nw, ng = norm_return_type(want), norm_return_type(got)
     if nw != ng and ng not in RETURN_TYPE_ALLOWLIST.get(nw, ()):
-        return True, "ok (soft mismatch)", f"{name} declared `{got}`, spec `{want}`", got
-    return True, "ok", None, got
+        return False, f"{name} declared `{got}`, spec `{want}` (131.99: exact match)", None, got
+    return True, ("ok" if nw == ng else f"ok (allowlisted widening {nw} -> {ng})"), None, got
 
 
 def tkc_check(src_path):

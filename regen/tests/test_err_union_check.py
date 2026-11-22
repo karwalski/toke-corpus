@@ -87,18 +87,19 @@ def test_norm_return_type_equates_spellings():
     assert regen_validate.is_error_union("i64!$e") and not regen_validate.is_error_union("str")
 
 
-def test_return_type_conforms_hard_soft_ok_and_allowlist(monkeypatch):
+def test_return_type_conforms_hard_exact_and_allowlist(monkeypatch):
     ok, detail, soft, decl = regen_validate.return_type_conforms(SPEC, PREFIX + GAMED)
     assert ok is False and decl == "str" and soft is None
     assert detail == "parseint declared `str`, spec `i64!$parseerr` requires an error union"
     ok, detail, soft, decl = regen_validate.return_type_conforms(SPEC, PREFIX + GOOD)
     assert (ok, detail, soft, decl) == (True, "ok", None, "i64!$parseerr")
-    ok, _, soft, decl = regen_validate.return_type_conforms(SPEC, PREFIX + WIDENED)
-    assert ok is True and decl == "u64!$parseerr"
-    assert soft == "parseint declared `u64!$parseerr`, spec `i64!$parseerr`"
+    # 131.99: a union with the wrong payload is no longer a soft flag -- exact match
+    ok, detail, soft, decl = regen_validate.return_type_conforms(SPEC, PREFIX + WIDENED)
+    assert ok is False and decl == "u64!$parseerr" and soft is None
+    assert detail == "parseint declared `u64!$parseerr`, spec `i64!$parseerr` (131.99: exact match)"
     monkeypatch.setattr(regen_validate, "RETURN_TYPE_ALLOWLIST", {"i64!parseerr": {"u64!parseerr"}})
     ok, detail, soft, _ = regen_validate.return_type_conforms(SPEC, PREFIX + WIDENED)
-    assert ok is True and soft is None and detail == "ok"
+    assert ok is True and soft is None and detail == "ok (allowlisted widening i64!parseerr -> u64!parseerr)"
     # wrapper shape: named target fine, the driver's callee is not -> hard fail
     ok, detail, soft, decl = regen_validate.return_type_conforms(SPEC, PREFIX + WRAPPED)
     assert ok is False and decl == "i64!$parseerr" and soft is None
@@ -381,10 +382,11 @@ def test_validate_one_gates_return_type_gate(tmp_path):
     # correct union: accepted, gate True, no soft flag
     rec, ok, reason, gates = run_shard.validate_one_gates(SPEC, GOOD, d)
     assert ok is True and gates["return_type"] is True and rec["regen"]["return_type_mismatch"] is None, reason
-    # widened payload: union present -> soft flag only (131.43 decides)
+    # widened payload: 131.99 makes it a hard reject (it was the soft flag)
     rec, ok, reason, gates = run_shard.validate_one_gates(SPEC, WIDENED, d)
-    assert ok is True and gates["return_type"] is True, reason
-    assert rec["regen"]["return_type_mismatch"] == "parseint declared `u64!$parseerr`, spec `i64!$parseerr`"
+    assert ok is False and gates["return_type"] is False, reason
+    assert reason == "return_type: parseint declared `u64!$parseerr`, spec `i64!$parseerr` (131.99: exact match)"
+    assert rec["regen"]["return_type_mismatch"] is None
     # stdin_program: gate not applicable
     sp = {"task_id": "L-1", "category": "D-CLI", "task_type": "stdin_program", "difficulty": 1,
           "description": "echo f=main():i64", "test_cases": []}

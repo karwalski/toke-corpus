@@ -107,6 +107,14 @@
    "present": true,
    "rows": 4,
    "sha256": "e86fceb21b74f349c0bb98762ec262b8431c0b3386174a1c509cb7722f4b81e7"
+  },
+  {
+   "story": "131.99",
+   "file": "pattern_sweep.131.99.patch.jsonl",
+   "origin": "pattern_sweep.131.64.jsonl",
+   "present": true,
+   "rows": 172,
+   "sha256": "967f91965d5e28e480a7a0865fb32fbb17f6c05bc53c485a3d58db3025227e41"
   }
  ],
  "replay": {
@@ -184,6 +192,14 @@
    "rows": 4,
    "same_bucket": 4,
    "REGEN->REGEN": 4
+  },
+  "131.99": {
+   "rows": 172,
+   "same_bucket": 135,
+   "AGENT->AGENT": 135,
+   "moved": 37,
+   "LEAVE->AGENT": 34,
+   "EXEMPT->AGENT": 3
   }
  },
  "buckets": {
@@ -215,10 +231,10 @@
   },
   "merged": {
    "regen": {
-    "EXEMPT": 1618,
+    "EXEMPT": 1615,
     "AUTO": 206,
-    "AGENT": 1898,
-    "LEAVE": 14011,
+    "AGENT": 1935,
+    "LEAVE": 13977,
     "REGEN": 5649,
     "records": 23382
    },
@@ -231,18 +247,18 @@
     "records": 1583
    },
    "all": {
-    "EXEMPT": 1618,
+    "EXEMPT": 1615,
     "AUTO": 217,
-    "AGENT": 3212,
-    "LEAVE": 14269,
+    "AGENT": 3249,
+    "LEAVE": 14235,
     "REGEN": 5649,
     "records": 24965
    }
   }
  },
  "transitions_rerun_to_merged": {
-  "LEAVE->AGENT": 624,
-  "EXEMPT->AGENT": 60,
+  "LEAVE->AGENT": 658,
+  "EXEMPT->AGENT": 63,
   "AUTO->AGENT": 11
  },
  "regen_outside_regen_class": {
@@ -254,6 +270,6 @@
  "merged_file": {
   "path": "corpus/regen_v04/audit/pattern_sweep.merged.jsonl",
   "rows": 24965,
-  "sha256": "faf1a987d8a80be496d6bb443ecf58894a3561f39c4be0b125d37a369e4ee0bb"
+  "sha256": "5bec5aa30c7ca12d04e8061ee311be611dfc551bcc942bba0715c957f075c33a"
  }
 }
