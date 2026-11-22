@@ -217,6 +217,23 @@ def test_compare_repair_mode_still_rejects_a_crashing_candidate(monkeypatch):
     assert r["verdict"] == "diverged" and r["mode"] == "repair"
 
 
+# ------------------------------------------------- generated-input driver ---
+def test_gen_main_matches_an_err_union_before_printing():
+    """131.137: the generated-input driver renders a `T!$err` target the way
+    the spec-case driver does (mt, `err:<variant>`), never by interpolating
+    the union, which tkc refuses with E4031 since 127.319."""
+    gsrc, err = dc.gen_main(ERR_SPEC, FIXED, [[10, 2], [5, 0]])
+    assert err is None
+    main = gsrc.split("f=main():i64{", 1)[1]
+    assert 'io.println("\\(safediv(' not in main
+    for k, call in ((0, "safediv(10;2)"), (1, "safediv(5;0)")):
+        stmt, e = drv._err_call(FIXED, "i64!$matherr", call, k)
+        assert e is None and stmt in main
+    # a target that does not return a union keeps the interpolated form
+    gsrc, err = dc.gen_main(ERR_SPEC, GAMED, [[10, 2]])
+    assert err is None and 'io.println("\\(safediv(10;2))")' in gsrc
+
+
 # ------------------------------------------------------------ provenance ---
 def test_bank_provenance_records_the_mode():
     ev = {"diff": {"mode": "repair", "checks": {"spec_cases": {"error_lines_changed": [
