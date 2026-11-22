@@ -38,6 +38,7 @@ import audit                                          # noqa: E402  (131.39: reb
 import run_shard                                      # noqa: E402  (131.39: rebind its TKC)
 import regen_validate                                       # noqa: E402  (131.39: rebind its TKC)
 import tkc_pin                                        # noqa: E402  (131.39)
+import size_gate_waiver                               # 131.108
 from run_shard import validate_one_gates              # noqa: E402
 from build_prompt import (expected_stdout_lines,       # noqa: E402  (131.74)
                           ERR_CONVENTION_COMMON,
@@ -588,8 +589,15 @@ def static_and_test_gates(spec, cand, tmpdir, lint_gate=True):
     return res
 
 
-def size_gates(res, before):
-    """min_bytes <= before, proxy_tokens <= before (None before/after = n/a)."""
+def size_gates(res, before, waiver=()):
+    """min_bytes <= before, proxy_tokens <= before (None before/after = n/a).
+
+    131.108: `waiver` is size_gate_waiver.waiver_stories(meta) — the row's
+    merged patches that are in the declared correctness set. When non-empty
+    both gates are n/a and res carries size_gate_note `waived(<story>)` and
+    size_delta; otherwise both gates apply as before."""
+    if size_gate_waiver.apply(res, before, waiver):
+        return res
     mb, pb = res.get("min_bytes"), res.get("proxy_tokens")
     b_mb, b_pb = (before or {}).get("min_bytes"), (before or {}).get("proxy_tokens")
     res["gates"]["min_bytes"] = None if mb is None or b_mb is None else mb <= b_mb

@@ -27,7 +27,7 @@ original's *output* for anything but reporting a delta, stop: that is the
 131.69 defect coming back.
 
 Imports are confined to modules with no differential machinery in them:
-run_shard, regen_validate, metrics, idiom_judge, tkc_pin.
+run_shard, regen_validate, metrics, idiom_judge, tkc_pin, size_gate_waiver.
 
 NOT assemble.sanitize. That helper deletes EVERY "```" run anywhere in the
 text, which silently corrupts a library program that handles markdown —
@@ -59,6 +59,7 @@ import metrics                                       # noqa: E402
 import run_shard                                     # noqa: E402
 import regen_validate                                      # noqa: E402
 import tkc_pin                                       # noqa: E402
+import size_gate_waiver                              # 131.108; no differential code
 from run_shard import validate_one_gates             # noqa: E402
 
 TKC = tkc_pin.default_tkc()
@@ -642,18 +643,24 @@ def lint_net_gate(res, before):
     return res
 
 
-def size_gates(res, before, nul_carve_out=False):
+def size_gates(res, before, nul_carve_out=False, waiver=()):
     """min_bytes <= before, proxy_tokens <= before.
 
     131.32: the four raw-NUL programs have no usable compile-time `before`
     (`tkc --min` truncates at the NUL), so both gates are explicitly n/a for
-    them — not silently passed, not spuriously failed."""
+    them — not silently passed, not spuriously failed.
+
+    131.108: `waiver` is size_gate_waiver.waiver_stories(meta) — the row's
+    merged patches in the declared library correctness set. Non-empty: both
+    gates n/a, size_gate_note `waived(<story>)` + size_delta."""
     mb, pb = res.get("min_bytes"), res.get("proxy_tokens")
     b_mb, b_pb = (before or {}).get("min_bytes"), (before or {}).get("proxy_tokens")
     if nul_carve_out:
         res["gates"]["min_bytes"] = None
         res["gates"]["proxy_tokens"] = None
         res["size_gate_note"] = NUL_CARVE_REASON
+        return res
+    if size_gate_waiver.apply(res, before, waiver):
         return res
     res["gates"]["min_bytes"] = None if mb is None or b_mb is None else mb <= b_mb
     res["gates"]["proxy_tokens"] = None if pb is None or b_pb is None else pb <= b_pb

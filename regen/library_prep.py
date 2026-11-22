@@ -136,6 +136,11 @@ def build_prompt(spec, src, ctx):
     if ctx.get("nul_carve_out"):
         lines.append("  current size: NOT MEASURABLE (131.32 raw NUL truncates --min) — "
                      "the size gates are n/a for this program.")
+    elif lc.size_gate_waiver.waiver_stories(row, source="library"):              # 131.108
+        lines.append(f"  current size: --min {b.get('min_bytes')} bytes, proxy tokens "
+                     f"{b.get('proxy_tokens')} — size gates "
+                     f"{lc.size_gate_waiver.note(lc.size_gate_waiver.waiver_stories(row, source='library'))}: "
+                     "this is a correctness repair, so the fix may grow the program; add nothing else.")
     else:
         lines.append(f"  current size: --min {b.get('min_bytes')} bytes, proxy tokens "
                      f"{b.get('proxy_tokens')} — the rewrite must be <= both.")
@@ -275,6 +280,9 @@ def prepare(paths, max_batches=lc.MAX_BATCHES, limit=None, embed_card=True,
                     "exempt_hit": exempt_hit, "patterns": [e["id"] for e in entries],
                     "est_saving": lc.bucket_est_saving(row),
                     "violations": row.get("violations") or [],
+                    "bucket_source": row.get("source"),
+                    "patches": list(row.get("patches") or []),             # 131.108: merged routing
+                    "size_gate_waiver": list(lc.size_gate_waiver.waiver_stories(row, source="library")),
                     "nul_carve_out": nul, "attempts": attempts,
                     "prev_reason": prev_reason, "card_sha": card_sha,
                     "catalogue_sha": cat["sha"],

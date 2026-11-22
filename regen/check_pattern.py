@@ -51,7 +51,7 @@ def run_worker_gates(paths, tid, tmp):
     if res["record"] is not None:
         pc.apply_exemptions(res, meta.get("exempt") or [])
         pc.lint_other_gate(res, before)
-        pc.size_gates(res, before)
+        pc.size_gates(res, before, pc.size_gate_waiver.waiver_stories(meta))  # 131.108
     elif res["gates"].get("compile") is False:
         raw, _ = pc.normalise_candidate(spec, cand)
         p = os.path.join(tmp, "diag.tk")
@@ -94,6 +94,11 @@ def report_lines(res, before):
                    f"{b.get('lint_other_warnings')} before — do not add unused-let/unused-import etc.")
     if res["gates"].get("idiom") is False:
         out.append(f"idiom {res.get('idiom')} < {pc.idiom_judge.IDIOM_FLOOR}")
+    if res.get("size_gate_note"):                 # 131.108: correctness-set row, size gates n/a
+        d = res.get("size_delta") or {}
+        out.append(f"size: {res['size_gate_note']} (131.108 correctness set): --min delta "
+                   f"{d.get('min_bytes')}, proxy delta {d.get('proxy_tokens')} — fix the defect first, "
+                   "then keep the program as small as the fix allows")
     if res["gates"].get("min_bytes") is False or res["gates"].get("proxy_tokens") is False:
         out.append(f"size: --min {res.get('min_bytes')} vs before {b.get('min_bytes')}; "
                    f"proxy {res.get('proxy_tokens')} vs before {b.get('proxy_tokens')} "
