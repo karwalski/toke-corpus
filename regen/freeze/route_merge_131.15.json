@@ -120,6 +120,14 @@
    "present": true,
    "rows": 172,
    "sha256": "967f91965d5e28e480a7a0865fb32fbb17f6c05bc53c485a3d58db3025227e41"
+  },
+  {
+   "story": "131.140",
+   "file": "pattern_sweep.131.140.patch.jsonl",
+   "origin": "pattern_sweep.131.107.jsonl",
+   "present": true,
+   "rows": 3756,
+   "sha256": "1bb80c076c27139e7113229e9b97039a5f620db4d9f9dab5d25833e35d626566"
   }
  ],
  "replay": {
@@ -206,6 +214,16 @@
    "moved": 37,
    "LEAVE->AGENT": 34,
    "EXEMPT->AGENT": 3
+  },
+  "131.140": {
+   "rows": 3756,
+   "same_bucket": 1732,
+   "REGEN->REGEN": 543,
+   "moved": 2024,
+   "LEAVE->AGENT": 1781,
+   "AGENT->AGENT": 1189,
+   "EXEMPT->AGENT": 156,
+   "AUTO->AGENT": 87
   }
  },
  "buckets": {
@@ -237,35 +255,35 @@
   },
   "merged": {
    "regen": {
-    "EXEMPT": 1954,
-    "AUTO": 376,
-    "AGENT": 1936,
-    "LEAVE": 13467,
+    "EXEMPT": 1798,
+    "AUTO": 301,
+    "AGENT": 3787,
+    "LEAVE": 11847,
     "REGEN": 5649,
     "records": 23382
    },
    "library": {
     "EXEMPT": 0,
-    "AUTO": 19,
-    "AGENT": 1314,
-    "LEAVE": 250,
+    "AUTO": 7,
+    "AGENT": 1487,
+    "LEAVE": 89,
     "REGEN": 0,
     "records": 1583
    },
    "all": {
-    "EXEMPT": 1954,
-    "AUTO": 395,
-    "AGENT": 3250,
-    "LEAVE": 13717,
+    "EXEMPT": 1798,
+    "AUTO": 308,
+    "AGENT": 5274,
+    "LEAVE": 11936,
     "REGEN": 5649,
     "records": 24965
    }
   }
  },
  "transitions_rerun_to_merged": {
-  "LEAVE->AGENT": 641,
-  "EXEMPT->AGENT": 80,
-  "AUTO->AGENT": 11
+  "LEAVE->AGENT": 2422,
+  "EXEMPT->AGENT": 236,
+  "AUTO->AGENT": 98
  },
  "regen_outside_regen_class": {
   "records": 0,
@@ -276,6 +294,6 @@
  "merged_file": {
   "path": "corpus/regen_v04/audit/pattern_sweep.merged.jsonl",
   "rows": 24965,
-  "sha256": "d8efe80e7590eb4cf948652dc77bde51ed4901304bbdb421f2b79c3ac4115d63"
+  "sha256": "93503f4850664c59e069b7457671c3d788eecbbe68e32a1527e2fd83f2640225"
  }
 }

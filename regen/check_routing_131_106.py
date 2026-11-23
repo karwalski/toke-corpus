@@ -57,6 +57,11 @@ rejects; its check ran with a tkc built from toke 799b4339
 field read other than .len on a str is E4034 at --check, as the build already
 reported) newly rejects: `"b".upper` without parentheses, never buildable;
 its check ran with ~/tk/toke/tkc on toke main (afb8641c or later).
+131.140 (2026-11-24) routed the records toke main a4636b56 (the 127.319 /
+127.323 / 127.462 std error-union class: reading the value of a fallible
+result is E4031) newly rejects; v3.2.0 accepts them. Its check ran with a tkc
+built from a clean archive of toke main a4636b56; its patch is the first built
+over the 131.107 base (route_merge NEW_SWEEP origin).
 
 --tkc defaults to the corpus pin (corpus_pin.default_tkc(): $TKC, else
 ~/tk/archive/pins/tkc-131.103/tkc, else ~/tk/toke/tkc).
@@ -91,7 +96,16 @@ CORPUS = route_merge.CORPUS
 FORBIDDEN = ("LEAVE", "EXEMPT", "AUTO")           # buckets that cannot fix a compile failure
 ROWS_NAME = f"check_routing_{STORY}.jsonl"
 # every story that routes --check failures with this tool, in route_merge order
-CHECK_STORIES = ("131.106", "131.111", "131.114", "131.117", "131.127")
+CHECK_STORIES = ("131.106", "131.111", "131.114", "131.117", "131.127", "131.140")
+
+
+# story-specific repair guidance appended to bucket_reason (the 131.15 prompt's "why")
+REPAIR_NOTES = {
+    "131.140": ("Owner answer R2 (register 1.1, 2026-11-12): agent repair only, no mechanical filler: "
+                "handle the fallible result where it is read (an 'mt' whose $err arm acts on the error, "
+                "or '!' in a fallible function), never a placeholder $ok default; a single-character "
+                "read goes through str.charcode (no union)."),
+}
 
 
 def summary_path(story=STORY):
@@ -237,6 +251,7 @@ def reason_for(r, tkc_desc, tests=True, story=STORY):
             "`tkc --check` with every printed line unchanged"
             + ("" if tests else " (no test cases: keep the program's logic exactly, change only what the "
                "diagnostic names)")
+            + (f". {REPAIR_NOTES[story]}" if story in REPAIR_NOTES else "")
             + f" (regen/freeze/check_routing_{story}.json)")
 
 

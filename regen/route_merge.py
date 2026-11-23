@@ -39,7 +39,8 @@ The patches written between Z95 and 131.134 (131.106, 131.105, 131.111,
 131.114, 131.117, 131.127, 131.99) were built with route_patch.merge_row on
 the merged file this tool wrote over the 131.64 re-run, so their origin is
 that sweep (MID_SWEEP), not the current base. A patch written from now on is
-built on a merged row over the 131.107 base: give it NEW_SWEEP.
+built on a merged row over the 131.107 base: give it NEW_SWEEP (131.140, the
+first, routes the records toke main a4636b56 rejects at --check).
 
 Usage (from the toke-corpus root):
   python3 regen/route_merge.py                       # default paths, writes merged + summary
@@ -68,7 +69,7 @@ PATCHES = (("131.42", OLD_SWEEP), ("131.67", OLD_SWEEP), ("131.15.looprebuild", 
            ("131.43", OLD_SWEEP), ("131.68", OLD_SWEEP), ("131.83", OLD_SWEEP),
            ("131.106", MID_SWEEP), ("131.105", MID_SWEEP), ("131.111", MID_SWEEP),
            ("131.114", MID_SWEEP), ("131.117", MID_SWEEP), ("131.127", MID_SWEEP),
-           ("131.99", MID_SWEEP))
+           ("131.99", MID_SWEEP), ("131.140", NEW_SWEEP))
 SUMMARY = os.path.join(HERE, "freeze", "route_merge_131.15.json")
 
 
