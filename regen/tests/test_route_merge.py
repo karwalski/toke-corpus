@@ -21,11 +21,13 @@ def _row(tid, bucket, viol=(), **kw):
     return r
 
 
-def _corpus(tmp_path, old, new, patches):
+def _corpus(tmp_path, old, new, patches, mid=None):
     a = tmp_path / "audit"
     a.mkdir()
     (a / rm.OLD_SWEEP).write_text("".join(json.dumps(r) + "\n" for r in old))
     (a / rm.NEW_SWEEP).write_text("".join(json.dumps(r) + "\n" for r in new))
+    if mid is not None:
+        (a / rm.MID_SWEEP).write_text("".join(json.dumps(r) + "\n" for r in mid))
     for story, rows in patches.items():
         (a / f"pattern_sweep.{story}.patch.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
     return str(tmp_path)
@@ -36,7 +38,14 @@ def test_patch_order_extends_route_patch_order():
     assert stories[:6] == list(route_patch.BASE_PATCHES + route_patch.APPLY_ORDER)
     assert stories[6:] == ["131.106", "131.105", "131.111", "131.114", "131.117", "131.127", "131.99"]
     assert all(o == rm.OLD_SWEEP for _, o in rm.PATCHES[:6])
-    assert all(o == rm.NEW_SWEEP for _, o in rm.PATCHES[6:])
+    assert all(o == rm.MID_SWEEP for _, o in rm.PATCHES[6:])     # built over the 131.64 re-run
+
+
+def test_base_is_the_131_107_rerun():
+    """131.134: the routing base is the sweep that routes nested-if-ladder (131.107)."""
+    assert rm.NEW_SWEEP == "pattern_sweep.131.107.jsonl"
+    assert rm.MID_SWEEP == "pattern_sweep.131.64.jsonl"
+    assert len({rm.OLD_SWEEP, rm.MID_SWEEP, rm.NEW_SWEEP}) == 3
 
 
 def test_replay_keeps_fresh_sweep_data_and_adds_only_the_delta(tmp_path):
@@ -94,6 +103,26 @@ def test_new_patch_origin_is_the_rerun(tmp_path):
     (tmp_path / "audit" / "pattern_sweep.131.106.patch.jsonl").write_text(json.dumps(p) + "\n")
     _, merged, _, _ = rm.build(corpus, patches=(("131.106", rm.NEW_SWEEP),))
     assert [v["rule"] for v in merged["a"]["violations"]] == ["loop-rebuilds-array", "does-not-compile"]
+
+
+def test_mid_sweep_patch_adds_only_its_delta_over_the_new_base(tmp_path):
+    """131.134: a 131.106+ patch was built on a 131.64-based row. Over the 131.107
+    base its delta is computed against the 131.64 row, so a violation the 131.64
+    row had and the 131.107 re-run dropped is NOT put back, and the new base's
+    own violation (the ladder hit) is kept."""
+    ladder = {"rule": "nested-if-ladder", "severity": "hint", "span": [5, 6], "fix": True, "saving": 1}
+    old = [_row("a", "LEAVE")]
+    mid = [_row("a", "AUTO", [LINT])]                       # 131.64 row
+    new = [_row("a", "AUTO", [ladder])]                     # 131.107 row: let fixed, ladder routed
+    p = route_patch.merge_row(mid[0], "a", "131.106", "does-not-compile", "AGENT", "E4031", ts=1)
+    corpus = _corpus(tmp_path, old, new, {"131.106": [p]}, mid=mid)
+    _, merged, stats, _ = rm.build(corpus, patches=(("131.106", rm.MID_SWEEP),))
+    r = merged["a"]
+    assert [v["rule"] for v in r["violations"]] == ["nested-if-ladder", "does-not-compile"]
+    assert r["bucket"] == "AGENT" and stats["131.106"]["AUTO->AGENT"] == 1
+    # with the wrong origin (the new base) the stale single-use-let would come back
+    _, wrong, _, _ = rm.build(corpus, patches=(("131.106", rm.NEW_SWEEP),))
+    assert "single-use-let" in [v["rule"] for v in wrong["a"]["violations"]]
 
 
 def test_missing_patch_file_is_empty_and_rows_unknown_are_counted(tmp_path):

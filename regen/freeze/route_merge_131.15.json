@@ -1,15 +1,20 @@
 {
  "story": "131.15 (prep: routing before the wave; Z95)",
- "what": "audit/pattern_sweep.merged.jsonl rebuilt by regen/route_merge.py: the 131.64 re-run sweep with every routing patch replayed in README order (delta violations + bucket + reason; REGEN sticky). Replaces the 2026-09-19 merged file, which was the 131.13 sweep + 131.42 + 131.67 + 131.15.looprebuild only (backed up as audit/pattern_sweep.merged.20260919.jsonl).",
+ "what": "audit/pattern_sweep.merged.jsonl rebuilt by regen/route_merge.py: the 131.107 re-run sweep (131.134; the 131.64 re-run before it) with every routing patch replayed in README order (delta violations + bucket + reason; REGEN sticky). Z95 replaced the 2026-09-19 merged file, which was the 131.13 sweep + 131.42 + 131.67 + 131.15.looprebuild only (backed up as audit/pattern_sweep.merged.20260919.jsonl).",
  "base_sweep": {
-  "file": "pattern_sweep.131.64.jsonl",
-  "sha256": "b8e0f969f66f4d288b5cd43b56d1b61563287e179a0746543bdfcff0fa8d4dff",
+  "file": "pattern_sweep.131.107.jsonl",
+  "sha256": "10f5bc338d154cca1b3342c02c53c7ab60f9105f4e9cba5060ea85667581649f",
   "rows": 24965,
-  "made_by": "Z91 131.64 re-run, tkc 3.1.0 9f1eb921 (regen/freeze/pattern_sweep_131.64.json)"
+  "made_by": "Z233 131.107 re-run, tkc 3.2.0 0558545d (regen/freeze/pattern_sweep_131.107.json)"
  },
  "origin_sweep_131_13": {
   "file": "pattern_sweep.jsonl",
   "sha256": "2985813a3ba08af4a331e02dfbcf5b1864c550f1069164991be08e7ea240312a"
+ },
+ "origin_sweep_131_64": {
+  "file": "pattern_sweep.131.64.jsonl",
+  "sha256": "b8e0f969f66f4d288b5cd43b56d1b61563287e179a0746543bdfcff0fa8d4dff",
+  "note": "origin of the 131.106-131.99 patches (built on the merged file over the 131.64 re-run)"
  },
  "patches": [
   {
@@ -121,17 +126,18 @@
   "131.42": {
    "rows": 429,
    "moved": 395,
-   "LEAVE->AGENT": 354,
-   "AUTO->AGENT": 2,
-   "EXEMPT->AGENT": 39,
+   "LEAVE->AGENT": 342,
+   "EXEMPT->AGENT": 50,
+   "AUTO->AGENT": 3,
    "same_bucket": 34,
    "AGENT->AGENT": 34
   },
   "131.67": {
    "rows": 56,
    "moved": 56,
-   "LEAVE->AGENT": 54,
-   "EXEMPT->AGENT": 2
+   "LEAVE->AGENT": 52,
+   "EXEMPT->AGENT": 3,
+   "AUTO->AGENT": 1
   },
   "131.15.looprebuild": {
    "rows": 3,
@@ -141,10 +147,11 @@
   "131.43": {
    "rows": 209,
    "moved": 188,
-   "LEAVE->AGENT": 170,
-   "EXEMPT->AGENT": 18,
+   "LEAVE->AGENT": 160,
+   "EXEMPT->AGENT": 23,
    "same_bucket": 21,
-   "AGENT->AGENT": 21
+   "AGENT->AGENT": 21,
+   "AUTO->AGENT": 5
   },
   "131.68": {},
   "131.83": {
@@ -152,17 +159,16 @@
    "same_bucket": 6,
    "REGEN->REGEN": 6,
    "moved": 2,
-   "LEAVE->REGEN": 1,
-   "AUTO->REGEN": 1
+   "LEAVE->REGEN": 2
   },
   "131.106": {
    "rows": 176,
    "same_bucket": 130,
    "REGEN->REGEN": 123,
    "moved": 46,
-   "LEAVE->AGENT": 36,
+   "LEAVE->AGENT": 42,
    "AGENT->AGENT": 7,
-   "AUTO->AGENT": 8,
+   "AUTO->AGENT": 2,
    "REGEN->AGENT": 2
   },
   "131.105": {
@@ -205,60 +211,60 @@
  "buckets": {
   "rerun": {
    "regen": {
-    "EXEMPT": 1678,
-    "AUTO": 217,
-    "AGENT": 1203,
-    "LEAVE": 14635,
+    "EXEMPT": 2034,
+    "AUTO": 387,
+    "AGENT": 1204,
+    "LEAVE": 14108,
     "REGEN": 5649,
     "records": 23382
    },
    "library": {
     "EXEMPT": 0,
-    "AUTO": 11,
+    "AUTO": 19,
     "AGENT": 1314,
-    "LEAVE": 258,
+    "LEAVE": 250,
     "REGEN": 0,
     "records": 1583
    },
    "all": {
-    "EXEMPT": 1678,
-    "AUTO": 228,
-    "AGENT": 2517,
-    "LEAVE": 14893,
+    "EXEMPT": 2034,
+    "AUTO": 406,
+    "AGENT": 2518,
+    "LEAVE": 14358,
     "REGEN": 5649,
     "records": 24965
    }
   },
   "merged": {
    "regen": {
-    "EXEMPT": 1615,
-    "AUTO": 206,
-    "AGENT": 1935,
-    "LEAVE": 13977,
+    "EXEMPT": 1954,
+    "AUTO": 376,
+    "AGENT": 1936,
+    "LEAVE": 13467,
     "REGEN": 5649,
     "records": 23382
    },
    "library": {
     "EXEMPT": 0,
-    "AUTO": 11,
+    "AUTO": 19,
     "AGENT": 1314,
-    "LEAVE": 258,
+    "LEAVE": 250,
     "REGEN": 0,
     "records": 1583
    },
    "all": {
-    "EXEMPT": 1615,
-    "AUTO": 217,
-    "AGENT": 3249,
-    "LEAVE": 14235,
+    "EXEMPT": 1954,
+    "AUTO": 395,
+    "AGENT": 3250,
+    "LEAVE": 13717,
     "REGEN": 5649,
     "records": 24965
    }
   }
  },
  "transitions_rerun_to_merged": {
-  "LEAVE->AGENT": 658,
-  "EXEMPT->AGENT": 63,
+  "LEAVE->AGENT": 641,
+  "EXEMPT->AGENT": 80,
   "AUTO->AGENT": 11
  },
  "regen_outside_regen_class": {
@@ -270,6 +276,6 @@
  "merged_file": {
   "path": "corpus/regen_v04/audit/pattern_sweep.merged.jsonl",
   "rows": 24965,
-  "sha256": "5bec5aa30c7ca12d04e8061ee311be611dfc551bcc942bba0715c957f075c33a"
+  "sha256": "d8efe80e7590eb4cf948652dc77bde51ed4901304bbdb421f2b79c3ac4115d63"
  }
 }
