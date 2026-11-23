@@ -1,0 +1,512 @@
+{
+ "story": "131.134",
+ "wave": "auto",
+ "ts": "2026-11-23T12:14:05Z",
+ "decision": "owner register 4.2 (2026-11-15): nested-if-ladder = cond-elif-chain form b, deterministic; 'handle the 641 in an AUTO pass'",
+ "routing": {
+  "base_sweep": "audit/pattern_sweep.131.107.jsonl (Z233, 131.107)",
+  "tool": "regen/route_merge.py",
+  "summary": "regen/freeze/route_merge_131.15.json",
+  "previous_merged_backup": "corpus/regen_v04/audit/pattern_sweep.merged.20261123.131-64-base.jsonl (sha256 5bec5aa3...)",
+  "transitions_vs_previous_merged": {
+   "LEAVE->EXEMPT": 363,
+   "LEAVE->AUTO": 225,
+   "AUTO->LEAVE": 71,
+   "EXEMPT->AUTO": 24,
+   "LEAVE->AGENT": 1
+  },
+  "patch_origins": "131.42..131.83 on the 131.13 sweep; 131.106..131.99 on the 131.64 re-run (MID_SWEEP), which they were built over",
+  "regen_outside_regen_class": 0
+ },
+ "selection": {
+  "rule": "merged routing rows with bucket AUTO, source regen, and a nested-if-ladder violation",
+  "rows": 238,
+  "by_task_type": {
+   "single_function": 104,
+   "migrate_fix": 90,
+   "full_program": 44
+  },
+  "new_auto_rows": 236,
+  "already_auto_before": 2,
+  "not_selected": {
+   "regen_auto_without_ladder": 138,
+   "note": "the 131.14 single-use-let AUTO rows, all processed and rejected/left by 131.14; not part of the ladder pass"
+  },
+  "library_auto_ladder_rows_left": {
+   "rows": 13,
+   "task_ids": [
+    "L-AIA-051",
+    "L-CRY-116",
+    "L-DAT-001",
+    "L-FIN-076",
+    "L-FIN-111",
+    "L-MED-004",
+    "L-MED-039",
+    "L-MED-076",
+    "L-MED-092",
+    "L-MED-093",
+    "L-MSG-100",
+    "L-SEC-026",
+    "L-SYS-062"
+   ],
+   "why": "pattern_autofix scores corpus records only (library programs are 'unknown ids'); library rewrites go through the 131.17 library wave, as 131.14 left library_auto.txt"
+  }
+ },
+ "dry_run_before_131_139": {
+  "tkc_bin_sha": "4d9fb477e9502fe9db8de00f6ca39b8d96e86b9d5cb3d017912a7b2397d55f0c",
+  "toke_git": "a4636b562a71",
+  "catalogue_sha": "ea9b223e363c",
+  "records": 238,
+  "changed": 238,
+  "decisions": {
+   "reject": 225,
+   "bank": 13
+  },
+  "reasons": {
+   "bank:fixed": 13,
+   "reject:pattern_remaining": 2,
+   "reject:preexisting": 167,
+   "reject:unverifiable": 56
+  },
+  "reject_reasons_detail": {
+   "preexisting:build: E9023": 73,
+   "unverifiable:no main() \u2014 not executable": 56,
+   "preexisting:compile: E4031,E4031,E4031": 43,
+   "preexisting:compile: E4031,E4031": 18,
+   "preexisting:pattern:mut-flag-if\u00d71": 14,
+   "preexisting:build: W1001,E9023": 8,
+   "preexisting:compile: E4031": 7,
+   "pattern_remaining:mut-flag-if\u00d71": 1,
+   "preexisting:lint:mutable-never-mutated": 1,
+   "preexisting:compile: E4031,E4011": 1,
+   "preexisting:pattern:flag-soup\u00d71": 1,
+   "pattern_remaining:flag-soup\u00d71": 1,
+   "preexisting:compile: W1001,E4031,E4031": 1
+  },
+  "diff_verdicts": {
+   "not_run": 169,
+   "identical": 13,
+   "unverifiable": 56
+  },
+  "unverifiable_reasons": {
+   "no main() \u2014 not executable": 56
+  },
+  "fix_rules": {
+   "nested-if-ladder": 238,
+   "single-use-let": 4,
+   "nested-if-and": 6,
+   "modulo-emulation": 1,
+   "negated-comparison": 3,
+   "negated-equality": 4
+  },
+  "perf_flags": [],
+  "by_task_type": {
+   "full_program": {
+    "reject": 31,
+    "bank": 13
+   },
+   "migrate_fix": {
+    "reject": 90
+   },
+   "single_function": {
+    "reject": 104
+   }
+  },
+  "thresholds": {
+   "perf_ratio": 1.5,
+   "perf_wall_ms": 5.0,
+   "perf_rss_kb": 1024.0,
+   "perf_runs": 3,
+   "n_generated": 20,
+   "idiom_floor": 0.6,
+   "max_depth": 4,
+   "max_func_bytes": 600
+  },
+  "mode": "dry-run",
+  "note": "single_function rows were rejected 'preexisting:build: E9023' (81): since 127.187 validate_one_gates builds every full_program, and the verbatim single_function module has no main(). Fixed by 131.139 (build_gate=False for that path) before the counted run."
+ },
+ "dry_run": {
+  "tkc_bin_sha": "4d9fb477e9502fe9db8de00f6ca39b8d96e86b9d5cb3d017912a7b2397d55f0c",
+  "toke_git": "a4636b562a71",
+  "catalogue_sha": "ea9b223e363c",
+  "records": 238,
+  "changed": 238,
+  "decisions": {
+   "reject": 150,
+   "bank": 88
+  },
+  "reasons": {
+   "bank:fixed": 88,
+   "reject:pattern_remaining": 2,
+   "reject:preexisting": 91,
+   "reject:unverifiable": 57
+  },
+  "reject_reasons_detail": {
+   "unverifiable:no main() \u2014 not executable": 56,
+   "preexisting:compile: E4031,E4031,E4031": 43,
+   "preexisting:compile: E4031,E4031": 18,
+   "preexisting:pattern:mut-flag-if\u00d71": 14,
+   "preexisting:compile: E4031": 7,
+   "preexisting:tests:output mismatch": 5,
+   "unverifiable:driver build failed: {\"schema_version\":\"1.0\",\"diagnostic_id\":\"D0001\",\"error_code\":\"E4032\",\"severity\":\"error\",\"stage\":\"type_check\",\"message\":\"cannot interpolate a composite value (array/struct/map) into a string\",\"file\":\"/; gen build failed: {\"schema_version\":\"1.0\",\"diagnostic_id\":\"D0001\",\"error_code\":\"E4032\",\"severity\":\"error\",\"stage\":\"type_check\",\"message\":\"cannot interpolate a composite value (array/struct/map) into a string\",\"file\":\"/": 1,
+   "pattern_remaining:mut-flag-if\u00d71": 1,
+   "preexisting:lint:mutable-never-mutated": 1,
+   "preexisting:compile: E4031,E4011": 1,
+   "preexisting:pattern:flag-soup\u00d71": 1,
+   "pattern_remaining:flag-soup\u00d71": 1,
+   "preexisting:compile: W1001,E4031,E4031": 1
+  },
+  "diff_verdicts": {
+   "unverifiable": 57,
+   "identical": 88,
+   "not_run": 93
+  },
+  "unverifiable_reasons": {
+   "driver build failed: {\"schema_version\":\"1.0\",\"diagnostic_id\":\"D0001\",\"error_code\":\"E4032\",\"severity\":\"error\",\"stage\":\"type_check\",\"message\":\"cannot interpolate a composite value (array/struct/map) into a string\",\"file\":\"/": 1,
+   "no main() \u2014 not executable": 56
+  },
+  "fix_rules": {
+   "nested-if-ladder": 238,
+   "single-use-let": 4,
+   "nested-if-and": 6,
+   "modulo-emulation": 1,
+   "negated-comparison": 3,
+   "negated-equality": 4
+  },
+  "perf_flags": [],
+  "by_task_type": {
+   "full_program": {
+    "reject": 31,
+    "bank": 13
+   },
+   "migrate_fix": {
+    "reject": 90
+   },
+   "single_function": {
+    "reject": 29,
+    "bank": 75
+   }
+  },
+  "thresholds": {
+   "perf_ratio": 1.5,
+   "perf_wall_ms": 5.0,
+   "perf_rss_kb": 1024.0,
+   "perf_runs": 3,
+   "n_generated": 20,
+   "idiom_floor": 0.6,
+   "max_depth": 4,
+   "max_func_bytes": 600
+  },
+  "mode": "dry-run"
+ },
+ "bank_run": {
+  "tkc_bin_sha": "4d9fb477e9502fe9db8de00f6ca39b8d96e86b9d5cb3d017912a7b2397d55f0c",
+  "toke_git": "a4636b562a71",
+  "catalogue_sha": "ea9b223e363c",
+  "records": 238,
+  "changed": 238,
+  "decisions": {
+   "bank": 88,
+   "reject": 150
+  },
+  "reasons": {
+   "bank:fixed": 88,
+   "reject:pattern_remaining": 2,
+   "reject:preexisting": 91,
+   "reject:unverifiable": 57
+  },
+  "reject_reasons_detail": {
+   "unverifiable:no main() \u2014 not executable": 56,
+   "preexisting:compile: E4031,E4031,E4031": 43,
+   "preexisting:compile: E4031,E4031": 18,
+   "preexisting:pattern:mut-flag-if\u00d71": 14,
+   "preexisting:compile: E4031": 7,
+   "preexisting:tests:output mismatch": 5,
+   "unverifiable:driver build failed: {\"schema_version\":\"1.0\",\"diagnostic_id\":\"D0001\",\"error_code\":\"E4032\",\"severity\":\"error\",\"stage\":\"type_check\",\"message\":\"cannot interpolate a composite value (array/struct/map) into a string\",\"file\":\"/; gen build failed: {\"schema_version\":\"1.0\",\"diagnostic_id\":\"D0001\",\"error_code\":\"E4032\",\"severity\":\"error\",\"stage\":\"type_check\",\"message\":\"cannot interpolate a composite value (array/struct/map) into a string\",\"file\":\"/": 1,
+   "pattern_remaining:mut-flag-if\u00d71": 1,
+   "preexisting:lint:mutable-never-mutated": 1,
+   "preexisting:compile: E4031,E4011": 1,
+   "preexisting:pattern:flag-soup\u00d71": 1,
+   "pattern_remaining:flag-soup\u00d71": 1,
+   "preexisting:compile: W1001,E4031,E4031": 1
+  },
+  "diff_verdicts": {
+   "identical": 88,
+   "unverifiable": 57,
+   "not_run": 93
+  },
+  "unverifiable_reasons": {
+   "driver build failed: {\"schema_version\":\"1.0\",\"diagnostic_id\":\"D0001\",\"error_code\":\"E4032\",\"severity\":\"error\",\"stage\":\"type_check\",\"message\":\"cannot interpolate a composite value (array/struct/map) into a string\",\"file\":\"/": 1,
+   "no main() \u2014 not executable": 56
+  },
+  "fix_rules": {
+   "nested-if-ladder": 238,
+   "single-use-let": 4,
+   "nested-if-and": 6,
+   "modulo-emulation": 1,
+   "negated-comparison": 3,
+   "negated-equality": 4
+  },
+  "perf_flags": [],
+  "by_task_type": {
+   "full_program": {
+    "reject": 31,
+    "bank": 13
+   },
+   "migrate_fix": {
+    "reject": 90
+   },
+   "single_function": {
+    "bank": 75,
+    "reject": 29
+   }
+  },
+  "thresholds": {
+   "perf_ratio": 1.5,
+   "perf_wall_ms": 5.0,
+   "perf_rss_kb": 1024.0,
+   "perf_runs": 3,
+   "n_generated": 20,
+   "idiom_floor": 0.6,
+   "max_depth": 4,
+   "max_func_bytes": 600
+  },
+  "mode": "bank",
+  "banked": {
+   "rewritten": 88
+  },
+  "note": "bank run reloaded the dry-run results; same pinned binary"
+ },
+ "rejects_by_reason": {
+  "preexisting:compile": {
+   "n": 70,
+   "task_ids": [
+    "A-STR-0028v14",
+    "A-STR-0028v75",
+    "D-CLI-0019v105",
+    "D-CLI-0019v11",
+    "D-CLI-0019v110",
+    "D-CLI-0019v133",
+    "D-CLI-0019v139",
+    "D-CLI-0019v144",
+    "D-CLI-0019v149",
+    "D-CLI-0019v15",
+    "D-CLI-0019v168",
+    "D-CLI-0019v169",
+    "D-CLI-0019v173",
+    "D-CLI-0019v176",
+    "D-CLI-0019v183",
+    "D-CLI-0019v194",
+    "D-CLI-0019v210",
+    "D-CLI-0019v213",
+    "D-CLI-0019v218",
+    "D-CLI-0019v223",
+    "D-CLI-0019v225",
+    "D-CLI-0019v232",
+    "D-CLI-0019v241",
+    "D-CLI-0019v261",
+    "D-CLI-0019v263",
+    "D-CLI-0019v38",
+    "D-CLI-0019v41",
+    "D-CLI-0019v46",
+    "D-CLI-0019v72",
+    "D-CLI-0019v9",
+    "D-CLI-0019v93",
+    "D-CLI-0019v97",
+    "D-CRY-0005v214",
+    "D-FIO-0003v13",
+    "D-NET-0016v339",
+    "D-NET-0016v82",
+    "D-TST-0025v155",
+    "D-TST-0025v272",
+    "D-WEB-0015v11",
+    "MIG-P2-A-A-STR-0026v63-228a42b5",
+    "MIG-P2-A-A-STR-0028v10-98e5506b",
+    "MIG-P2-A-A-STR-0033v55-c63be2d3",
+    "MIG-P2-A-A-STR-0050v19-2786ea18",
+    "MIG-P2-A-A-STR-0053v3-8bd531dc",
+    "MIG-P2-A-A-STR-0058v15-99eb955a",
+    "MIG-P2-A-A-STR-0063v19-7a74cbd9",
+    "MIG-P2-B-D-CFG-0002v331-850fe7a1",
+    "MIG-P2-B-D-CLI-0007v238-91af50f0",
+    "MIG-P2-B-D-CLI-0012v280-dc3f739d",
+    "MIG-P2-B-D-CRY-0008v284-3c28ddd2",
+    "MIG-P2-B-D-DAT-0002v243-2660fc06",
+    "MIG-P2-B-D-DAT-0002v249-a33a6edd",
+    "MIG-P2-B-D-FIO-0007v357-9e8cdfc4",
+    "MIG-P2-B-D-FIO-0010v307-c264dbb5",
+    "MIG-P2-B-D-FIO-0010v355-7e711a68",
+    "MIG-P2-B-D-FIO-0011v368-3fa2ea23",
+    "MIG-P2-B-D-NET-0006v301-8935d440",
+    "MIG-P2-B-D-NET-0011v282-f9c0c6a9",
+    "MIG-P2-B-D-NET-0017v335-25a47ab3",
+    "MIG-P2-B-D-NET-0018v295-377811b2",
+    "MIG-P2-B-D-WEB-0002v224-6800789f",
+    "MIG-P2-B-D-WEB-0008v205-ab8be803",
+    "MIG-P2-B-D-WEB-0015v243-31afbe91",
+    "MIG-P2-B-D-WEB-0016v220-144ee4d0",
+    "MIG-P2-B-D-WEB-0016v247-96086cbe",
+    "MIG-P2-B-D-WEB-0017v214-f663be37",
+    "MIG-P2-B-D-WEB-0017v223-4860831b",
+    "MIG-P2-B-D-WEB-0022v218-5d88133d",
+    "MIG-P2-B-D-WEB-0022v235-08a9badc",
+    "MIG-P2-B-D-WEB-0026v207-7ee53239"
+   ]
+  },
+  "unverifiable:no main() \u2014 not executable": {
+   "n": 56,
+   "task_ids": [
+    "MIG-P2-A-A-ARR-0011v7-82674a89",
+    "MIG-P2-A-A-ARR-0024v15-7280ba78",
+    "MIG-P2-A-A-ARR-0043v2-01077444",
+    "MIG-P2-A-A-ARR-0075-cc8d000b",
+    "MIG-P2-A-A-ARR-0075v23-8eb57238",
+    "MIG-P2-A-A-ARR-0092v31-edcc49e1",
+    "MIG-P2-A-A-ARR-0110v4-77d31712",
+    "MIG-P2-A-A-CND-0009v50-9cbbe535",
+    "MIG-P2-A-A-CND-0012v59-50a84327",
+    "MIG-P2-A-A-CND-0032v58-07ed9fc4",
+    "MIG-P2-A-A-CND-0034v23-cf1ab9d7",
+    "MIG-P2-A-A-CND-0034v7-559588db",
+    "MIG-P2-A-A-CND-0037v10-4d20b01f",
+    "MIG-P2-A-A-CND-0038v28-b6c7a35e",
+    "MIG-P2-A-A-CND-0038v34-b337a442",
+    "MIG-P2-A-A-CND-0042v11-a1baac15",
+    "MIG-P2-A-A-CND-0044v10-2989ef49",
+    "MIG-P2-A-A-CND-0047v26-d185d274",
+    "MIG-P2-A-A-CND-0048v26-e35e3fd5",
+    "MIG-P2-A-A-CND-0051v1-5c505ede",
+    "MIG-P2-A-A-CND-0051v38-9ea196b9",
+    "MIG-P2-A-A-CND-0082v1-722ce21d",
+    "MIG-P2-A-A-MTH-0004v39-49269e9b",
+    "MIG-P2-A-A-MTH-0017v31-a921ee85",
+    "MIG-P2-A-A-MTH-0018v42-b50ed1c4",
+    "MIG-P2-A-A-MTH-0021v19-89ffa82f",
+    "MIG-P2-A-A-MTH-0034v26-74481d9f",
+    "MIG-P2-A-A-MTH-0035v19-88a1dba0",
+    "MIG-P2-A-A-MTH-0043v23-f47fbb01",
+    "MIG-P2-A-A-MTH-0116v26-1fd6fb1a",
+    "MIG-P2-A-A-SRT-0027v40-ef3b2c34",
+    "MIG-P2-A-A-SRT-0029v16-40342b5a",
+    "MIG-P2-A-A-SRT-0034v7-9ba781bb",
+    "MIG-P2-A-A-SRT-0046v59-543eab2a",
+    "MIG-P2-A-A-SRT-0052v15-065795f5",
+    "MIG-P2-A-A-SRT-0052v23-f6853e77",
+    "MIG-P2-A-A-SRT-0052v4-3175655e",
+    "MIG-P2-A-A-SRT-0052v62-57cf6e25",
+    "MIG-P2-A-A-SRT-0061-2b59f67f",
+    "MIG-P2-A-A-SRT-0061v16-d5529454",
+    "MIG-P2-A-A-SRT-0066v33-2fec9f3d",
+    "MIG-P2-A-A-SRT-0067v9-cbfa946a",
+    "MIG-P2-A-A-SRT-0082v4-e379da2f",
+    "MIG-P2-A-A-SRT-0083v18-88a3f987",
+    "MIG-P2-A-A-SRT-0099v6-61be9680",
+    "MIG-P2-A-A-STR-0021v66-b2a973b4",
+    "MIG-P2-A-A-STR-0032v56-afd8ab62",
+    "MIG-P2-B-D-CFG-0001v328-25cb3345",
+    "MIG-P2-B-D-CFG-0009v330-7ef1c87f",
+    "MIG-P2-B-D-CFG-0009v338-c4e9f73e",
+    "MIG-P2-B-D-NET-0006v334-91307332",
+    "MIG-P2-B-D-NET-0015v277-bf4aeaf5",
+    "MIG-P2-B-D-TST-0002v250-cbd4628c",
+    "MIG-P2-B-D-TST-0002v274-86232031",
+    "MIG-P2-B-D-TST-0015v268-801bc724",
+    "MIG-P2-B-D-WEB-0003v227-8e4802b2"
+   ]
+  },
+  "preexisting:pattern": {
+   "n": 15,
+   "task_ids": [
+    "A-CND-0046v69",
+    "A-CND-0093v21",
+    "A-CND-0096v53",
+    "D-CFG-0004v275",
+    "D-FIO-0004v347",
+    "D-FIO-0016v363",
+    "D-FIO-0016v75",
+    "D-NET-0012v139",
+    "D-NET-0012v283",
+    "D-TST-0025v147",
+    "D-TST-0025v171",
+    "D-TST-0025v211",
+    "D-WEB-0009v99",
+    "MIG-P2-A-A-CND-0044v13-2380a8e3",
+    "MIG-P2-A-A-MTH-0113v18-41f70d5b"
+   ]
+  },
+  "preexisting:tests": {
+   "n": 5,
+   "task_ids": [
+    "A-SRT-0027v13",
+    "A-SRT-0060v18",
+    "A-SRT-0061v5",
+    "A-SRT-0061v75",
+    "A-SRT-0061v78"
+   ]
+  },
+  "unverifiable:driver build failed": {
+   "n": 1,
+   "task_ids": [
+    "A-ARR-0082v13"
+   ]
+  },
+  "pattern_remaining:mut-flag-if\u00d71": {
+   "n": 1,
+   "task_ids": [
+    "A-CND-0072v16"
+   ]
+  },
+  "preexisting:lint": {
+   "n": 1,
+   "task_ids": [
+    "D-CLI-0019v111"
+   ]
+  },
+  "pattern_remaining:flag-soup\u00d71": {
+   "n": 1,
+   "task_ids": [
+    "MIG-P2-B-D-CFG-0004v350-a0cceb72"
+   ]
+  }
+ },
+ "rejects_note": "70 originals fail --check on toke main a4636b56 (E4031 'reads the value of a fallible result', 127.319 class; negative control: the v3.2.0 reference build ea7ddf22 accepts all 70 at --check, main rejects all 70; e.g. A-STR-0028v14, D-CLI-0019v105): they need check-routing, not a lint rewrite (131.140). 56 migrate_fix rows have no main() and no lock, so no differential check (unverifiable, not banked; --allow-unverifiable not used).",
+ "consistency": {
+  "ledger_lines_added": 88,
+  "archived_originals_added": 88,
+  "manifest_check": {
+   "ok": 23382,
+   "legacy_source_sha": 0,
+   "stale": 0,
+   "manifest_without_file": 0,
+   "missing_from_manifest": 0,
+   "freeze_match": 22724,
+   "freeze_diverged": 658,
+   "not_in_freeze": 0,
+   "freeze_orphan": 0,
+   "stale_but_matches_freeze": 0,
+   "files": 23382,
+   "manifest_rows": 23382,
+   "manifest_unique": 23382,
+   "manifest_dup_rows": 0,
+   "freeze_rows": 23382,
+   "stale_pct": 0.0
+  },
+  "cross_check": "for all 88: record sha == ledger.new_sha256 == MANIFEST.sha256; rewrite131.prev_sha256 == ledger.prev_sha256; archived original != banked source; rewrite131.story 131.134; one tkc_bin_sha. 0 problems.",
+  "resweep_of_banked": "tkc --lint --diag-json on the 88 banked sources: 0 nested-if-ladder hits",
+  "task_ids": "no task_id added or renamed (MANIFEST 23,382 unique before and after)"
+ },
+ "holdout_check": {
+  "tool": "scripts/id_disjoint.py",
+  "left": "the 88 banked task_ids",
+  "right": [
+   "data/holdout_task_ids.txt",
+   "data/benchmark_tasks.jsonl task ids"
+  ],
+  "status": "VACUOUS",
+  "note": "the known 131.22a/131.85 condition: the benchmark lists hold integers and HumanEval/N ids, which no corpus id can equal; the comparable list is owner doc 4.12. The bank rewrites existing records in place and adds no task_id."
+ },
+ "merged_rows_after_bank": "the 88 banked rows still read AUTO with their pre-bank sweep violations in audit/pattern_sweep.merged.jsonl until the next sweep re-run (the merged file is sweep + patches; the 131.14 wave had the same lag)",
+ "tools": "regen/pattern_autofix.py --bucket <238 ids> --bucket-name AUTO --story 131.134 --workdir corpus/regen_v04/work/autofix_131.134 --workers 4 [--dry-run|--bank], TKC = tkc built from toke main a4636b56 (clean clone)",
+ "ledger": "corpus/regen_v04/ledger/rewrite_131.jsonl",
+ "originals": "corpus/regen_v04/audit/replaced/131/"
+}
