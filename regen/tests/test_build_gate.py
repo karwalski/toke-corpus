@@ -53,3 +53,14 @@ def test_no_test_cases_good_program_is_built():
     ok, reason, g = gates(dict(SPEC), GOOD)
     assert g["build"] is True
     assert reason is None or not reason.startswith("build")
+
+
+@needs_tkc
+def test_build_gate_off_skips_the_build_only():
+    """131.139: build_gate=False leaves `build` None (pattern_autofix checks a
+    single_function as a verbatim module with no main and builds its driver
+    itself); every other gate still runs."""
+    with tempfile.TemporaryDirectory() as td:
+        rec, ok, reason, g = rs.validate_one_gates(dict(SPEC), NO_MAIN, td, build_gate=False)
+    assert g["compile"] is True and g["build"] is None and g["idiom"] is not None
+    assert ok and reason is None

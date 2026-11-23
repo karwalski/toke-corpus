@@ -147,7 +147,7 @@ def validate_one(spec, raw_src, workdir):
 
 
 def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=None,
-                       return_type_gate=True):
+                       return_type_gate=True, build_gate=True):
     """validate_one plus a per-gate verdict dict (131.18). Gate keys:
     compile, signature, return_type, build, tests, idiom, structure, pattern,
     lint — each True/False/None (None = not applicable). `return_type`
@@ -160,7 +160,11 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
     `pattern` (131.10) is a hard gate
     on every path: any 131.9 pattern-rule error/warning rejects (hints pass),
     net of the spec's style mandate. `lint_gate=True` additionally rejects on
-    any other lint warning > 0 (library ingest; NOT applied by validate_one). task_type stdin_program: source is
+    any other lint warning > 0 (library ingest; NOT applied by validate_one).
+    `build_gate=False` (131.139) skips the build of a full_program/stdin_program
+    (`build` stays None): only for a caller that checks a single_function as a
+    verbatim module and builds its tests on a driver itself (pattern_autofix).
+    task_type stdin_program: source is
     taken verbatim (no assemble/sanitize), no target-signature check, one
     execution per test case with stdin fed (regen_validate.run_stdin_cases)."""
     ttype = spec.get("task_type", "full_program")
@@ -197,7 +201,7 @@ def validate_one_gates(spec, raw_src, workdir, lint_gate=False, case_timeout=Non
         # failure is now a rejection (`ok` below) on both paths; before, even
         # WITH test cases it left `runtime` without a `match` key and passed.
         build_ok = None
-        if rc == 0 and ttype in ("full_program", "stdin_program"):
+        if build_gate and rc == 0 and ttype in ("full_program", "stdin_program"):
             binpath = tkpath + ".bin"
             # stdin_program specs may carry build_flags (library: --allow-all for
             # fs/env/net capabilities); the full_program build line is unchanged
