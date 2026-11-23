@@ -45,6 +45,27 @@ def test_gate_spec_single_function_verbatim():
     fp = {"task_type": "full_program", "test_cases": [1]}
     assert pa.gate_spec(fp) is fp
 
+def test_gate_build_off_only_for_single_function():
+    """131.139: the verbatim single_function module has no main(); building it is
+    E9023 on candidate and original alike (every one was 'preexisting:build')."""
+    assert pa.gate_build({"task_type": "single_function"}) is False
+    for tt in ("full_program", "stdin_program", "migrate_fix", None):
+        assert pa.gate_build({"task_type": tt}) is True
+
+
+@pytest.mark.skipif(not HAVE_TKC, reason="tkc not built")
+def test_single_function_verbatim_module_passes_the_gates(tmp_path):
+    import run_shard
+    spec = {"task_id": "A-TST-0139", "category": "A-TST", "task_type": "single_function",
+            "difficulty": 1, "signature": "f=twice(x:i64):i64",
+            "test_cases": [{"inputs": [2], "expected": 4}]}
+    src = "m=prog;\nf=twice(x:i64):i64{\n  <x*2\n};\n"
+    _r, ok, reason, g = run_shard.validate_one_gates(pa.gate_spec(spec), src, str(tmp_path),
+                                                     build_gate=pa.gate_build(spec))
+    assert g["build"] is None and ok, reason
+    _r, ok, reason, g = run_shard.validate_one_gates(pa.gate_spec(spec), src, str(tmp_path))
+    assert g["build"] is False and reason.startswith("build: ")        # the 131.139 failure
+
 
 # ------------------------------------------------------------- selection ---
 def test_bucket_ids_and_sweep_examples(tmp_path):

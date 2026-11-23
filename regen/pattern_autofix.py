@@ -22,6 +22,9 @@ Per record (parallel, resumable, never raises past the worker):
      the harness stub prefix is NOT re-assembled — 129.4/5 repairs dropped
      unused stubs and re-adding them would inflate min_bytes; their spec tests
      run on the driver.append_main binary that diff_check builds anyway.
+     The verbatim module has no main(), so it is NOT built by the gate
+     (131.139: since 127.187 the gate builds every full_program, and the
+     build failed E9023 on the candidate and the original alike).
      A gate the ORIGINAL also fails is reported as reject:preexisting:<gate>.
   4. min_bytes (tkc --min byte length) non-increasing
   5. diff_check: spec cases + 20 generated inputs + python_ref -> `identical`
@@ -204,6 +207,13 @@ def _rule_list(diags):
     return ",".join(sorted({d.get("rule") or "?" for d in diags}))
 
 
+def gate_build(spec):
+    """131.139: build_gate for validate_one_gates. A single_function checked as a
+    verbatim module has no main() to build (E9023); its spec cases run on the
+    driver binary in step 5. Every other task type keeps the build gate."""
+    return spec.get("task_type") != "single_function"
+
+
 def gate_spec(spec):
     """Spec used for validate_one_gates: single_function is checked as a verbatim
     module (no re-assembly of the harness prefix; tests run on the driver)."""
@@ -361,7 +371,7 @@ def autofix_one(job):
             return res
         # 3. gates
         gspec = gate_spec(spec)
-        record, ok, reason, gates = validate_one_gates(gspec, fixed, tmp)
+        record, ok, reason, gates = validate_one_gates(gspec, fixed, tmp, build_gate=gate_build(spec))
         res["gates"] = gates
         cand = record["tk_source"] if record else fixed
         cand_path = os.path.join(opts["cand_dir"], tid + ".tk")
@@ -369,7 +379,7 @@ def autofix_one(job):
             f.write(cand)
         res["candidate_path"] = cand_path
         if not ok:
-            _o, ook, oreason, _g = validate_one_gates(gspec, orig, tmp)
+            _o, ook, oreason, _g = validate_one_gates(gspec, orig, tmp, build_gate=gate_build(spec))
             if not ook and _gate_key(oreason) == _gate_key(reason):
                 res["decision"], res["reason"] = "reject", "preexisting:" + (reason or "gate")
             else:
