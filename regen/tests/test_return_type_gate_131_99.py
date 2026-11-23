@@ -58,7 +58,7 @@ def test_131_42_hard_cases_are_unchanged():
 def test_99_joins_the_correctness_set_and_is_replayed_last():
     assert "131.99" in sgw.CORRECTNESS_SET["regen"]
     assert "131.99" not in sgw.CORRECTNESS_SET["library"]
-    assert route_merge.PATCHES[-1] == ("131.99", route_merge.NEW_SWEEP)
+    assert route_merge.PATCHES[-1] == ("131.99", route_merge.MID_SWEEP)   # built over 131.64 (131.134)
     assert sgw.waiver_stories({"source": "regen", "patches": ["131.43", "131.99"]}) == ("131.43", "131.99")
 
 

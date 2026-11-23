@@ -46,6 +46,28 @@ def test_gate_spec_single_function_verbatim():
     assert pa.gate_spec(fp) is fp
 
 
+def test_gate_build_off_only_for_single_function():
+    """131.139: the verbatim single_function module has no main(); building it is
+    E9023 on candidate and original alike (every one was 'preexisting:build')."""
+    assert pa.gate_build({"task_type": "single_function"}) is False
+    for tt in ("full_program", "stdin_program", "migrate_fix", None):
+        assert pa.gate_build({"task_type": tt}) is True
+
+
+@pytest.mark.skipif(not HAVE_TKC, reason="tkc not built")
+def test_single_function_verbatim_module_passes_the_gates(tmp_path):
+    import run_shard
+    spec = {"task_id": "A-TST-0139", "category": "A-TST", "task_type": "single_function",
+            "difficulty": 1, "signature": "f=twice(x:i64):i64",
+            "test_cases": [{"inputs": [2], "expected": 4}]}
+    src = "m=prog;\nf=twice(x:i64):i64{\n  <x*2\n};\n"
+    _r, ok, reason, g = run_shard.validate_one_gates(pa.gate_spec(spec), src, str(tmp_path),
+                                                     build_gate=pa.gate_build(spec))
+    assert g["build"] is None and ok, reason
+    _r, ok, reason, g = run_shard.validate_one_gates(pa.gate_spec(spec), src, str(tmp_path))
+    assert g["build"] is False and reason.startswith("build: ")        # the 131.139 failure
+
+
 # ------------------------------------------------------------- selection ---
 def test_bucket_ids_and_sweep_examples(tmp_path):
     b = tmp_path / "bucket.jsonl"
@@ -159,6 +181,32 @@ def test_bank_one_archives_stamps_ledger_and_skips_stale(tmp_path):
     assert open(archived).read() == rec["tk_source"]
     lines = [json.loads(l) for l in open(ledger)]
     assert [l["status"] for l in lines if l.get("wave") == "auto"] == ["rewritten", "skipped"]
+
+
+def test_bank_one_stamps_the_result_story(tmp_path):
+    """131.134: a later AUTO pass (--story) stamps its own story in rewrite131;
+    a result without one keeps the 131.14 default."""
+    corpus = str(tmp_path / "corpus")
+    rec_path = os.path.join(corpus, "D-TST", "D-TST-0002v1.json")
+    os.makedirs(os.path.dirname(rec_path))
+    with open(rec_path, "w") as f:
+        json.dump(_record("D-TST-0002v1", "D-TST", "m=t;\nf=main():i64{<0};\n"), f)
+    mpath = os.path.join(corpus, "MANIFEST.jsonl")
+    manifest_tool.Manifest(mpath).stamp("D-TST-0002v1", rec_path)
+    cand_path = str(tmp_path / "cand.tk")
+    with open(cand_path, "w") as f:
+        f.write("m=t;\nf=main():i64{<1};\n")
+    res = {"task_id": "D-TST-0002v1", "category": "D-TST", "decision": "bank", "story": "131.134",
+           "reason": "fixed:nested-if-ladder", "prev_sha256": pa.sha256_file(rec_path),
+           "candidate_path": cand_path, "fix": {"rules_with_fix": ["nested-if-ladder"]},
+           "diff": {"verdict": "identical"}}
+    ledger = os.path.join(corpus, "ledger", "rewrite_131.jsonl")
+    entry = pa.bank_one(res, corpus, manifest_tool.Manifest(mpath), ledger, ("t", "c", "g"))
+    assert entry["status"] == "rewritten"
+    rw = json.load(open(rec_path))["regen"]["rewrite131"]
+    assert rw["story"] == "131.134" and rw["rules_fixed"] == ["nested-if-ladder"]
+    assert pa.summarise([], {"shas": ("t", "c", "g"), "story": "131.134"})["story"] == "131.134"
+    assert pa.summarise([], {"shas": ("t", "c", "g")})["story"] == "131.14"
 
 
 # --------------------------------------------------------------- summary ---

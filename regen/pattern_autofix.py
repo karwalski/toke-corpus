@@ -22,6 +22,9 @@ Per record (parallel, resumable, never raises past the worker):
      the harness stub prefix is NOT re-assembled — 129.4/5 repairs dropped
      unused stubs and re-adding them would inflate min_bytes; their spec tests
      run on the driver.append_main binary that diff_check builds anyway.
+     The verbatim module has no main(), so it is NOT built by the gate
+     (131.139: since 127.187 the gate builds every full_program, and the
+     build failed E9023 on the candidate and the original alike).
      A gate the ORIGINAL also fails is reported as reject:preexisting:<gate>.
   4. min_bytes (tkc --min byte length) non-increasing
   5. diff_check: spec cases + 20 generated inputs + python_ref -> `identical`
@@ -204,6 +207,13 @@ def _rule_list(diags):
     return ",".join(sorted({d.get("rule") or "?" for d in diags}))
 
 
+def gate_build(spec):
+    """131.139: build_gate for validate_one_gates. A single_function checked as a
+    verbatim module has no main() to build (E9023); its spec cases run on the
+    driver binary in step 5. Every other task type keeps the build gate."""
+    return spec.get("task_type") != "single_function"
+
+
 def gate_spec(spec):
     """Spec used for validate_one_gates: single_function is checked as a verbatim
     module (no re-assembly of the harness prefix; tests run on the driver)."""
@@ -299,7 +309,7 @@ def autofix_one(job):
     tid, rec_path, spec, a_test, opts = job
     t0 = time.time()
     res = {"task_id": tid, "category": spec.get("category"), "task_type": spec.get("task_type"),
-           "story": STORY, "wave": WAVE, "decision": None, "reason": None, "ts": int(t0),
+           "story": opts.get("story") or STORY, "wave": WAVE, "decision": None, "reason": None, "ts": int(t0),
            "prev_sha256": None, "changed": False, "fix": None, "lint_after": None, "gates": None,
            "min_bytes": None, "proxy_tokens": None, "tests": None, "diff": None, "perf": None,
            "candidate_path": None}
@@ -361,7 +371,7 @@ def autofix_one(job):
             return res
         # 3. gates
         gspec = gate_spec(spec)
-        record, ok, reason, gates = validate_one_gates(gspec, fixed, tmp)
+        record, ok, reason, gates = validate_one_gates(gspec, fixed, tmp, build_gate=gate_build(spec))
         res["gates"] = gates
         cand = record["tk_source"] if record else fixed
         cand_path = os.path.join(opts["cand_dir"], tid + ".tk")
@@ -369,7 +379,7 @@ def autofix_one(job):
             f.write(cand)
         res["candidate_path"] = cand_path
         if not ok:
-            _o, ook, oreason, _g = validate_one_gates(gspec, orig, tmp)
+            _o, ook, oreason, _g = validate_one_gates(gspec, orig, tmp, build_gate=gate_build(spec))
             if not ook and _gate_key(oreason) == _gate_key(reason):
                 res["decision"], res["reason"] = "reject", "preexisting:" + (reason or "gate")
             else:
@@ -520,7 +530,7 @@ def bank_one(res, corpus, manifest, ledger_path, shas, now=None):
         perf = res.get("perf") or {}
         rules_fixed = (res.get("fix") or {}).get("rules_with_fix") or []
         rg["rewrite131"] = {
-            "wave": WAVE, "story": STORY, "ts": ts, "prev_sha256": res.get("prev_sha256"),
+            "wave": WAVE, "story": res.get("story") or STORY, "ts": ts, "prev_sha256": res.get("prev_sha256"),
             "card_sha": CARD_SHA, "catalogue_sha": cat_sha, "tkc_sha": tkc_sha, "toke_git": toke_git,
             "tkc_bin_sha": tkc_bin_sha,               # 131.39: the binary that verified this rewrite
             "patterns_fixed": rules_to_patterns(rules_fixed), "rules_fixed": rules_fixed,
@@ -608,7 +618,7 @@ def summarise(results, opts):
     perf_flags = [r["task_id"] for r in changed if (r.get("perf") or {}).get("flag")]
     el = [r.get("elapsed_s", 0) for r in results]
     bank = decisions.get("bank", 0)
-    return {"story": STORY, "wave": WAVE, "ts": manifest_tool.now_iso(),
+    return {"story": opts.get("story") or STORY, "wave": WAVE, "ts": manifest_tool.now_iso(),
             "tkc_sha": opts["shas"][0], "catalogue_sha": opts["shas"][1],
             "toke_git": opts["shas"][2] if len(opts["shas"]) > 2 else None,
             "tkc_bin_sha": _bin_sha_of(opts["shas"]),     # 131.39
@@ -651,6 +661,9 @@ def main(argv=None):
     ap.add_argument("--perf-runs", type=int, default=PERF_RUNS)
     ap.add_argument("--n-generated", type=int, default=dc.N_GENERATED)
     ap.add_argument("--redo", action="store_true", help="re-process task ids that already have a result")
+    ap.add_argument("--story", default=STORY,
+                    help=f"story stamped in results, summary and rewrite131 provenance (default {STORY}; "
+                         "131.134: the nested-if-ladder AUTO pass)")
     ap.add_argument("--allow-unverifiable", action="store_true",
                     help="bank on static gates alone when no differential check is possible")
     ap.add_argument("--ref-strict", action="store_true",
@@ -684,7 +697,7 @@ def main(argv=None):
     opts = {"tmpdir": os.path.join(wd, "tmp"), "cand_dir": os.path.join(wd, "cand"),
             "perf_runs": args.perf_runs, "n_generated": args.n_generated,
             "allow_unverifiable": args.allow_unverifiable, "ref_strict": args.ref_strict,
-            "bank": args.bank, "shas": shas, "unknown": unknown}
+            "bank": args.bank, "shas": shas, "unknown": unknown, "story": args.story}
     for tid in ids:
         rp = os.path.join(wd, "results", tid + ".json")
         if os.path.exists(rp) and not args.redo:

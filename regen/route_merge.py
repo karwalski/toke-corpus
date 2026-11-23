@@ -28,12 +28,18 @@ Replay instead. For each patch, in order, for each row p of it:
 Everything else — metrics, lint, sweep violations, exemptions — comes from the
 fresh sweep row.
 
+Base. Since 131.134 the fresh sweep is the 131.107 re-run
+(`audit/pattern_sweep.131.107.jsonl`, Z233: nested-if-ladder routed as
+cond-elif-chain form b, owner decision 4.2); before that it was the 131.64
+re-run.
+
 Origins. The six 2026-09 patches (131.42, 131.67, 131.15.looprebuild, 131.43,
 131.68, 131.83) were built on the 131.13 sweep (`audit/pattern_sweep.jsonl`).
-Patches written after this tool (131.106, 131.105, 131.111, 131.114, 131.117,
-131.127, 131.99) are built with
-route_patch.merge_row on the merged file this tool writes, whose rows come
-from the 131.64 re-run — their origin is that sweep.
+The patches written between Z95 and 131.134 (131.106, 131.105, 131.111,
+131.114, 131.117, 131.127, 131.99) were built with route_patch.merge_row on
+the merged file this tool wrote over the 131.64 re-run, so their origin is
+that sweep (MID_SWEEP), not the current base. A patch written from now on is
+built on a merged row over the 131.107 base: give it NEW_SWEEP.
 
 Usage (from the toke-corpus root):
   python3 regen/route_merge.py                       # default paths, writes merged + summary
@@ -55,13 +61,14 @@ CORPUS = os.environ.get("TOKE_CORPUS_DIR",           # same default as pattern_c
 BUCKETS = ("EXEMPT", "AUTO", "AGENT", "LEAVE", "REGEN")
 SCOPES = ("regen", "library")
 OLD_SWEEP = "pattern_sweep.jsonl"                 # 131.13 (2026-09-18)
-NEW_SWEEP = "pattern_sweep.131.64.jsonl"          # 131.64 re-run (Z91, tkc 9f1eb921)
+MID_SWEEP = "pattern_sweep.131.64.jsonl"          # 131.64 re-run (Z91, tkc 9f1eb921): base until 131.134
+NEW_SWEEP = "pattern_sweep.131.107.jsonl"         # 131.107 re-run (Z233, tkc 3.2.0 0558545d): base (131.134)
 # (story, origin sweep) in README apply order
 PATCHES = (("131.42", OLD_SWEEP), ("131.67", OLD_SWEEP), ("131.15.looprebuild", OLD_SWEEP),
            ("131.43", OLD_SWEEP), ("131.68", OLD_SWEEP), ("131.83", OLD_SWEEP),
-           ("131.106", NEW_SWEEP), ("131.105", NEW_SWEEP), ("131.111", NEW_SWEEP),
-           ("131.114", NEW_SWEEP), ("131.117", NEW_SWEEP), ("131.127", NEW_SWEEP),
-           ("131.99", NEW_SWEEP))
+           ("131.106", MID_SWEEP), ("131.105", MID_SWEEP), ("131.111", MID_SWEEP),
+           ("131.114", MID_SWEEP), ("131.117", MID_SWEEP), ("131.127", MID_SWEEP),
+           ("131.99", MID_SWEEP))
 SUMMARY = os.path.join(HERE, "freeze", "route_merge_131.15.json")
 
 
@@ -160,6 +167,8 @@ def build(corpus, patches=PATCHES):
     if not base:
         raise SystemExit(f"route_merge: {os.path.join(audit, NEW_SWEEP)} missing or empty")
     origins = {OLD_SWEEP: read_rows(os.path.join(audit, OLD_SWEEP)), NEW_SWEEP: base}
+    if any(o == MID_SWEEP for _, o in patches):
+        origins[MID_SWEEP] = read_rows(os.path.join(audit, MID_SWEEP))
     plist, files = [], []
     for story, origin in patches:
         path = route_patch.patch_path(corpus, story)
@@ -186,14 +195,19 @@ def summary(corpus, base, merged, stats, files, out_path):
     regen_off_class = regen_outside_class(merged)
     return {
         "story": "131.15 (prep: routing before the wave; Z95)",
-        "what": "audit/pattern_sweep.merged.jsonl rebuilt by regen/route_merge.py: the 131.64 re-run sweep "
-                "with every routing patch replayed in README order (delta violations + bucket + reason; "
-                "REGEN sticky). Replaces the 2026-09-19 merged file, which was the 131.13 sweep + 131.42 + "
-                "131.67 + 131.15.looprebuild only (backed up as audit/pattern_sweep.merged.20260919.jsonl).",
+        "what": "audit/pattern_sweep.merged.jsonl rebuilt by regen/route_merge.py: the 131.107 re-run sweep "
+                "(131.134; the 131.64 re-run before it) with every routing patch replayed in README order "
+                "(delta violations + bucket + reason; REGEN sticky). Z95 replaced the 2026-09-19 merged file, "
+                "which was the 131.13 sweep + 131.42 + 131.67 + 131.15.looprebuild only (backed up as "
+                "audit/pattern_sweep.merged.20260919.jsonl).",
         "base_sweep": {"file": NEW_SWEEP, "sha256": sha256_file(os.path.join(audit, NEW_SWEEP)),
-                       "rows": len(base), "made_by": "Z91 131.64 re-run, tkc 3.1.0 9f1eb921 "
-                                                     "(regen/freeze/pattern_sweep_131.64.json)"},
+                       "rows": len(base), "made_by": "Z233 131.107 re-run, tkc 3.2.0 0558545d "
+                                                     "(regen/freeze/pattern_sweep_131.107.json)"},
         "origin_sweep_131_13": {"file": OLD_SWEEP, "sha256": sha256_file(os.path.join(audit, OLD_SWEEP))},
+        "origin_sweep_131_64": {"file": MID_SWEEP, "sha256": sha256_file(os.path.join(audit, MID_SWEEP))
+                                if os.path.exists(os.path.join(audit, MID_SWEEP)) else None,
+                                "note": "origin of the 131.106-131.99 patches (built on the merged file over "
+                                        "the 131.64 re-run)"},
         "patches": files,
         "replay": stats,
         "buckets": {"rerun": counts(base), "merged": counts(merged)},
