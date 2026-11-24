@@ -239,13 +239,24 @@ Build strings by interpolation `"\(expr)"`; `+` does not concatenate strings
 ## Arena blocks
 
 ```
-{arena
-  let tmp=@(1;2;3);
-}
+m=arenademo;
+f=main():i64{
+  let n=mut.0;
+  {arena
+    let tmp=@(1;2;3);
+    n=tmp.len;
+  }
+  <n-3
+};
 ```
 
-Allocations inside `{arena ...}` are freed when the block exits; every function
-body is an implicit arena (spec v0.3 §11.14).
+`{arena ...}` is parsed and type-checked but releases nothing: values made
+inside it live until the program exits, like values made anywhere else, and no
+function body is an arena. Do not rely on memory being released at the block's
+exit. Inside the block, at any depth, assigning a heap value (a string, array,
+map, struct, sum or closure) to a module-level mut binding is E5001. A scalar
+may be assigned, and assigning to a binding of the enclosing function is
+accepted, as above (toke docs/spec/memory-model.md §1.2, §2.4).
 
 ## Common mistakes
 
