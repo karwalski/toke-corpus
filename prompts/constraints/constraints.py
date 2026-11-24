@@ -271,8 +271,11 @@ following task.
 
 ## Constraint
 Your program MUST use an arena block `{{arena ... }}` in at least one
-function. All allocations inside the arena block are freed when the scope
-exits.
+function. As shipped the block releases nothing: values made inside it live
+until the program exits. Inside the block, assigning a heap value (a string,
+array, map, struct, sum or closure, or an error union over one) to a
+module-level mut binding is E5001; assign scalars, or bind to the function's
+own locals (toke docs/spec/memory-model.md §1.2, §2.4).
 
 Example -- arena block:
 ```
