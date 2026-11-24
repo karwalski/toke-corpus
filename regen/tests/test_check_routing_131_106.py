@@ -96,7 +96,7 @@ def test_check_stories_replay_in_route_merge_order():
 def test_routed_earlier_reads_only_earlier_check_patches(tmp_path):
     (tmp_path / "audit").mkdir()
     for story, ids in (("131.106", ["a", "b"]), ("131.111", ["c"]), ("131.114", ["d"]),
-                       ("131.117", ["e"])):
+                       ("131.117", ["e"]), ("131.127", ["f"])):
         (tmp_path / "audit" / f"pattern_sweep.{story}.patch.jsonl").write_text(
             "".join(json.dumps(_cur(t, "AGENT", story)) + "\n" for t in ids))
     assert cr.routed_earlier(str(tmp_path), "131.106") == set()
@@ -104,6 +104,7 @@ def test_routed_earlier_reads_only_earlier_check_patches(tmp_path):
     assert cr.routed_earlier(str(tmp_path), "131.114") == {"a", "b", "c"}   # 138.22 past the pin
     assert cr.routed_earlier(str(tmp_path), "131.117") == {"a", "b", "c", "d"}   # 127.342 past the pin
     assert cr.routed_earlier(str(tmp_path), "131.127") == set("abcde")   # 127.430 (toke 127.432)
+    assert cr.routed_earlier(str(tmp_path), "131.140") == set("abcdef")  # main a4636b56 E4031 class
 
 
 def test_later_story_routes_only_new_failures_and_names_itself():
@@ -166,3 +167,14 @@ def test_stored_rows_route_every_failure_regardless_of_tkc():
     merged routing must cover every failure they record."""
     _, rows = cr.read_check(ROWS)
     assert not cr.gate(rows, rm.read_rows(MERGED))
+
+
+def test_131_140_reason_carries_owner_r2_no_filler():
+    rows, _ = cr.route_rows({"x": _chk("x", 1)}, {"x": _cur("x", "LEAVE")}, {}, "toke 3.2.0 (bin 299c)",
+                            story="131.140")
+    reason = rows[0]["bucket_reason"]
+    assert rows[0]["bucket"] == "AGENT"
+    assert "Owner answer R2" in reason and "never a placeholder $ok default" in reason
+    assert "str.charcode" in reason and reason.endswith("(regen/freeze/check_routing_131.140.json)")
+    other, _ = cr.route_rows({"x": _chk("x", 1)}, {"x": _cur("x", "LEAVE")}, {}, "t", story="131.127")
+    assert "R2" not in other[0]["bucket_reason"]

@@ -36,9 +36,11 @@ def _corpus(tmp_path, old, new, patches, mid=None):
 def test_patch_order_extends_route_patch_order():
     stories = [s for s, _ in rm.PATCHES]
     assert stories[:6] == list(route_patch.BASE_PATCHES + route_patch.APPLY_ORDER)
-    assert stories[6:] == ["131.106", "131.105", "131.111", "131.114", "131.117", "131.127", "131.99"]
+    assert stories[6:] == ["131.106", "131.105", "131.111", "131.114", "131.117", "131.127", "131.99",
+                           "131.140"]
     assert all(o == rm.OLD_SWEEP for _, o in rm.PATCHES[:6])
-    assert all(o == rm.MID_SWEEP for _, o in rm.PATCHES[6:])     # built over the 131.64 re-run
+    assert all(o == rm.MID_SWEEP for _, o in rm.PATCHES[6:13])   # built over the 131.64 re-run
+    assert all(o == rm.NEW_SWEEP for _, o in rm.PATCHES[13:])    # 131.140 on: over the 131.107 base
 
 
 def test_base_is_the_131_107_rerun():
