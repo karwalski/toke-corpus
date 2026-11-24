@@ -254,7 +254,7 @@ f=main():i64{
 inside it live until the program exits, like values made anywhere else, and no
 function body is an arena. Do not rely on memory being released at the block's
 exit. Inside the block, at any depth, assigning a heap value (a string, array,
-map, struct, sum or closure) to a module-level mut binding is E5001. A scalar
+map, struct, sum or closure, or an error union whose value is one of these) to a module-level mut binding is E5001. A scalar
 may be assigned, and assigning to a binding of the enclosing function is
 accepted, as above (toke docs/spec/memory-model.md §1.2, §2.4).
 
